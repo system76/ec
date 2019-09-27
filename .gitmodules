@@ -1,0 +1,4 @@
+[submodule "ecsim"]
+	path = ecsim
+	url = https://github.com/system76/ecsim.git
+	branch = master

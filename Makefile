@@ -7,6 +7,9 @@ all: build/ec.rom
 clean:
 	rm -rf build
 
+sim: build/ec.rom
+	cargo run --release --manifest-path ecsim/Cargo.toml -- $<
+
 build/ec.rom: build/ec.ihx
 	mkdir -p build
 	makebin -p < $< > $@
