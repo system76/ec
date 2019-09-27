@@ -1,6 +1,8 @@
 #ifndef _KBC_H_
 #define _KBC_H_
 
+void kbc_init(void);
+
 __xdata volatile unsigned char __at(0x1300) KBHICR;
 __xdata volatile unsigned char __at(0x1302) KBIRQR;
 __xdata volatile unsigned char __at(0x1304) KBHISR;

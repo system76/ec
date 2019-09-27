@@ -1,6 +1,8 @@
 #ifndef _GPIO_H_
 #define _GPIO_H_
 
+void gpio_init(void);
+
 __xdata volatile unsigned char __at(0x1600) GCR;
 
 __xdata volatile unsigned char __at(0x1601) GPDRA;

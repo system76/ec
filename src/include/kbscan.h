@@ -1,6 +1,8 @@
 #ifndef _KBSCAN_H_
 #define _KBSCAN_H_
 
+void kbscan_init(void);
+
 __xdata volatile unsigned char __at(0x1D00) KSOL;
 __xdata volatile unsigned char __at(0x1D01) KSOH1;
 __xdata volatile unsigned char __at(0x1D02) KSOCTRL;

@@ -1,6 +1,8 @@
 #ifndef _PS2_H_
 #define _PS2_H_
 
+void ps2_init(void);
+
 __xdata volatile unsigned char __at(0x1700) PSCTL1;
 __xdata volatile unsigned char __at(0x1701) PSCTL2;
 __xdata volatile unsigned char __at(0x1702) PSCTL3;

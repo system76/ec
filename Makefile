@@ -13,7 +13,7 @@ build/ec.rom: build/ec.ihx
 
 build/ec.ihx: $(OBJ)
 	mkdir -p build
-	sdcc -mmcs51 -o $@ $<
+	sdcc -mmcs51 -o $@ $^
 
 build/%.rel: src/%.c $(INCLUDE)
 	mkdir -p build
