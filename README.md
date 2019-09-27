@@ -1,2 +1,1 @@
-# ec
-System76 EC (WIP)
+# System76 EC (WIP)
