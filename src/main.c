@@ -19,6 +19,8 @@ struct Pin LED_AIRPLANE_N = PIN(G, 6);
 
 struct Pin PWR_SW = PIN(D, 0);
 
+static char * MODEL = "galp3-c";
+
 void main() {
     gpio_init();
     gctrl_init();
@@ -29,10 +31,10 @@ void main() {
     //TODO: INTC, PECI, PWM, SMBUS
 
     // Set the battery full LED (to know our firmware is loaded)
-    pin_set(&LED_BAT_CHG, true);
-    delay_ms(1000);
     pin_set(&LED_BAT_FULL, true);
-    printf("Hello from System76 EC!\n");
+    printf("Hello from System76 EC for %s!\n", MODEL);
+
+    gpio_debug();
 
     bool last = false;
     for(;;) {

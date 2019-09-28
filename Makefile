@@ -8,7 +8,11 @@ clean:
 	rm -rf build
 
 sim: build/ec.rom
-	cargo run --release --manifest-path ecsim/Cargo.toml -- $<
+	cargo run \
+		--release \
+		--manifest-path ecsim/Cargo.toml \
+		--no-default-features \
+		-- $<
 
 build/ec.rom: build/ec.ihx
 	mkdir -p build

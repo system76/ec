@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "include/gpio.h"
 
 void gpio_init() {
@@ -97,4 +99,23 @@ void gpio_init() {
     GPCRJ5 = 0x40;
     GPCRJ6 = 0x44;
     GPCRJ7 = 0x80;
+}
+
+void gpio_debug_bank(char bank, unsigned char data) {
+    for(char i = 0; i < 8; i++) {
+        printf("%c%d = %d\n", bank, i, (data >> i) & 1);
+    }
+}
+
+void gpio_debug(void) {
+    gpio_debug_bank('A', GPDRA);
+    gpio_debug_bank('B', GPDRB);
+    gpio_debug_bank('C', GPDRC);
+    gpio_debug_bank('D', GPDRD);
+    gpio_debug_bank('E', GPDRE);
+    gpio_debug_bank('F', GPDRF);
+    gpio_debug_bank('G', GPDRG);
+    gpio_debug_bank('H', GPDRH);
+    gpio_debug_bank('I', GPDRI);
+    gpio_debug_bank('J', GPDRJ);
 }

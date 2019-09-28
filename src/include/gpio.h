@@ -2,6 +2,7 @@
 #define _GPIO_H_
 
 void gpio_init(void);
+void gpio_debug(void);
 
 __xdata volatile unsigned char __at(0x1600) GCR;
 
