@@ -9,12 +9,12 @@ sim: $(BUILD)/ec.rom
 		--no-default-features \
 		-- $<
 
-# Convert from Intel Hex format to binary
+# Convert from Intel Hex file to binary file
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx
 	@mkdir -p $(@D)
 	makebin -p < $< > $@
 
-# Link object files into Intel Hex format
+# Link object files into Intel Hex file
 $(BUILD)/ec.ihx: $(OBJ)
 	@mkdir -p $(@D)
 	$(CC) -o $@ $^
