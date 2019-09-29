@@ -43,6 +43,8 @@ void init(void) {
     kbscan_init();
 
     //TODO: INTC, PECI, PWM, SMBUS
+
+    // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 }
 
 struct Pin PWR_SW = PIN(D, 0);
