@@ -1,6 +1,6 @@
 # Parameter for current board
 #BOARD?=system76/galp3-c
-BOARD?=arduino/atmega2560
+BOARD?=arduino/mega2560
 
 # Set build directory
 BUILD=build/$(BOARD)
