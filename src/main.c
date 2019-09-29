@@ -47,18 +47,18 @@ void init(void) {
     // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 }
 
-struct Pin PWR_SW = PIN(D, 0);
-
-void power_switch(void) {
+void power_button(struct Pin * button) {
     static bool last = false;
 
     // Check if the power switch goes low
-    bool new = pin_get(&PWR_SW);
+    bool new = pin_get(button);
     if (!new && last) {
         printf("Power Switch\n");
     }
     last = new;
 }
+
+struct Pin PWR_SW = PIN(D, 0);
 
 struct Pin LED_BAT_CHG = PIN(A, 5);
 struct Pin LED_BAT_FULL = PIN(A, 6);
@@ -78,7 +78,7 @@ void main(void) {
     gpio_debug();
 
     for(;;) {
-        power_switch();
+        power_button(&PWR_SW);
         kbc_event(&KBC);
         pmc_event(&PMC_1);
     }
