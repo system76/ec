@@ -22,4 +22,4 @@ $(BUILD)/ec.ihx: $(OBJ)
 # Compile C files into object files
 $(BUILD)/%.rel: src/%.c $(INCLUDE)
 	@mkdir -p $(@D)
-	$(CC) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<

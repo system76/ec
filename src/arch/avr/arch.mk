@@ -23,4 +23,4 @@ $(BUILD)/ec.elf: $(OBJ)
 # Compile C files into object files
 $(BUILD)/%.o: src/%.c $(INCLUDE)
 	@mkdir -p $(@D)
-	$(CC) -o $@ -c $<
+	$(CC) $(CFLAGS) -o $@ -c $<
