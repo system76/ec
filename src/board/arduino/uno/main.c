@@ -9,7 +9,7 @@ void init(void) {
 int main(void) {
     init();
 
-    printf("Hello from System76 EC for the Arduino Mega 2560!\n");
+    printf("Hello from System76 EC for the Arduino Uno!\n");
     for (;;) {
         int c = getchar();
         if (c == '\r') {

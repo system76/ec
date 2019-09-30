@@ -19,7 +19,11 @@
         _BV(UCSZ ## N ## 1) | _BV(UCSZ ## N ## 0) \
     }
 
-#if defined(__AVR_ATmega32U4__)
+#if defined(__AVR_ATmega328P__)
+    static struct Uart UARTS[] = {
+        UART(0)
+    };
+#elif defined(__AVR_ATmega32U4__)
     static struct Uart UARTS[] = {
         UART(1)
     };
