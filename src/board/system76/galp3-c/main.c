@@ -9,6 +9,7 @@
 #include <board/kbscan.h>
 #include <board/pmc.h>
 #include <board/ps2.h>
+#include <board/pwm.h>
 
 void external_0(void) __interrupt(0) {
     printf("external_0\n");
@@ -40,8 +41,9 @@ void init(void) {
     kbc_init();
     pmc_init();
     kbscan_init();
+    pwm_init();
 
-    //TODO: INTC, PECI, PWM, SMBUS
+    //TODO: INTC, PECI, SMBUS
 
     // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 }
