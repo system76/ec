@@ -1,3 +1,3 @@
 # Arduino Uno
 
-![Arduino Uno Pinout](https://upload.wikimedia.org/wikipedia/commons/c/c9/Pinout_of_ARDUINO_Board_and_ATMega328PU.svg)
+![Arduino Uno Pinout](https://arduino.pinout.guide/arduino_uno_and_atmega328_pinout.png)
