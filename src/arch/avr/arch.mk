@@ -1,4 +1,5 @@
 CC=avr-gcc -mmcu=$(EC)
+CFLAGS+=-Os -fstack-usage -Wall -Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
 OBJ=$(patsubst src/%.c,$(BUILD)/%.o,$(SRC))
 
 # Run EC rom in simulator
@@ -11,7 +12,7 @@ $(BUILD)/ec.rom: $(BUILD)/ec.ihx
 	makebin -p < $< > $@
 
 # Convert from ELF file to Intel Hex file
-$(BUILD)/ec.ihx: $(OBJ)
+$(BUILD)/ec.ihx: $(BUILD)/ec.elf
 	@mkdir -p $(@D)
 	avr-objcopy -j .text -j .data -O ihex $< $@
 
