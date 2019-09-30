@@ -70,11 +70,11 @@ __code const char * MODEL = "galp3-c";
 void main(void) {
     init();
 
+    gpio_debug();
+
     // Set the battery full LED (to know our firmware is loaded)
     gpio_set(&LED_BAT_FULL, true);
     printf("Hello from System76 EC for %s!\n", MODEL);
-
-    gpio_debug();
 
     for(;;) {
         power_button(&PWR_SW);
