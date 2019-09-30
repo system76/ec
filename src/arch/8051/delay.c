@@ -1,7 +1,7 @@
 #include <8051.h>
 
-#include "include/delay.h"
-#include "include/timer.h"
+#include <arch/delay.h>
+#include <arch/timer.h>
 
 // One millisecond in ticks is determined as follows:
 //   9.2 MHz is the clock rate

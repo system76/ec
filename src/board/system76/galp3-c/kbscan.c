@@ -1,4 +1,4 @@
-#include "include/kbscan.h"
+#include <board/kbscan.h>
 
 void kbscan_init(void) {
     KSOCTRL = 0x05;

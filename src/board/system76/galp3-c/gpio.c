@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "include/gpio.h"
+#include <board/gpio.h>
 
 void gpio_init() {
     // Enable LPC reset on GPD2

@@ -1,4 +1,4 @@
-#include "include/ps2.h"
+#include <board/ps2.h>
 
 void ps2_init(void) {
     PSCTL1 = 0x11;

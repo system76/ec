@@ -2,14 +2,13 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "include/delay.h"
-#include "include/gpio.h"
-#include "include/gctrl.h"
-#include "include/kbc.h"
-#include "include/pin.h"
-#include "include/pmc.h"
-#include "include/ps2.h"
-#include "include/kbscan.h"
+#include <arch/delay.h>
+#include <board/gpio.h>
+#include <board/gctrl.h>
+#include <board/kbc.h>
+#include <board/kbscan.h>
+#include <board/pmc.h>
+#include <board/ps2.h>
 
 void external_0(void) __interrupt(0) {
     printf("external_0\n");
@@ -47,24 +46,24 @@ void init(void) {
     // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 }
 
-void power_button(struct Pin * button) {
+void power_button(struct Gpio * button) {
     static bool last = false;
 
     // Check if the power switch goes low
-    bool new = pin_get(button);
+    bool new = gpio_get(button);
     if (!new && last) {
         printf("Power Switch\n");
     }
     last = new;
 }
 
-struct Pin PWR_SW = PIN(D, 0);
+struct Gpio PWR_SW = GPIO(D, 0);
 
-struct Pin LED_BAT_CHG = PIN(A, 5);
-struct Pin LED_BAT_FULL = PIN(A, 6);
-struct Pin LED_PWR = PIN(A, 7);
-struct Pin LED_ACIN = PIN(C, 7);
-struct Pin LED_AIRPLANE_N = PIN(G, 6);
+struct Gpio LED_BAT_CHG = GPIO(A, 5);
+struct Gpio LED_BAT_FULL = GPIO(A, 6);
+struct Gpio LED_PWR = GPIO(A, 7);
+struct Gpio LED_ACIN = GPIO(C, 7);
+struct Gpio LED_AIRPLANE_N = GPIO(G, 6);
 
 __code const char * MODEL = "galp3-c";
 
@@ -72,7 +71,7 @@ void main(void) {
     init();
 
     // Set the battery full LED (to know our firmware is loaded)
-    pin_set(&LED_BAT_FULL, true);
+    gpio_set(&LED_BAT_FULL, true);
     printf("Hello from System76 EC for %s!\n", MODEL);
 
     gpio_debug();

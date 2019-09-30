@@ -1,6 +1,6 @@
 #include <8051.h>
 
-#include "include/timer.h"
+#include <arch/timer.h>
 
 void timer_mode_1(int value) {
     timer_stop();

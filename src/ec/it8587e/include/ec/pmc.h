@@ -1,9 +1,7 @@
-#ifndef _PMC_H_
-#define _PMC_H_
+#ifndef _EC_PMC_H
+#define _EC_PMC_H
 
 #include <stdint.h>
-
-void pmc_init(void);
 
 struct Pmc {
     // Status register
@@ -39,4 +37,4 @@ __xdata volatile uint8_t __at(0x1511) PM2DO;
 __xdata volatile uint8_t __at(0x1514) PM2DI;
 __xdata volatile uint8_t __at(0x1516) PM2CTL;
 
-#endif // _PMC_H_
+#endif // _EC_PMC_H

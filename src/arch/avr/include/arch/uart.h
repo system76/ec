@@ -1,5 +1,5 @@
-#ifndef UART_H
-#define UART_H
+#ifndef _ARCH_UART_H
+#define _ARCH_UART_H
 
 #include <stdint.h>
 
@@ -28,4 +28,7 @@ unsigned char uart_can_write(struct Uart * uart);
 unsigned char uart_read(struct Uart * uart);
 void uart_write(struct Uart * uart, unsigned char data);
 
-#endif // UART_H
+extern struct Uart * uart_stdio;
+void uart_stdio_init(int num, unsigned long baud);
+
+#endif // _ARCH_UART_H

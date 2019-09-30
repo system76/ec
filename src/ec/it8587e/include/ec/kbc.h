@@ -1,5 +1,5 @@
-#ifndef _KBC_H_
-#define _KBC_H_
+#ifndef _EC_KBC_H
+#define _EC_KBC_H
 
 #include <stdint.h>
 
@@ -40,4 +40,4 @@ __xdata volatile uint8_t __at(0x1306) KBHIKDOR;
 __xdata volatile uint8_t __at(0x1308) KBHIMDOR;
 __xdata volatile uint8_t __at(0x130A) KBHIDIR;
 
-#endif // _KBC_H_
+#endif // _EC_KBC_H

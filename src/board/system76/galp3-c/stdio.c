@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "include/kbscan.h"
-#include "include/timer.h"
+#include <arch/timer.h>
+#include <board/kbscan.h>
 
 // Wait 25 us
 // 65536 - (25 / 1.304) = 65517

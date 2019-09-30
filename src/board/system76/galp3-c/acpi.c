@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include "include/acpi.h"
+#include <board/acpi.h>
 
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;

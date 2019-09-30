@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-#include "include/stdio.h"
+#include <arch/uart.h>
 
 void init(void) {
-    stdio_init(0, 9600);
+    uart_stdio_init(0, 9600);
 }
 
 void main(void) {

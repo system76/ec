@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <avr/io.h>
 
-#include "include/cpu.h"
-#include "include/uart.h"
+#include <arch/uart.h>
+#include <board/cpu.h>
 
 #define UART(N) \
     { \
@@ -71,4 +71,29 @@ unsigned char uart_can_write(struct Uart * uart) {
 void uart_write(struct Uart * uart, unsigned char data) {
     while (!uart_can_write(uart)) ;
     *(uart->data) = data;
+}
+
+struct Uart * uart_stdio = NULL;
+
+int uart_stdio_get(FILE * stream) {
+    return (int)uart_read(uart_stdio);
+}
+
+int uart_stdio_put(char data, FILE * stream) {
+    if (data == '\n') {
+        uart_write(uart_stdio, '\r');
+    }
+    uart_write(uart_stdio, (unsigned char)data);
+    return 0;
+}
+
+FILE uart_stdio_file = FDEV_SETUP_STREAM(uart_stdio_put, uart_stdio_get, _FDEV_SETUP_RW);
+
+void uart_stdio_init(int num, unsigned long baud) {
+    struct Uart * uart = uart_new(num);
+    if(uart != NULL) {
+        uart_init(uart, baud);
+        uart_stdio = uart;
+        stdin = stdout = stderr = &uart_stdio_file;
+    }
 }
