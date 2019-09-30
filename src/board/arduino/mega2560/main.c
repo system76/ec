@@ -4,7 +4,7 @@
 #include <arch/uart.h>
 
 void init(void) {
-    uart_stdio_init(0, 9600);
+    uart_stdio_init(0, __CONSOLE_BAUD__);
 }
 
 struct Gpio LED = GPIO(B, 7);
