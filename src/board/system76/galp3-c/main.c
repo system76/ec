@@ -10,6 +10,7 @@
 #include <board/pmc.h>
 #include <board/ps2.h>
 #include <board/pwm.h>
+#include <board/smbus.h>
 #include <common/macro.h>
 
 void external_0(void) __interrupt(0) {
@@ -43,8 +44,9 @@ void init(void) {
     pmc_init();
     kbscan_init();
     pwm_init();
+    smbus_init();
 
-    //TODO: INTC, PECI, SMBUS
+    //TODO: INTC, PECI
 
     // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 }

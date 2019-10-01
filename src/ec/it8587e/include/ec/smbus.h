@@ -42,5 +42,13 @@ volatile uint8_t __xdata __at(0x1C10) HOCTL2A;
 // SMCLK timing setting for channel A
 volatile uint8_t __xdata __at(0x1C10) SCLKTSA;
 
+// Timing registers
+volatile uint8_t __xdata __at(0x1C22) SMB4P7USL;
+volatile uint8_t __xdata __at(0x1C23) SMB4P0USL;
+volatile uint8_t __xdata __at(0x1C24) SMB300NS;
+volatile uint8_t __xdata __at(0x1C25) SMB250NS;
+volatile uint8_t __xdata __at(0x1C26) SMB25MS;
+volatile uint8_t __xdata __at(0x1C27) SMB45P3USL;
+volatile uint8_t __xdata __at(0x1C28) SMB45P3USH;
 
 #endif // _EC_SMBUS_H
