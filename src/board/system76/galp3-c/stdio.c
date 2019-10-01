@@ -1,38 +1,48 @@
 #include <stdio.h>
 
-#include <arch/timer.h>
-#include <board/kbscan.h>
+#include <ec/smbus.h>
 
-// Wait 25 us
-// 65536 - (25 / 1.304) = 65517
-void parallel_delay(void) {
-    timer_mode_1(65517);
-    timer_wait();
-    timer_stop();
-}
+void i2c_write(unsigned char value) {
+    for (;;) {
+        // Wait for last command
+        while (HOSTAA & 1) {}
 
-// This takes a time of 25 us * 3 = 75 us
-// That produces a frequency of 13.333 KHz
-// Which produces a bitrate of 106.667 KHz
-void parallel_write(unsigned char value) {
-    // Make sure clock is high
-    KSOH1 = 0xFF;
-    parallel_delay();
+        // Clear result
+        HOSTAA = HOSTAA;
 
-    // Set value
-    KSOL = value;
-    parallel_delay();
+        // Clock down to 50 KHz
+        SCLKTSA = 1;
 
-    // Set clock low
-    KSOH1 = 0;
-    parallel_delay();
+        // Enable host interface with i2c compatibility
+        HOCTL2A = (1 << 1) | (1 << 0);
 
-    // Set clock high again
-    KSOH1 = 0xFF;
+        // Write value to 0x76
+        TRASLAA = (0x76 << 1) | (0 << 1);
+        HOCMDA = value;
+
+        // Start command
+        HOCTLA = (1 << 6) | (0b001 << 2);
+
+        // Wait for command to start
+        while (!(HOSTAA & 1)) {}
+
+        // Wait for command to finish
+        while (HOSTAA & 1) {}
+
+        // Read and clear status
+        uint8_t status = HOSTAA;
+        HOSTAA = status;
+
+        // If there were no errors, return
+        uint8_t error = (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
+        if (!(status & error)) {
+            break;
+        }
+    }
 }
 
 int putchar(int c) {
     unsigned char byte = (unsigned char)c;
-    parallel_write(byte);
+    i2c_write(byte);
     return (int)byte;
 }
