@@ -101,21 +101,37 @@ void gpio_init() {
     GPCRJ7 = 0x80;
 }
 
-void gpio_debug_bank(char bank, unsigned char data) {
+void gpio_debug_bank(
+    char * bank,
+    uint8_t data,
+    uint8_t mirror,
+    uint8_t pot,
+    volatile uint8_t * control
+) {
     for(char i = 0; i < 8; i++) {
-        printf("%c%d = %d\n", bank, i, (data >> i) & 1);
+        printf(
+            "%s%d data %d mirror %d pot %d control %02X\n",
+            bank,
+            i,
+            (data >> i) & 1,
+            (mirror >> i) & 1,
+            (pot >> i) & 1,
+            *(control + i)
+        );
     }
 }
 
 void gpio_debug(void) {
-    gpio_debug_bank('A', GPDRA);
-    gpio_debug_bank('B', GPDRB);
-    gpio_debug_bank('C', GPDRC);
-    gpio_debug_bank('D', GPDRD);
-    gpio_debug_bank('E', GPDRE);
-    gpio_debug_bank('F', GPDRF);
-    gpio_debug_bank('G', GPDRG);
-    gpio_debug_bank('H', GPDRH);
-    gpio_debug_bank('I', GPDRI);
-    gpio_debug_bank('J', GPDRJ);
+    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCRA0)
+    bank(A);
+    bank(B);
+    bank(C);
+    bank(D);
+    bank(E);
+    bank(F);
+    bank(G);
+    bank(H);
+    bank(I);
+    bank(J);
+    #undef bank
 }
