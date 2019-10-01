@@ -10,8 +10,8 @@
     .control = &PM ## NUM ## CTL, \
 }
 
-__code struct Pmc PMC_1 = PMC(1);
-__code struct Pmc PMC_2 = PMC(2);
+struct Pmc __code PMC_1 = PMC(1);
+struct Pmc __code PMC_2 = PMC(2);
 
 uint8_t pmc_status(struct Pmc * pmc) {
     return *(pmc->status);

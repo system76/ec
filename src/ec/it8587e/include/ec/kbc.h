@@ -20,7 +20,7 @@ struct Kbc {
     volatile uint8_t * data_in;
 };
 
-extern __code struct Kbc KBC;
+extern struct Kbc __code KBC;
 
 #define KBC_STS_OBF (1 << 0)
 #define KBC_STS_IBF (1 << 1)
@@ -33,11 +33,11 @@ void kbc_mouse(struct Kbc * kbc, uint8_t data);
 
 void kbc_event(struct Kbc * kbc);
 
-__xdata volatile uint8_t __at(0x1300) KBHICR;
-__xdata volatile uint8_t __at(0x1302) KBIRQR;
-__xdata volatile uint8_t __at(0x1304) KBHISR;
-__xdata volatile uint8_t __at(0x1306) KBHIKDOR;
-__xdata volatile uint8_t __at(0x1308) KBHIMDOR;
-__xdata volatile uint8_t __at(0x130A) KBHIDIR;
+volatile uint8_t __xdata __at(0x1300) KBHICR;
+volatile uint8_t __xdata __at(0x1302) KBIRQR;
+volatile uint8_t __xdata __at(0x1304) KBHISR;
+volatile uint8_t __xdata __at(0x1306) KBHIKDOR;
+volatile uint8_t __xdata __at(0x1308) KBHIMDOR;
+volatile uint8_t __xdata __at(0x130A) KBHIDIR;
 
 #endif // _EC_KBC_H

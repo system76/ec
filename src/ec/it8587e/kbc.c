@@ -2,7 +2,7 @@
 
 #include <ec/kbc.h>
 
-__code struct Kbc KBC = {
+struct Kbc __code KBC = {
     .control = &KBHICR,
     .irq = &KBIRQR,
     .status = &KBHISR,
