@@ -1,10 +1,12 @@
 #include <board/ps2.h>
 
 void ps2_init(void) {
-    PSCTL1 = 0x11;
-    PSCTL2 = 0x41;
-    PSCTL3 = 0x41;
-    PSINT1 = 0x04;
-    PSINT2 = 0x04;
-    PSINT3 = 0x04;
+    *(PS2_1.control) = 0x11;
+    *(PS2_1.interrupt) = 0x04;
+
+    *(PS2_2.control) = 0x41;
+    *(PS2_2.interrupt) = 0x04;
+
+    *(PS2_3.control) = 0x41;
+    *(PS2_3.interrupt) = 0x04;
 }
