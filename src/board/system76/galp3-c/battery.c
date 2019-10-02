@@ -47,6 +47,47 @@ uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
     }
 }
 
+uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
+    // Wait for last command
+    while (HOSTAA & 1) {}
+
+    // Clear result
+    HOSTAA = HOSTAA;
+
+    // Clock down to 50 KHz
+    SCLKTSA = 1;
+
+    // Enable host interface
+    HOCTL2A = 1 << 0;
+
+    // Write value to address
+    TRASLAA = (address << 1);
+    HOCMDA = command;
+
+    D0REGA = (uint8_t)data;
+    D1REGA = (uint8_t)(data >> 8);
+
+    // Start read word command
+    HOCTLA = (1 << 6) | (0b011 << 2);
+
+    // Wait for command to start
+    while (!(HOSTAA & 1)) {}
+
+    // Wait for command to finish
+    while (HOSTAA & 1) {}
+
+    // Read and clear status
+    uint8_t status = HOSTAA;
+    HOSTAA = status;
+
+    // Disable host interface
+    HOCTL2A = 0;
+
+    // If there were no errors, set value and return 0
+    uint8_t error = (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
+    //TODO: custom error type or flags for errors
+    return (status & error);
+}
 void battery_debug(void) {
     uint16_t data = 0;
     uint8_t err = 0;
