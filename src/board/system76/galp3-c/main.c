@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include <arch/delay.h>
+#include <board/battery.h>
 #include <board/gpio.h>
 #include <board/gctrl.h>
 #include <board/kbc.h>
@@ -86,6 +87,8 @@ void power_button() {
     bool new = gpio_get(&PWR_SW_N);
     if (!new && last) {
         printf("Power switch\n");
+
+        // battery_charger_enable();
 
         battery_debug();
         //gpio_set(&DD_ON, true);
