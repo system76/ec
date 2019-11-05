@@ -99,9 +99,9 @@ void touchpad_event(struct Ps2 * ps2) {
     //TODO
 }
 
-
-//struct Gpio __code LED_PWR = GPIO(A, 7);
-//struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
+struct Gpio __code LED_PWR = GPIO(A, 7);
+struct Gpio __code LED_SSD_N = GPIO(G, 6);
+struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
 
 void main(void) {
     init();

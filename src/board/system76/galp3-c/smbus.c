@@ -8,4 +8,10 @@ void smbus_init(void) {
     SMB25MS = 0x19;
     SMB45P3USL = 0x5C;
     SMB45P3USH = 0x01;
+
+    // Clock to 400 KHz
+    SCLKTSA = 3;
+
+    // Enable host interface
+    HOCTL2A = 1 << 0;
 }

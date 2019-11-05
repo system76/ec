@@ -3,18 +3,6 @@
 #include <board/smbus.h>
 
 uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
-    // Wait for last command
-    while (HOSTAA & 1) {}
-
-    // Clear result
-    HOSTAA = HOSTAA;
-
-    // Clock to 400 KHz
-    SCLKTSA = 3;
-
-    // Enable host interface
-    HOCTL2A = 1 << 0;
-
     // Read value from address
     TRASLAA = (address << 1) | (1 << 0);
     HOCMDA = command;
@@ -32,9 +20,6 @@ uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
     uint8_t status = HOSTAA;
     HOSTAA = status;
 
-    // Disable host interface
-    HOCTL2A = 0;
-
     // If there were no errors, set value and return 0
     uint8_t error = (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
     if (!(status & error)) {
@@ -48,18 +33,6 @@ uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
 }
 
 uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
-    // Wait for last command
-    while (HOSTAA & 1) {}
-
-    // Clear result
-    HOSTAA = HOSTAA;
-
-    // Clock to 400 KHz
-    SCLKTSA = 3;
-
-    // Enable host interface
-    HOCTL2A = 1 << 0;
-
     // Write value to address
     TRASLAA = (address << 1);
     HOCMDA = command;
@@ -80,14 +53,41 @@ uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
     uint8_t status = HOSTAA;
     HOSTAA = status;
 
-    // Disable host interface
-    HOCTL2A = 0;
-
     // If there were no errors, set value and return 0
     uint8_t error = (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
     //TODO: custom error type or flags for errors
     return (status & error);
 }
+
+uint8_t battery_charger_disable(void) {
+    uint8_t err = 0;
+
+    // Disable charge current
+    err = smbus_write(0x09, 0x14, 0);
+    if (err) return err;
+
+    // Disable charge voltage
+    err = smbus_write(0x09, 0x15, 0);
+    if (err) return err;
+}
+
+uint8_t battery_charger_enable(void) {
+    uint8_t err = 0;
+
+    err = battery_charger_disable();
+    if (err) return err;
+
+    // Set charge current to ~1.5 A
+    err = smbus_write(0x09, 0x14, 0x0600);
+    if (err) return err;
+
+    // Set charge voltage to ~13 V
+    err = smbus_write(0x09, 0x15, 0x3300);
+    if (err) return err;
+
+    return 0;
+}
+
 void battery_debug(void) {
     uint16_t data = 0;
     uint8_t err = 0;
