@@ -9,8 +9,8 @@ uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
     // Clear result
     HOSTAA = HOSTAA;
 
-    // Clock down to 50 KHz
-    SCLKTSA = 1;
+    // Clock to 400 KHz
+    SCLKTSA = 3;
 
     // Enable host interface
     HOCTL2A = 1 << 0;
@@ -54,8 +54,8 @@ uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
     // Clear result
     HOSTAA = HOSTAA;
 
-    // Clock down to 50 KHz
-    SCLKTSA = 1;
+    // Clock to 400 KHz
+    SCLKTSA = 3;
 
     // Enable host interface
     HOCTL2A = 1 << 0;

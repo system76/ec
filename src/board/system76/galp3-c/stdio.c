@@ -10,8 +10,8 @@ void i2c_write(unsigned char value) {
         // Clear result
         HOSTAA = HOSTAA;
 
-        // Clock down to 50 KHz
-        SCLKTSA = 1;
+        // Clock to 400 KHz
+        SCLKTSA = 3;
 
         // Enable host interface with i2c compatibility
         HOCTL2A = (1 << 1) | (1 << 0);
