@@ -1,0 +1,25 @@
+G3 state
+VCCRTC from VCC_RTC enabled by CMOS battery
+RTCRST# from VCC_RTC
+
+Power plugged in
+VCCDSW_3P3 from VDD3 enabled by AC power
+Assert VA_EC_EN
+VCCPRIM_3P3 from 3.3VA enabled by VA_EC_EN
+VCCPRIM_1P8 from 1.8VA enabled by VA_EC_EN
+VCCPRIM_1P05 from 1.05VA enabled by VA_EC_EN
+Assert DD_ON
+VDD5 enabled by DD_ON
+3.3V enabled by DD_ON
+Assert SUS_ACK# by SUS_PWR_ACK
+Assert DSW_PWROK by PCH_DPWROK_EC
+Assert RSMRST#
+S5 state
+
+Assert ACPRESENT#
+Assert PWRBTN#
+Assert EC_EN - WHEN?
+Assert VR_ON
+Assert PCH_PWROK via PM_PWROK
+Assert PCH_PWROK_EC
+S0 state
