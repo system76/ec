@@ -81,17 +81,23 @@ void power_button() {
     static struct Gpio __code PCH_PWROK_EC =    GPIO(A, 4);
     static struct Gpio __code LED_PWR =         GPIO(A, 7);
     static struct Gpio __code ALL_SYS_PWRGD =   GPIO(C, 0);
+    static struct Gpio __code PM_PWROK =        GPIO(C, 6);
     static struct Gpio __code PWR_SW_N =        GPIO(D, 0);
+    static struct Gpio __code BUF_PLT_RST_N =   GPIO(D, 2);
     static struct Gpio __code PWR_BTN_N =       GPIO(D, 5);
+    static struct Gpio __code SUSWARN_N =       GPIO(D, 7);
     static struct Gpio __code EC_EN =           GPIO(E, 1);
+    static struct Gpio __code VA_EC_EN =        GPIO(E, 3);
     static struct Gpio __code DD_ON =           GPIO(E, 4);
     static struct Gpio __code EC_RSMRST_N =     GPIO(E, 5);
-    static struct Gpio __code VA_EC_EN =        GPIO(E, 7);
+    static struct Gpio __code AC_PRESENT =      GPIO(E, 7);
     static struct Gpio __code SUSC_N_PCH =      GPIO(H, 1);
     static struct Gpio __code VR_ON =           GPIO(H, 4);
     static struct Gpio __code SUSB_N_PCH =      GPIO(H, 6);
     static struct Gpio __code SLP_SUS_N =       GPIO(I, 2);
     static struct Gpio __code SUS_PWR_ACK =     GPIO(J, 0);
+
+    static bool power = false;
 
     // Check if the power switch goes low
     static bool last = false;
@@ -99,11 +105,10 @@ void power_button() {
     if (!new && last) {
         printf("Power switch press\n");
 
-        static bool power = false;
         power = !power;
 
         if (power) {
-            printf("Enabling power\n");
+            printf("Enabling S5 power\n");
 
             // We assume that VCCRTC has already been stable, RTCRST# is
             // already set, and VCCDSW_3P3 is stable
@@ -122,9 +127,9 @@ void power_button() {
             // Wait for SLP_SUS# (tPCH32)
             delay_ms(95);
             for (;;) {
-                bool slp_sus = gpio_get(&SLP_SUS_N);
-                printf("SLP_SUS_N: %d\n", slp_sus);
-                if (slp_sus) break;
+                bool value = gpio_get(&SLP_SUS_N);
+                printf("SLP_SUS_N: %d\n", value);
+                if (value) break;
                 delay_ms(1);
             }
 
@@ -144,28 +149,78 @@ void power_button() {
             printf("EC_RSMRST_N: %d\n", power);
             gpio_set(&EC_RSMRST_N, power);
 
-            // printf("SUS_PWR_ACK: %d\n", power);
-            // gpio_set(&SUS_PWR_ACK, power);
-            //
-            // // Wait for tPCH03
-            // delay_ms(10);
-            //
-            // printf("
+            // Allow processor to control SUSB# and SUSC#
+            printf("EC_EN: %d\n", power);
+            gpio_set(&EC_EN, power);
 
-            // printf("EC_EN: %d\n", power);
-            // gpio_set(&EC_EN, power);
-            //
+            // Assert SUS_ACK#
+            printf("SUS_PWR_ACK: %d\n", power);
+            gpio_set(&SUS_PWR_ACK, power);
+
             // printf("VR_ON: %d\n", power);
             // gpio_set(&VR_ON, power);
+        }
+    }
 
-            printf("LED_PWR: %d\n", power);
-            gpio_set(&LED_PWR, power);
+    // Set PWR_BTN line!
+    gpio_set(&PWR_BTN_N, new);
+
+    if (!new && last) {
+        if (power) {
+            printf("Enabling S0 power\n");
+
+            // Wait for ALL_SYS_PWRGD
+            for (;;) {
+                bool value = gpio_get(&ALL_SYS_PWRGD);
+                printf("ALL_SYS_PWRGD: %d\n", value);
+                if (value) break;
+                delay_ms(1);
+            }
+
+            // Assert VR_ON
+            printf("VR_ON: %d\n", power);
+            gpio_set(&VR_ON, power);
+
+            // Assert PM_PWEROK, PCH_PWROK will be asserted when H_VR_READY is
+            printf("PM_PWROK: %d\n", power);
+            gpio_set(&PM_PWROK, power);
+
+            // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
+            delay_ms(10);
+
+            // Assert PCH_PWEROK_EC, SYS_PWEROK will be asserted
+            printf("PCH_PWROK_EC: %d\n", power);
+            gpio_set(&PCH_PWROK_EC, power);
+
+            // Wait for PLT_RST#
+            for (;;) {
+                bool value = gpio_get(&BUF_PLT_RST_N);
+                printf("BUF_PLT_RST_N: %d\n", value);
+                if (value) break;
+                delay_ms(1);
+            }
         } else {
-            //TODO
             printf("Disabling power\n");
 
-            printf("LED_PWR: %d\n", power);
-            gpio_set(&LED_PWR, power);
+            // De-assert SUS_ACK#
+            printf("SUS_PWR_ACK: %d\n", power);
+            gpio_set(&SUS_PWR_ACK, power);
+
+            // De-assert PCH_PWEROK_EC, SYS_PWEROK will be de-asserted
+            printf("PCH_PWROK_EC: %d\n", power);
+            gpio_set(&PCH_PWROK_EC, power);
+
+            // De-assert PM_PWEROK, PCH_PWROK will be de-asserted
+            printf("PM_PWROK: %d\n", power);
+            gpio_set(&PM_PWROK, power);
+
+            // De-assert VR_ON
+            printf("VR_ON: %d\n", power);
+            gpio_set(&VR_ON, power);
+
+            // Block processor from controlling SUSB# and SUSC#
+            printf("EC_EN: %d\n", power);
+            gpio_set(&EC_EN, power);
 
             // De-assert RSMRST#
             printf("EC_RSMRST_N: %d\n", power);
@@ -192,16 +247,22 @@ void power_button() {
             // Disable battery charger
             battery_charger_disable();
         }
+
+        printf("LED_PWR: %d\n", power);
+        gpio_set(&LED_PWR, power);
     } else if (new && !last) {
         printf("Power switch release\n");
 
+        printf("SUSWARN_N: %d\n", gpio_get(&SUSWARN_N));
+        printf("SUSC_N_PCH: %d\n", gpio_get(&SUSC_N_PCH));
+        printf("SUSB_N_PCH: %d\n", gpio_get(&SUSB_N_PCH));
         printf("ALL_SYS_PWRGD: %d\n", gpio_get(&ALL_SYS_PWRGD));
+        printf("BUF_PLT_RST_N: %d\n", gpio_get(&BUF_PLT_RST_N));
 
         battery_debug();
     }
-    last = new;
 
-    gpio_set(&PWR_BTN_N, new);
+    last = new;
 }
 
 void touchpad_event(struct Ps2 * ps2) {
