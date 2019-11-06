@@ -77,21 +77,127 @@ void ac_adapter() {
 }
 
 void power_button() {
-    static struct Gpio __code PWR_SW_N = GPIO(D, 0);
-    static struct Gpio __code PWR_BTN_N = GPIO(D, 5);
-    //static struct Gpio __code DD_ON = GPIO(E, 4);
-
-    static bool last = false;
+    static struct Gpio __code PCH_DPWROK_EC =   GPIO(A, 3);
+    static struct Gpio __code PCH_PWROK_EC =    GPIO(A, 4);
+    static struct Gpio __code LED_PWR =         GPIO(A, 7);
+    static struct Gpio __code ALL_SYS_PWRGD =   GPIO(C, 0);
+    static struct Gpio __code PWR_SW_N =        GPIO(D, 0);
+    static struct Gpio __code PWR_BTN_N =       GPIO(D, 5);
+    static struct Gpio __code EC_EN =           GPIO(E, 1);
+    static struct Gpio __code DD_ON =           GPIO(E, 4);
+    static struct Gpio __code EC_RSMRST_N =     GPIO(E, 5);
+    static struct Gpio __code VA_EC_EN =        GPIO(E, 7);
+    static struct Gpio __code SUSC_N_PCH =      GPIO(H, 1);
+    static struct Gpio __code VR_ON =           GPIO(H, 4);
+    static struct Gpio __code SUSB_N_PCH =      GPIO(H, 6);
+    static struct Gpio __code SLP_SUS_N =       GPIO(I, 2);
+    static struct Gpio __code SUS_PWR_ACK =     GPIO(J, 0);
 
     // Check if the power switch goes low
+    static bool last = false;
     bool new = gpio_get(&PWR_SW_N);
     if (!new && last) {
-        printf("Power switch\n");
+        printf("Power switch press\n");
 
-        // battery_charger_enable();
+        static bool power = false;
+        power = !power;
+
+        if (power) {
+            printf("Enabling power\n");
+
+            // We assume that VCCRTC has already been stable, RTCRST# is
+            // already set, and VCCDSW_3P3 is stable
+
+            // Enable battery charger - also provides correct power levels for
+            // system boot sourced from the AC adapter
+            battery_charger_enable();
+
+            // Make sure VCCDSW is stable for at least 10 ms (tPCH02)
+            delay_ms(10 + 5);
+
+            // Assert DSW_PWROK
+            printf("PCH_DPWROK_EC: %d\n", power);
+            gpio_set(&PCH_DPWROK_EC, power);
+
+            // Wait for SLP_SUS# (tPCH32)
+            delay_ms(95);
+            for (;;) {
+                bool slp_sus = gpio_get(&SLP_SUS_N);
+                printf("SLP_SUS_N: %d\n", slp_sus);
+                if (slp_sus) break;
+                delay_ms(1);
+            }
+
+            // Enable VCCPRIM_* planes - must be enabled prior to USB power
+            // in order to avoid leakage
+            printf("VA_EC_EN: %d\n", power);
+            gpio_set(&VA_EC_EN, power);
+
+            // Make sure VCCPRIM_* is stable for at least 10 ms (tPCH03)
+            delay_ms(10 + 5);
+
+            // Enable VDD5
+            printf("DD_ON: %d\n", power);
+            gpio_set(&DD_ON, power);
+
+            // Assert RSMRST#
+            printf("EC_RSMRST_N: %d\n", power);
+            gpio_set(&EC_RSMRST_N, power);
+
+            // printf("SUS_PWR_ACK: %d\n", power);
+            // gpio_set(&SUS_PWR_ACK, power);
+            //
+            // // Wait for tPCH03
+            // delay_ms(10);
+            //
+            // printf("
+
+            // printf("EC_EN: %d\n", power);
+            // gpio_set(&EC_EN, power);
+            //
+            // printf("VR_ON: %d\n", power);
+            // gpio_set(&VR_ON, power);
+
+            printf("LED_PWR: %d\n", power);
+            gpio_set(&LED_PWR, power);
+        } else {
+            //TODO
+            printf("Disabling power\n");
+
+            printf("LED_PWR: %d\n", power);
+            gpio_set(&LED_PWR, power);
+
+            // De-assert RSMRST#
+            printf("EC_RSMRST_N: %d\n", power);
+            gpio_set(&EC_RSMRST_N, power);
+
+            // Disable VDD5
+            printf("DD_ON: %d\n", power);
+            gpio_set(&DD_ON, power);
+
+            // Wait a minimum of 400 ns (tPCH12)
+            delay_ms(1);
+
+            // Disable VCCPRIM_* planes
+            printf("VA_EC_EN: %d\n", power);
+            gpio_set(&VA_EC_EN, power);
+
+            // De-assert DSW_PWROK
+            printf("PCH_DPWROK_EC: %d\n", power);
+            gpio_set(&PCH_DPWROK_EC, power);
+
+            // Wait a minimum of 400 ns (tPCH14)
+            delay_ms(1);
+
+            // Disable battery charger
+            battery_charger_disable();
+        }
+    } else if (new && !last) {
+        printf("Power switch release\n");
+
+        printf("ALL_SYS_PWRGD: %d\n", gpio_get(&ALL_SYS_PWRGD));
 
         battery_debug();
-        //gpio_set(&DD_ON, true);
     }
     last = new;
 
@@ -102,7 +208,6 @@ void touchpad_event(struct Ps2 * ps2) {
     //TODO
 }
 
-struct Gpio __code LED_PWR = GPIO(A, 7);
 struct Gpio __code LED_SSD_N = GPIO(G, 6);
 struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
 
