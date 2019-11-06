@@ -7,21 +7,17 @@ void pwm_init(void) {
     // Disable PWM
     ZTIER = 0;
 
-    // Set prescaler to 1159 + 1
-    C6CPRS = 0x87;
-    C6MCPRS = 0x04;
+    // Set prescalar clock frequency to EC clock
+    PCFSR = 0b01;
+
+    // Set clock prescaler to 0 + 1
+    C0CPRS = 0;
 
     // Set cycle time to 255 + 1
-    CTR2 = 0xFF;
+    CTR0 = 255;
 
     // Turn on the CPU fan at half blast (temperature control TODO)
-    DCR2 = 0x80;
-
-    // Set gating clock source
-    PCSGR = 0xFF;
-
-    // Set PWM2 output to use C6CPRS / CTR2
-    PCSSGL = (0b10 << 4);
+    DCR2 = 128;
 
     // Enable PWM
     ZTIER = (1 << 1);
