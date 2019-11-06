@@ -43,6 +43,8 @@ volatile uint8_t __xdata __at(0x1820) F2TLRR;
 // Fan two tachometer most significant byte reading register
 volatile uint8_t __xdata __at(0x1821) F2TMRR;
 
+// PWM polarity register
+volatile uint8_t __xdata __at(0x180A) PWMPOL;
 // Prescaler clock frequency select register
 volatile uint8_t __xdata __at(0x180B) PCFSR;
 // Prescaler clock source select group low
@@ -52,7 +54,7 @@ volatile uint8_t __xdata __at(0x180D) PCSSGH;
 // Prescaler clock source gating register
 volatile uint8_t __xdata __at(0x180F) PCSGR;
 // PWM clock control register with weird name
-volatile uint8_t __xdata __at(0x1821) ZTIER;
+volatile uint8_t __xdata __at(0x1823) ZTIER;
 // Tachometer switch control register
 volatile uint8_t __xdata __at(0x1848) TSWCTLR;
 
