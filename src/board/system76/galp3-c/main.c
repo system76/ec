@@ -100,9 +100,16 @@ void power_button() {
     static bool power = false;
 
     // Check if the power switch goes low
-    static bool last = false;
+    static bool last = true;
     bool new = gpio_get(&PWR_SW_N);
     if (!new && last) {
+        // Ensure press is not spurious
+        delay_ms(100);
+        if (gpio_get(&PWR_SW_N) != new) {
+            printf("Spurious press\n");
+            return;
+        }
+
         printf("Power switch press\n");
 
         power = !power;
