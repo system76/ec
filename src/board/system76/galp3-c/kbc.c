@@ -11,6 +11,7 @@ enum KbcState {
     KBC_STATE_NORMAL,
     KBC_STATE_WRITE_CONFIG,
     KBC_STATE_SET_LEDS,
+    KBC_STATE_SCANCODE,
 };
 
 void kbc_event(struct Kbc * kbc) {
@@ -62,6 +63,17 @@ void kbc_event(struct Kbc * kbc) {
                         case 0xED:
                             printf("    set leds\n");
                             state = KBC_STATE_SET_LEDS;
+                            kbc_keyboard(kbc, 0xFA);
+                            break;
+                        case 0xEE:
+                            printf("    echo\n");
+                            // Hey, this is easy. I like easy commands
+                            kbc_keyboard(kbc, 0xEE);
+                            break;
+                        case 0xF0:
+                            printf("    get/set scancode\n");
+                            state = KBC_STATE_SCANCODE;
+                            kbc_keyboard(kbc, 0xFA);
                             break;
                         case 0xF4:
                             printf("    enable scanning\n");
@@ -74,6 +86,7 @@ void kbc_event(struct Kbc * kbc) {
                         case 0xFF:
                             printf("    self test\n");
                             kbc_keyboard(kbc, 0xFA);
+                            while (kbc_status(kbc) & KBC_STS_OBF) {}
                             // Yep, everything is still good, I promise
                             kbc_keyboard(kbc, 0xAA);
                             break;
@@ -86,6 +99,16 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_SET_LEDS:
                     printf("  set leds\n");
                     state = KBC_STATE_NORMAL;
+                    kbc_keyboard(kbc, 0xFA);
+                    break;
+                case KBC_STATE_SCANCODE:
+                    printf("  get/set scancode\n");
+                    state = KBC_STATE_NORMAL;
+                    switch (data) {
+                        case 0x02:
+                            printf("    set scancode set 2\n");
+                            break;
+                    }
                     kbc_keyboard(kbc, 0xFA);
                     break;
             }
