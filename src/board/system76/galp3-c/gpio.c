@@ -99,6 +99,13 @@ void gpio_init() {
     GPCRJ5 = 0x40;
     GPCRJ6 = 0x44;
     GPCRJ7 = 0x80;
+    GPCRM0 = 0x00;
+    GPCRM1 = 0x00;
+    GPCRM2 = 0x00;
+    GPCRM3 = 0x00;
+    GPCRM4 = 0x00;
+    GPCRM5 = 0x00;
+    GPCRM6 = 0x00;
 }
 
 void gpio_debug_bank(
@@ -122,7 +129,7 @@ void gpio_debug_bank(
 }
 
 void gpio_debug(void) {
-    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCRA0)
+    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCR ## BANK ## 0)
     bank(A);
     bank(B);
     bank(C);
