@@ -115,7 +115,7 @@ void power_button() {
 
             // Enable battery charger - also provides correct power levels for
             // system boot sourced from the AC adapter
-            battery_charger_enable();
+            //battery_charger_enable();
 
             // Make sure VCCDSW is stable for at least 10 ms (tPCH02)
             delay_ms(10 + 5);
@@ -245,7 +245,7 @@ void power_button() {
             delay_ms(1);
 
             // Disable battery charger
-            battery_charger_disable();
+            //battery_charger_disable();
         }
 
         printf("LED_PWR: %d\n", power);
@@ -259,7 +259,7 @@ void power_button() {
         printf("ALL_SYS_PWRGD: %d\n", gpio_get(&ALL_SYS_PWRGD));
         printf("BUF_PLT_RST_N: %d\n", gpio_get(&BUF_PLT_RST_N));
 
-        battery_debug();
+        //battery_debug();
     }
 
     last = new;
@@ -275,15 +275,32 @@ struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
 void main(void) {
     init();
 
-    static struct Gpio __code LED_BAT_CHG = GPIO(A, 5);
-    static struct Gpio __code LED_BAT_FULL = GPIO(A, 6);
+    printf("\n");
+
+    static struct Gpio __code LED_BAT_CHG =     GPIO(A, 5);
+    static struct Gpio __code LED_BAT_FULL =    GPIO(A, 6);
+    static struct Gpio __code SMI_N =           GPIO(D, 3);
+    static struct Gpio __code SCI_N =           GPIO(D, 4);
+    static struct Gpio __code SWI_N =           GPIO(E, 0);
+    static struct Gpio __code SB_KBCRST_N =     GPIO(E, 6);
+    static struct Gpio __code PM_CLKRUN_N =     GPIO(H, 0);
+    static struct Gpio __code BKL_EN =          GPIO(H, 2);
 
     // Set the battery full LED (to know our firmware is loading)
     gpio_set(&LED_BAT_CHG, true);
 
     gpio_debug();
 
-    battery_debug();
+    //battery_debug();
+
+    // Allow CPU to boot
+    gpio_set(&SB_KBCRST_N, true);
+    // Allow backlight to be turned on
+    gpio_set(&BKL_EN, true);
+    // Assert SMI#, SCI#, and SWI#
+    gpio_set(&SCI_N, true);
+    gpio_set(&SMI_N, true);
+    gpio_set(&SWI_N, true);
 
     // Set the battery full LED (to know our firmware is loaded)
     gpio_set(&LED_BAT_FULL, true);
