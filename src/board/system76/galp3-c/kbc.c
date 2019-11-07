@@ -73,6 +73,7 @@ void kbc_event(struct Kbc * kbc) {
                             break;
                         case 0xFF:
                             printf("    self test\n");
+                            kbc_keyboard(kbc, 0xFA);
                             // Yep, everything is still good, I promise
                             kbc_keyboard(kbc, 0xAA);
                             break;
