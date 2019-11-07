@@ -31,8 +31,6 @@ uint8_t kbc_read(struct Kbc * kbc);
 void kbc_keyboard(struct Kbc * kbc, uint8_t data);
 void kbc_mouse(struct Kbc * kbc, uint8_t data);
 
-void kbc_event(struct Kbc * kbc);
-
 volatile uint8_t __xdata __at(0x1300) KBHICR;
 volatile uint8_t __xdata __at(0x1302) KBIRQR;
 volatile uint8_t __xdata __at(0x1304) KBHISR;
