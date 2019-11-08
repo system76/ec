@@ -4,9 +4,9 @@
 #include <board/kbscan.h>
 
 void kbc_init(void) {
+    // Disable interrupts
     *(KBC.irq) = 0;
-    // Enable IRQ1 on keyboard output and IRQ12 on mouse output
-    *(KBC.control) = 0x03;
+    *(KBC.control) = 0;
 }
 
 enum KbcState {
@@ -98,6 +98,18 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_WRITE_CONFIG:
                     printf("  write configuration byte\n");
                     state = KBC_STATE_NORMAL;
+                    uint8_t control = *kbc->control;
+                    if (data & 1) {
+                        control |= 1;
+                    } else {
+                        control &= ~1;
+                    }
+                    if (data & (1 << 1)) {
+                        control |= (1 << 1);
+                    } else {
+                        control &= ~(1 << 1);
+                    }
+                    *kbc->control = control;
                     break;
                 case KBC_STATE_SET_LEDS:
                     printf("  set leds\n");
