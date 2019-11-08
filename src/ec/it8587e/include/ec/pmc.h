@@ -1,6 +1,7 @@
 #ifndef _EC_PMC_H
 #define _EC_PMC_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 struct Pmc {
@@ -23,7 +24,7 @@ extern struct Pmc __code PMC_2;
 
 uint8_t pmc_status(struct Pmc * pmc);
 uint8_t pmc_read(struct Pmc * pmc);
-void pmc_write(struct Pmc * pmc, uint8_t data);
+bool pmc_write(struct Pmc * pmc, uint8_t data, int timeout);
 
 void pmc_event(struct Pmc * pmc);
 

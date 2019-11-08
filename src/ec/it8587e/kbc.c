@@ -17,14 +17,23 @@ uint8_t kbc_read(struct Kbc * kbc) {
     return *(kbc->data_in);
 }
 
-void kbc_keyboard(struct Kbc * kbc, uint8_t data) {
-    //TODO: use timeout
-    while (kbc_status(kbc) & KBC_STS_OBF) {}
-    *(kbc->keyboard_out) = data;
+
+static bool kbc_wait(struct Kbc * kbc, int timeout) {
+    while (kbc_status(kbc) & KBC_STS_OBF) {
+        if (timeout == 0) return false;
+        timeout -= 1;
+    }
+    return true;
 }
 
-void kbc_mouse(struct Kbc * kbc, uint8_t data) {
-    //TODO: use timeout
-    while (kbc_status(kbc) & KBC_STS_OBF) {}
+bool kbc_keyboard(struct Kbc * kbc, uint8_t data, int timeout) {
+    if (!kbc_wait(kbc, timeout)) return false;
+    *(kbc->keyboard_out) = data;
+    return true;
+}
+
+bool kbc_mouse(struct Kbc * kbc, uint8_t data, int timeout) {
+    if (!kbc_wait(kbc, timeout)) return false;
     *(kbc->mouse_out) = data;
+    return true;
 }

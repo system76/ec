@@ -10,20 +10,22 @@ void kbc_init(void) {
     *(KBC.control) = 0;
 }
 
+#define KBC_TIMEOUT 1000
+
 // System flag
 static bool kbc_system = false;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
 
-void kbc_key(struct Kbc * kbc, uint16_t key, bool pressed) {
+bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed) {
     if (kbc_translate) {
         key = keymap_translate(key);
     }
     switch (key & 0xFF00) {
         case K_E0:
             printf("  E0\n");
-            kbc_keyboard(kbc, 0xE0);
+            if (!kbc_keyboard(kbc, 0xE0, KBC_TIMEOUT)) return false;
             key &= 0xFF;
             // Fall through
         case 0x00:
@@ -32,13 +34,14 @@ void kbc_key(struct Kbc * kbc, uint16_t key, bool pressed) {
                     key |= 0x80;
                 } else {
                     printf("  F0\n");
-                    kbc_keyboard(kbc, 0xF0);
+                    if (!kbc_keyboard(kbc, 0xF0, KBC_TIMEOUT)) return false;
                 }
             }
             printf("  %02X\n", key);
-            kbc_keyboard(kbc, (uint8_t)key);
+            if (!kbc_keyboard(kbc, (uint8_t)key, KBC_TIMEOUT)) return false;
             break;
     }
+    return true;
 }
 
 enum KbcState {
@@ -84,12 +87,12 @@ void kbc_event(struct Kbc * kbc) {
             case 0xAA:
                 printf("  test controller\n");
                 // Why not pass the test?
-                kbc_keyboard(kbc, 0x55);
+                kbc_keyboard(kbc, 0x55, KBC_TIMEOUT);
                 break;
             case 0xAB:
                 printf("  test first port\n");
                 // We _ARE_ the keyboard, so everything is good.
-                kbc_keyboard(kbc, 0x00);
+                kbc_keyboard(kbc, 0x00, KBC_TIMEOUT);
                 break;
             case 0xAD:
                 printf("  disable first port\n");
@@ -112,33 +115,34 @@ void kbc_event(struct Kbc * kbc) {
                         case 0xED:
                             printf("    set leds\n");
                             state = KBC_STATE_SET_LEDS;
-                            kbc_keyboard(kbc, 0xFA);
+                            kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                             break;
                         case 0xEE:
                             printf("    echo\n");
                             // Hey, this is easy. I like easy commands
-                            kbc_keyboard(kbc, 0xEE);
+                            kbc_keyboard(kbc, 0xEE, KBC_TIMEOUT);
                             break;
                         case 0xF0:
                             printf("    get/set scancode\n");
                             state = KBC_STATE_SCANCODE;
-                            kbc_keyboard(kbc, 0xFA);
+                            kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                             break;
                         case 0xF4:
                             printf("    enable scanning\n");
                             kbscan_enabled = true;
-                            kbc_keyboard(kbc, 0xFA);
+                            kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                             break;
                         case 0xF5:
                             printf("    disable scanning\n");
                             kbscan_enabled = false;
-                            kbc_keyboard(kbc, 0xFA);
+                            kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                             break;
                         case 0xFF:
                             printf("    self test\n");
-                            kbc_keyboard(kbc, 0xFA);
-                            // Yep, everything is still good, I promise
-                            kbc_keyboard(kbc, 0xAA);
+                            if (kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT)) {
+                                // Yep, everything is still good, I promise
+                                kbc_keyboard(kbc, 0xAA, KBC_TIMEOUT);
+                            }
                             break;
                     }
                     break;
@@ -171,7 +175,7 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_SET_LEDS:
                     printf("  set leds\n");
                     state = KBC_STATE_NORMAL;
-                    kbc_keyboard(kbc, 0xFA);
+                    kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                     break;
                 case KBC_STATE_SCANCODE:
                     printf("  get/set scancode\n");
@@ -181,7 +185,7 @@ void kbc_event(struct Kbc * kbc) {
                             printf("    set scancode set 2\n");
                             break;
                     }
-                    kbc_keyboard(kbc, 0xFA);
+                    kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                     break;
                 case KBC_STATE_WRITE_PORT:
                     printf("  write port byte\n");

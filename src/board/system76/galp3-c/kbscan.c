@@ -51,7 +51,7 @@ void kbscan_event(void) {
                     uint16_t key = keymap(i, j, kbscan_layer);
                     printf("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
                     if (kbscan_enabled && key) {
-                        kbc_key(&KBC, key, new_b);
+                        kbc_scancode(&KBC, key, new_b);
                     }
                 }
             }

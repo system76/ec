@@ -1,6 +1,7 @@
 #ifndef _EC_KBC_H
 #define _EC_KBC_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 void kbc_init(void);
@@ -28,8 +29,8 @@ extern struct Kbc __code KBC;
 
 uint8_t kbc_status(struct Kbc * kbc);
 uint8_t kbc_read(struct Kbc * kbc);
-void kbc_keyboard(struct Kbc * kbc, uint8_t data);
-void kbc_mouse(struct Kbc * kbc, uint8_t data);
+bool kbc_keyboard(struct Kbc * kbc, uint8_t data, int timeout);
+bool kbc_mouse(struct Kbc * kbc, uint8_t data, int timeout);
 
 volatile uint8_t __xdata __at(0x1300) KBHICR;
 volatile uint8_t __xdata __at(0x1302) KBIRQR;
