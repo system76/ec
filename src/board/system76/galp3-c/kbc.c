@@ -73,6 +73,7 @@ void kbc_event(struct Kbc * kbc) {
                 if (kbc_translate) {
                     config |= (1 << 6);
                 }
+                kbc_keyboard(kbc, config, KBC_TIMEOUT);
                 break;
             case 0x60:
                 printf("  write configuration byte\n");
