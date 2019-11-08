@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include <board/kbc.h>
+#include <board/kbscan.h>
 
 void kbc_init(void) {
     *(KBC.irq) = 0;
@@ -77,16 +78,17 @@ void kbc_event(struct Kbc * kbc) {
                             break;
                         case 0xF4:
                             printf("    enable scanning\n");
+                            kbscan_enabled = true;
                             kbc_keyboard(kbc, 0xFA);
                             break;
                         case 0xF5:
                             printf("    disable scanning\n");
+                            kbscan_enabled = false;
                             kbc_keyboard(kbc, 0xFA);
                             break;
                         case 0xFF:
                             printf("    self test\n");
                             kbc_keyboard(kbc, 0xFA);
-                            while (kbc_status(kbc) & KBC_STS_OBF) {}
                             // Yep, everything is still good, I promise
                             kbc_keyboard(kbc, 0xAA);
                             break;

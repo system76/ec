@@ -1,12 +1,5 @@
 #include <board/keymap.h>
 
-// Keymap output pins
-#define KM_OUT 16
-// Keymap input pins
-#define KM_IN 8
-// Keymap layers (normal, Fn)
-#define KM_LAY 2
-
 uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
     {   //  0
         {0, 0}, // 0

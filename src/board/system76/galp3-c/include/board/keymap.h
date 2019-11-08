@@ -3,6 +3,13 @@
 
 #include <stdint.h>
 
+// Keymap output pins
+#define KM_OUT 16
+// Keymap input pins
+#define KM_IN 8
+// Keymap layers (normal, Fn)
+#define KM_LAY 2
+
 uint16_t keymap(int output, int input, int layer);
 
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
