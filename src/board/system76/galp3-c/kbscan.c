@@ -61,8 +61,9 @@ void kbscan_event(void) {
                                     printf("  F0\n");
                                     kbc_keyboard(&KBC, 0xF0);
                                 }
-                                printf("  %02X\n", (uint8_t)key);
-                                kbc_keyboard(&KBC, (uint8_t)key);
+                                uint8_t key_byte = (uint8_t)(key & 0xFF);
+                                printf("  %02X\n", key_byte);
+                                kbc_keyboard(&KBC, key_byte);
                                 break;
                         }
                     }
