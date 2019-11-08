@@ -5,7 +5,8 @@
 
 void kbc_init(void) {
     *(KBC.irq) = 0;
-    *(KBC.control) = 0x48;
+    // Enable IRQ1 on keyboard output and IRQ12 on mouse output
+    *(KBC.control) = 0x03;
 }
 
 enum KbcState {
