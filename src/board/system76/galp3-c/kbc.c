@@ -10,6 +10,8 @@ void kbc_init(void) {
     *(KBC.control) = 0;
 }
 
+// System flag
+static bool kbc_system = false;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
@@ -58,6 +60,16 @@ void kbc_event(struct Kbc * kbc) {
 
             state = KBC_STATE_NORMAL;
             switch (data) {
+            case 0x20:
+                printf("  read configuration byte\n");
+                uint8_t config = *kbc->control & 0x03;
+                if (kbc_system) {
+                    config |= (1 << 2);
+                }
+                if (kbc_translate) {
+                    config |= (1 << 6);
+                }
+                break;
             case 0x60:
                 printf("  write configuration byte\n");
                 state = KBC_STATE_WRITE_CONFIG;
@@ -138,6 +150,11 @@ void kbc_event(struct Kbc * kbc) {
                         control |= (1 << 1);
                     } else {
                         control &= ~(1 << 1);
+                    }
+                    if (data & (1 << 2)) {
+                        kbc_system = true;
+                    } else {
+                        kbc_system = false;
                     }
                     if (data & (1 << 6)) {
                         kbc_translate = true;
