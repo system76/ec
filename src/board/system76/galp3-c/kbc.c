@@ -46,6 +46,7 @@ enum KbcState {
     KBC_STATE_WRITE_CONFIG,
     KBC_STATE_SET_LEDS,
     KBC_STATE_SCANCODE,
+    KBC_STATE_WRITE_PORT,
 };
 
 void kbc_event(struct Kbc * kbc) {
@@ -95,6 +96,10 @@ void kbc_event(struct Kbc * kbc) {
                 break;
             case 0xAE:
                 printf("  enable first port\n");
+                break;
+            case 0xD1:
+                printf("  write port byte\n");
+                state = KBC_STATE_WRITE_PORT;
                 break;
             }
         } else {
@@ -177,6 +182,10 @@ void kbc_event(struct Kbc * kbc) {
                             break;
                     }
                     kbc_keyboard(kbc, 0xFA);
+                    break;
+                case KBC_STATE_WRITE_PORT:
+                    printf("  write port byte\n");
+                    state = KBC_STATE_NORMAL;
                     break;
             }
         }
