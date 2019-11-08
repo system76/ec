@@ -2,6 +2,7 @@
 
 #include <arch/delay.h>
 #include <board/kbscan.h>
+#include <board/keymap.h>
 
 void kbscan_init(void) {
     KSOCTRL = 0x05;
@@ -18,6 +19,8 @@ void kbscan_init(void) {
 }
 
 void kbscan_event(void) {
+    static int layer = 0;
+
     static uint8_t last = 0xFF;
     uint8_t new = KSI;
     if (new != last) {
@@ -43,6 +46,10 @@ void kbscan_event(void) {
             for (j = 0; j < 8; j++) {
                 if (!(ksi & (1 << j))) {
                     printf("    %d, %d\n", i, j);
+                    uint16_t key = keymap(layer, i, j);
+                    if (key) {
+                        printf("      0x%04X\n", key);
+                    }
                 }
             }
         }
