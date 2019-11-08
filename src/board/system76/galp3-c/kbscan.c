@@ -51,21 +51,7 @@ void kbscan_event(void) {
                     uint16_t key = keymap(i, j, kbscan_layer);
                     printf("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
                     if (kbscan_enabled && key) {
-                        switch (key & 0xFF00) {
-                            case K_E0:
-                                printf("  E0\n");
-                                kbc_keyboard(&KBC, 0xE0);
-                                // Fall through
-                            case 0x00:
-                                if (!new_b) {
-                                    printf("  F0\n");
-                                    kbc_keyboard(&KBC, 0xF0);
-                                }
-                                uint8_t key_byte = (uint8_t)(key & 0xFF);
-                                printf("  %02X\n", key_byte);
-                                kbc_keyboard(&KBC, key_byte);
-                                break;
-                        }
+                        kbc_key(&KBC, key, new_b);
                     }
                 }
             }

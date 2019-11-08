@@ -170,3 +170,108 @@ uint16_t keymap(int output, int input, int layer) {
         return 0;
     }
 }
+
+// This is terrible, from http://www.vetra.com/scancodes.html
+uint16_t keymap_translate(uint16_t key) {
+    switch (key) {
+        // Function keys
+
+        case K_F1: return 0x3B;
+        case K_F2: return 0x3C;
+        case K_F3: return 0x3D;
+        case K_F4: return 0x3E;
+        case K_F5: return 0x3F;
+        case K_F6: return 0x40;
+        case K_F7: return 0x41;
+        case K_F8: return 0x42;
+        case K_F9: return 0x43;
+        case K_F10: return 0x44;
+        case K_F11: return 0x57;
+        case K_F12: return 0x58;
+
+        // Number keys
+
+        case K_0: return 0x0B;
+        case K_1: return 0x02;
+        case K_2: return 0x03;
+        case K_3: return 0x04;
+        case K_4: return 0x05;
+        case K_5: return 0x06;
+        case K_6: return 0x07;
+        case K_7: return 0x08;
+        case K_8: return 0x09;
+        case K_9: return 0x0A;
+
+        // Letter keys
+
+        case K_A: return 0x1E;
+        case K_B: return 0x30;
+        case K_C: return 0x2E;
+        case K_D: return 0x20;
+        case K_E: return 0x12;
+        case K_F: return 0x21;
+        case K_G: return 0x22;
+        case K_H: return 0x23;
+        case K_I: return 0x17;
+        case K_J: return 0x24;
+        case K_K: return 0x25;
+        case K_L: return 0x26;
+        case K_M: return 0x32;
+        case K_N: return 0x31;
+        case K_O: return 0x18;
+        case K_P: return 0x19;
+        case K_Q: return 0x10;
+        case K_R: return 0x13;
+        case K_S: return 0x1F;
+        case K_T: return 0x14;
+        case K_U: return 0x16;
+        case K_V: return 0x2F;
+        case K_W: return 0x11;
+        case K_X: return 0x2D;
+        case K_Y: return 0x15;
+        case K_Z: return 0x2C;
+
+        // Special keys
+
+        case K_ESC: return 0x01;
+
+        case K_TICK: return 0x29;
+        case K_MINUS: return 0x0C;
+        case K_EQUALS: return 0x0D;
+        case K_BKSP: return 0x0E;
+
+        case K_TAB: return 0x0F;
+        case K_BRACE_OPEN: return 0x1A;
+        case K_BRACE_CLOSE: return 0x1B;
+        case K_BACKSLASH: return 0x2B;
+
+        case K_CAPS: return 0x3A;
+        case K_SEMICOLON: return 0x27;
+        case K_QUOTE: return 0x28;
+        case K_ENTER: return 0x1C;
+
+        case K_LEFT_SHIFT: return 0x2A;
+        case K_COMMA: return 0x33;
+        case K_PERIOD: return 0x34;
+        case K_SLASH: return 0x35;
+        case K_RIGHT_SHIFT: return 0x36;
+
+        case K_LEFT_CTRL: return 0x1D;
+        case K_LEFT_ALT: return 0x38;
+        case K_SPACE: return 0x39;
+        case K_RIGHT_ALT: return (K_E0 | 0x38);
+        case K_RIGHT_CTRL: return (K_E0 | 0x1D);
+
+        case K_INSERT: return (K_E0 | 0x52);
+        case K_DEL: return (K_E0 | 0x53);
+        case K_HOME: return (K_E0 | 0x47);
+        case K_END: return (K_E0 | 0x4F);
+        case K_PGUP: return (K_E0 | 0x49);
+        case K_PGDN: return (K_E0 | 0x51);
+
+        case K_UP: return (K_E0 | 0x48);
+        case K_LEFT: return (K_E0 | 0x4B);
+        case K_DOWN: return (K_E0 | 0x50);
+        case K_RIGHT: return (K_E0 | 0x4D);
+    }
+}

@@ -2,11 +2,41 @@
 
 #include <board/kbc.h>
 #include <board/kbscan.h>
+#include <board/keymap.h>
 
 void kbc_init(void) {
     // Disable interrupts
     *(KBC.irq) = 0;
     *(KBC.control) = 0;
+}
+
+// Translate from scancode set 2 to scancode set 1
+// for basically no good reason
+static bool kbc_translate = true;
+
+void kbc_key(struct Kbc * kbc, uint16_t key, bool pressed) {
+    if (kbc_translate) {
+        key = keymap_translate(key);
+    }
+    switch (key & 0xFF00) {
+        case K_E0:
+            printf("  E0\n");
+            kbc_keyboard(kbc, 0xE0);
+            key &= 0xFF;
+            // Fall through
+        case 0x00:
+            if (!pressed) {
+                if (kbc_translate) {
+                    key |= 0x80;
+                } else {
+                    printf("  F0\n");
+                    kbc_keyboard(kbc, 0xF0);
+                }
+            }
+            printf("  %02X\n", key);
+            kbc_keyboard(kbc, (uint8_t)key);
+            break;
+    }
 }
 
 enum KbcState {
@@ -108,6 +138,11 @@ void kbc_event(struct Kbc * kbc) {
                         control |= (1 << 1);
                     } else {
                         control &= ~(1 << 1);
+                    }
+                    if (data & (1 << 6)) {
+                        kbc_translate = true;
+                    } else {
+                        kbc_translate = false;
                     }
                     *kbc->control = control;
                     break;

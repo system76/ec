@@ -1,9 +1,12 @@
 #ifndef _BOARD_KBC_H
 #define _BOARD_KBC_H
 
+#include <stdbool.h>
+
 #include <ec/kbc.h>
 
 void kbc_init(void);
+void kbc_key(struct Kbc * kbc, uint16_t key, bool pressed);
 void kbc_event(struct Kbc * kbc);
 
 #endif // _BOARD_KBC_H

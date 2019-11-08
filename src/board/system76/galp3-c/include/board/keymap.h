@@ -12,6 +12,8 @@
 
 uint16_t keymap(int output, int input, int layer);
 
+uint16_t keymap_translate(uint16_t key);
+
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
 // Should send 0xE0 before scancode bytes
