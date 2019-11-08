@@ -22,6 +22,8 @@ uint8_t pmc_read(struct Pmc * pmc) {
 }
 
 void pmc_write(struct Pmc * pmc, uint8_t data) {
+    //TODO: use timeout
+    while (pmc_status(pmc) & PMC_STS_OBF) {}
     *(pmc->data_out) = data;
 }
 
@@ -42,6 +44,7 @@ void pmc_event(struct Pmc * pmc) {
         if (sts & PMC_STS_CMD) {
             printf("pmc cmd: %02X\n", data);
 
+            state = PMC_STATE_DEFAULT;
             switch (data) {
             case 0x80:
                 state = PMC_STATE_ACPI_READ;
@@ -49,8 +52,19 @@ void pmc_event(struct Pmc * pmc) {
             case 0x81:
                 state = PMC_STATE_ACPI_WRITE;
                 break;
-            default:
-                state = PMC_STATE_DEFAULT;
+            case 0x82:
+                printf("  burst enable\n");
+                // TODO: figure out what burst is
+                pmc_write(pmc, 0x90);
+                break;
+            case 0x83:
+                printf("  burst disable\n");
+                // TODO: figure out what burst is
+                break;
+            case 0x84:
+                printf("  SCI queue\n");
+                // TODO: queue is always empty
+                pmc_write(pmc, 0);
                 break;
             }
         } else {
