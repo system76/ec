@@ -41,15 +41,11 @@ void kbscan_event(void) {
 
             uint8_t ksi = KSI;
 
-            printf("  %d: %02X\n", i, ksi);
             int j;
             for (j = 0; j < 8; j++) {
                 if (!(ksi & (1 << j))) {
-                    printf("    %d, %d\n", i, j);
-                    uint16_t key = keymap(layer, i, j);
-                    if (key) {
-                        printf("      0x%04X\n", key);
-                    }
+                    uint16_t key = keymap(i, j, layer);
+                    printf("  %d, %d, %d = 0x%04X\n", i, j, layer, key);
                 }
             }
         }
