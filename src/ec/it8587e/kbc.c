@@ -28,12 +28,14 @@ static bool kbc_wait(struct Kbc * kbc, int timeout) {
 
 bool kbc_keyboard(struct Kbc * kbc, uint8_t data, int timeout) {
     if (!kbc_wait(kbc, timeout)) return false;
+    *(kbc->status) &= ~0x20;
     *(kbc->keyboard_out) = data;
     return true;
 }
 
 bool kbc_mouse(struct Kbc * kbc, uint8_t data, int timeout) {
     if (!kbc_wait(kbc, timeout)) return false;
+    *(kbc->status) |= 0x20;
     *(kbc->mouse_out) = data;
     return true;
 }
