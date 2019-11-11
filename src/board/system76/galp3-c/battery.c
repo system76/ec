@@ -99,9 +99,9 @@ void battery_debug(void) {
         err = smbus_read(A, V, &data); \
         if (err) { \
             printf("ERROR %02X\n", err); \
-            return; \
+        } else { \
+            printf("%04X\n", data); \
         } \
-        printf("%04X\n", data); \
     }
 
     printf("Battery:\n");
