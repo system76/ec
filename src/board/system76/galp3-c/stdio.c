@@ -4,7 +4,7 @@
 
 void i2c_write(unsigned char value) {
     // Write value to 0x76
-    TRASLAA = 0x76 << 1;
+    TRASLAA = 0xEC; // 0x76 << 1
     HOCMDA = value;
 
     for (;;) {

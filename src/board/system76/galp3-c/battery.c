@@ -69,6 +69,8 @@ uint8_t battery_charger_disable(void) {
     // Disable charge voltage
     err = smbus_write(0x09, 0x15, 0);
     if (err) return err;
+
+    return 0;
 }
 
 uint8_t battery_charger_enable(void) {

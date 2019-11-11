@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <board/keymap.h>
 
 uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
@@ -276,5 +278,9 @@ uint16_t keymap_translate(uint16_t key) {
         case K_LEFT: return (K_E0 | 0x4B);
         case K_DOWN: return (K_E0 | 0x50);
         case K_RIGHT: return (K_E0 | 0x4D);
+
+        default:
+            printf("keymap_translate: unknown %02X\n", key);
+            return 0;
     }
 }

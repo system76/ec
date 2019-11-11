@@ -12,7 +12,7 @@ void gpio_init() {
     GPDRC = 0;
     GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
     GPDRE = 0;
-    GPDRF = (1 << 7) | (1 << 6);
+    GPDRF = 0xC0; // (1 << 7) | (1 << 6)
     GPDRG = 0;
     GPDRH = 0;
     GPDRI = 0;
