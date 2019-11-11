@@ -174,6 +174,8 @@ uint16_t keymap(int output, int input, int layer) {
 }
 
 // This is terrible, from http://www.vetra.com/scancodes.html
+// TODO: redo by applying transform at lower level as recommended by:
+// https://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html#ss10.3
 uint16_t keymap_translate(uint16_t key) {
     switch (key) {
         // Function keys

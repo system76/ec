@@ -14,14 +14,20 @@ void kbc_init(void) {
 
 // System flag
 static bool kbc_system = false;
+// Enable first port - TODO
+static bool kbc_first = false;
+// Enable second port - TODO
+static bool kbc_second = false;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
 
 bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed) {
+    if (!kbc_first) return true;
     if (kbc_translate) {
         key = keymap_translate(key);
     }
+    if (!key) return true;
     switch (key & 0xFF00) {
         case K_E0:
             printf("  E0\n");
@@ -50,6 +56,9 @@ enum KbcState {
     KBC_STATE_SET_LEDS,
     KBC_STATE_SCANCODE,
     KBC_STATE_WRITE_PORT,
+    KBC_STATE_FIRST_PORT_OUTPUT,
+    KBC_STATE_SECOND_PORT_OUTPUT,
+    KBC_STATE_SECOND_PORT_INPUT,
 };
 
 void kbc_event(struct Kbc * kbc) {
@@ -70,6 +79,12 @@ void kbc_event(struct Kbc * kbc) {
                 if (kbc_system) {
                     config |= (1 << 2);
                 }
+                if (!kbc_first) {
+                    config |= (1 << 4);
+                }
+                if (!kbc_second) {
+                    config |= (1 << 5);
+                }
                 if (kbc_translate) {
                     config |= (1 << 6);
                 }
@@ -81,9 +96,16 @@ void kbc_event(struct Kbc * kbc) {
                 break;
             case 0xA7:
                 printf("  disable second port\n");
+                kbc_second = false;
                 break;
             case 0xA8:
                 printf("  enable second port\n");
+                kbc_second = true;
+                break;
+            case 0xA9:
+                printf("  test second port\n");
+                // TODO: communicate with touchpad?
+                kbc_keyboard(kbc, 0x00, KBC_TIMEOUT);
                 break;
             case 0xAA:
                 printf("  test controller\n");
@@ -97,13 +119,27 @@ void kbc_event(struct Kbc * kbc) {
                 break;
             case 0xAD:
                 printf("  disable first port\n");
+                kbc_first = false;
                 break;
             case 0xAE:
                 printf("  enable first port\n");
+                kbc_first = true;
                 break;
             case 0xD1:
                 printf("  write port byte\n");
                 state = KBC_STATE_WRITE_PORT;
+                break;
+            case 0xD2:
+                printf("  write first port output\n");
+                state = KBC_STATE_FIRST_PORT_OUTPUT;
+                break;
+            case 0xD3:
+                printf("  write second port output\n");
+                state = KBC_STATE_SECOND_PORT_OUTPUT;
+                break;
+            case 0xD4:
+                printf("  write second port input\n");
+                state = KBC_STATE_SECOND_PORT_INPUT;
                 break;
             }
         } else {
@@ -127,6 +163,14 @@ void kbc_event(struct Kbc * kbc) {
                             printf("    get/set scancode\n");
                             state = KBC_STATE_SCANCODE;
                             kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
+                            break;
+                        case 0xF2:
+                            printf("    identify keyboard\n");
+                            if (kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT)) {
+                                if (kbc_keyboard(kbc, 0xAB, KBC_TIMEOUT)) {
+                                    kbc_keyboard(kbc, 0x83, KBC_TIMEOUT);
+                                }
+                            }
                             break;
                         case 0xF4:
                             printf("    enable scanning\n");
@@ -161,16 +205,10 @@ void kbc_event(struct Kbc * kbc) {
                     } else {
                         control &= ~(1 << 1);
                     }
-                    if (data & (1 << 2)) {
-                        kbc_system = true;
-                    } else {
-                        kbc_system = false;
-                    }
-                    if (data & (1 << 6)) {
-                        kbc_translate = true;
-                    } else {
-                        kbc_translate = false;
-                    }
+                    kbc_system = (bool)(data & (1 << 2));
+                    kbc_first = (bool)(!(data & (1 << 4)));
+                    kbc_second = (bool)(!(data & (1 << 5)));
+                    kbc_translate = (bool)(data & (1 << 6));
                     *kbc->control = control;
                     break;
                 case KBC_STATE_SET_LEDS:
@@ -191,6 +229,21 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_WRITE_PORT:
                     printf("  write port byte\n");
                     state = KBC_STATE_NORMAL;
+                    break;
+                case KBC_STATE_FIRST_PORT_OUTPUT:
+                    printf("  write first port output\n");
+                    state = KBC_STATE_NORMAL;
+                    kbc_keyboard(kbc, data, KBC_TIMEOUT);
+                    break;
+                case KBC_STATE_SECOND_PORT_OUTPUT:
+                    printf("  write second port output\n");
+                    state = KBC_STATE_NORMAL;
+                    kbc_mouse(kbc, data, KBC_TIMEOUT);
+                    break;
+                case KBC_STATE_SECOND_PORT_INPUT:
+                    printf("  write second port input\n");
+                    state = KBC_STATE_NORMAL;
+                    // TODO: mouse commands (write to touchpad?)
                     break;
             }
         }
