@@ -56,7 +56,7 @@ void ac_adapter() {
     static struct Gpio __code ACIN_N = GPIO(B, 6);
     static struct Gpio __code LED_ACIN = GPIO(C, 7);
 
-    static bool last = false;
+    static bool last = true;
 
     // Check if the adapter line goes low
     bool new = gpio_get(&ACIN_N);
@@ -68,9 +68,12 @@ void ac_adapter() {
         printf("Power adapter ");
         if (new) {
             printf("unplugged\n");
+            battery_charger_disable();
         } else {
             printf("plugged in\n");
+            battery_charger_enable();
         }
+        battery_debug();
     }
 
     last = new;
@@ -122,7 +125,7 @@ void power_button() {
 
             // Enable battery charger - also provides correct power levels for
             // system boot sourced from the AC adapter
-            //battery_charger_enable();
+            // battery_charger_enable();
 
             // Make sure VCCDSW is stable for at least 10 ms (tPCH02)
             delay_ms(10 + 5);
@@ -252,7 +255,7 @@ void power_button() {
             delay_ms(1);
 
             // Disable battery charger
-            //battery_charger_disable();
+            // battery_charger_disable();
         }
 
         printf("LED_PWR: %d\n", power);
@@ -266,7 +269,7 @@ void power_button() {
         printf("ALL_SYS_PWRGD: %d\n", gpio_get(&ALL_SYS_PWRGD));
         printf("BUF_PLT_RST_N: %d\n", gpio_get(&BUF_PLT_RST_N));
 
-        //battery_debug();
+        // battery_debug();
     }
 
     last = new;
