@@ -1,5 +1,5 @@
 CC=avr-gcc -mmcu=$(EC)
-CFLAGS+=-Os -fstack-usage -Wall -Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
+CFLAGS+=-Os -fstack-usage -Wall -Werror -Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
 OBJ=$(patsubst src/%.c,$(BUILD)/%.o,$(SRC))
 
 # Run EC rom in simulator
