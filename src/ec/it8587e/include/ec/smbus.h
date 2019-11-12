@@ -40,7 +40,7 @@ volatile uint8_t __xdata __at(0x1C0F) NDHBA;
 // Host control 2 for channel A
 volatile uint8_t __xdata __at(0x1C10) HOCTL2A;
 // SMCLK timing setting for channel A
-volatile uint8_t __xdata __at(0x1C10) SCLKTSA;
+volatile uint8_t __xdata __at(0x1C40) SCLKTSA;
 
 // Timing registers
 volatile uint8_t __xdata __at(0x1C22) SMB4P7USL;
