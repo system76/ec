@@ -40,7 +40,7 @@ uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
     D0REGA = (uint8_t)data;
     D1REGA = (uint8_t)(data >> 8);
 
-    // Start read word command
+    // Start write word command
     HOCTLA = (1 << 6) | (0b011 << 2);
 
     // Wait for command to start
