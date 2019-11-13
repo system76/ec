@@ -88,9 +88,9 @@ static int i2c_transaction(uint8_t * data, int length, bool read) {
             HOSTAA = HOSTAA;
         } else
         // If we are waiting on direction switch
-        if (HOCTLA & (1 << 2)) {
+        if (HOCTL2A & (1 << 2)) {
             // Complete direction switch
-            HOCTLA &= ~(1 << 2);
+            HOCTL2A &= ~(1 << 2);
         } else {
             // Start new transaction
             HOCTLA = (1 << 6) | (0b111 << 2);
