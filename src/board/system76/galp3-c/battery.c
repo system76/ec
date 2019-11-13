@@ -1,62 +1,15 @@
 #include <stdio.h>
 
-#include <board/smbus.h>
+#include <ec/i2c.h>
 
 uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
-    // Read value from address
-    TRASLAA = (address << 1) | (1 << 0);
-    HOCMDA = command;
-
-    // Start read word command
-    HOCTLA = (1 << 6) | (0b011 << 2);
-
-    // Wait for command to start
-    while (!(HOSTAA & 1)) {}
-
-    // Wait for command to finish
-    while (HOSTAA & 1) {}
-
-    // Read and clear status
-    uint8_t status = HOSTAA;
-    HOSTAA = status;
-
-    // If there were no errors, set value and return 0
-    uint8_t error = (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
-    if (!(status & error)) {
-        *data = ((uint16_t)D0REGA) |
-                ((uint16_t)D1REGA << 8);
-        return 0;
-    } else {
-        //TODO: custom error type or flags for errors
-        return (status & error);
-    }
+    if (i2c_write(address, &command, 1)) return 1;
+    return i2c_read(address, (uint8_t *)data, 2);
 }
 
 uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
-    // Write value to address
-    TRASLAA = (address << 1);
-    HOCMDA = command;
-
-    D0REGA = (uint8_t)data;
-    D1REGA = (uint8_t)(data >> 8);
-
-    // Start write word command
-    HOCTLA = (1 << 6) | (0b011 << 2);
-
-    // Wait for command to start
-    while (!(HOSTAA & 1)) {}
-
-    // Wait for command to finish
-    while (HOSTAA & 1) {}
-
-    // Read and clear status
-    uint8_t status = HOSTAA;
-    HOSTAA = status;
-
-    // If there were no errors, set value and return 0
-    uint8_t error = (1 << 6) | (1 << 5) | (1 << 4) | (1 << 3) | (1 << 2);
-    //TODO: custom error type or flags for errors
-    return (status & error);
+    if (i2c_write(address, &command, 1)) return 1;
+    return i2c_write(address, &data, 2);
 }
 
 uint8_t battery_charger_disable(void) {

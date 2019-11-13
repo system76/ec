@@ -19,5 +19,5 @@ void smbus_init(void) {
     SCLKTSA = 1;
 
     // Enable host interface
-    HOCTL2A = 1 << 0;
+    HOCTL2A = 1;
 }
