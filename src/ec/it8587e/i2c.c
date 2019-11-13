@@ -5,7 +5,7 @@
 #include <ec/smbus.h>
 
 //TODO: find best value
-#define TIMEOUT (F_CPU/1000)
+#define I2C_TIMEOUT (F_CPU/1000)
 
 #define HOSTA_BYTE_DONE (1 << 7)
 #define HOSTA_TIMEOUT (1 << 6)
@@ -18,10 +18,12 @@
 #define HOSTA_ERR (HOSTA_TIMEOUT | HOSTA_NACK | HOSTA_FAIL | HOSTA_BUS_ERR | HOSTA_DEV_ERR)
 
 void i2c_reset(bool kill) {
-    // Set kill bit
-    if (kill) HOCTLA |= (1 << 1);
-    // Wait for host to finish
-    while (HOSTAA & HOSTA_BUSY) {}
+    if (HOSTAA & HOSTA_BUSY) {
+        // Set kill bit
+        if (kill) HOCTLA |= (1 << 1);
+        // Wait for host to finish
+        while (HOSTAA & HOSTA_BUSY) {}
+    }
     // Clear status register
     HOSTAA = HOSTAA;
     // Clear current command
@@ -39,9 +41,6 @@ int i2c_start(uint8_t addr, bool read) {
             if (read) {
                 // Enable direction switch
                 HOCTL2A |= (1 << 3) | (1 << 2);
-
-                // Clear status to start switch process
-                HOSTAA = HOSTAA;
             } else {
                 // Unsupported!
                 i2c_reset(true);
@@ -49,6 +48,8 @@ int i2c_start(uint8_t addr, bool read) {
             }
         }
     } else {
+        i2c_reset(true);
+
         // Enable host controller with i2c compatibility
         HOCTL2A = (1 << 1) | 1;
 
@@ -86,35 +87,37 @@ static int i2c_transaction(uint8_t * data, int length, bool read) {
         if (HOSTAA & HOSTA_BYTE_DONE) {
             // Clear status to process next byte
             HOSTAA = HOSTAA;
-        } else
+        } else {
+            // Start new transaction
+            HOCTLA = (1 << 6) | (0b111 << 2) | 1;
+        }
+
         // If we are waiting on direction switch
         if (HOCTL2A & (1 << 2)) {
             // Complete direction switch
             HOCTL2A &= ~(1 << 2);
-        } else {
-            // Start new transaction
-            HOCTLA = (1 << 6) | (0b111 << 2);
         }
 
         // Wait for byte done, timeout, or error
-        // uint32_t timeout;
-        // for(timeout = TIMEOUT; timeout > 0; timeout--) {
-        for(;;) {
-            uint8_t status = HOSTAA;
-            if (status & HOSTA_BYTE_DONE) {
-                // If byte is finished, break
-                break;
-            } else if (status & HOSTA_ERR) {
-                // If error occured, kill transaction and return error
+        uint8_t status;
+        uint32_t timeout = I2C_TIMEOUT;
+        for(timeout = I2C_TIMEOUT; timeout > 0; timeout--) {
+            status = HOSTAA;
+            // If error occured, kill transaction and return error
+            if (status & HOSTA_ERR) {
                 i2c_reset(true);
-                return -(int)(status & HOSTA_ERR);
+                return -(int)(status);
+            } else
+            // If byte done, break
+            if (status & HOSTA_BYTE_DONE) {
+                break;
             }
         }
-        // if (timeout == 0) {
-        //     // If timeout occured, kill transaction and return error
-        //     i2c_reset(true);
-        //     return -1;
-        // }
+        // If timeout occured, kill transaction and return error
+        if (timeout == 0) {
+            i2c_reset(true);
+            return -(0x1000 | (int)status);
+        }
 
         if (read) {
             // Read byte
