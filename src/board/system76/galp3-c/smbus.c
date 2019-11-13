@@ -1,4 +1,5 @@
 #include <board/smbus.h>
+#include <ec/i2c.h>
 
 void smbus_init(void) {
     // 9.2 MHz * 4.7 us = 43.24
@@ -17,4 +18,7 @@ void smbus_init(void) {
 
     // Clock set to 50 Hz
     SCLKTSA = 1;
+
+    // Set up for i2c usage
+    i2c_reset(true);
 }
