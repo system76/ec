@@ -6,8 +6,6 @@
 #include <board/keymap.h>
 
 bool kbscan_enabled = false;
-uint8_t kbscan_layer = 0;
-uint8_t __pdata kbscan_last[KM_OUT] = { 0 };
 
 void kbscan_init(void) {
     KSOCTRL = 0x05;
@@ -24,6 +22,9 @@ void kbscan_init(void) {
 }
 
 void kbscan_event(void) {
+    static uint8_t kbscan_layer = 0;
+    static uint8_t __pdata kbscan_last[KM_OUT] = { 0 };
+
     int i;
     for (i = 0; i < KM_OUT; i++) {
         KSOL = 0xFF;
