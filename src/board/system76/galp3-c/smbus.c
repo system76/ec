@@ -17,7 +17,4 @@ void smbus_init(void) {
 
     // Clock set to 50 Hz
     SCLKTSA = 1;
-
-    // Enable host interface
-    HOCTL2A = 1;
 }
