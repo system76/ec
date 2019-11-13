@@ -16,8 +16,8 @@ void smbus_init(void) {
     SMB45P3USL = 0xA1;
     SMB45P3USH = 0x01;
 
-    // Clock set to 50 Hz
-    SCLKTSA = 1;
+    // Clock set to 50 KHz
+    // SCLKTSA = 1;
 
     // Set up for i2c usage
     i2c_reset(true);

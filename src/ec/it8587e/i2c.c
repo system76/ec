@@ -5,7 +5,7 @@
 #include <ec/smbus.h>
 
 //TODO: find best value
-#define I2C_TIMEOUT (F_CPU/1000)
+#define I2C_TIMEOUT 1000
 
 #define HOSTA_BYTE_DONE (1 << 7)
 #define HOSTA_TIMEOUT (1 << 6)
@@ -89,7 +89,7 @@ static int i2c_transaction(uint8_t * data, int length, bool read) {
             HOSTAA = HOSTAA;
         } else {
             // Start new transaction
-            HOCTLA = (1 << 6) | (0b111 << 2) | 1;
+            HOCTLA = (1 << 6) | (0b111 << 2);
         }
 
         // If we are waiting on direction switch
