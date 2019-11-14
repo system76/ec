@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#include <board/i2c.h>
+#include <common/i2c.h>
 
 uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
     return i2c_get(address, command, (uint8_t *)data, 2);
