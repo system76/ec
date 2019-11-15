@@ -2,23 +2,23 @@
 
 #include <common/i2c.h>
 
-uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
+int smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
     return i2c_get(address, command, (uint8_t *)data, 2);
 }
 
-uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
+int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
     return i2c_set(address, command, (uint8_t *)&data, 2);
 }
 
 void battery_debug(void) {
     uint16_t data = 0;
-    uint8_t err = 0;
+    int res = 0;
 
     #define command(N, A, V) { \
         printf(#N ": "); \
-        err = smbus_read(A, V, &data); \
-        if (err) { \
-            printf("ERROR %02X\n", err); \
+        res = smbus_read(A, V, &data); \
+        if (res < 0) { \
+            printf("ERROR %04X\n", -res); \
         } else { \
             printf("%04X\n", data); \
         } \

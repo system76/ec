@@ -2,56 +2,54 @@
 
 #include <ec/i2c.h>
 
-uint8_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
-    if (i2c_write(address, &command, 1)) return 1;
-    return i2c_read(address, (uint8_t *)data, 2);
+int smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
+    return i2c_get(address, command, (uint8_t *)data, 2);
 }
 
-uint8_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
-    if (i2c_write(address, &command, 1)) return 1;
-    return i2c_write(address, &data, 2);
+int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
+    return i2c_set(address, command, (uint8_t *)&data, 2);
 }
 
-uint8_t battery_charger_disable(void) {
-    uint8_t err = 0;
+int battery_charger_disable(void) {
+    int res = 0;
 
     // Disable charge current
-    err = smbus_write(0x09, 0x14, 0);
-    if (err) return err;
+    res = smbus_write(0x09, 0x14, 0);
+    if (res < 0) return res;
 
     // Disable charge voltage
-    err = smbus_write(0x09, 0x15, 0);
-    if (err) return err;
+    res = smbus_write(0x09, 0x15, 0);
+    if (res < 0) return res;
 
     return 0;
 }
 
-uint8_t battery_charger_enable(void) {
-    uint8_t err = 0;
+int battery_charger_enable(void) {
+    int res = 0;
 
-    err = battery_charger_disable();
-    if (err) return err;
+    res = battery_charger_disable();
+    if (res < 0) return res;
 
     // Set charge current to ~1.5 A
-    err = smbus_write(0x09, 0x14, 0x0600);
-    if (err) return err;
+    res = smbus_write(0x09, 0x14, 0x0600);
+    if (res < 0) return res;
 
     // Set charge voltage to ~13 V
-    err = smbus_write(0x09, 0x15, 0x3300);
-    if (err) return err;
+    res = smbus_write(0x09, 0x15, 0x3300);
+    if (res < 0) return res;
 
     return 0;
 }
 
 void battery_debug(void) {
     uint16_t data = 0;
-    uint8_t err = 0;
+    int res = 0;
 
     #define command(N, A, V) { \
         printf(#N ": "); \
-        err = smbus_read(A, V, &data); \
-        if (err) { \
-            printf("ERROR %02X\n", err); \
+        res = smbus_read(A, V, &data); \
+        if (res < 0) { \
+            printf("ERROR %04X\n", -res); \
         } else { \
             printf("%04X\n", data); \
         } \
