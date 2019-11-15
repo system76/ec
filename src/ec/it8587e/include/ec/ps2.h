@@ -14,6 +14,9 @@ extern struct Ps2 __code PS2_1;
 extern struct Ps2 __code PS2_2;
 extern struct Ps2 __code PS2_3;
 
+int ps2_read(struct Ps2 * ps2, uint8_t * data, int length); 
+int ps2_write(struct Ps2 * ps2, uint8_t * data, int length);
+
 volatile uint8_t __xdata __at(0x1700) PSCTL1;
 volatile uint8_t __xdata __at(0x1701) PSCTL2;
 volatile uint8_t __xdata __at(0x1702) PSCTL3;

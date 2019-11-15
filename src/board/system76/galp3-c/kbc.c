@@ -3,6 +3,7 @@
 #include <board/kbc.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
+#include <ec/ps2.h>
 
 void kbc_init(void) {
     // Disable interrupts
@@ -15,9 +16,9 @@ void kbc_init(void) {
 // System flag
 static bool kbc_system = false;
 // Enable first port - TODO
-static bool kbc_first = false;
+bool kbc_first = false;
 // Enable second port - TODO
-static bool kbc_second = false;
+bool kbc_second = false;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
@@ -243,7 +244,7 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_SECOND_PORT_INPUT:
                     printf("  write second port input\n");
                     state = KBC_STATE_NORMAL;
-                    // TODO: mouse commands (write to touchpad?)
+                    ps2_write(&PS2_3, &data, 1);
                     break;
             }
         }
