@@ -63,8 +63,8 @@ void gpio_init() {
     GPCRF1 = 0x44;
     GPCRF2 = 0x84;
     GPCRF3 = 0x44;
-    GPCRF4 = 0x80;
-    GPCRF5 = 0x80;
+    GPCRF4 = 0x00;
+    GPCRF5 = 0x00;
     GPCRF6 = 0x00;
     GPCRF7 = 0x80;
     GPCRG0 = 0x44;

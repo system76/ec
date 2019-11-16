@@ -371,7 +371,7 @@ void main(void) {
         ac_adapter();
         power_button();
         kbscan_event();
-        //TODO: touchpad_event(&PS2_3);
+        touchpad_event(&PS2_3);
         kbc_event(&KBC);
         pmc_event(&PMC_1);
     }
