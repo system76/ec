@@ -16,8 +16,8 @@ void pwm_init(void) {
     // Set cycle time to 255 + 1
     CTR0 = 255;
 
-    // Turn on the CPU fan at half blast (temperature control TODO)
-    DCR2 = 128;
+    // Turn off CPU fan (temperature control in peci_event)
+    DCR2 = 0;
 
     // Enable PWM
     ZTIER = (1 << 1);

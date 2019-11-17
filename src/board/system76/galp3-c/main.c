@@ -49,7 +49,85 @@ void init(void) {
 
     //TODO: INTC, PECI
 
-    // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
+    // Allow PECI pin to be used
+    GCR2 |= (1 << 4);
+}
+
+// PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
+void peci_event(void) {
+    static volatile uint8_t __xdata __at(0x3000) HOSTAR;
+    static volatile uint8_t __xdata __at(0x3001) HOCTLR;
+    static volatile uint8_t __xdata __at(0x3002) HOCMDR;
+    static volatile uint8_t __xdata __at(0x3003) HOTRADDR;
+    static volatile uint8_t __xdata __at(0x3004) HOWRLR;
+    static volatile uint8_t __xdata __at(0x3005) HORDLR;
+    static volatile uint8_t __xdata __at(0x3006) HOWRDR;
+    static volatile uint8_t __xdata __at(0x3007) HORDDR;
+    static volatile uint8_t __xdata __at(0x3008) HOCTL2R;
+    static volatile uint8_t __xdata __at(0x3009) RWFCSV;
+
+    // Wait for completion
+    while (HOSTAR & 1) {}
+    // Clear status
+    HOSTAR = HOSTAR;
+
+    // Enable PECI, clearing data fifo's
+    HOCTLR = (1 << 5) | (1 << 3);
+    // Set address to default
+    HOTRADDR = 0x30;
+    // Set write length
+    HOWRLR = 1;
+    // Set read length
+    HORDLR = 2;
+    // Set command
+    HOCMDR = 1;
+    // Start transaction
+    HOCTLR |= 1;
+
+    // Wait for completion
+    while (HOSTAR & 1) {}
+
+    if (HOSTAR & (1 << 1)) {
+        // Use result if finished successfully
+        uint8_t low = HORDDR;
+        uint8_t high = HORDDR;
+        int16_t offset = ((int16_t)high << 8) | (int16_t)low;
+
+        // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
+        #define T_JUNCTION 10000
+        int16_t temp = T_JUNCTION + offset;
+
+        // Set fan based on temp, adapted from
+        // https://github.com/pop-os/system76-power/blob/master/src/fan.rs#L218
+        uint8_t duty = 0;
+        if (temp >= 9000) {
+            // 90C = 100%
+            duty = 255;
+        } else if (temp >= 8000) {
+            // 80C = 50%
+            duty = 128;
+        } else if (temp >= 7500) {
+            // 75C = 45%
+            duty = 115;
+        } else if (temp >= 6500) {
+            // 65C = 40%
+            duty = 102;
+        } else if (temp >= 5500) {
+            // 55C = 35%
+            duty = 90;
+        } else if (temp >= 4500) {
+            // 45C = 30%
+            duty = 77;
+        }
+
+        if (duty != DCR2) {
+            DCR2 = duty;
+            printf("PECI offset=%d, temp=%d = %d\n", offset, temp, duty);
+        }
+    } else {
+        // Default to 50% if there is an error
+        DCR2 = 128;
+    }
 }
 
 void ac_adapter() {
@@ -368,6 +446,7 @@ void main(void) {
     printf("Hello from System76 EC for %s!\n", xstr(__BOARD__));
 
     for(;;) {
+        peci_event();
         ac_adapter();
         power_button();
         kbscan_event();
