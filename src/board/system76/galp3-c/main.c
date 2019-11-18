@@ -403,7 +403,7 @@ void touchpad_event(struct Ps2 * ps2) {
     *(ps2->status) = status;
     if (status & (1 << 3)) {
         uint8_t data = *(ps2->data);
-        printf("touchpad: %02X\n", data);
+        //printf("touchpad: %02X\n", data);
         kbc_mouse(&KBC, data, 1000);
     }
 }
