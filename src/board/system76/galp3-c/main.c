@@ -422,13 +422,17 @@ void main(void) {
     static struct Gpio __code SCI_N =           GPIO(D, 4);
     static struct Gpio __code SWI_N =           GPIO(E, 0);
     static struct Gpio __code SB_KBCRST_N =     GPIO(E, 6);
+    static struct Gpio __code BT_EN =           GPIO(F, 3);
     static struct Gpio __code PM_CLKRUN_N =     GPIO(H, 0);
     static struct Gpio __code BKL_EN =          GPIO(H, 2);
+    static struct Gpio __code WLAN_EN =         GPIO(H, 5);
 
     // Set the battery full LED (to know our firmware is loading)
     gpio_set(&LED_BAT_CHG, true);
 
+#if GPIO_DEBUG
     gpio_debug();
+#endif
 
     //battery_debug();
 
@@ -436,6 +440,9 @@ void main(void) {
     gpio_set(&SB_KBCRST_N, true);
     // Allow backlight to be turned on
     gpio_set(&BKL_EN, true);
+    // Enable wireless
+    gpio_set(&BT_EN, true);
+    gpio_set(&WLAN_EN, true);
     // Assert SMI#, SCI#, and SWI#
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);

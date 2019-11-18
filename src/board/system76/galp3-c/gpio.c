@@ -80,7 +80,7 @@ void gpio_init() {
     GPCRH2 = 0x44;
     GPCRH3 = 0x44;
     GPCRH4 = 0x80;
-    GPCRH5 = 0x80;
+    GPCRH5 = 0x44;
     GPCRH6 = 0x80;
     GPCRH7 = 0x80;
     GPCRI0 = 0x00;
@@ -108,6 +108,7 @@ void gpio_init() {
     GPCRM6 = 0x00;
 }
 
+#if GPIO_DEBUG
 void gpio_debug_bank(
     char * bank,
     uint8_t data,
@@ -142,3 +143,4 @@ void gpio_debug(void) {
     bank(J);
     #undef bank
 }
+#endif
