@@ -426,6 +426,7 @@ void main(void) {
     static struct Gpio __code PM_CLKRUN_N =     GPIO(H, 0);
     static struct Gpio __code BKL_EN =          GPIO(H, 2);
     static struct Gpio __code WLAN_EN =         GPIO(H, 5);
+    static struct Gpio __code WLAN_PWR_EN =     GPIO(J, 4);
 
     // Set the battery full LED (to know our firmware is loading)
     gpio_set(&LED_BAT_CHG, true);
@@ -434,8 +435,6 @@ void main(void) {
     gpio_debug();
 #endif
 
-    //battery_debug();
-
     // Allow CPU to boot
     gpio_set(&SB_KBCRST_N, true);
     // Allow backlight to be turned on
@@ -443,6 +442,7 @@ void main(void) {
     // Enable wireless
     gpio_set(&BT_EN, true);
     gpio_set(&WLAN_EN, true);
+    gpio_set(&WLAN_PWR_EN, true);
     // Assert SMI#, SCI#, and SWI#
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
