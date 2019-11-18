@@ -452,7 +452,7 @@ void main(void) {
         peci_event();
         ac_adapter();
         power_button();
-        //kbscan_event();
+        kbscan_event();
         touchpad_event(&PS2_3);
         kbc_event(&KBC);
         pmc_event(&PMC_1);
