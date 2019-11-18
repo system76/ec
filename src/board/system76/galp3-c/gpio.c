@@ -1,6 +1,5 @@
-#include <stdio.h>
-
 #include <board/gpio.h>
+#include <common/debug.h>
 
 void gpio_init() {
     // Enable LPC reset on GPD2
@@ -117,7 +116,7 @@ void gpio_debug_bank(
     volatile uint8_t * control
 ) {
     for(char i = 0; i < 8; i++) {
-        printf(
+        DEBUG(
             "%s%d:\n\tdata %d\n\tmirror %d\n\tpot %d\n\tcontrol %02X\n",
             bank,
             i,

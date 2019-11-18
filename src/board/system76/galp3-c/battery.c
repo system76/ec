@@ -1,5 +1,4 @@
-#include <stdio.h>
-
+#include <common/debug.h>
 #include <common/i2c.h>
 
 int smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
@@ -46,22 +45,22 @@ void battery_debug(void) {
     int res = 0;
 
     #define command(N, A, V) { \
-        printf(#N ": "); \
+        DEBUG(#N ": "); \
         res = smbus_read(A, V, &data); \
         if (res < 0) { \
-            printf("ERROR %04X\n", -res); \
+            DEBUG("ERROR %04X\n", -res); \
         } else { \
-            printf("%04X\n", data); \
+            DEBUG("%04X\n", data); \
         } \
     }
 
-    printf("Battery:\n");
+    DEBUG("Battery:\n");
     command(Temperature, 0x0B, 0x08);
     command(Voltage, 0x0B, 0x09);
     command(Current, 0x0B, 0x0A);
     command(Charge, 0x0B, 0x0D);
 
-    printf("Charger:\n");
+    DEBUG("Charger:\n");
     command(ChargeOption0, 0x09, 0x12);
     command(ChargeOption1, 0x09, 0x3B);
     command(ChargeOption2, 0x09, 0x38);

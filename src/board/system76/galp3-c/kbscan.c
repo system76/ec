@@ -1,9 +1,8 @@
-#include <stdio.h>
-
 #include <arch/delay.h>
 #include <board/kbc.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
+#include <common/debug.h>
 
 bool kbscan_enabled = false;
 
@@ -50,7 +49,7 @@ void kbscan_event(void) {
                 bool last_b = last & (1 << j);
                 if (new_b != last_b) {
                     uint16_t key = keymap(i, j, kbscan_layer);
-                    printf("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                    TRACE("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
                     if (kbscan_enabled && key) {
                         kbc_scancode(&KBC, key, new_b);
                     }

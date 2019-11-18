@@ -1,6 +1,5 @@
-#include <stdio.h>
-
 #include <board/acpi.h>
+#include <common/debug.h>
 #include <ec/pmc.h>
 
 #define PMC(NUM) { \
@@ -52,7 +51,7 @@ void pmc_event(struct Pmc * pmc) {
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
-            printf("pmc cmd: %02X\n", data);
+            DEBUG("pmc cmd: %02X\n", data);
 
             state = PMC_STATE_DEFAULT;
             switch (data) {
@@ -63,22 +62,22 @@ void pmc_event(struct Pmc * pmc) {
                 state = PMC_STATE_ACPI_WRITE;
                 break;
             case 0x82:
-                printf("  burst enable\n");
+                DEBUG("  burst enable\n");
                 // TODO: figure out what burst is
                 pmc_write(pmc, 0x90, PMC_TIMEOUT);
                 break;
             case 0x83:
-                printf("  burst disable\n");
+                DEBUG("  burst disable\n");
                 // TODO: figure out what burst is
                 break;
             case 0x84:
-                printf("  SCI queue\n");
+                DEBUG("  SCI queue\n");
                 // TODO: queue is always empty
                 pmc_write(pmc, 0, PMC_TIMEOUT);
                 break;
             }
         } else {
-            printf("pmc data: %02X\n", data);
+            DEBUG("pmc data: %02X\n", data);
 
             switch (state) {
             case PMC_STATE_ACPI_READ:
