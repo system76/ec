@@ -3,6 +3,16 @@
 
 #include <stdint.h>
 
+#define HOSTA_BYTE_DONE (1 << 7)
+#define HOSTA_TIMEOUT (1 << 6)
+#define HOSTA_NACK (1 << 5)
+#define HOSTA_FAIL (1 << 4)
+#define HOSTA_BUS_ERR (1 << 3)
+#define HOSTA_DEV_ERR (1 << 2)
+#define HOSTA_FINISH (1 << 1)
+#define HOSTA_BUSY (1 << 0)
+#define HOSTA_ERR (HOSTA_TIMEOUT | HOSTA_NACK | HOSTA_FAIL | HOSTA_BUS_ERR | HOSTA_DEV_ERR)
+
 // Host status for channel A
 volatile uint8_t __xdata __at(0x1C00) HOSTAA;
 // Host control for channel A
