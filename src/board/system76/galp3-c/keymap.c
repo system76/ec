@@ -265,7 +265,7 @@ uint16_t keymap_translate(uint16_t key) {
         case K_SPACE: return 0x39;
         case K_RIGHT_ALT: return (K_E0 | 0x38);
         case K_RIGHT_SUPER: return (K_E0 | 0x5C);
-        case K_APP: return (K_E0 | 0x5E);
+        case K_APP: return (K_E0 | 0x5D);
         case K_RIGHT_CTRL: return (K_E0 | 0x1D);
 
         case K_INSERT: return (K_E0 | 0x52);
