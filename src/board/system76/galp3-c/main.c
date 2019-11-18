@@ -396,7 +396,7 @@ void touchpad_event(struct Ps2 * ps2) {
     if (kbc_second) {
         *(ps2->control) = 0x07;
     } else {
-        *(ps2->control) = 0x01;
+        ps2_reset(ps2);
     }
 
     uint8_t status = *(ps2->status);

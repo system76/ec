@@ -22,6 +22,13 @@ struct Ps2 __code PS2_1 = PS2(1);
 struct Ps2 __code PS2_2 = PS2(2);
 struct Ps2 __code PS2_3 = PS2(3);
 
+void ps2_reset(struct Ps2 * ps2) {
+    // Reset interface to defaults
+    *(ps2->control) = 1;
+    // Clear status
+    *(ps2->status) = *(ps2->status);
+}
+
 static int ps2_transaction(struct Ps2 * ps2, uint8_t * data, int length, bool read) {
     int i;
     for (i = 0; i < length; i++) {
@@ -43,7 +50,7 @@ static int ps2_transaction(struct Ps2 * ps2, uint8_t * data, int length, bool re
             uint8_t status = *(ps2->status);
             // If an error happened, clear status and return the error
             if (status & PSSTS_ALL_ERR) {
-                *(ps2->status) = status;
+                ps2_reset(ps2);
                 return -(int)status;
             }
             // If transaction is done, break
@@ -53,11 +60,14 @@ static int ps2_transaction(struct Ps2 * ps2, uint8_t * data, int length, bool re
         }
         // If a timeout happened, return the error
         if (timeout == 0) {
-            return -1;
+            ps2_reset(ps2);
+            return -0x1000;
         }
         if (read) {
             data[i] = *(ps2->data);
         }
+        // Set interface to defaults
+        ps2_reset(ps2);
     }
 
     return i;
