@@ -16,6 +16,8 @@
 #include <common/debug.h>
 #include <common/macro.h>
 
+static uint8_t main_cycle = 0;
+
 void external_0(void) __interrupt(0) {
     TRACE("external_0\n");
 }
@@ -77,6 +79,9 @@ void ac_adapter() {
             battery_charger_enable();
         }
         battery_debug();
+
+        // Reset main loop cycle to force reading PECI and battery
+        main_cycle = 0;
     }
 
     last = new;
@@ -150,7 +155,7 @@ void power_button() {
     bool new = gpio_get(&PWR_SW_N);
     if (!new && last) {
         // Ensure press is not spurious
-        delay_ms(100);
+        delay_ms(10);
         if (gpio_get(&PWR_SW_N) != new) {
             DEBUG("Spurious press\n");
             return;
@@ -251,6 +256,7 @@ void power_button() {
 
             // enable pnp devices
             pnp_enable();
+
         } else {
             DEBUG("Disabling power\n");
 
@@ -296,6 +302,9 @@ void power_button() {
             // Wait a minimum of 400 ns (tPCH14)
             delay_ms(1);
         }
+
+        // Reset main loop cycle to force reading PECI and battery
+        main_cycle = 0;
 
         TRACE("LED_PWR: %d\n", power);
         gpio_set(&LED_PWR, power);
@@ -375,14 +384,25 @@ void main(void) {
     gpio_set(&LED_BAT_FULL, true);
     INFO("Hello from System76 EC for %s!\n", xstr(__BOARD__));
 
-    for(;;) {
-        peci_event();
+    for(main_cycle = 0; ; main_cycle++) {
+        // Enables or disables battery charging based on AC adapter
         ac_adapter();
-        battery_event();
+        // Checks for power button press
         power_button();
+        // Scans keyboard and sends keyboard packets
         kbscan_event();
+        // Passes through touchpad packets
         touchpad_event(&PS2_3);
+        // Checks for keyboard/mouse packets from host
         kbc_event(&KBC);
+        // Only run the following once out of every 256 loops
+        if (main_cycle == 0) {
+            // Updates fan status and temps
+            peci_event();
+            // Updates battery status
+            battery_event();
+        }
+        // Handles ACPI communication
         pmc_event(&PMC_1);
     }
 }
