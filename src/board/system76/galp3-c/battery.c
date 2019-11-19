@@ -40,6 +40,30 @@ int battery_charger_enable(void) {
     return 0;
 }
 
+uint16_t battery_temp = 0;
+uint16_t battery_voltage = 0;
+uint16_t battery_current = 0;
+uint16_t battery_charge = 0;
+
+void battery_event(void) {
+    int res = 0;
+
+    #define command(N, V) { \
+        res = smbus_read(0x0B, V, &N); \
+        if (res < 0) { \
+            N = 0; \
+            return; \
+        } \
+    }
+
+    command(battery_temp, 0x08);
+    command(battery_voltage, 0x09);
+    command(battery_current, 0x0A);
+    command(battery_charge, 0x0D);
+
+    #undef command
+}
+
 void battery_debug(void) {
     uint16_t data = 0;
     int res = 0;
