@@ -6,6 +6,8 @@
 extern int16_t peci_offset;
 extern int16_t peci_temp;
 extern uint8_t peci_duty;
+extern uint8_t peci_tcontrol;
+extern uint8_t peci_tjmax;
 
 void peci_event(void);
 

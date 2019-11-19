@@ -28,6 +28,8 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x10, peci_offset);
         ACPI_16(0x12, peci_temp);
         ACPI_8 (0x14, peci_duty);
+        ACPI_8 (0x15, peci_tcontrol);
+        ACPI_8 (0x16, peci_tjmax);
     }
 
     DEBUG("acpi_read %02X = %02X\n", addr, data);
