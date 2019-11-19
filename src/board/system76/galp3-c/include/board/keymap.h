@@ -23,6 +23,12 @@ uint16_t keymap_translate(uint16_t key);
 
 #define K_FN (0x8000)
 
+// Hotkeys
+
+#define K_MUTE (K_E0 | 0x23)
+#define K_VOLUME_DOWN (K_E0 | 0x21)
+#define K_VOLUME_UP (K_E0 | 0x32)
+
 // Function keys
 
 #define K_F1 (0x05)
