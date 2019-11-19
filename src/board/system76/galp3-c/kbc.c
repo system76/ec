@@ -219,11 +219,13 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_SCANCODE:
                     DEBUG("  get/set scancode\n");
                     state = KBC_STATE_NORMAL;
-                    switch (data) {
-                        case 0x02:
-                            DEBUG("    set scancode set 2\n");
-                            break;
-                    }
+                    #if LEVEL >= LEVEL_DEBUG
+                        switch (data) {
+                            case 0x02:
+                                DEBUG("    set scancode set 2\n");
+                                break;
+                        }
+                    #endif
                     kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                     break;
                 case KBC_STATE_WRITE_PORT:

@@ -299,15 +299,18 @@ void power_button() {
 
         TRACE("LED_PWR: %d\n", power);
         gpio_set(&LED_PWR, power);
-    } else if (new && !last) {
-        DEBUG("Power switch release\n");
-
-        TRACE("SUSWARN_N: %d\n", gpio_get(&SUSWARN_N));
-        TRACE("SUSC_N_PCH: %d\n", gpio_get(&SUSC_N_PCH));
-        TRACE("SUSB_N_PCH: %d\n", gpio_get(&SUSB_N_PCH));
-        TRACE("ALL_SYS_PWRGD: %d\n", gpio_get(&ALL_SYS_PWRGD));
-        TRACE("BUF_PLT_RST_N: %d\n", gpio_get(&BUF_PLT_RST_N));
     }
+    #if LEVEL >= LEVEL_DEBUG
+        else if (new && !last) {
+            DEBUG("Power switch release\n");
+
+            TRACE("SUSWARN_N: %d\n", gpio_get(&SUSWARN_N));
+            TRACE("SUSC_N_PCH: %d\n", gpio_get(&SUSC_N_PCH));
+            TRACE("SUSB_N_PCH: %d\n", gpio_get(&SUSB_N_PCH));
+            TRACE("ALL_SYS_PWRGD: %d\n", gpio_get(&ALL_SYS_PWRGD));
+            TRACE("BUF_PLT_RST_N: %d\n", gpio_get(&BUF_PLT_RST_N));
+        }
+    #endif
 
     last = new;
 }

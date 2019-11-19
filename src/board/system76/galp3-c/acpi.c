@@ -36,6 +36,9 @@ uint8_t acpi_read(uint8_t addr) {
     return data;
 }
 
+// If not in debug mode, data is not used, ignore warning
+#pragma save
+#pragma disable_warning 85
 void acpi_write(uint8_t addr, uint8_t data) {
     DEBUG("acpi_write %02X = %02X\n", addr, data);
 
@@ -43,3 +46,4 @@ void acpi_write(uint8_t addr, uint8_t data) {
     //TODO
     }
 }
+#pragma restore
