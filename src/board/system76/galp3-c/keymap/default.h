@@ -1,3 +1,5 @@
+// Default layout
+
 #define K(V) {V, V}
 
 uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
