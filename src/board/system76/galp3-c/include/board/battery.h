@@ -8,8 +8,8 @@ extern uint16_t battery_voltage;
 extern uint16_t battery_current;
 extern uint16_t battery_charge;
 
-void battery_charger_disable(void);
-void battery_charger_enable(void);
+int battery_charger_disable(void);
+int battery_charger_enable(void);
 void battery_event(void);
 void battery_debug(void);
 

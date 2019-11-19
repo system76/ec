@@ -66,15 +66,21 @@ void ac_adapter() {
     // Set ACIN LED
     gpio_set(&LED_ACIN, !new);
 
+    // Battery charger disables by default after timeout, make sure it knows
+    // we are still alive by setting charge values repeatedly
+    if (new) {
+        battery_charger_disable();
+    } else {
+        battery_charger_enable();
+    }
+
     // If there has been a change, print
     if (new != last) {
         DEBUG("Power adapter ");
         if (new) {
             DEBUG("unplugged\n");
-            battery_charger_disable();
         } else {
             DEBUG("plugged in\n");
-            battery_charger_enable();
         }
         battery_debug();
     }
