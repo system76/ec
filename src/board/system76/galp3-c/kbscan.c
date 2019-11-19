@@ -10,14 +10,13 @@ void kbscan_init(void) {
     KSOCTRL = 0x05;
     KSICTRLR = 0x04;
 
-    // Set all outputs to GPIO mode and low
+    // Set all outputs to GPIO mode, low, and inputs
     KSOL = 0;
     KSOH1 = 0;
-    KSOH2 = 0;
     KSOLGCTRL = 0xFF;
-    KSOLGOEN = 0xFF;
+    KSOLGOEN = 0;
     KSOHGCTRL = 0xFF;
-    KSOHGOEN = 0xFF;
+    KSOHGOEN = 0;
 }
 
 void kbscan_event(void) {
@@ -26,19 +25,17 @@ void kbscan_event(void) {
 
     int i;
     for (i = 0; i < KM_OUT; i++) {
-        KSOL = 0xFF;
-        KSOH1 = 0xFF;
-        KSOH2 = 0xFF;
+        // Set current line as output
         if (i < 8) {
-            KSOL = ~(1 << i);
+            KSOLGOEN = 1 << i;
+            KSOHGOEN = 0;
         } else if (i < 16) {
-            KSOH1 = ~(1 << (i - 8));
-        } else if (i < 24) {
-            KSOH2 = ~(1 << (i - 16));
+            KSOLGOEN = 0;
+            KSOHGOEN = 1 << (i - 8);
         }
 
         // TODO: figure out optimal delay
-        delay_ticks(1);
+        delay_ticks(10);
 
         uint8_t new = ~KSI;
         uint8_t last = kbscan_last[i];
@@ -49,8 +46,11 @@ void kbscan_event(void) {
                 bool last_b = last & (1 << j);
                 if (new_b != last_b) {
                     uint16_t key = keymap(i, j, kbscan_layer);
-                    TRACE("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
-                    if (kbscan_enabled && key) {
+                    DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                    if (key == K_FN) {
+                        if (new_b) kbscan_layer = 1;
+                        else kbscan_layer = 0;
+                    } else if (kbscan_enabled && key) {
                         kbc_scancode(&KBC, key, new_b);
                     }
                 }
@@ -60,10 +60,10 @@ void kbscan_event(void) {
         }
     }
 
-    KSOL = 0;
-    KSOH1 = 0;
-    KSOH2 = 0;
+    // Reset all lines to inputs
+    KSOLGOEN = 0;
+    KSOHGOEN = 0;
 
     // TODO: figure out optimal delay
-    delay_ticks(1);
+    delay_ticks(10);
 }

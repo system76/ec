@@ -63,7 +63,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         {K_E, 0}, // 7
     },
     {   //  6
-        {0, 0}, // 0
+        {K_FN, K_FN}, // 0
         {K_B, 0}, // 1
         {K_F, 0}, // 2
         {K_G, 0}, // 3

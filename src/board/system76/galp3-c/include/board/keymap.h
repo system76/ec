@@ -19,6 +19,10 @@ uint16_t keymap_translate(uint16_t key);
 // Should send 0xE0 before scancode bytes
 #define K_E0 0x0100
 
+// Layer selection
+
+#define K_FN (0x8000)
+
 // Function keys
 
 #define K_F1 (0x05)
