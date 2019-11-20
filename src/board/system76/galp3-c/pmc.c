@@ -1,5 +1,6 @@
 #include <board/acpi.h>
 #include <board/pmc.h>
+#include <board/scratch.h>
 #include <common/debug.h>
 
 void pmc_init(void) {
@@ -47,6 +48,12 @@ void pmc_event(struct Pmc * pmc) {
                 DEBUG("  SCI queue\n");
                 // TODO: queue is always empty
                 pmc_write(pmc, 0, PMC_TIMEOUT);
+                break;
+
+            case 0xDC:
+                DEBUG("  scratch rom\n");
+                pmc_write(pmc, 0x33, PMC_TIMEOUT);
+                scratch_trampoline();
                 break;
             }
         } else {

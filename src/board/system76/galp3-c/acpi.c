@@ -30,6 +30,9 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8 (0x14, peci_duty);
         ACPI_8 (0x15, peci_tcontrol);
         ACPI_8 (0x16, peci_tjmax);
+
+        // Set size of flash (from old firmware)
+        ACPI_8 (0xE5, 0x80);
     }
 
     DEBUG("acpi_read %02X = %02X\n", addr, data);

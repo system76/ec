@@ -1,5 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
+#define printf printf_small
 
 #include <scratch/pmc.h>
 
@@ -28,20 +30,73 @@ static int flash_transaction(uint32_t offset, uint8_t * data, int length, bool r
     return i;
 }
 
-#define PMC_TIMEOUT 1000
+enum PmcState {
+    PMC_STATE_DEFAULT,
+    PMC_STATE_WRITE,
+};
+
+static uint8_t __xdata __at(0x1F07) EWDKEYR;
 
 static void pmc_event(struct Pmc * pmc) {
+    static enum PmcState state = PMC_STATE_DEFAULT;
+
     uint8_t sts = pmc_status(pmc);
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
+        //printf("%x\n", data);
         if (sts & PMC_STS_CMD) {
-        } else {
+            switch (state) {
+                case PMC_STATE_DEFAULT:
+                    switch (data) {
+                        case 0x01:
+                            // Enable follow
+                            ECINDAR3 = 0x0F;
+                            break;
+                        case 0x02:
+                            // Generate high CE#
+                            data = 0;
+                            flash_transaction(0x7FFFFE00, &data, 1, false);
+                            // Fall through
+                        case 0x03:
+                            state = PMC_STATE_WRITE;
+                            break;
+                        case 0x04:
+                            // Read data
+                            flash_transaction(0x7FFFFD00, &data, 1, true);
+                            pmc_write(pmc, data);
+                            break;
+                        case 0x05:
+                            // Disable follow
+                            ECINDAR3 = 0x00;
+                            break;
+                        case 0xFC:
+                            // Clear processor caches
+                            __asm__("mov 0xf7, #1");
+                            __asm__("nop");
+                            __asm__("mov 0xf7, #1");
+                            __asm__("nop");
+                            __asm__("mov 0xf7, #1");
+                            __asm__("nop");
+                            __asm__("mov 0xf7, #1");
+                            __asm__("nop");
+                            // Exit scratch ROM by going through trampoline
+                            __asm__("ljmp 0x1000");
+                            break;
+                    }
+                    break;
+                case PMC_STATE_WRITE:
+                    // Write command or data
+                    flash_transaction(0x7FFFFD00, &data, 1, false);
+                    state = PMC_STATE_DEFAULT;
+                    break;
+            }
         }
     }
 }
 
 // Main program while running in scratch ROM
 void main(void) {
+    printf("scratch\n");
 	for (;;) {
         pmc_event(&PMC_1);
     }

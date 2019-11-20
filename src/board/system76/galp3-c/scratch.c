@@ -37,44 +37,49 @@ static void scratch_start(void) __naked {
 	__endasm;
 }
 
-// Enter scratch ROM
-int scratch_trampoline(void) {
+// Enter or exit scratch ROM
+void scratch_trampoline(void) {
 	// Uses SCAR1, 2, 3, and 4 which are mapped at 0x0800 in data space and are
     // 2048 bytes in size. SCAR0 cannot be used due to __pdata overwriting it.
 
-    int i;
-    // Copy scratch ROM
-    for (i = 0; i < ARRAY_SIZE(scratch_rom) && i < ARRAY_SIZE(scratch_ram); i++) {
-        scratch_ram[i] = scratch_rom[i];
+    if ((SCAR1H == 0x00) || (SCAR2H == 0x00) || (SCAR3H == 0x00) || (SCAR4H == 0x00)) {
+        // Disable scratch RAM mapping
+        SCAR1H = 0b11;
+        SCAR2H = 0b11;
+        SCAR3H = 0b11;
+        SCAR4H = 0b11;
+    } else {
+        int i;
+        // Copy scratch ROM
+        for (i = 0; i < ARRAY_SIZE(scratch_rom) && i < ARRAY_SIZE(scratch_ram); i++) {
+            scratch_ram[i] = scratch_rom[i];
+        }
+
+        // Fill the rest with nop
+        for (; i < ARRAY_SIZE(scratch_ram); i++) {
+            scratch_ram[i] = 0x00;
+        }
+
+        // Set scratch RAM 1 mapping at 0x0000 and enable
+        SCAR1L = 0x00;
+        SCAR1M = 0x00;
+        SCAR1H = 0x00;
+        // Set scratch RAM 2 mapping at 0x0400 and enable
+        SCAR2L = 0x00;
+        SCAR2M = 0x04;
+        SCAR2H = 0x00;
+        // Set scratch RAM 3 mapping at 0x0600 and enable
+        SCAR3L = 0x00;
+        SCAR3M = 0x06;
+        SCAR3H = 0x00;
+        // Set scratch RAM 4 mapping at 0x0800 and enable
+        SCAR4L = 0x00;
+        SCAR4M = 0x08;
+        SCAR4H = 0x00;
     }
 
-    // Fill the rest with nop
-    for (; i < ARRAY_SIZE(scratch_ram); i++) {
-        scratch_ram[i] = 0x00;
-    }
-
-    // Set scratch RAM 1 mapping at 0x0000 and enable
-    SCAR1L = 0x00;
-    SCAR1M = 0x00;
-    SCAR1H = 0x00;
-    // Set scratch RAM 2 mapping at 0x0400 and enable
-    SCAR2L = 0x00;
-    SCAR2M = 0x04;
-    SCAR2H = 0x00;
-    // Set scratch RAM 3 mapping at 0x0600 and enable
-    SCAR3L = 0x00;
-    SCAR3M = 0x06;
-    SCAR3H = 0x00;
-    // Set scratch RAM 4 mapping at 0x0800 and enable
-    SCAR4L = 0x00;
-    SCAR4M = 0x08;
-    SCAR4H = 0x00;
-
-    // Jump to scratch reset function
+    // Jump to reset function
     __asm__("ljmp 0");
-
-    // Should never happen
-    return 0;
 }
 
 // Finish segment located at 0x1000
