@@ -26,8 +26,6 @@ uint8_t pmc_status(struct Pmc * pmc);
 uint8_t pmc_read(struct Pmc * pmc);
 bool pmc_write(struct Pmc * pmc, uint8_t data, int timeout);
 
-void pmc_event(struct Pmc * pmc);
-
 volatile uint8_t __xdata __at(0x1500) PM1STS;
 volatile uint8_t __xdata __at(0x1501) PM1DO;
 volatile uint8_t __xdata __at(0x1504) PM1DI;
