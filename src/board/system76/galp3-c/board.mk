@@ -16,6 +16,6 @@ SCRATCH_INCLUDE=$(wildcard $(SCRATCH_DIR)/include/scratch/*.h)
 SCRATCH_CFLAGS=-I$(SCRATCH_DIR)/include
 include $(SCRATCH_DIR)/scratch.mk
 
-# Require scratch.rom to be compiled before main firmware
+# Include scratch header in main firmware
 CFLAGS+=-I$(BUILD)/include
 INCLUDE+=$(BUILD)/include/scratch.h
