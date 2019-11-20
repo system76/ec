@@ -20,6 +20,6 @@ $(BUILD)/ec.ihx: $(OBJ)
 	$(CC) -o $@ $^
 
 # Compile C files into object files
-$(BUILD)/%.rel: src/%.c $(INCLUDE)
+$(OBJ): $(BUILD)/%.rel: src/%.c $(INCLUDE)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
