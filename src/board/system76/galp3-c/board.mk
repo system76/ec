@@ -16,7 +16,7 @@ SCRATCH_CC=\
 	sdcc \
 	-mmcs51 \
 	--model-small \
-	--code-size 1024 \
+	--code-size 2048 \
 	--Werror
 
 # Convert from binary file to C header
