@@ -1,7 +1,5 @@
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
-#define printf printf_small
 
 #include <scratch/pmc.h>
 
@@ -43,7 +41,6 @@ static void pmc_event(struct Pmc * pmc) {
     uint8_t sts = pmc_status(pmc);
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
-        //printf("%x\n", data);
         if (sts & PMC_STS_CMD) {
             switch (state) {
                 case PMC_STATE_DEFAULT:
@@ -96,7 +93,6 @@ static void pmc_event(struct Pmc * pmc) {
 
 // Main program while running in scratch ROM
 void main(void) {
-    printf("scratch\n");
 	for (;;) {
         pmc_event(&PMC_1);
     }
