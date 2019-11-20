@@ -1,6 +1,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <scratch/pmc.h>
+
 volatile uint8_t __xdata __at(0x103B) ECINDAR0;
 volatile uint8_t __xdata __at(0x103C) ECINDAR1;
 volatile uint8_t __xdata __at(0x103D) ECINDAR2;
@@ -26,9 +28,21 @@ static int flash_transaction(uint32_t offset, uint8_t * data, int length, bool r
     return i;
 }
 
+#define PMC_TIMEOUT 1000
+
+static void pmc_event(struct Pmc * pmc) {
+    uint8_t sts = pmc_status(pmc);
+    if (sts & PMC_STS_IBF) {
+        uint8_t data = pmc_read(pmc);
+        if (sts & PMC_STS_CMD) {
+        } else {
+        }
+    }
+}
+
 // Main program while running in scratch ROM
 void main(void) {
-    // TODO: implement flashing protocol and prevent access to flash
-	// data (i.e. calling functions in CSEG) during this process
-	for (;;) {}
+	for (;;) {
+        pmc_event(&PMC_1);
+    }
 }
