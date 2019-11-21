@@ -264,11 +264,11 @@ void power_button() {
             TRACE("SUS_PWR_ACK: %d\n", power);
             gpio_set(&SUS_PWR_ACK, power);
 
-            // De-assert PCH_PWEROK_EC, SYS_PWEROK will be de-asserted
+            // De-assert PCH_PWROK_EC, SYS_PWROK will be de-asserted
             TRACE("PCH_PWROK_EC: %d\n", power);
             gpio_set(&PCH_PWROK_EC, power);
 
-            // De-assert PM_PWEROK, PCH_PWROK will be de-asserted
+            // De-assert PM_PWROK, PCH_PWROK will be de-asserted
             TRACE("PM_PWROK: %d\n", power);
             gpio_set(&PM_PWROK, power);
 
