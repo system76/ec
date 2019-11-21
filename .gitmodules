@@ -2,3 +2,7 @@
 	path = ecsim
 	url = https://github.com/system76/ecsim.git
 	branch = master
+[submodule "ecflash"]
+	path = ecflash
+	url = https://github.com/system76/ecflash.git
+	branch = master
