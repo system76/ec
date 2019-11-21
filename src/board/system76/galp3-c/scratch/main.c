@@ -33,8 +33,6 @@ enum PmcState {
     PMC_STATE_WRITE,
 };
 
-static uint8_t __xdata __at(0x1F07) EWDKEYR;
-
 static void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
 
