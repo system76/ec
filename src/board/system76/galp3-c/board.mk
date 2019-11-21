@@ -19,3 +19,7 @@ include $(SCRATCH_DIR)/scratch.mk
 # Include scratch header in main firmware
 CFLAGS+=-I$(BUILD)/include
 INCLUDE+=$(BUILD)/include/scratch.h
+
+flash: $(BUILD)/ec.rom
+	cargo build --manifest-path ecflash/Cargo.toml --example flash --release
+	sudo ecflash/target/release/examples/flash $<
