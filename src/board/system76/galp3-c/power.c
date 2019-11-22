@@ -64,6 +64,8 @@ static struct Gpio __code SUS_PWR_ACK =     GPIO(J, 0);
 
 // Enable deep sleep well power
 void power_on_ds5() {
+    DEBUG("power_on_ds5\n");
+    
 #if DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
     // | VCCRTC | RTCRST# | VCCDSW_3P3 | DSW_PWROK |
@@ -93,6 +95,8 @@ void power_on_ds5() {
 
 // Enable S5 power
 void power_on_s5() {
+    DEBUG("power_on_s5\n");
+
 #if DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
 
@@ -130,6 +134,8 @@ void power_on_s5() {
 }
 
 void power_off_s5() {
+    DEBUG("power_off_s5\n");
+
 #if DEEP_SX
     // TODO
 #else // DEEP_SX
