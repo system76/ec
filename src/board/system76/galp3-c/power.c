@@ -254,8 +254,7 @@ void power_event(void) {
 
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
-    bool primary = !gpio_get(&SUSWARN_N) || !gpio_get(&SUSB_N_PCH);
-    if (primary) {
+    if (!gpio_get(&SUSWARN_N)) {
         if (state == POWER_STATE_DS5) {
             power_on_s5();
             state = POWER_STATE_DS5;
