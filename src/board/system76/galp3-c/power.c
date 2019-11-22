@@ -170,6 +170,32 @@ enum PowerState {
 void power_event(void) {
     static enum PowerState state = POWER_STATE_DEFAULT;
 
+    // Sync power button state
+    {
+        // Read power button state
+        static bool last = true;
+        bool new = gpio_get(&PWR_SW_N);
+        if (!new && last) {
+            // Ensure press is not spurious
+            delay_ms(10);
+            if (gpio_get(&PWR_SW_N) != new) {
+                DEBUG("Spurious press\n");
+                new = !new;
+            } else {
+                DEBUG("Power switch press\n");
+            }
+        }
+        #if LEVEL >= LEVEL_DEBUG
+            else if (new && !last) {
+                DEBUG("Power switch release\n");
+            }
+        #endif
+
+        // Send power signal to PCH
+        gpio_set(&PWR_BTN_N, new);
+        last = new;
+    }
+
     // Always switch to ds5 if EC is running
     if (state == POWER_STATE_DEFAULT) {
         power_on_ds5();
@@ -180,27 +206,6 @@ void power_event(void) {
         state = POWER_STATE_S5;
     }
 
-    // Read power button state
-    static bool last = true;
-    bool new = gpio_get(&PWR_SW_N);
-    if (!new && last) {
-        // Ensure press is not spurious
-        delay_ms(10);
-        if (gpio_get(&PWR_SW_N) != new) {
-            DEBUG("Spurious press\n");
-            return;
-        }
-
-        DEBUG("Power switch press\n");
-    }
-    #if LEVEL >= LEVEL_DEBUG
-        else if (new && !last) {
-            DEBUG("Power switch release\n");
-        }
-    #endif
-
-    // Send power signal to PCH
-    gpio_set(&PWR_BTN_N, new);
 
 #if DEEP_SX
     //TODO
@@ -208,7 +213,9 @@ void power_event(void) {
     //TODO: set power state as necessary
 
     // If system power is good
-    if (gpio_get(&ALL_SYS_PWRGD)) {
+    static bool pg_last = false;
+    bool pg_new = gpio_get(&ALL_SYS_PWRGD);
+    if (pg_new && !pg_last) {
         DEBUG("ALL_SYS_PWRGD asserted\n");
 
         // Allow H_VR_READY to set PCH_PWROK
@@ -219,7 +226,7 @@ void power_event(void) {
 
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
         gpio_set(&PCH_PWROK_EC, true);
-    } else {
+    } else if(!pg_new && pg_last) {
         DEBUG("ALL_SYS_PWRGD de-asserted\n");
 
         // De-assert SYS_PWROK
@@ -229,9 +236,9 @@ void power_event(void) {
         gpio_set(&PM_PWROK, false);
     }
 
-    static bool rst_old = false;
+    static bool rst_last = false;
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
-    if (!rst_old && rst_new) {
+    if (rst_new && !rst_last) {
         // LPC was just reset, enable PNP devices
         pnp_enable();
         //TODO: reset KBC and touchpad states
