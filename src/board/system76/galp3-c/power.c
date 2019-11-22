@@ -65,7 +65,7 @@ static struct Gpio __code SUS_PWR_ACK =     GPIO(J, 0);
 // Enable deep sleep well power
 void power_on_ds5() {
     DEBUG("power_on_ds5\n");
-    
+
 #if DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
     // | VCCRTC | RTCRST# | VCCDSW_3P3 | DSW_PWROK |
@@ -196,10 +196,10 @@ void power_event(void) {
                 DEBUG("Power switch release\n");
             }
         #endif
+        last = new;
 
         // Send power signal to PCH
         gpio_set(&PWR_BTN_N, new);
-        last = new;
     }
 
     // Always switch to ds5 if EC is running
@@ -241,6 +241,7 @@ void power_event(void) {
         // De-assert PCH_PWROK
         gpio_set(&PM_PWROK, false);
     }
+    pg_last = pg_new;
 
     static bool rst_last = false;
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
@@ -249,6 +250,7 @@ void power_event(void) {
         pnp_enable();
         //TODO: reset KBC and touchpad states
     }
+    rst_last = rst_new;
 
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
