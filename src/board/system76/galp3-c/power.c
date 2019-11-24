@@ -282,7 +282,7 @@ void power_event(void) {
             DEBUG("%02X: SLP_S4# de-asserted\n", main_cycle);
         }
         s4_last = s4_new;
-        
+
         static bool sus_last = false;
         bool sus_new = gpio_get(&SLP_SUS_N);
         if (!sus_new && sus_last) {
@@ -300,7 +300,9 @@ void power_event(void) {
     if (ack_new && !ack_last) {
         DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
 
-        if (state == POWER_STATE_S5) {
+        if (gpio_get(&SUSC_N_PCH)) {
+            DEBUG("%02X: entering S3 state\n", main_cycle);
+        } else if (state == POWER_STATE_S5) {
             power_off_s5();
             state = POWER_STATE_DS5;
         }
