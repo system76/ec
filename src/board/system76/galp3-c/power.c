@@ -250,9 +250,12 @@ void power_event(void) {
 
     static bool rst_last = false;
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
-    if (!rst_new && rst_last) {
-        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
-    } else if(rst_new && !rst_last) {
+    #if LEVEL >= LEVEL_DEBUG
+        if (!rst_new && rst_last) {
+            DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
+        } else
+    #endif
+    if(rst_new && !rst_last) {
         DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
 
         // LPC was just reset, enable PNP devices
@@ -261,23 +264,34 @@ void power_event(void) {
     }
     rst_last = rst_new;
 
-    static bool s4_last = false;
-    bool s4_new = gpio_get(&SUSC_N_PCH);
-    if (!s4_new && s4_last) {
-        DEBUG("%02X: SLP_S4# asserted\n", main_cycle);
-    } else if(s4_new && !s4_last) {
-        DEBUG("%02X: SLP_S4# de-asserted\n", main_cycle);
-    }
-    s4_last = s4_new;
+    #if LEVEL >= LEVEL_DEBUG
+        static bool s3_last = false;
+        bool s3_new = gpio_get(&SUSB_N_PCH);
+        if (!s3_new && s3_last) {
+            DEBUG("%02X: SLP_S3# asserted\n", main_cycle);
+        } else if(s3_new && !s3_last) {
+            DEBUG("%02X: SLP_S3# de-asserted\n", main_cycle);
+        }
+        s3_last = s3_new;
 
-    static bool s3_last = false;
-    bool s3_new = gpio_get(&SUSB_N_PCH);
-    if (!s3_new && s3_last) {
-        DEBUG("%02X: SLP_S3# asserted\n", main_cycle);
-    } else if(s3_new && !s3_last) {
-        DEBUG("%02X: SLP_S3# de-asserted\n", main_cycle);
-    }
-    s3_last = s3_new;
+        static bool s4_last = false;
+        bool s4_new = gpio_get(&SUSC_N_PCH);
+        if (!s4_new && s4_last) {
+            DEBUG("%02X: SLP_S4# asserted\n", main_cycle);
+        } else if(s4_new && !s4_last) {
+            DEBUG("%02X: SLP_S4# de-asserted\n", main_cycle);
+        }
+        s4_last = s4_new;
+        
+        static bool sus_last = false;
+        bool sus_new = gpio_get(&SLP_SUS_N);
+        if (!sus_new && sus_last) {
+            DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
+        } else if (sus_new && !sus_last) {
+            DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
+        }
+        sus_last = sus_new;
+    #endif
 
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
@@ -290,18 +304,13 @@ void power_event(void) {
             power_off_s5();
             state = POWER_STATE_DS5;
         }
-    } else if (!ack_new && ack_last) {
-        DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
     }
+    #if LEVEL >= LEVEL_DEBUG
+        else if (!ack_new && ack_last) {
+            DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
+        }
+    #endif
     ack_last = ack_new;
 
-    static bool sus_last = false;
-    bool sus_new = gpio_get(&SLP_SUS_N);
-    if (!sus_new && sus_last) {
-        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
-    } else if (sus_new && !sus_last) {
-        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
-    }
-    sus_last = sus_new;
 #endif // DEEP_SX
 }
