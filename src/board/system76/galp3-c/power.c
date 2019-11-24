@@ -7,6 +7,8 @@
 // Platform does not currently support Deep Sx
 #define DEEP_SX 0
 
+extern uint8_t main_cycle;
+
 static struct Gpio __code PCH_DPWROK_EC =   GPIO(A, 3);
 static struct Gpio __code PCH_PWROK_EC =    GPIO(A, 4);
 static struct Gpio __code LED_PWR =         GPIO(A, 7);
@@ -61,10 +63,12 @@ static struct Gpio __code SUS_PWR_ACK =     GPIO(J, 0);
 #endif
 // DSW_PWROK assertion to SLP_SUS# de-assertion
 #define tPCH32 delay_ms(95)
+// RSMRST# de-assertion to SUSPWRDNACK valid
+#define tPLT01 delay_ms(200)
 
 // Enable deep sleep well power
 void power_on_ds5() {
-    DEBUG("power_on_ds5\n");
+    DEBUG("%02X: power_on_ds5\n", main_cycle);
 
 #if DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
@@ -95,7 +99,7 @@ void power_on_ds5() {
 
 // Enable S5 power
 void power_on_s5() {
-    DEBUG("power_on_s5\n");
+    DEBUG("%02X: power_on_s5\n", main_cycle);
 
 #if DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
@@ -126,7 +130,8 @@ void power_on_s5() {
     gpio_set(&EC_RSMRST_N, true);
 
     // Wait for PCH stability
-    tPCH18;
+    //tPCH18;
+    tPLT01;
 
     // Allow processor to control SUSB# and SUSC#
     gpio_set(&EC_EN, true);
@@ -134,7 +139,7 @@ void power_on_s5() {
 }
 
 void power_off_s5() {
-    DEBUG("power_off_s5\n");
+    DEBUG("%02X: power_off_s5\n", main_cycle);
 
 #if DEEP_SX
     // TODO
@@ -176,42 +181,40 @@ enum PowerState {
 void power_event(void) {
     static enum PowerState state = POWER_STATE_DEFAULT;
 
-    // Sync power button state
-    {
-        // Read power button state
-        static bool last = true;
-        bool new = gpio_get(&PWR_SW_N);
-        if (!new && last) {
-            // Ensure press is not spurious
-            delay_ms(10);
-            if (gpio_get(&PWR_SW_N) != new) {
-                DEBUG("Spurious press\n");
-                new = !new;
-            } else {
-                DEBUG("Power switch press\n");
-            }
-        }
-        #if LEVEL >= LEVEL_DEBUG
-            else if (new && !last) {
-                DEBUG("Power switch release\n");
-            }
-        #endif
-        last = new;
-
-        // Send power signal to PCH
-        gpio_set(&PWR_BTN_N, new);
-    }
-
     // Always switch to ds5 if EC is running
     if (state == POWER_STATE_DEFAULT) {
         power_on_ds5();
         state = POWER_STATE_DS5;
-
-        //TODO: Logic for switching from ds5 to s5
-        power_on_s5();
-        state = POWER_STATE_S5;
     }
 
+    // Read power switch state
+    static bool ps_last = true;
+    bool ps_new = gpio_get(&PWR_SW_N);
+    if (!ps_new && ps_last) {
+        // Ensure press is not spurious
+        delay_ms(10);
+        if (gpio_get(&PWR_SW_N) != ps_new) {
+            DEBUG("%02X: Spurious press\n", main_cycle);
+            ps_new = ps_last;
+        } else {
+            DEBUG("%02X: Power switch press\n", main_cycle);
+
+            // Enable S5 power if necessary, before sending PWR_BTN
+            if (state == POWER_STATE_DS5) {
+                power_on_s5();
+                state = POWER_STATE_S5;
+            }
+        }
+    }
+    #if LEVEL >= LEVEL_DEBUG
+        else if (ps_new && !ps_last) {
+            DEBUG("%02X: Power switch release\n", main_cycle);
+        }
+    #endif
+    ps_last = ps_new;
+
+    // Send power signal to PCH
+    gpio_set(&PWR_BTN_N, ps_new);
 
 #if DEEP_SX
     //TODO
@@ -222,7 +225,9 @@ void power_event(void) {
     static bool pg_last = false;
     bool pg_new = gpio_get(&ALL_SYS_PWRGD);
     if (pg_new && !pg_last) {
-        DEBUG("ALL_SYS_PWRGD asserted\n");
+        DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
+
+        //TODO: tPLT04;
 
         // Allow H_VR_READY to set PCH_PWROK
         gpio_set(&PM_PWROK, true);
@@ -233,7 +238,7 @@ void power_event(void) {
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
         gpio_set(&PCH_PWROK_EC, true);
     } else if(!pg_new && pg_last) {
-        DEBUG("ALL_SYS_PWRGD de-asserted\n");
+        DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
         // De-assert SYS_PWROK
         gpio_set(&PCH_PWROK_EC, false);
@@ -245,25 +250,58 @@ void power_event(void) {
 
     static bool rst_last = false;
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
-    if (rst_new && !rst_last) {
+    if (!rst_new && rst_last) {
+        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
+    } else if(rst_new && !rst_last) {
+        DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
+
         // LPC was just reset, enable PNP devices
         pnp_enable();
         //TODO: reset KBC and touchpad states
     }
     rst_last = rst_new;
 
+    static bool s4_last = false;
+    bool s4_new = gpio_get(&SUSC_N_PCH);
+    if (!s4_new && s4_last) {
+        DEBUG("%02X: SLP_S4# asserted\n", main_cycle);
+    } else if(s4_new && !s4_last) {
+        DEBUG("%02X: SLP_S4# de-asserted\n", main_cycle);
+    }
+    s4_last = s4_new;
+
+    static bool s3_last = false;
+    bool s3_new = gpio_get(&SUSB_N_PCH);
+    if (!s3_new && s3_last) {
+        DEBUG("%02X: SLP_S3# asserted\n", main_cycle);
+    } else if(s3_new && !s3_last) {
+        DEBUG("%02X: SLP_S3# de-asserted\n", main_cycle);
+    }
+    s3_last = s3_new;
+
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
-    if (!gpio_get(&SUSWARN_N)) {
-        if (state == POWER_STATE_DS5) {
-            power_on_s5();
-            state = POWER_STATE_DS5;
-        }
-    } else {
+    static bool ack_last = false;
+    bool ack_new = gpio_get(&SUSWARN_N);
+    if (ack_new && !ack_last) {
+        DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
+
         if (state == POWER_STATE_S5) {
             power_off_s5();
             state = POWER_STATE_DS5;
         }
+    } else if (!ack_new && ack_last) {
+        DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
     }
+    ack_last = ack_new;
+
+    static bool sus_last = false;
+    bool sus_new = gpio_get(&SLP_SUS_N);
+    if (!sus_new && sus_last) {
+        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
+    } else if (sus_new && !sus_last) {
+        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
+    }
+    sus_last = sus_new;
 #endif // DEEP_SX
 }

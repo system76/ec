@@ -17,7 +17,7 @@
 #include <common/debug.h>
 #include <common/macro.h>
 
-static uint8_t main_cycle = 0;
+uint8_t main_cycle = 0;
 
 void external_0(void) __interrupt(0) {
     TRACE("external_0\n");
