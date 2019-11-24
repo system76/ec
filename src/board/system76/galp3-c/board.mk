@@ -18,7 +18,7 @@ CFLAGS+=-DLEVEL=2
 # Add scratch ROM source
 SCRATCH_DIR=$(BOARD_DIR)/scratch
 SCRATCH_SRC=$(wildcard $(SCRATCH_DIR)/*.c)
-SCRATCH_INCLUDE=$(wildcard $(SCRATCH_DIR)/include/scratch/*.h)
+SCRATCH_INCLUDE=$(wildcard $(SCRATCH_DIR)/include/scratch/*.h) $(SCRATCH_DIR)/scratch.mk
 SCRATCH_CFLAGS=-I$(SCRATCH_DIR)/include
 include $(SCRATCH_DIR)/scratch.mk
 
