@@ -21,6 +21,7 @@ void kbscan_init(void) {
 
 void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
+    uint8_t layer = kbscan_layer;
     static uint8_t kbscan_last[KM_OUT] = { 0 };
 
     int i;
@@ -41,15 +42,15 @@ void kbscan_event(void) {
         uint8_t last = kbscan_last[i];
         if (new != last) {
             int j;
-            for (j = 0; j < 8; j++) {
+            for (j = 0; j < KM_IN; j++) {
                 bool new_b = new & (1 << j);
                 bool last_b = last & (1 << j);
                 if (new_b != last_b) {
                     uint16_t key = keymap(i, j, kbscan_layer);
                     DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
                     if (key == K_FN) {
-                        if (new_b) kbscan_layer = 1;
-                        else kbscan_layer = 0;
+                        if (new_b) layer = 1;
+                        else layer = 0;
                     } else if (kbscan_enabled && key) {
                         kbc_scancode(&KBC, key, new_b);
                     }
@@ -58,6 +59,36 @@ void kbscan_event(void) {
 
             kbscan_last[i] = new;
         }
+    }
+
+    if (layer != kbscan_layer) {
+        //TODO: unpress keys before going to scratch rom
+
+        // Unpress all currently pressed keys
+        for (i = 0; i < KM_OUT; i++) {
+            uint8_t new = 0;
+            uint8_t last = kbscan_last[i];
+            if (last) {
+                int j;
+                for (j = 0; j < KM_IN; j++) {
+                    bool new_b = new & (1 << j);
+                    bool last_b = last & (1 << j);
+                    if (new_b != last_b) {
+                        uint16_t key = keymap(i, j, kbscan_layer);
+                        DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                        if (key == K_FN) {
+                            // N/A
+                        } else if (kbscan_enabled && key) {
+                            kbc_scancode(&KBC, key, new_b);
+                        }
+                    }
+                }
+            }
+
+            kbscan_last[i] = new;
+        }
+
+        kbscan_layer = layer;
     }
 
     // Reset all lines to inputs
