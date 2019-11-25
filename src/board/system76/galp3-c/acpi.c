@@ -2,6 +2,9 @@
 #include <board/battery.h>
 #include <board/peci.h>
 #include <common/debug.h>
+#include <ec/gpio.h>
+
+static struct Gpio __code ACIN_N = GPIO(B, 6);
 
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;
@@ -20,16 +23,28 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16((K) + 2, (V) >> 16)
 
     switch (addr) {
-        ACPI_16(0x00, battery_temp);
-        ACPI_16(0x02, battery_voltage);
-        ACPI_16(0x04, battery_current);
-        ACPI_16(0x06, battery_charge);
+        // Handle AC adapter and battery present
+        case 0x10:
+            if (!gpio_get(&ACIN_N)) {
+                // AC adapter connected
+                data |= 1 << 0;
+            }
+            // BAT0 always connected - TODO
+            data |= 1 << 2;
+            break;
 
-        ACPI_16(0x10, peci_offset);
-        ACPI_16(0x12, peci_temp);
-        ACPI_8 (0x14, peci_duty);
-        ACPI_8 (0x15, peci_tcontrol);
-        ACPI_8 (0x16, peci_tjmax);
+        ACPI_16(0x16, battery_design_capacity);
+        ACPI_16(0x1A, battery_full_capacity);
+        ACPI_16(0x22, battery_design_voltage);
+
+        // Bypass status test in ACPI
+        case 0x26:
+            data |= 1 << 1;
+            break;
+
+        ACPI_16(0x2A, battery_current);
+        ACPI_16(0x2E, battery_remaining_capacity);
+        ACPI_16(0x32, battery_voltage);
 
         // Set size of flash (from old firmware)
         ACPI_8 (0xE5, 0x80);
@@ -38,6 +53,7 @@ uint8_t acpi_read(uint8_t addr) {
     DEBUG("acpi_read %02X = %02X\n", addr, data);
     return data;
 }
+
 
 // If not in debug mode, data is not used, ignore warning
 #pragma save

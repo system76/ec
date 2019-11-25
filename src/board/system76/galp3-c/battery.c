@@ -44,6 +44,10 @@ uint16_t battery_temp = 0;
 uint16_t battery_voltage = 0;
 uint16_t battery_current = 0;
 uint16_t battery_charge = 0;
+uint16_t battery_remaining_capacity = 0;
+uint16_t battery_full_capacity = 0;
+uint16_t battery_design_capacity = 0;
+uint16_t battery_design_voltage = 0;
 
 void battery_event(void) {
     int res = 0;
@@ -60,6 +64,10 @@ void battery_event(void) {
     command(battery_voltage, 0x09);
     command(battery_current, 0x0A);
     command(battery_charge, 0x0D);
+    command(battery_remaining_capacity, 0x0F);
+    command(battery_full_capacity, 0x10);
+    command(battery_design_capacity, 0x18);
+    command(battery_design_voltage, 0x19);
 
     #undef command
 }
