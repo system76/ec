@@ -130,11 +130,13 @@ void power_on_s5() {
     gpio_set(&EC_RSMRST_N, true);
 
     // Wait for PCH stability
-    //tPCH18;
-    tPLT01;
+    tPCH18;
 
     // Allow processor to control SUSB# and SUSC#
     gpio_set(&EC_EN, true);
+
+    // Wait for SUSPWRDNACK validity
+    tPLT01;
 #endif // DEEP_SX
 }
 
@@ -300,7 +302,9 @@ void power_event(void) {
     if (ack_new && !ack_last) {
         DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
 
-        if (gpio_get(&SUSC_N_PCH)) {
+        if (!pg_new) {
+            DEBUG("%02X: booting\n", main_cycle);
+        } else if (gpio_get(&SUSC_N_PCH)) {
             DEBUG("%02X: entering S3 state\n", main_cycle);
         } else if (state == POWER_STATE_S5) {
             power_off_s5();
