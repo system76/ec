@@ -10,7 +10,7 @@ INCLUDE+=$(wildcard $(BOARD_DIR)/keymap/*.h)
 # 3 - INFO
 # 4 - DEBUG
 # 5 - TRACE
-CFLAGS+=-DLEVEL=4
+CFLAGS+=-DLEVEL=2
 
 # Enable I2C debug on 0x76
 CFLAGS+=-DI2C_DEBUGGER=0x76
