@@ -9,8 +9,28 @@ int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
     return i2c_set(address, command, (uint8_t *)&data, 2);
 }
 
+// ChargeOption0 flags
+// Low Power Mode Enable
+#define SBC_EN_LWPWR        ((uint16_t)(1 << 15))
+// Watchdog Timer Adjust
+#define SBC_WDTMR_ADJ_175S  ((uint16_t)(0b11 << 13))
+// Switching Frequency
+#define SBC_PWM_FREQ_800KHZ ((uint16_t)(0b01 << 8))
+// IDCHG Amplifier Gain
+#define SBC_IDCHC_GAIN      ((uint16_t)(1 << 3))
+
 int battery_charger_disable(void) {
     int res = 0;
+
+    // Set charge option 0 with 175s watchdog
+    res = smbus_write(
+        0x09,
+        0x12,
+        SBC_EN_LWPWR |
+        SBC_WDTMR_ADJ_175S |
+        SBC_PWM_FREQ_800KHZ |
+        SBC_IDCHC_GAIN
+    );
 
     // Disable charge current
     res = smbus_write(0x09, 0x14, 0);
@@ -36,6 +56,15 @@ int battery_charger_enable(void) {
     // Set charge voltage to ~13 V
     res = smbus_write(0x09, 0x15, 0x3300);
     if (res < 0) return res;
+
+    // Set charge option 0 with watchdog disabled
+    res = smbus_write(
+        0x09,
+        0x12,
+        SBC_EN_LWPWR |
+        SBC_PWM_FREQ_800KHZ |
+        SBC_IDCHC_GAIN
+    );
 
     return 0;
 }
