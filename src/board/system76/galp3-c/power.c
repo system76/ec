@@ -137,6 +137,9 @@ void power_on_s5() {
 
     // Wait for SUSPWRDNACK validity
     tPLT01;
+
+    // Extra wait - TODO remove
+    delay_ms(200);
 #endif // DEEP_SX
 }
 
@@ -302,9 +305,7 @@ void power_event(void) {
     if (ack_new && !ack_last) {
         DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
 
-        if (!pg_new) {
-            DEBUG("%02X: booting\n", main_cycle);
-        } else if (gpio_get(&SUSC_N_PCH)) {
+        if (gpio_get(&SUSC_N_PCH)) {
             DEBUG("%02X: entering S3 state\n", main_cycle);
         } else if (state == POWER_STATE_S5) {
             power_off_s5();
