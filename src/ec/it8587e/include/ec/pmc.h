@@ -23,6 +23,7 @@ extern struct Pmc __code PMC_2;
 #define PMC_STS_CMD (1 << 3)
 
 uint8_t pmc_status(struct Pmc * pmc);
+void pmc_set_status(struct Pmc * pmc, uint8_t status);
 uint8_t pmc_read(struct Pmc * pmc);
 bool pmc_write(struct Pmc * pmc, uint8_t data, int timeout);
 

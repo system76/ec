@@ -14,6 +14,10 @@ uint8_t pmc_status(struct Pmc * pmc) {
     return *(pmc->status);
 }
 
+void pmc_set_status(struct Pmc * pmc, uint8_t status) {
+    *(pmc->status) = status;
+}
+
 uint8_t pmc_read(struct Pmc * pmc) {
     return *(pmc->data_in);
 }

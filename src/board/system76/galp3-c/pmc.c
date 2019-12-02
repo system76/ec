@@ -3,6 +3,8 @@
 #include <board/scratch.h>
 #include <common/debug.h>
 
+uint8_t pmc_sci_queue = 0;
+
 void pmc_init(void) {
     *(PMC_1.control) = 0x41;
     *(PMC_2.control) = 0x41;
@@ -37,17 +39,24 @@ void pmc_event(struct Pmc * pmc) {
                 break;
             case 0x82:
                 DEBUG("  burst enable\n");
-                // TODO: figure out what burst is
+                // Set burst bit
+                pmc_set_status(pmc, sts | (1 << 4));
+                // Send acknowledgement byte
                 pmc_write(pmc, 0x90, PMC_TIMEOUT);
                 break;
             case 0x83:
                 DEBUG("  burst disable\n");
-                // TODO: figure out what burst is
+                // Clear burst bit
+                pmc_set_status(pmc, sts & ~(1 << 4));
                 break;
             case 0x84:
                 DEBUG("  SCI queue\n");
-                // TODO: queue is always empty
-                pmc_write(pmc, 0, PMC_TIMEOUT);
+                // Clear SCI event pending bit
+                pmc_set_status(pmc, sts & ~(1 << 5));
+                // Send SCI event
+                pmc_write(pmc, pmc_sci_queue, PMC_TIMEOUT);
+                // Clear SCI queue
+                pmc_sci_queue = 0;
                 break;
 
             case 0xDC:
