@@ -2,8 +2,7 @@
 #include <board/pmc.h>
 #include <board/scratch.h>
 #include <common/debug.h>
-
-uint8_t pmc_sci_queue = 0;
+#include <ec/gpio.h>
 
 void pmc_init(void) {
     *(PMC_1.control) = 0x41;
@@ -18,6 +17,22 @@ enum PmcState {
     PMC_STATE_ACPI_WRITE,
     PMC_STATE_ACPI_WRITE_ADDR,
 };
+
+static uint8_t pmc_sci_queue = 0;
+static struct Gpio __code SCI_N =           GPIO(D, 4);
+
+bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
+    bool update = pmc_sci_queue == 0;
+    // Set SCI queue if possible
+    if (update) pmc_sci_queue = sci;
+    // Set SCI pending bit
+    uint8_t sts = pmc_status(pmc);
+    pmc_set_status(pmc, sts | (1 << 5));
+    // Start SCI interrupt
+    gpio_set(&SCI_N, false);
+    *(SCI_N.control) = 0x40;
+    return update;
+}
 
 void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
@@ -51,10 +66,13 @@ void pmc_event(struct Pmc * pmc) {
                 break;
             case 0x84:
                 DEBUG("  SCI queue\n");
-                // Clear SCI event pending bit
+                // Clear SCI pending bit
                 pmc_set_status(pmc, sts & ~(1 << 5));
-                // Send SCI event
+                // Send SCI queue
                 pmc_write(pmc, pmc_sci_queue, PMC_TIMEOUT);
+                // Stop SCI interrupt
+                *(SCI_N.control) = 0x80;
+                gpio_set(&SCI_N, true);
                 // Clear SCI queue
                 pmc_sci_queue = 0;
                 break;

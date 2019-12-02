@@ -14,14 +14,27 @@ uint16_t keymap(int output, int input, int layer);
 
 uint16_t keymap_translate(uint16_t key);
 
+// Key types
+#define KT_MASK (0xF000)
+
+// Normal keys
+#define KT_NORMAL (0x0000)
+
+// Layer selection
+#define KT_FN (0x1000)
+
+// SCI
+#define KT_SCI (0x2000)
+
+#define SCI_BRIGHTNESS_DOWN (0x11)
+#define SCI_BRIGHTNESS_UP (0x12)
+#define SCI_AIRPLANE_MODE (0x14)
+
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
 // Should send 0xE0 before scancode bytes
-#define K_E0 0x0100
+#define K_E0 (0x0100)
 
-// Layer selection
-
-#define K_FN (0x8000)
 
 // Hotkeys
 

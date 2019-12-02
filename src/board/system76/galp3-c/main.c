@@ -62,6 +62,7 @@ void ac_adapter() {
     static struct Gpio __code ACIN_N = GPIO(B, 6);
     static struct Gpio __code LED_ACIN = GPIO(C, 7);
 
+    static bool send_sci = true;
     static bool last = true;
 
     // Check if the adapter line goes low
@@ -83,6 +84,16 @@ void ac_adapter() {
 
         // Reset main loop cycle to force reading PECI and battery
         main_cycle = 0;
+
+        // Send SCI to update AC and battery information
+        send_sci = true;
+    }
+
+    if (send_sci) {
+        // Send SCI 0x16 for AC detect event
+        if (pmc_sci(&PMC_1, 0x16)) {
+            send_sci = false;
+        }
     }
 
     last = new;

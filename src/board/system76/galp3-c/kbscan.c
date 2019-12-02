@@ -2,6 +2,7 @@
 #include <board/kbc.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
+#include <board/pmc.h>
 #include <common/debug.h>
 
 bool kbscan_enabled = false;
@@ -48,11 +49,25 @@ void kbscan_event(void) {
                 if (new_b != last_b) {
                     uint16_t key = keymap(i, j, kbscan_layer);
                     DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
-                    if (key == K_FN) {
-                        if (new_b) layer = 1;
-                        else layer = 0;
-                    } else if (kbscan_enabled && key) {
-                        kbc_scancode(&KBC, key, new_b);
+                    switch (key & KT_MASK) {
+                        case (KT_FN):
+                            if (new_b) layer = 1;
+                            else layer = 0;
+                            break;
+                        case (KT_SCI):
+                            if (new_b) {
+                                uint8_t sci = (uint8_t)(key & 0xFF);
+                                if (!pmc_sci(&PMC_1, sci)) {
+                                    // In the case of ignored SCI, reset bit
+                                    new &= ~(1 << j);
+                                }
+                            }
+                            break;
+                        case (KT_NORMAL):
+                            if (kbscan_enabled && key) {
+                                kbc_scancode(&KBC, key, new_b);
+                            }
+                            break;
                     }
                 }
             }
@@ -76,10 +91,12 @@ void kbscan_event(void) {
                     if (new_b != last_b) {
                         uint16_t key = keymap(i, j, kbscan_layer);
                         DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
-                        if (key == K_FN) {
-                            // N/A
-                        } else if (kbscan_enabled && key) {
-                            kbc_scancode(&KBC, key, new_b);
+                        switch (key & KT_MASK) {
+                            case (KT_NORMAL):
+                                if (kbscan_enabled && key) {
+                                    kbc_scancode(&KBC, key, new_b);
+                                }
+                                break;
                         }
                     }
                 }
