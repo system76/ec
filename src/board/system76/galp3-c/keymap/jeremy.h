@@ -50,7 +50,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_A), // 3
         K(K_TAB), // 4
         K(0), // 5
-        {K_SPACE, K_BKSP}, // 6
+        {K_SPACE, K_ESC}, // 6
         K(K_Q), // 7
     },
     {   //  5
@@ -117,7 +117,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(0), // 0
         K(K_UP), // 1
         K(K_PERIOD), // 2
-        {K_SEMICOLON, K_INSERT}, // 3
+        {K_SEMICOLON, K_BKSP}, // 3
         K(K_P), // 4
         K(K_0), // 5
         {K_F8, KT_SCI | SCI_BRIGHTNESS_DOWN}, // 6
