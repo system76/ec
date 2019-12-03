@@ -5,6 +5,7 @@
 #include <ec/gpio.h>
 
 static struct Gpio __code ACIN_N = GPIO(B, 6);
+static struct Gpio __code LID_SW_N = GPIO(D, 1);
 
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;
@@ -23,6 +24,14 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16((K) + 2, (V) >> 16)
 
     switch (addr) {
+        // Lid state and other flags
+        case 0x03:
+            if (gpio_get(&LID_SW_N)) {
+                // Lid is open
+                data |= 1 << 0;
+            }
+            break;
+
         // Handle AC adapter and battery present
         case 0x10:
             if (!gpio_get(&ACIN_N)) {
@@ -37,7 +46,7 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x1A, battery_full_capacity);
         ACPI_16(0x22, battery_design_voltage);
 
-        // Bypass status test in ACPI
+        // Bypass status test in ACPI - TODO
         case 0x26:
             data |= 1 << 1;
             break;
