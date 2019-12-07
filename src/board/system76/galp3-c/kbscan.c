@@ -1,3 +1,5 @@
+#include <mcs51/8052.h>
+
 #include <arch/delay.h>
 #include <board/kbc.h>
 #include <board/kbscan.h>
@@ -18,12 +20,23 @@ void kbscan_init(void) {
     KSOLGOEN = 0;
     KSOHGCTRL = 0xFF;
     KSOHGOEN = 0;
+
+    // Make sure timer 2 is stopped
+    T2CON = 0;
 }
 
 void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
     uint8_t layer = kbscan_layer;
     static uint8_t kbscan_last[KM_OUT] = { 0 };
+
+    // If timer 2 is finished
+    if (TF2) {
+        // Stop timer 2 running
+        TR2 = 0;
+        // Clear timer 2 finished flag
+        TF2 = 0;
+    }
 
     int i;
     for (i = 0; i < KM_OUT; i++) {
@@ -47,6 +60,26 @@ void kbscan_event(void) {
                 bool new_b = new & (1 << j);
                 bool last_b = last & (1 << j);
                 if (new_b != last_b) {
+                    // If timer 2 is running
+                    if (TR2) {
+                        // Debounce releases
+                        if (!new_b) {
+                            // Restore bit, so that this release can be handled later
+                            new |= (1 << j);
+                            // Skip processing of release
+                            continue;
+                        }
+                    } else {
+                        // Begin debouncing on press
+                        if (new_b) {
+                            // Run timer 2 for 20 ms
+                            // 65536-(20000 * 69 + 89)/90 = 0xC419
+                            TH2 = 0xC4;
+                            TL2 = 0x19;
+                            TR2 = 1;
+                        }
+                    }
+
                     uint16_t key = keymap(i, j, kbscan_layer);
                     DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
                     switch (key & KT_MASK) {
