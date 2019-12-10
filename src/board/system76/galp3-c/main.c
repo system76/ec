@@ -130,6 +130,8 @@ void main(void) {
     static struct Gpio __code SWI_N =           GPIO(E, 0);
     static struct Gpio __code SB_KBCRST_N =     GPIO(E, 6);
     static struct Gpio __code BT_EN =           GPIO(F, 3);
+    static struct Gpio __code USB_PWR_EN_N =    GPIO(F, 7);
+    static struct Gpio __code CCD_EN =          GPIO(G, 0);
     static struct Gpio __code PM_CLKRUN_N =     GPIO(H, 0);
     static struct Gpio __code BKL_EN =          GPIO(H, 2);
     static struct Gpio __code WLAN_EN =         GPIO(H, 5);
@@ -146,10 +148,14 @@ void main(void) {
     gpio_set(&SB_KBCRST_N, true);
     // Allow backlight to be turned on
     gpio_set(&BKL_EN, true);
+    // Enable camera
+    gpio_set(&CCD_EN, true);
     // Enable wireless
     gpio_set(&BT_EN, true);
     gpio_set(&WLAN_EN, true);
     gpio_set(&WLAN_PWR_EN, true);
+    // Enable right USB port
+    gpio_set(&USB_PWR_EN_N, false);
     // Assert SMI#, SCI#, and SWI#
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
