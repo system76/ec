@@ -119,7 +119,7 @@ void gpio_init() {
     // H_PECI
     GPCRF6 = GPIO_ALT;
     // USB_PWR_EN#
-    GPCRF7 = GPIO_IN;
+    GPCRF7 = GPIO_OUT;
     // CCD_EN
     GPCRG0 = GPIO_OUT | GPIO_UP;
     // 3G_EN
