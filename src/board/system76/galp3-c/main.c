@@ -115,6 +115,39 @@ void touchpad_event(struct Ps2 * ps2) {
     }
 }
 
+void lid_event(void) {
+    static struct Gpio __code LID_SW_N = GPIO(D, 1);
+
+    static bool send_sci = true;
+    static bool last = true;
+
+    // Check if the adapter line goes low
+    bool new = gpio_get(&LID_SW_N);
+    // If there has been a change, print
+    if (new != last) {
+        DEBUG("Lid ");
+        if (new) {
+            DEBUG("open\n");
+
+            //TODO: send SWI if needed
+        } else {
+            DEBUG("closed\n");
+        }
+
+        // Send SCI
+        send_sci = true;
+    }
+
+    if (send_sci) {
+        // Send SCI 0x1B for lid event
+        if (pmc_sci(&PMC_1, 0x1B)) {
+            send_sci = false;
+        }
+    }
+
+    last = new;
+}
+
 struct Gpio __code LED_SSD_N = GPIO(G, 6);
 struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
 
@@ -174,6 +207,8 @@ void main(void) {
         kbscan_event();
         // Passes through touchpad packets
         touchpad_event(&PS2_3);
+        // Handle lid close/open
+        lid_event();
         // Checks for keyboard/mouse packets from host
         kbc_event(&KBC);
         // Only run the following once out of every 256 loops
