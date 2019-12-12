@@ -159,7 +159,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_ENTER), // 2
         K(0), // 3
         K(K_DOWN), // 4
-        K(K_F12), // 5
+        {K_F12, KT_SCI | SCI_SUSPEND}, // 5
         K(K_END), // 6
         K(K_PGDN), // 7
     },

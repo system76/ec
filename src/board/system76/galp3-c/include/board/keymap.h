@@ -29,6 +29,7 @@ uint16_t keymap_translate(uint16_t key);
 #define SCI_BRIGHTNESS_DOWN (0x11)
 #define SCI_BRIGHTNESS_UP (0x12)
 #define SCI_AIRPLANE_MODE (0x14)
+#define SCI_SUSPEND (0x15)
 
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
