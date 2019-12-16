@@ -98,7 +98,10 @@ void kbscan_event(void) {
                     }
 
                     uint16_t key = keymap(i, j, kbscan_layer);
-                    WARN("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                    DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                    if (!key) {
+                        WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
+                    }
                     switch (key & KT_MASK) {
                         case (KT_FN):
                             if (new_b) layer = 1;
