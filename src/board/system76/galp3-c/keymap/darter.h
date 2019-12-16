@@ -45,10 +45,10 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
     },
     {   //  4
         K(K_Z), // 0
-        K(0), // 1
+        K(0 /* NUM_MINUS */), // 1
         K(0), // 2
-        K(0), // 3
-        K(0), // 4
+        K(0 /* NUM_8 */), // 3
+        K(0 /* NUM_2 */), // 4
         K(0), // 5
         K(0), // 6
         K(0), // 7
@@ -58,9 +58,9 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_W), // 1
         K(0), // 2
         K(0), // 3
-        K(0), // 4
-        K(0), // 5
-        K(0), // 6
+        K(0 /* NUMLK */), // 4
+        K(0 /* NUM_4 */), // 5
+        K(0 /* NUM_6 */), // 6
         K(K_CAPS), // 7
     },
     {   //  6
@@ -84,7 +84,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_ESC), // 7
     },
     {   //  8
-        K(0), // 0
+        K(0 /* NUM_0 */), // 0
         K(K_J), // 1
         K(K_BRACE_CLOSE), // 2
         K(K_9), // 3
@@ -94,17 +94,17 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_F1), // 7
     },
     {   //  9
-        K(0), // 0
+        K(0 /* NUM_PERIOD */), // 0
         K(K_F), // 1
         K(K_H), // 2
         K(K_F2), // 3
         K(0), // 4
-        K(0), // 5
+        K(0 /* NUM_ENTER */), // 5
         K(K_QUOTE), // 6
         K(K_B), // 7
     },
     {   // 10
-        K(0), // 0
+        K(0 /* NUM_SLASH */), // 0
         K(K_COMMA), // 1
         K(0), // 2
         K(K_BRACE_OPEN), // 3
@@ -114,7 +114,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_2), // 7
     },
     {   // 11
-        K(0), // 0
+        K(0 /* NUM_ASTERISK */), // 0
         K(K_PERIOD), // 1
         K(K_7), // 2
         K(K_D), // 3
@@ -146,9 +146,9 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
     {   // 14
         K(K_Q), // 0
         K(K_F10), // 1
-        K(0), // 2
+        K(0 /* NUM_7 */), // 2
         K(K_F4), // 3
-        K(0), // 4
+        K(0 /* NUM_5 */), // 4
         K(0), // 5
         K(K_DEL), // 6
         K(K_4), // 7
@@ -157,16 +157,16 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_APP), // 0
         K(K_X), // 1
         K(K_ENTER), // 2
-        K(0), // 3
+        K(0 /* NUM_PLUS */), // 3
         K(K_U), // 4
-        K(0), // 5
+        K(0 /* NUM_9 */), // 5
         K(K_3), // 6
         K(K_BKSP), // 7
     },
     {   // 16
         K(K_END), // 0
         K(K_HOME), // 1
-        K(0), // 2
+        K(K_C), // 2
         K(K_UP), // 3
         K(K_DOWN), // 4
         K(K_TICK), // 5
@@ -176,9 +176,9 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
     {   // 17
         K(K_G), // 0
         K(K_EQUALS), // 1
-        K(K_C), // 2
+        K(0), // 2
         K(KT_FN), // 3
-        K(0), // 4
+        K(0 /* NUM_1 */), // 4
         K(K_LEFT), // 5
         K(K_RIGHT), // 6
         K(0), // 7
