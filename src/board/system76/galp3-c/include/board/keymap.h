@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-// Keymap output pins
-#define KM_OUT 16
+// Keymap output pins (16 for galago, 18 for darter)
+#define KM_OUT 18
 // Keymap input pins
 #define KM_IN 8
 // Keymap layers (normal, Fn)

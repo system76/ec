@@ -1,12 +1,6 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 
-#define GPIO_ALT 0x00
-#define GPIO_IN 0x80
-#define GPIO_OUT 0x40
-#define GPIO_UP 0x04
-#define GPIO_DOWN 0x02
-
 void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;
@@ -62,12 +56,12 @@ void gpio_init() {
     GPCRC1 = GPIO_IN | GPIO_UP;
     // SMD_VGA_THERM
     GPCRC2 = GPIO_IN | GPIO_UP;
-    // NC
-    GPCRC3 = GPIO_IN | GPIO_UP;
+    // KSO16 (Darter)
+    GPCRC3 = GPIO_IN;
     // CNVI_DET#
     GPCRC4 = GPIO_OUT | GPIO_UP;
-    // NC
-    GPCRC5 = GPIO_OUT | GPIO_UP;
+    // KSO17 (Darter)
+    GPCRC5 = GPIO_IN;
     // PM_PWROK
     GPCRC6 = GPIO_OUT;
     // LED_ACIN

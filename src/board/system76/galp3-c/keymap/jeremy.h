@@ -1,4 +1,4 @@
-// Jeremy's layout - http://www.keyboard-layout-editor.com/#/gists/43e77d2570f1c1c210bbdd69c106f961
+// Jeremy's layout - http://www.keyboard-layout-editor.com/#/gists/fe00274727fc01b78a79d79473cd547c
 
 #define K(V) {V, V}
 

@@ -1,4 +1,4 @@
-// Default layout
+// Default layout - http://www.keyboard-layout-editor.com/#/gists/6aec6d441a039b76ec0895bd6bbda68d
 
 #define K(V) {V, V}
 

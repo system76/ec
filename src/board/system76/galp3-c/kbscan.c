@@ -1,6 +1,7 @@
 #include <mcs51/8052.h>
 
 #include <arch/delay.h>
+#include <board/gpio.h>
 #include <board/kbc.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
@@ -15,11 +16,12 @@ void kbscan_init(void) {
 
     // Set all outputs to GPIO mode, low, and inputs
     KSOL = 0;
-    KSOH1 = 0;
     KSOLGCTRL = 0xFF;
     KSOLGOEN = 0;
+    KSOH1 = 0;
     KSOHGCTRL = 0xFF;
     KSOHGOEN = 0;
+    KSOH2 = 0;
 
     // Make sure timer 2 is stopped
     T2CON = 0;
@@ -42,12 +44,27 @@ void kbscan_event(void) {
     for (i = 0; i < KM_OUT; i++) {
         // Set current line as output
         if (i < 8) {
+            KSOLGOEN = 0;
             KSOLGOEN = 1 << i;
-            KSOHGOEN = 0;
+            GPCRC3 = GPIO_IN;
+            GPCRC5 = GPIO_IN;
         } else if (i < 16) {
             KSOLGOEN = 0;
             KSOHGOEN = 1 << (i - 8);
+            GPCRC3 = GPIO_IN;
+            GPCRC5 = GPIO_IN;
+        } else if (i == 16) {
+            KSOLGOEN = 0;
+            KSOHGOEN = 0;
+            GPCRC3 = GPIO_OUT;
+            GPCRC5 = GPIO_IN;
+        } else if (i == 17) {
+            KSOLGOEN = 0;
+            KSOHGOEN = 0;
+            GPCRC3 = GPIO_IN;
+            GPCRC5 = GPIO_OUT;
         }
+        GPDRC &= ~((1 << 3) | (1 << 5));
 
         // TODO: figure out optimal delay
         delay_ticks(10);
@@ -81,7 +98,7 @@ void kbscan_event(void) {
                     }
 
                     uint16_t key = keymap(i, j, kbscan_layer);
-                    DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                    WARN("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
                     switch (key & KT_MASK) {
                         case (KT_FN):
                             if (new_b) layer = 1;
@@ -144,6 +161,8 @@ void kbscan_event(void) {
     // Reset all lines to inputs
     KSOLGOEN = 0;
     KSOHGOEN = 0;
+    GPCRC3 = GPIO_IN;
+    GPCRC5 = GPIO_IN;
 
     // TODO: figure out optimal delay
     delay_ticks(10);
