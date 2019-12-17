@@ -182,4 +182,24 @@ uint16_t keymap_translate(uint16_t key);
 #define K_DOWN (K_E0 | 0x72)
 #define K_RIGHT (K_E0 | 0x74)
 
+// Numpad
+
+#define K_NUM_LOCK (0x77)
+#define K_NUM_SLASH (K_E0 | 0x4A)
+#define K_NUM_ASTERISK (0x7C)
+#define K_NUM_MINUS (0x7B)
+#define K_NUM_PLUS (0x79)
+#define K_NUM_PERIOD (0x71)
+#define K_NUM_ENTER (K_E0 | 0x5A)
+#define K_NUM_0 (0x70)
+#define K_NUM_1 (0x69)
+#define K_NUM_2 (0x72)
+#define K_NUM_3 (0x7A)
+#define K_NUM_4 (0x6B)
+#define K_NUM_5 (0x73)
+#define K_NUM_6 (0x74)
+#define K_NUM_7 (0x6C)
+#define K_NUM_8 (0x75)
+#define K_NUM_9 (0x7D)
+
 #endif // _BOARD_KEYMAP_H
