@@ -136,7 +136,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
     {   // 13
         K(0), // 0
         K(K_V), // 1
-        K(0), // 2
+        K(0 /* PRTSC */), // 2
         {K_F9, KT_SCI | SCI_BRIGHTNESS_UP}, // 3
         K(K_N), // 4
         K(K_O), // 5
@@ -149,7 +149,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_NUM_7), // 2
         K(K_F4), // 3
         K(K_NUM_5), // 4
-        K(0), // 5
+        K(K_INSERT), // 5
         K(K_DEL), // 6
         K(K_4), // 7
     },
@@ -176,7 +176,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
     {   // 17
         K(K_G), // 0
         K(K_EQUALS), // 1
-        K(0), // 2
+        K(K_NUM_3), // 2
         K(KT_FN), // 3
         K(K_NUM_1), // 4
         K(K_LEFT), // 5
