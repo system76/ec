@@ -91,7 +91,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_T), // 4
         K(K_F7), // 5
         K(K_8), // 6
-        K(K_F1), // 7
+        {K_F1, K_TOUCHPAD}, // 7
     },
     {   //  9
         K(K_NUM_PERIOD), // 0
@@ -169,7 +169,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_C), // 2
         K(K_UP), // 3
         K(K_DOWN), // 4
-        K(K_TICK), // 5
+        {K_TICK, K_PLAY_PAUSE}, // 5
         {K_F11, KT_SCI | SCI_AIRPLANE_MODE}, // 6
         {K_F12, KT_SCI | SCI_SUSPEND}, // 7
     },

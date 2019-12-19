@@ -80,7 +80,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_Y), // 3
         K(K_2), // 4
         K(K_1), // 5
-        K(K_TICK), // 6
+        {K_TICK, K_PLAY_PAUSE}, // 6
         K(K_ESC), // 7
     },
     {   //  8
@@ -91,7 +91,7 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_4), // 4
         K(K_3), // 5
         K(K_F2), // 6
-        K(K_F1), // 7
+        {K_F1, K_TOUCHPAD}, // 7
     },
     {   //  9
         K(K_W), // 0

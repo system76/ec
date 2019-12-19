@@ -36,12 +36,14 @@ uint16_t keymap_translate(uint16_t key);
 // Should send 0xE0 before scancode bytes
 #define K_E0 (0x0100)
 
-
 // Hotkeys
 
+#define K_PLAY_PAUSE (K_E0 | 0x34)
 #define K_MUTE (K_E0 | 0x23)
 #define K_VOLUME_DOWN (K_E0 | 0x21)
 #define K_VOLUME_UP (K_E0 | 0x32)
+// Custom scancode
+#define K_TOUCHPAD (K_E0 | 0x57)
 
 // Function keys
 
