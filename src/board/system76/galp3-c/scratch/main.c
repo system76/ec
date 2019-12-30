@@ -34,14 +34,6 @@ enum PmcState {
     PMC_STATE_WRITE,
 };
 
-void puthex(uint8_t data) {
-    if (data <= 9) {
-        putchar(data + '0');
-    } else {
-        putchar(data + 'A');
-    }
-}
-
 static void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
 
@@ -49,9 +41,7 @@ static void pmc_event(struct Pmc * pmc) {
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
-            puthex((data >> 4) & 0xF);
-            puthex(data & 0xF);
-            putchar('\n');
+            printf_tiny("%x\n", data);
 
             switch (state) {
                 case PMC_STATE_DEFAULT:
@@ -72,6 +62,7 @@ static void pmc_event(struct Pmc * pmc) {
                             // Read data
                             flash_transaction(0x7FFFFD00, &data, 1, true);
                             pmc_write(pmc, data);
+                            printf_tiny("=%x\n", data);
                             break;
                         case 0x05:
                             // Disable follow
