@@ -1,6 +1,5 @@
 #include <stdbool.h>
 
-#include <board/cpu.h>
 #include <ec/ps2.h>
 
 #define PS2(NUM) { \
@@ -10,7 +9,7 @@
     .data = &PSDAT ## NUM, \
 }
 
-#define TIMEOUT (F_CPU/1000)
+#define TIMEOUT 1000
 
 #define PSSTS_TIMEOUT_ERR (1 << 6)
 #define PSSTS_FRAME_ERR (1 << 5)

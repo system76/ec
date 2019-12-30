@@ -1,6 +1,5 @@
 #include <stdbool.h>
 
-#include <board/cpu.h>
 #include <common/i2c.h>
 #include <ec/smbus.h>
 
