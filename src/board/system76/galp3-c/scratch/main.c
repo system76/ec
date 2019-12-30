@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdint.h>
 
 #include <scratch/pmc.h>
@@ -33,6 +34,14 @@ enum PmcState {
     PMC_STATE_WRITE,
 };
 
+void puthex(uint8_t data) {
+    if (data <= 9) {
+        putchar(data + '0');
+    } else {
+        putchar(data + 'A');
+    }
+}
+
 static void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
 
@@ -40,6 +49,10 @@ static void pmc_event(struct Pmc * pmc) {
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
+            puthex((data >> 4) & 0xF);
+            puthex(data & 0xF);
+            putchar('\n');
+
             switch (state) {
                 case PMC_STATE_DEFAULT:
                     switch (data) {
