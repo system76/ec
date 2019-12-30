@@ -3,7 +3,7 @@
 
 #include <common/macro.h>
 
-// Include scratch ROM, must be less than 1024 bytes, controlled by makefile
+// Include scratch ROM, must be less than 2048 bytes, controlled by makefile
 uint8_t __code scratch_rom[] = {
     #include <scratch.h>
 };
@@ -72,9 +72,9 @@ void scratch_trampoline(void) {
         SCAR3L = 0x00;
         SCAR3M = 0x06;
         SCAR3H = 0x00;
-        // Set scratch RAM 4 mapping at 0x0800 and enable
+        // Set scratch RAM 4 mapping at 0x0700 and enable
         SCAR4L = 0x00;
-        SCAR4M = 0x08;
+        SCAR4M = 0x07;
         SCAR4H = 0x00;
     }
 
