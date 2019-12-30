@@ -42,7 +42,6 @@ static void pmc_event(struct Pmc * pmc) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
             printf_tiny("%x\n", data);
-
             switch (state) {
                 case PMC_STATE_DEFAULT:
                     switch (data) {
@@ -95,6 +94,7 @@ static void pmc_event(struct Pmc * pmc) {
 
 // Main program while running in scratch ROM
 void main(void) {
+    printf_tiny("SCRATCH\n");
 	for (;;) {
         pmc_event(&PMC_1);
     }
