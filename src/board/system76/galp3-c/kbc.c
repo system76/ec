@@ -10,7 +10,7 @@ void kbc_init(void) {
     *(KBC.control) = 0;
 }
 
-#define KBC_TIMEOUT 1000
+#define KBC_TIMEOUT 10000
 
 // System flag
 static bool kbc_system = false;

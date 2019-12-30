@@ -9,7 +9,7 @@ void pmc_init(void) {
     *(PMC_2.control) = 0x41;
 }
 
-#define PMC_TIMEOUT 1000
+#define PMC_TIMEOUT 10000
 
 enum PmcState {
     PMC_STATE_DEFAULT,

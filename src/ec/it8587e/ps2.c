@@ -9,7 +9,7 @@
     .data = &PSDAT ## NUM, \
 }
 
-#define TIMEOUT 1000
+#define PS2_TIMEOUT 10000
 
 #define PSSTS_TIMEOUT_ERR (1 << 6)
 #define PSSTS_FRAME_ERR (1 << 5)
@@ -45,7 +45,7 @@ static int ps2_transaction(struct Ps2 * ps2, uint8_t * data, int length, bool re
         }
 
         uint32_t timeout;
-        for (timeout = TIMEOUT; timeout > 0; timeout--) {
+        for (timeout = PS2_TIMEOUT; timeout > 0; timeout--) {
             uint8_t status = *(ps2->status);
             // If an error happened, clear status and return the error
             if (status & PSSTS_ALL_ERR) {

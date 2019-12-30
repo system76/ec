@@ -4,7 +4,7 @@
 #include <ec/smbus.h>
 
 //TODO: find best value
-#define I2C_TIMEOUT 1000
+#define I2C_TIMEOUT 10000
 
 void i2c_reset(bool kill) {
     if (HOSTAA & HOSTA_BUSY) {
