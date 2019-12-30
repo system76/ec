@@ -10,6 +10,7 @@
 
 int putchar(int c) {
     unsigned char byte = (unsigned char)c;
+    if (byte == '\n') putchar('\r');
 #ifdef SERIAL_DEBUGGER
     SBUF = byte;
 #endif
