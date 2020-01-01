@@ -6,22 +6,6 @@
 
 #include <arch/gpio.h>
 
-// Mapping of 24-pin ribbon cable to GPIOs
-static struct Gpio gpios[24] = {
-    GPIO(B, 1), GPIO(B, 0),
-    GPIO(B, 3), GPIO(B, 2),
-    GPIO(L, 1), GPIO(L, 0),
-    GPIO(L, 3), GPIO(L, 2),
-    GPIO(L, 5), GPIO(L, 4),
-    GPIO(L, 7), GPIO(L, 6),
-    GPIO(G, 1), GPIO(G, 0),
-    GPIO(D, 7), GPIO(G, 2),
-    GPIO(C, 1), GPIO(C, 0),
-    GPIO(C, 3), GPIO(C, 2),
-    GPIO(C, 5), GPIO(C, 4),
-    GPIO(C, 7), GPIO(C, 6)
-};
-
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm
 struct ParallelPins {
     // Data (KSO0 - KSO7) - bi-directional
@@ -73,6 +57,22 @@ static struct ParallelPins pins = {
     .addr_n = 8,
     .strap_0 = 11,
     .strap_1 = 12,
+};
+
+// Mapping of 24-pin ribbon cable to GPIOs
+static struct Gpio gpios[24] = {
+    GPIO(B, 1), GPIO(B, 0),
+    GPIO(B, 3), GPIO(B, 2),
+    GPIO(L, 1), GPIO(L, 0),
+    GPIO(L, 3), GPIO(L, 2),
+    GPIO(L, 5), GPIO(L, 4),
+    GPIO(L, 7), GPIO(L, 6),
+    GPIO(G, 1), GPIO(G, 0),
+    GPIO(D, 7), GPIO(G, 2),
+    GPIO(C, 1), GPIO(C, 0),
+    GPIO(C, 3), GPIO(C, 2),
+    GPIO(C, 5), GPIO(C, 4),
+    GPIO(C, 7), GPIO(C, 6)
 };
 
 #define PIN_GPIO(N) \
