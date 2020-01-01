@@ -22,6 +22,7 @@ static struct Gpio gpios[24] = {
     GPIO(C, 7), GPIO(C, 6)
 };
 
+// See http://efplus.com/techref/io/parallel/1284/eppmode.htm
 struct ParallelPins {
     // Data (KSO0 - KSO7) - bi-directional
     uint8_t d0;
