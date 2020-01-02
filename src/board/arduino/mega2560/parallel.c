@@ -41,8 +41,41 @@
     /*  1K-Ohm pull-down resistor */ \
     PIN(strap_1, 12)
 
+#define DATA_BITS \
+    DATA_BIT(0) \
+    DATA_BIT(1) \
+    DATA_BIT(2) \
+    DATA_BIT(3) \
+    DATA_BIT(4) \
+    DATA_BIT(5) \
+    DATA_BIT(6) \
+    DATA_BIT(7)
+
+// Flip odd and even pins
+//#define FLIP
+
+#ifdef FLIP
+
+// Mapping of 24-pin ribbon cable to GPIOs (flipped)
+static struct Gpio GPIOS[24] = {
+    GPIO(B, 0), GPIO(B, 1), 
+    GPIO(B, 2), GPIO(B, 3), 
+    GPIO(L, 0), GPIO(L, 1), 
+    GPIO(L, 2), GPIO(L, 3), 
+    GPIO(L, 4), GPIO(L, 5), 
+    GPIO(L, 6), GPIO(L, 7), 
+    GPIO(G, 0), GPIO(G, 1), 
+    GPIO(G, 2), GPIO(D, 7), 
+    GPIO(C, 0), GPIO(C, 1), 
+    GPIO(C, 2), GPIO(C, 3), 
+    GPIO(C, 4), GPIO(C, 5), 
+    GPIO(C, 6), GPIO(C, 7)
+};
+
+#else // FLIP
+
 // Mapping of 24-pin ribbon cable to GPIOs
-static struct Gpio gpios[24] = {
+static struct Gpio GPIOS[24] = {
     GPIO(B, 1), GPIO(B, 0),
     GPIO(B, 3), GPIO(B, 2),
     GPIO(L, 1), GPIO(L, 0),
@@ -57,10 +90,20 @@ static struct Gpio gpios[24] = {
     GPIO(C, 7), GPIO(C, 6)
 };
 
+
+#endif // FLIP
+
 // Parallel struct definition
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm
 struct Parallel {
     #define PIN(N, P) struct Gpio * N;
+    PINS
+    #undef PIN
+};
+
+// Parallel struct instance
+static struct Parallel PORT = {
+    #define PIN(N, P) .N = &GPIOS[P - 1],
     PINS
     #undef PIN
 };
@@ -106,17 +149,7 @@ void parallel_reset(struct Parallel * port) {
     gpio_set(port->reset_n, true);
 }
 
-#define DATA_BITS \
-    DATA_BIT(0) \
-    DATA_BIT(1) \
-    DATA_BIT(2) \
-    DATA_BIT(3) \
-    DATA_BIT(4) \
-    DATA_BIT(5) \
-    DATA_BIT(6) \
-    DATA_BIT(7)
-
-//TODO: address cycle, read cycle, timeout
+//TODO: timeout
 int parallel_transaction(struct Parallel * port, uint8_t * data, int length, bool read, bool addr) {
     int i;
     for (i = 0; i < length; i++) {
@@ -184,14 +217,153 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
     return i;
 }
 
-// Parallel struct instance
-static struct Parallel PORT = {
-    #define PIN(N, P) .N = &gpios[P - 1],
-    PINS
-    #undef PIN
-};
+void parallel_host(void) {
+    printf("Parallel host. Reset to exit\n");
 
-void parallel(void) {
     struct Parallel * port = &PORT;
+    parallel_reset(port);
+
+    for (;;) {
+        int c = getchar();
+        if (c < 0) break;
+
+        putchar(c);
+        if (c == '\r') {
+            putchar('\n');
+        }
+
+        uint8_t byte = (uint8_t)c;
+        parallel_transaction(port, &byte, 1, false, false);
+    }
+
     parallel_hiz(port);
 }
+
+void parallel_peripheral(void) {
+    printf("Parallel peripheral (WIP, writes only). Reset to exit\n");
+
+    struct Parallel * port = &PORT;
+    parallel_hiz(port);
+
+    // Set wait line to low output
+    gpio_set_dir(port->wait_n, true);
+
+    // Strobes are high when inactive
+    bool last_data_n = true;
+    bool last_addr_n = true;
+
+    for (;;) {
+        // Read data strobe and edge detect
+        bool data_n = gpio_get(port->data_n);
+        bool data_edge = last_data_n && !data_n;
+
+        // Read address strobe and edge detect
+        bool addr_n = gpio_get(port->addr_n);
+        bool addr_edge = last_addr_n && !addr_n;
+
+        // If not in reset
+        if (gpio_get(port->reset_n)) {
+            // On the falling edge of either strobe
+            if (data_edge || addr_edge) {
+                // Check if read or write cycle
+                bool read = gpio_get(port->write_n);
+        
+                // Read data
+                uint8_t byte = 0;
+                #define DATA_BIT(B) \
+                    if (gpio_get(port->d ## B)) byte |= (1 << B);
+                DATA_BITS
+                #undef DATA_BIT
+
+                //TODO: Check if strobe fell while reading
+
+                // Set wait line high
+                gpio_set(port->wait_n, true);
+
+                if (data_edge) {
+                    putchar('d');
+                }
+
+                if (addr_edge) {
+                    putchar('a');
+                }
+
+                if (read) {
+                    putchar('<');
+                } else {
+                    putchar('>');
+                }
+
+                printf("%02X\n", byte);
+
+                // Delay 5 usecs
+                _delay_us(5);
+
+                // Set wait line low
+                gpio_set(port->wait_n, false);
+            }
+        }
+
+        last_data_n = data_n;
+        last_addr_n = addr_n;
+    }
+}
+
+void parallel_spy(void) {
+    printf("Parallel spy. Reset to exit\n");
+
+    struct Parallel * port = &PORT;
+    parallel_hiz(port);
+
+    // Strobes are high when inactive
+    bool last_data_n = true;
+    bool last_addr_n = true;
+
+    for (;;) {
+        // Read data strobe and edge detect
+        bool data_n = gpio_get(port->data_n);
+        bool data_edge = last_data_n && !data_n;
+
+        // Read address strobe and edge detect
+        bool addr_n = gpio_get(port->addr_n);
+        bool addr_edge = last_addr_n && !addr_n;
+
+        // If not in reset
+        if (gpio_get(port->reset_n)) {
+            // On the falling edge of either strobe
+            if (data_edge || addr_edge) {
+                // Check if read or write cycle
+                bool read = gpio_get(port->write_n);
+        
+                // Read data
+                uint8_t byte = 0;
+                #define DATA_BIT(B) \
+                    if (gpio_get(port->d ## B)) byte |= (1 << B);
+                DATA_BITS
+                #undef DATA_BIT
+
+                //TODO: Check if strobe fell while reading
+
+                if (data_edge) {
+                    putchar('d');
+                }
+
+                if (addr_edge) {
+                    putchar('a');
+                }
+
+                if (read) {
+                    putchar('<');
+                } else {
+                    putchar('>');
+                }
+
+                printf("%02X\n", byte);
+            }
+        }
+
+        last_data_n = data_n;
+        last_addr_n = addr_n;
+    }
+}
+

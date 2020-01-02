@@ -8,20 +8,16 @@
 
 void init(void) {
     uart_stdio_init(0, __CONSOLE_BAUD__);
-    i2c_init(50000);
-}
-
-static void i2c_slave_new() {}
-
-static void i2c_slave_recv(uint8_t data) {
-    printf("%c", data);
-}
-
-static uint8_t i2c_slave_send() {
-    return 0;
+    // Disable SPI
+    SPCR = 0;
 }
 
 struct Gpio LED = GPIO(B, 7);
+
+//TODO: .h file
+void parallel_host(void);
+void parallel_peripheral(void);
+void parallel_spy(void);
 
 int main(void) {
     init();
@@ -30,17 +26,16 @@ int main(void) {
     gpio_set(&LED, false);
     printf("Hello from System76 EC for the Arduino Mega 2560!\n");
 
-    battery_debug();
-
     for (;;) {
-        i2c_slave_init(0x76, i2c_slave_new, i2c_slave_recv, i2c_slave_send);
+        printf("Press a key to select parallel mode:\n");
+        printf("  h = host, p = peripheral, s = spy\n");
         int c = getchar();
-        i2c_slave_stop();
-        if (c == '\r') {
-            putchar('\n');
-            battery_debug();
-        } else if (c > 0) {
-            putchar(c);
+        if (c == 'h') {
+            parallel_host();
+        } else if (c == 'p') {
+            parallel_peripheral();
+        } else if (c == 's') {
+            parallel_spy();
         }
     }
 }
