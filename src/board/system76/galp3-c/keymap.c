@@ -2,7 +2,7 @@
 #include <common/debug.h>
 
 // Set the desired keymap here
-#include "keymap/default.h"
+#include "keymap/jeremy.h"
 
 uint16_t keymap(int output, int input, int layer) {
     if (output < KM_OUT && input < KM_IN && layer < KM_LAY) {

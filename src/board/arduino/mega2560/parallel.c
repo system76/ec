@@ -51,35 +51,8 @@
     DATA_BIT(6) \
     DATA_BIT(7)
 
-// Flip odd and even pins
-//#define FLIP
-
-#ifdef FLIP
-
-// Mapping of 24-pin ribbon cable to GPIOs (flipped)
-static struct Gpio GPIOS[24] = {
-    GPIO(B, 0), GPIO(B, 1), 
-    GPIO(B, 2), GPIO(B, 3), 
-    GPIO(L, 0), GPIO(L, 1), 
-    GPIO(L, 2), GPIO(L, 3), 
-    GPIO(L, 4), GPIO(L, 5), 
-    GPIO(L, 6), GPIO(L, 7), 
-    GPIO(G, 0), GPIO(G, 1), 
-    GPIO(G, 2), GPIO(D, 7), 
-    GPIO(C, 0), GPIO(C, 1), 
-    GPIO(C, 2), GPIO(C, 3), 
-    GPIO(C, 4), GPIO(C, 5), 
-    GPIO(C, 6), GPIO(C, 7)
-};
-
-#else // FLIP
-
 // Mapping of 24-pin ribbon cable to GPIOs
 static struct Gpio GPIOS[24] = {
-    GPIO(B, 1), GPIO(B, 0),
-    GPIO(B, 3), GPIO(B, 2),
-    GPIO(L, 1), GPIO(L, 0),
-    GPIO(L, 3), GPIO(L, 2),
     GPIO(L, 5), GPIO(L, 4),
     GPIO(L, 7), GPIO(L, 6),
     GPIO(G, 1), GPIO(G, 0),
@@ -87,11 +60,12 @@ static struct Gpio GPIOS[24] = {
     GPIO(C, 1), GPIO(C, 0),
     GPIO(C, 3), GPIO(C, 2),
     GPIO(C, 5), GPIO(C, 4),
-    GPIO(C, 7), GPIO(C, 6)
+    GPIO(C, 7), GPIO(C, 6),
+    GPIO(A, 6), GPIO(A, 7),
+    GPIO(A, 4), GPIO(A, 5),
+    GPIO(A, 2), GPIO(A, 3),
+    GPIO(A, 0), GPIO(A, 1),
 };
-
-
-#endif // FLIP
 
 // Parallel struct definition
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm
@@ -124,8 +98,8 @@ void parallel_reset(struct Parallel * port) {
     // Set reset line low
     gpio_set_dir(port->reset_n, true);
 
-    // Wait 5 microseconds
-    _delay_us(5);
+    // Wait 1 microsecond
+    _delay_us(1);
     
     // Make sure strobes are high outputs
     gpio_set(port->data_n, true);
@@ -140,10 +114,15 @@ void parallel_reset(struct Parallel * port) {
     // Pull up wait line
     gpio_set(port->wait_n, true);
 
+    // Pull up data lines
+    #define DATA_BIT(B) gpio_set(port->d ## B, true);
+    DATA_BITS
+    #undef DATA_BIT
+
     //TODO: something with straps
     
-    // Wait 5 microseconds
-    _delay_us(5);
+    // Wait 1 microsecond
+    _delay_us(1);
 
     // Set reset line high, ending reset
     gpio_set(port->reset_n, true);
@@ -169,8 +148,8 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             #undef DATA_BIT
         }
 
-        // Wait 5 microseconds
-        _delay_us(5);
+        // Wait 1 microsecond
+        _delay_us(1);
 
         if (addr) {
             // Set address strobe low
@@ -200,21 +179,76 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             gpio_set(port->data_n, true);
         }
 
-        // Wait 5 microseconds
-        _delay_us(5);
+        // Wait 1 microsecond
+        _delay_us(1);
 
-        // Reset data lines to high impedance inputs
+        // Reset data lines to pull-up inputs
         #define DATA_BIT(B) \
             gpio_set_dir(port->d ## B, false); \
-            gpio_set(port->d ## B, false);
+            gpio_set(port->d ## B, true);
         DATA_BITS
         #undef DATA_BIT
 
         // Set write line high
-        gpio_set(port->data_n, true);
+        gpio_set(port->write_n, true);
     }
 
     return i;
+}
+
+#define parallel_get_address(P, D, L) parallel_transaction(P, D, L, true, true)
+#define parallel_set_address(P, D, L) parallel_transaction(P, D, L, false, true)
+#define parallel_read(P, D, L) parallel_transaction(P, D, L, true, false)
+#define parallel_write(P, D, L) parallel_transaction(P, D, L, false, false)
+
+int parallel_read_at(struct Parallel * port, uint8_t address, uint8_t * data, int length) {
+    int res;
+
+    res = parallel_set_address(port, &address, 1);
+    if (res < 0) return res;
+
+    return parallel_read(port, data, length);
+}
+
+int parallel_write_at(struct Parallel * port, uint8_t address, uint8_t * data, int length) {
+    int res;
+
+    res = parallel_set_address(port, &address, 1);
+    if (res < 0) return res;
+
+    return parallel_write(port, data, length);
+}
+
+int parallel_flash_transaction(struct Parallel * port, uint32_t address, uint8_t * data, int length, bool read) {
+    int res;
+    uint8_t byte;
+
+    // ECINDAR3
+    byte = (uint8_t)(address >> 24);
+    res = parallel_write_at(port, 7, &byte, 1);
+    if (res < 0) return res;
+
+    // ECINDAR2
+    byte = (uint8_t)(address >> 16);
+    res = parallel_write_at(port, 6, &byte, 1);
+    if (res < 0) return res;
+    
+    // ECINDAR1
+    byte = (uint8_t)(address >> 8);
+    res = parallel_write_at(port, 5, &byte, 1);
+    if (res < 0) return res;
+
+    // ECINDAR0
+    byte = (uint8_t)(address);
+    res = parallel_write_at(port, 4, &byte, 1);
+    if (res < 0) return res;
+
+    // ECINDDR
+    if (read) {
+        return parallel_read_at(port, 8, data, length);
+    } else {
+        return parallel_write_at(port, 8, data, length);
+    }
 }
 
 void parallel_host(void) {
@@ -227,13 +261,34 @@ void parallel_host(void) {
         int c = getchar();
         if (c < 0) break;
 
-        putchar(c);
         if (c == '\r') {
-            putchar('\n');
-        }
+            printf("Reading chip ID\n");
 
-        uint8_t byte = (uint8_t)c;
-        parallel_transaction(port, &byte, 1, false, false);
+            uint8_t id[3];
+
+            parallel_read_at(port, 0, &id[0], 1);
+            parallel_read_at(port, 1, &id[1], 1);
+            parallel_read_at(port, 2, &id[2], 1);
+
+            printf("  ID %02X%02X version %d\n", id[0], id[1], id[2]);
+
+            uint8_t byte;
+
+            byte = 0;
+            parallel_flash_transaction(port, 0x7FFFFE00, &byte, 1, false);
+
+            uint8_t command[5] = {0xB, 0, 0, 0, 0};
+            parallel_flash_transaction(port, 0x7FFFFD00, command, 5, false);
+
+            int i;
+            for (i = 0; i < 256; i++) {
+                parallel_flash_transaction(port, 0x7FFFFD00, &byte, 1, true);
+                printf("%02X: %02X\n", i, byte);
+            }
+
+            byte = 0;
+            parallel_flash_transaction(port, 0x7FFFFE00, &byte, 1, false);
+        }
     }
 
     parallel_hiz(port);
@@ -296,8 +351,8 @@ void parallel_peripheral(void) {
 
                 printf("%02X\n", byte);
 
-                // Delay 5 usecs
-                _delay_us(5);
+                // Wait 1 microsecond
+                _delay_us(1);
 
             }
         }
@@ -365,3 +420,62 @@ void parallel_spy(void) {
     }
 }
 
+int parallel_main(void) {
+    int res = 0;
+
+    struct Parallel * port = &PORT;
+    parallel_reset(port);
+
+    uint8_t b;
+    int c;
+    for (;;) {
+        c = getchar();
+        if (c < 0) goto err;
+
+        switch (c) {
+            // Echo
+            case 'E':
+                break;
+
+            // Set address
+            case 'A':
+                c = getchar();
+                if (c < 0) goto err;
+
+                b = (uint8_t)c;
+                res = parallel_set_address(port, &b, 1);
+                if (res < 0) goto err;
+
+                break;
+
+            // Read data
+            case 'R':
+                res = parallel_read(port, &b, 1);
+                if (res < 0) goto err;
+
+                c = putchar((int)b);
+                if (c < 0) goto err;
+
+                break;
+
+            // Write data
+            case 'W':
+                c = getchar();
+                if (c < 0) goto err;
+
+                b = (uint8_t)c;
+                res = parallel_write(port, &b, 1);
+                if (res < 0) goto err;
+
+                break;
+        }
+
+        c = putchar('\r');
+        if (c < 0) goto err;
+    }
+
+err:
+    parallel_hiz(port);
+
+    return res;
+}

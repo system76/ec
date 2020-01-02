@@ -84,9 +84,6 @@ int uart_stdio_get(FILE * stream) {
 }
 
 int uart_stdio_put(char data, FILE * stream) {
-    if (data == '\n') {
-        uart_write(uart_stdio, '\r');
-    }
     uart_write(uart_stdio, (unsigned char)data);
     return 0;
 }

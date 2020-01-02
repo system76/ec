@@ -8,13 +8,12 @@
 
 void init(void) {
     uart_stdio_init(0, __CONSOLE_BAUD__);
-    // Disable SPI
-    SPCR = 0;
 }
 
 struct Gpio LED = GPIO(B, 7);
 
 //TODO: .h file
+void parallel_main(void);
 void parallel_host(void);
 void parallel_peripheral(void);
 void parallel_spy(void);
@@ -24,6 +23,12 @@ int main(void) {
 
     gpio_set_dir(&LED, true);
     gpio_set(&LED, false);
+
+    parallel_main();
+
+    for (;;) {}
+
+    /*
     printf("Hello from System76 EC for the Arduino Mega 2560!\n");
 
     for (;;) {
@@ -38,4 +43,5 @@ int main(void) {
             parallel_spy();
         }
     }
+    */
 }
