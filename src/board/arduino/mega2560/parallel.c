@@ -245,14 +245,14 @@ void parallel_peripheral(void) {
     struct Parallel * port = &PORT;
     parallel_hiz(port);
 
-    // Set wait line to low output
-    gpio_set_dir(port->wait_n, true);
-
     // Strobes are high when inactive
     bool last_data_n = true;
     bool last_addr_n = true;
 
     for (;;) {
+        // Pull wait line low
+        gpio_set_dir(port->wait_n, true);
+
         // Read data strobe and edge detect
         bool data_n = gpio_get(port->data_n);
         bool data_edge = last_data_n && !data_n;
@@ -277,8 +277,8 @@ void parallel_peripheral(void) {
 
                 //TODO: Check if strobe fell while reading
 
-                // Set wait line high
-                gpio_set(port->wait_n, true);
+                // Release wait line
+                gpio_set_dir(port->wait_n, false);
 
                 if (data_edge) {
                     putchar('d');
@@ -299,8 +299,6 @@ void parallel_peripheral(void) {
                 // Delay 5 usecs
                 _delay_us(5);
 
-                // Set wait line low
-                gpio_set(port->wait_n, false);
             }
         }
 
