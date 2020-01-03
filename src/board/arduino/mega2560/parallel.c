@@ -7,6 +7,7 @@
 #include <util/delay.h>
 
 #include <arch/gpio.h>
+#include <arch/uart.h>
 
 // Mapping of 24-pin ribbon cable to parallel pins. See schematic
 #define PINS \
@@ -420,58 +421,99 @@ void parallel_spy(void) {
     }
 }
 
+int serial_transaction(uint8_t * data, int length, bool read) {
+    int i;
+    for (i = 0; i < length; i++) {
+        if (read) {
+            data[i] = (uint8_t)uart_read(uart_stdio);
+        } else {
+            uart_write(uart_stdio, (unsigned char)data[i]);
+        }
+    }
+
+    return i;
+}
+
+#define serial_read(D, L) serial_transaction(D, L, true)
+#define serial_write(D, L) serial_transaction(D, L, false)
+
 int parallel_main(void) {
     int res = 0;
 
     struct Parallel * port = &PORT;
     parallel_reset(port);
 
-    uint8_t b;
-    int c;
+    static uint8_t data[256];
+    char command;
+    int length;
     for (;;) {
-        c = getchar();
-        if (c < 0) goto err;
+        // Read command and length
+        res = serial_read(data, 2);
+        if (res < 0) goto err;
+        // Command is a character
+        command = (char)data[0];
+        // Length is received data + 1
+        length = (int)data[1] + 1;
+        // Truncate length to size of data
+        if (length > sizeof(data)) length = sizeof(data);
 
-        switch (c) {
+        switch (command) {
             // Echo
             case 'E':
+                // Read data from serial
+                res = serial_read(data, length);
+                if (res < 0) goto err;
+
+                // Write data to serial
+                res = serial_write(data, length);
+                if (res < 0) goto err;
+
                 break;
 
             // Set address
             case 'A':
-                c = getchar();
-                if (c < 0) goto err;
+                // Read data from serial
+                res = serial_read(data, length);
+                if (res < 0) goto err;
 
-                b = (uint8_t)c;
-                res = parallel_set_address(port, &b, 1);
+                // Write address to parallel
+                res = parallel_set_address(port, data, length);
                 if (res < 0) goto err;
 
                 break;
 
             // Read data
             case 'R':
-                res = parallel_read(port, &b, 1);
+                // Read data from parallel
+                res = parallel_read(port, data, length);
                 if (res < 0) goto err;
+                for (res = 0; res < length; res++) {
+                    data[res] = (uint8_t)res;
+                }
 
-                c = putchar((int)b);
-                if (c < 0) goto err;
+                // Write data to serial
+                res = serial_write(data, length);
+                if (res < 0) goto err;
 
                 break;
 
             // Write data
             case 'W':
-                c = getchar();
-                if (c < 0) goto err;
+                // Read data from serial
+                res = serial_read(data, length);
+                if (res < 0) goto err;
 
-                b = (uint8_t)c;
-                res = parallel_write(port, &b, 1);
+                // Write data to parallel
+                res = parallel_write(port, data, length);
                 if (res < 0) goto err;
 
                 break;
         }
 
-        c = putchar('\r');
-        if (c < 0) goto err;
+        // Send ACK
+        data[0] = '\r';
+        res = serial_write(data, 1);
+        if (res < 0) goto err;
     }
 
 err:
