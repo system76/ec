@@ -131,26 +131,29 @@ void parallel_reset(struct Parallel * port) {
 
 //TODO: timeout
 int parallel_transaction(struct Parallel * port, uint8_t * data, int length, bool read, bool addr) {
+    if (!read) {
+        // Set write line low
+        gpio_set(port->write_n, false);
+
+        // Set data direction out
+        #define DATA_BIT(B) gpio_set_dir(port->d ## B, true);
+        DATA_BITS
+        #undef DATA_BIT
+    }
+
     int i;
+    uint8_t byte;
     for (i = 0; i < length; i++) {
         // Wait for wait line to be low
         while (gpio_get(port->wait_n)) {}
-
-        // Set write line
-        gpio_set(port->write_n, read);
         
         if (!read) {
-            // Set data
-            uint8_t byte = data[i];
-            #define DATA_BIT(B) \
-                gpio_set(port->d ## B, (byte & (1 << B)) > 0); \
-                gpio_set_dir(port->d ## B, true);
+            // Set data low where necessary
+            byte = data[i];
+            #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, false);
             DATA_BITS
             #undef DATA_BIT
         }
-
-        // Wait 1 microsecond
-        _delay_us(1);
 
         if (addr) {
             // Set address strobe low
@@ -164,9 +167,8 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
         while (!gpio_get(port->wait_n)) {}
 
         if (read) {
-            uint8_t byte = 0;
-            #define DATA_BIT(B) \
-                if (gpio_get(port->d ## B)) byte |= (1 << B);
+            byte = 0;
+            #define DATA_BIT(B) if (gpio_get(port->d ## B)) byte |= (1 << B);
             DATA_BITS
             #undef DATA_BIT
             data[i] = byte;
@@ -180,13 +182,17 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             gpio_set(port->data_n, true);
         }
 
-        // Wait 1 microsecond
-        _delay_us(1);
+        if (!read) {
+            // Set data high where necessary
+            #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, true);
+            DATA_BITS
+            #undef DATA_BIT
+        }
+    }
 
-        // Reset data lines to pull-up inputs
-        #define DATA_BIT(B) \
-            gpio_set_dir(port->d ## B, false); \
-            gpio_set(port->d ## B, true);
+    if (!read) {
+        // Set data direction in
+        #define DATA_BIT(B) gpio_set_dir(port->d ## B, false);
         DATA_BITS
         #undef DATA_BIT
 
@@ -224,21 +230,44 @@ int parallel_main(void) {
     struct Parallel * port = &PORT;
     parallel_reset(port);
 
-    static uint8_t data[256];
+    static uint8_t data[128];
     char command;
     int length;
+    int i;
     for (;;) {
         // Read command and length
-        res = serial_read(data, 2);
+        res = serial_read(data, 3);
         if (res < 0) goto err;
         // Command is a character
         command = (char)data[0];
         // Length is received data + 1
-        length = (int)data[1] + 1;
+        length = (
+            ((int)data[1]) |
+            (((int)data[2]) << 8)
+        ) + 1;
         // Truncate length to size of data
         if (length > sizeof(data)) length = sizeof(data);
 
         switch (command) {
+            // Buffer size
+            case 'B':
+                // Fill buffer size - 1
+                for (i = 0; i < length; i++) {
+                    if (i < 2) {
+                        data[i] = (uint8_t)(
+                            (sizeof(data) - 1) >> (i * 8)
+                        );
+                    } else {
+                        data[i] = 0;
+                    }
+                }
+                
+                // Write data to serial
+                res = serial_write(data, length);
+                if (res < 0) goto err;
+
+                break;
+
             // Echo
             case 'E':
                 // Read data from serial
@@ -268,9 +297,6 @@ int parallel_main(void) {
                 // Read data from parallel
                 res = parallel_read(port, data, length);
                 if (res < 0) goto err;
-                for (res = 0; res < length; res++) {
-                    data[res] = (uint8_t)res;
-                }
 
                 // Write data to serial
                 res = serial_write(data, length);
