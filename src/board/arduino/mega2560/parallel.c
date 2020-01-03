@@ -208,6 +208,101 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
 #define parallel_read(P, D, L) parallel_transaction(P, D, L, true, false)
 #define parallel_write(P, D, L) parallel_transaction(P, D, L, false, false)
 
+static uint8_t ADDRESS_INDAR1 = 0x05;
+static uint8_t ADDRESS_INDDR = 0x08;
+
+static uint8_t ZERO = 0x00;
+static uint8_t SPI_ENABLE = 0xFE;
+static uint8_t SPI_DATA = 0xFD;
+
+// Disable chip
+int parallel_spi_reset(struct Parallel *port) {
+    int res;
+
+    res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
+    if (res < 0) return res;
+    
+    res = parallel_write(port, &SPI_ENABLE, 1);
+    if (res < 0) return res;
+
+    res = parallel_set_address(port, &ADDRESS_INDDR, 1);
+    if (res < 0) return res;
+
+    return parallel_write(port, &ZERO, 1);
+}
+
+// Enable chip and read or write data
+int parallel_spi_transaction(struct Parallel *port, uint8_t * data, int length, bool read) {
+    int res;
+
+    res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
+    if (res < 0) return res;
+    
+    res = parallel_write(port, &SPI_DATA, 1);
+    if (res < 0) return res;
+
+    res = parallel_set_address(port, &ADDRESS_INDDR, 1);
+    if (res < 0) return res;
+
+    return parallel_transaction(port, data, length, read, false);
+}
+
+#define parallel_spi_read(P, D, L) parallel_spi_transaction(P, D, L, true)
+#define parallel_spi_write(P, D, L) parallel_spi_transaction(P, D, L, false)
+
+// "Hardware" accelerated SPI programming, requires ECINDARs to be set
+int parallel_spi_program(struct Parallel * port, uint8_t * data, int length, bool initialized) {
+    static uint8_t aai[6] = { 0xAD, 0, 0, 0, 0, 0 };
+    int res;
+    int i;
+    uint8_t status;
+
+    for(i = 0; (i + 1) < length; i+=2) {
+        // Disable chip to begin command
+        res = parallel_spi_reset(port);
+        if (res < 0) return res;
+
+        if (!initialized) {
+            // If not initialized, the start address must be sent
+            aai[1] = 0;
+            aai[2] = 0;
+            aai[3] = 0;
+
+            aai[4] = data[i];
+            aai[5] = data[i + 1];
+
+            res = parallel_spi_write(port, aai, 6);
+            if (res < 0) return res;
+
+            initialized = true;
+        } else {
+            aai[1] = data[i];
+            aai[2] = data[i + 1];
+
+            res = parallel_spi_write(port, aai, 3);
+            if (res < 0) return res;
+        }
+
+        // Wait for SPI busy flag to clear
+        for (;;) {
+            // Disable chip to begin command
+            res = parallel_spi_reset(port);
+            if (res < 0) return res;
+
+            status = 0x05;
+            res = parallel_spi_write(port, &status, 1);
+            if (res < 0) return res;
+
+            res = parallel_spi_read(port, &status, 1);
+            if (res < 0) return res;
+
+            if (!(status & 1)) break;
+        }
+    }
+
+    return i;
+}
+
 int serial_transaction(uint8_t * data, int length, bool read) {
     int i;
     for (i = 0; i < length; i++) {
@@ -234,17 +329,29 @@ int parallel_main(void) {
     char command;
     int length;
     int i;
+    uint8_t address;
+    bool set_address = false;
+    bool program_aai = false;
     for (;;) {
         // Read command and length
-        res = serial_read(data, 3);
+        res = serial_read(data, 2);
         if (res < 0) goto err;
         // Command is a character
         command = (char)data[0];
+
+        // Special address prefix
+        if (command == 'A') {
+            // Prepare to set address on next parallel cycle
+            address = data[1];
+            set_address = true;
+            continue;
+        } else if (command != 'P') {
+            // End accelerated programming
+            program_aai = false;
+        }
+
         // Length is received data + 1
-        length = (
-            ((int)data[1]) |
-            (((int)data[2]) << 8)
-        ) + 1;
+        length = ((int)data[1]) + 1;
         // Truncate length to size of data
         if (length > sizeof(data)) length = sizeof(data);
 
@@ -253,10 +360,8 @@ int parallel_main(void) {
             case 'B':
                 // Fill buffer size - 1
                 for (i = 0; i < length; i++) {
-                    if (i < 2) {
-                        data[i] = (uint8_t)(
-                            (sizeof(data) - 1) >> (i * 8)
-                        );
+                    if (i == 0) {
+                        data[i] = (uint8_t)(sizeof(data) - 1);
                     } else {
                         data[i] = 0;
                     }
@@ -280,20 +385,15 @@ int parallel_main(void) {
 
                 break;
 
-            // Set address
-            case 'A':
-                // Read data from serial
-                res = serial_read(data, length);
-                if (res < 0) goto err;
-
-                // Write address to parallel
-                res = parallel_set_address(port, data, length);
-                if (res < 0) goto err;
-
-                break;
-
             // Read data
             case 'R':
+                // Update parallel address if necessary
+                if (set_address) {
+                    res = parallel_set_address(port, &address, 1);
+                    if (res < 0) goto err;
+                    set_address = false;
+                }
+
                 // Read data from parallel
                 res = parallel_read(port, data, length);
                 if (res < 0) goto err;
@@ -304,23 +404,48 @@ int parallel_main(void) {
 
                 break;
 
+            // Accelerated program function
+            case 'P':
+                // Read data from serial
+                res = serial_read(data, length);
+                if (res < 0) goto err;
+
+                // Run accelerated programming function
+                res = parallel_spi_program(port, data, length, program_aai);
+                if (res < 0) goto err;
+                program_aai = true;
+
+                // Send ACK of data length
+                data[0] = (uint8_t)(length - 1);
+                res = serial_write(data, 1);
+                if (res < 0) goto err;
+
+                break;
+
             // Write data
             case 'W':
                 // Read data from serial
                 res = serial_read(data, length);
                 if (res < 0) goto err;
 
+                // Update parallel address if necessary
+                if (set_address) {
+                    res = parallel_set_address(port, &address, 1);
+                    if (res < 0) goto err;
+                    set_address = false;
+                }
+
                 // Write data to parallel
                 res = parallel_write(port, data, length);
                 if (res < 0) goto err;
 
+                // Send ACK of data length
+                data[0] = (uint8_t)(length - 1);
+                res = serial_write(data, 1);
+                if (res < 0) goto err;
+
                 break;
         }
-
-        // Send ACK
-        data[0] = '\r';
-        res = serial_write(data, 1);
-        if (res < 0) goto err;
     }
 
 err:
