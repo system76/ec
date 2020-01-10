@@ -72,6 +72,8 @@ volatile uint8_t __xdata __at(0x1CA8) PECERCE;
 volatile uint8_t __xdata __at(0x1CA9) SMBPCTLE;
 // Host control 2 for channel E
 volatile uint8_t __xdata __at(0x1CAA) HOCTL2E;
+// SMCLK timing setting for channel E
+volatile uint8_t __xdata __at(0x1CAB) SCLKTSE;
 
 // Timing registers
 volatile uint8_t __xdata __at(0x1C22) SMB4P7USL;

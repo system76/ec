@@ -19,6 +19,8 @@ struct Gpio __code BKL_EN =         GPIO(H, 2);
 void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;
+    // Enable SMBus channel 4
+    GCR15 = (1 << 4);
 
     // Set GPIO data
     GPDRA = 0;
