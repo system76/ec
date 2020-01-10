@@ -6,11 +6,11 @@
 //TODO: find best value
 #define I2C_TIMEOUT 10000
 
-#define HOSTA HOSTAA
-#define HOCTL HOCTLA
-#define HOCTL2 HOCTL2A
-#define HOBDB HOBDBA
-#define TRASLA TRASLAA
+#define HOSTA HOSTAE
+#define HOCTL HOCTLE
+#define HOCTL2 HOCTL2E
+#define HOBDB HOBDBE
+#define TRASLA TRASLAE
 
 void i2c_reset(bool kill) {
     if (HOSTA & HOSTA_BUSY) {

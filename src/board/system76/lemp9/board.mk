@@ -1,4 +1,4 @@
-EC=it8587e
+EC=it5570e
 
 # Add keymaps to include
 INCLUDE+=$(wildcard $(BOARD_DIR)/keymap/*.h)
