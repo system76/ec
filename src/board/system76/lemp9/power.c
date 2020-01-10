@@ -320,4 +320,17 @@ void power_event(void) {
     ack_last = ack_new;
 
 #endif // DEEP_SX
+
+    switch (state) {
+        case POWER_STATE_DEFAULT:
+        case POWER_STATE_DS5:
+        case POWER_STATE_S5:
+        case POWER_STATE_DS3:
+        case POWER_STATE_S3:
+            gpio_set(&LED_PWR, false);
+            break;
+        case POWER_STATE_S0:
+            gpio_set(&LED_PWR, true);
+            break;
+    }
 }
