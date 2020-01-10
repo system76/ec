@@ -59,8 +59,8 @@ void init(void) {
 }
 
 void ac_adapter() {
-    static struct Gpio __code ACIN_N = GPIO(B, 0);
-    static struct Gpio __code LED_ACIN = GPIO(C, 7);
+    extern struct Gpio __code ACIN_N;
+    extern struct Gpio __code LED_ACIN;
 
     static bool send_sci = true;
     static bool last = true;
@@ -116,7 +116,7 @@ void touchpad_event(struct Ps2 * ps2) {
 }
 
 void lid_event(void) {
-    static struct Gpio __code LID_SW_N = GPIO(B, 1);
+    extern struct Gpio __code LID_SW_N;
 
     static bool send_sci = true;
     static bool last = true;
@@ -153,17 +153,16 @@ void main(void) {
 
     INFO("\n");
 
-    static struct Gpio __code SMI_N =           GPIO(D, 4);
-    static struct Gpio __code SCI_N =           GPIO(D, 3);
-    static struct Gpio __code SWI_N =           GPIO(B, 5);
-    static struct Gpio __code SB_KBCRST_N =     GPIO(E, 6);
-    static struct Gpio __code BT_EN =           GPIO(F, 3);
-    static struct Gpio __code USB_PWR_EN_N =    GPIO(E, 3);
-    static struct Gpio __code CCD_EN =          GPIO(D, 1);
-    static struct Gpio __code PM_CLKRUN_N =     GPIO(H, 0);
-    static struct Gpio __code BKL_EN =          GPIO(H, 2);
-    static struct Gpio __code WLAN_EN =         GPIO(G, 1);
-    static struct Gpio __code WLAN_PWR_EN =     GPIO(A, 3);
+    extern struct Gpio __code SMI_N;
+    extern struct Gpio __code SCI_N;
+    extern struct Gpio __code SWI_N;
+    extern struct Gpio __code SB_KBCRST_N;
+    extern struct Gpio __code BT_EN;
+    extern struct Gpio __code USB_PWR_EN_N;
+    extern struct Gpio __code CCD_EN;
+    extern struct Gpio __code BKL_EN;
+    extern struct Gpio __code WLAN_EN;
+    extern struct Gpio __code WLAN_PWR_EN;
 
 #if GPIO_DEBUG
     gpio_debug();
