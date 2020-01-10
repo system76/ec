@@ -1,4 +1,4 @@
-// Default layout - http://www.keyboard-layout-editor.com/#/gists/6aec6d441a039b76ec0895bd6bbda68d
+// Default layout
 
 #define K(V) {V, V}
 
@@ -136,11 +136,11 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
     {   // 13
         K(0), // 0
         K(0), // 1
-        K(0 /* TODO: PrtSc/SysRq */), // 2
+        K(K_HOME), // 2
         K(K_BRACE_CLOSE), // 3
         K(K_EQUALS), // 4
         K(K_RIGHT), // 5
-        K(0 /* TODO: Pause/Break */), // 6
+        K(K_END), // 6
         {K_F11, KT_SCI | SCI_AIRPLANE_MODE}, // 7
     },
     {   // 14
@@ -149,18 +149,18 @@ uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
         K(K_LEFT), // 2
         K(K_BKSP), // 3
         K(K_PGUP), // 4
-        K(K_INSERT), // 5
-        K(K_HOME), // 6
+        K(0/* TODO K_PRTSC */), // 5
+        K(0), // 6
         K(K_DEL), // 7
     },
     {   // 15
-        K(K_APP), // 0
+        K(0), // 0
         K(0), // 1
         K(K_ENTER), // 2
         K(0), // 3
         K(K_DOWN), // 4
         {K_F12, KT_SCI | SCI_SUSPEND}, // 5
-        K(K_END), // 6
+        K(0), // 6
         K(K_PGDN), // 7
     },
 };
