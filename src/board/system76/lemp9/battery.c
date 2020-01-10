@@ -22,7 +22,6 @@ int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
 int battery_charger_disable(void) {
     int res = 0;
 
-/* TODO: Grab battery settings
     // Set charge option 0 with 175s watchdog
     res = smbus_write(
         0x09,
@@ -40,7 +39,6 @@ int battery_charger_disable(void) {
     // Disable charge voltage
     res = smbus_write(0x09, 0x15, 0);
     if (res < 0) return res;
-*/
 
     return 0;
 }
@@ -51,13 +49,12 @@ int battery_charger_enable(void) {
     res = battery_charger_disable();
     if (res < 0) return res;
 
-/* TODO: Grab battery settings
-    // Set charge current to ~1.5 A
-    res = smbus_write(0x09, 0x14, 0x0600);
+    // Set charge current to 3.264 A
+    res = smbus_write(0x09, 0x14, 0x0CF2);
     if (res < 0) return res;
 
-    // Set charge voltage to ~13 V
-    res = smbus_write(0x09, 0x15, 0x3300);
+    // Set charge voltage to 8.8 V
+    res = smbus_write(0x09, 0x15, 0x2260);
     if (res < 0) return res;
 
     // Set charge option 0 with watchdog disabled
@@ -68,7 +65,6 @@ int battery_charger_enable(void) {
         SBC_PWM_FREQ_800KHZ |
         SBC_IDCHC_GAIN
     );
-*/
 
     return 0;
 }
