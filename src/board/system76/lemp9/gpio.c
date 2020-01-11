@@ -26,11 +26,11 @@ void gpio_init() {
 
     // Set GPIO data
     GPDRA = 0;
-    GPDRB = 0x18;
+    GPDRB = (1 << 4) | (1 << 3);
     GPDRC = 0;
-    GPDRD = 0x38;
-    GPDRE = 0x08;
-    GPDRF = 0x40;
+    GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
+    GPDRE = (1 << 3);
+    GPDRF = (1 << 6);
     GPDRG = 0;
     GPDRH = 0;
     GPDRI = 0;
