@@ -1,9 +1,6 @@
 #include <board/keymap.h>
 #include <common/debug.h>
 
-// Set the desired keymap here
-#include "keymap/default.h"
-
 uint16_t keymap(int output, int input, int layer) {
     if (output < KM_OUT && input < KM_IN && layer < KM_LAY) {
         return KEYMAP[layer][output][input];
