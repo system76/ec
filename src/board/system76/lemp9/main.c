@@ -51,11 +51,9 @@ void init(void) {
     kbscan_init();
     pwm_init();
     smbus_init();
+    peci_init();
 
-    //TODO: INTC, PECI
-
-    // Allow PECI pin to be used
-    GCR2 |= (1 << 4);
+    //TODO: INTC
 }
 
 void ac_adapter() {
