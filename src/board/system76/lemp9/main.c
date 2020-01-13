@@ -56,47 +56,6 @@ void init(void) {
     //TODO: INTC
 }
 
-void ac_adapter() {
-    extern struct Gpio __code ACIN_N;
-    extern struct Gpio __code LED_ACIN;
-
-    static bool send_sci = true;
-    static bool last = true;
-
-    // Check if the adapter line goes low
-    bool new = gpio_get(&ACIN_N);
-    // Set ACIN LED
-    gpio_set(&LED_ACIN, !new);
-
-    // If there has been a change, print
-    if (new != last) {
-        DEBUG("Power adapter ");
-        if (new) {
-            DEBUG("unplugged\n");
-            battery_charger_disable();
-        } else {
-            DEBUG("plugged in\n");
-            battery_charger_enable();
-        }
-        battery_debug();
-
-        // Reset main loop cycle to force reading PECI and battery
-        main_cycle = 0;
-
-        // Send SCI to update AC and battery information
-        send_sci = true;
-    }
-
-    if (send_sci) {
-        // Send SCI 0x16 for AC detect event
-        if (pmc_sci(&PMC_1, 0x16)) {
-            send_sci = false;
-        }
-    }
-
-    last = new;
-}
-
 void touchpad_event(struct Ps2 * ps2) {
     if (kbc_second) {
         *(ps2->control) = 0x07;
@@ -186,8 +145,6 @@ void main(void) {
     INFO("Hello from System76 EC for %s!\n", xstr(__BOARD__));
 
     for(main_cycle = 0; ; main_cycle++) {
-        // Enables or disables battery charging based on AC adapter
-        ac_adapter();
         // Handle power states
         power_event();
         // Scans keyboard and sends keyboard packets
