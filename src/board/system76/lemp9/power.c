@@ -9,25 +9,25 @@
 
 extern uint8_t main_cycle;
 
-static struct Gpio __code PCH_DPWROK_EC =   GPIO(A, 7);
-static struct Gpio __code PCH_PWROK_EC =    GPIO(A, 6);
-static struct Gpio __code LED_PWR =         GPIO(D, 0);
-static struct Gpio __code ALL_SYS_PWRGD =   GPIO(C, 0);
-static struct Gpio __code PM_PWROK =        GPIO(C, 6);
-static struct Gpio __code PWR_SW_N =        GPIO(B, 3);
-static struct Gpio __code BUF_PLT_RST_N =   GPIO(D, 2);
-static struct Gpio __code PWR_BTN_N =       GPIO(D, 5);
-static struct Gpio __code SUSWARN_N =       GPIO(D, 7);
-static struct Gpio __code EC_EN =           GPIO(J, 6);
-static struct Gpio __code VA_EC_EN =        GPIO(J, 4);
-static struct Gpio __code DD_ON =           GPIO(E, 4);
-static struct Gpio __code EC_RSMRST_N =     GPIO(E, 5);
-static struct Gpio __code AC_PRESENT =      GPIO(E, 1);
-static struct Gpio __code SUSC_N_PCH =      GPIO(H, 1);
-static struct Gpio __code VR_ON =           GPIO(H, 4);
-static struct Gpio __code SUSB_N_PCH =      GPIO(H, 6);
-static struct Gpio __code SLP_SUS_N =       GPIO(J, 3);
-static struct Gpio __code SUS_PWR_ACK =     GPIO(J, 7);
+extern struct Gpio __code PCH_DPWROK_EC;
+extern struct Gpio __code PCH_PWROK_EC;
+extern struct Gpio __code LED_PWR;
+extern struct Gpio __code ALL_SYS_PWRGD;
+extern struct Gpio __code PM_PWROK;
+extern struct Gpio __code PWR_SW_N;
+extern struct Gpio __code BUF_PLT_RST_N;
+extern struct Gpio __code PWR_BTN_N;
+extern struct Gpio __code SUSWARN_N;
+extern struct Gpio __code EC_EN;
+extern struct Gpio __code VA_EC_EN;
+extern struct Gpio __code DD_ON;
+extern struct Gpio __code EC_RSMRST_N;
+extern struct Gpio __code AC_PRESENT;
+extern struct Gpio __code SUSC_N_PCH;
+extern struct Gpio __code VR_ON;
+extern struct Gpio __code SUSB_N_PCH;
+extern struct Gpio __code SLP_SUS_N;
+extern struct Gpio __code SUS_PWR_ACK;
 
 // VccRTC stable (55%) to RTCRST# high
 #define tPCH01 delay_ms(9)

@@ -76,14 +76,12 @@ static void peci_config(void) {
     }
 }
 
-
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 void peci_event(void) {
     // Wait for completion
     while (HOSTAR & 1) {}
     // Clear status
     HOSTAR = HOSTAR;
-
 
     // Enable PECI, clearing data fifo's
     HOCTLR = (1 << 5) | (1 << 3);
