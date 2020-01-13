@@ -1,5 +1,6 @@
 # Parameter for current board
-BOARD?=system76/galp3-c
+#BOARD?=system76/galp3-c
+BOARD?=system76/lemp9
 #BOARD?=arduino/mega2560
 #BOARD?=arduino/micro
 #BOARD?=arduino/uno
