@@ -1,20 +1,40 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 
+
 struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
+struct Gpio __code PCH_PWROK_EC =   GPIO(A, 6);
+struct Gpio __code PCH_DPWROK_EC =  GPIO(A, 7);
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
+struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code SWI_N =          GPIO(B, 5);
+struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
+struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
+struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code CCD_EN =         GPIO(D, 1);
+struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2);
 struct Gpio __code SCI_N =          GPIO(D, 3);
 struct Gpio __code SMI_N =          GPIO(D, 4);
+struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
+struct Gpio __code SUSWARN_N =      GPIO(D, 7);
+struct Gpio __code AC_PRESENT =     GPIO(E, 1);
 struct Gpio __code USB_PWR_EN_N =   GPIO(E, 3);
+struct Gpio __code DD_ON =          GPIO(E, 4);
+struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code SB_KBCRST_N =    GPIO(E, 6);
 struct Gpio __code BT_EN =          GPIO(F, 3);
 struct Gpio __code WLAN_EN =        GPIO(G, 1);
 struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0);
+struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code BKL_EN =         GPIO(H, 2);
+struct Gpio __code VR_ON =          GPIO(H, 4);
+struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
+struct Gpio __code SLP_SUS_N =      GPIO(J, 3);
+struct Gpio __code VA_EC_EN =       GPIO(J, 4);
+struct Gpio __code EC_EN =          GPIO(J, 6);
+struct Gpio __code SUS_PWR_ACK =    GPIO(J, 7);
 
 void gpio_init() {
     // Enable LPC reset on GPD2
@@ -31,7 +51,7 @@ void gpio_init() {
     GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
     GPDRE = (1 << 3);
     GPDRF = (1 << 6);
-    GPDRG = 0;
+    GPDRG = (1 << 6);
     GPDRH = 0;
     GPDRI = 0;
     GPDRJ = 0;
@@ -126,9 +146,9 @@ void gpio_init() {
     // EC_BT_EN
     GPCRF3 = GPIO_OUT | GPIO_UP;
     // TP_CLK
-    GPCRF4 = GPIO_IN;
+    GPCRF4 = GPIO_ALT;
     // TP_DATA
-    GPCRF5 = GPIO_IN;
+    GPCRF5 = GPIO_ALT;
     // H_PECI
     GPCRF6 = GPIO_ALT;
     // CPU_C10_GATE#
