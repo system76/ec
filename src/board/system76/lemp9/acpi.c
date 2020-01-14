@@ -4,6 +4,8 @@
 #include <common/debug.h>
 #include <ec/gpio.h>
 
+extern bool lid_wake;
+
 static struct Gpio __code ACIN_N = GPIO(B, 0);
 static struct Gpio __code LID_SW_N = GPIO(B, 1);
 
@@ -29,6 +31,9 @@ uint8_t acpi_read(uint8_t addr) {
             if (gpio_get(&LID_SW_N)) {
                 // Lid is open
                 data |= 1 << 0;
+            }
+            if (lid_wake) {
+                data |= 1 << 2;
             }
             break;
 
@@ -64,14 +69,13 @@ uint8_t acpi_read(uint8_t addr) {
 }
 
 
-// If not in debug mode, data is not used, ignore warning
-#pragma save
-#pragma disable_warning 85
 void acpi_write(uint8_t addr, uint8_t data) {
     DEBUG("acpi_write %02X = %02X\n", addr, data);
 
     switch (addr) {
-    //TODO
+        // Lid state and other flags
+        case 0x03:
+            lid_wake = (bool)(data & (1 << 2));
+            break;
     }
 }
-#pragma restore

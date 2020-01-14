@@ -72,8 +72,10 @@ void touchpad_event(struct Ps2 * ps2) {
     }
 }
 
+bool lid_wake = false;
 void lid_event(void) {
     extern struct Gpio __code LID_SW_N;
+    extern struct Gpio __code SWI_N;
 
     static bool send_sci = true;
     static bool last = true;
@@ -87,6 +89,16 @@ void lid_event(void) {
             DEBUG("open\n");
 
             //TODO: send SWI if needed
+            if (lid_wake) {
+                gpio_set(&SWI_N, false);
+
+                //TODO: find correct delay
+                delay_ticks(10);
+
+                gpio_set(&SWI_N, true);
+
+                lid_wake = false;
+            }
         } else {
             DEBUG("closed\n");
         }
