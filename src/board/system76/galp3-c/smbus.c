@@ -17,5 +17,5 @@ void smbus_init(void) {
     SMB45P3USH = 0x01;
 
     // Set up for i2c usage
-    i2c_reset(true);
+    i2c_reset(&I2C_0, true);
 }

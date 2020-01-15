@@ -3,6 +3,8 @@
 
 #include <common/i2c.h>
 
-void i2c_reset(bool kill);
+extern struct I2C __code I2C_0;
+
+void i2c_reset(struct I2C * i2c, bool kill);
 
 #endif // _EC_I2C_H

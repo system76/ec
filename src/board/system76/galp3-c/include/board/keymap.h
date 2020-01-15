@@ -11,7 +11,7 @@
 #define KM_LAY 2
 
 // Keymap
-extern uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN];
+extern uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY];
 
 // Get a keycode from the keymap
 uint16_t keymap(int output, int input, int layer);
