@@ -2,38 +2,16 @@
 
 #include <arch/delay.h>
 #include <board/battery.h>
+#include <board/gpio.h>
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <common/debug.h>
-#include <ec/gpio.h>
 
 // Platform does not currently support Deep Sx
 #define DEEP_SX 0
 
 extern uint8_t main_cycle;
-
-extern struct Gpio __code ACIN_N;
-extern struct Gpio __code LED_ACIN;
-extern struct Gpio __code PCH_DPWROK_EC;
-extern struct Gpio __code PCH_PWROK_EC;
-extern struct Gpio __code LED_PWR;
-extern struct Gpio __code ALL_SYS_PWRGD;
-extern struct Gpio __code PM_PWROK;
-extern struct Gpio __code PWR_SW_N;
-extern struct Gpio __code BUF_PLT_RST_N;
-extern struct Gpio __code PWR_BTN_N;
-extern struct Gpio __code SUSWARN_N;
-extern struct Gpio __code EC_EN;
-extern struct Gpio __code VA_EC_EN;
-extern struct Gpio __code DD_ON;
-extern struct Gpio __code EC_RSMRST_N;
-extern struct Gpio __code AC_PRESENT;
-extern struct Gpio __code SUSC_N_PCH;
-extern struct Gpio __code VR_ON;
-extern struct Gpio __code SUSB_N_PCH;
-extern struct Gpio __code SLP_SUS_N;
-extern struct Gpio __code SUS_PWR_ACK;
 
 // VccRTC stable (55%) to RTCRST# high
 #define tPCH01 delay_ms(9)

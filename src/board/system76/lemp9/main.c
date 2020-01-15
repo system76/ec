@@ -74,9 +74,6 @@ void touchpad_event(struct Ps2 * ps2) {
 
 bool lid_wake = false;
 void lid_event(void) {
-    extern struct Gpio __code LID_SW_N;
-    extern struct Gpio __code SWI_N;
-
     static bool send_sci = true;
     static bool last = true;
 
@@ -88,7 +85,6 @@ void lid_event(void) {
         if (new) {
             DEBUG("open\n");
 
-            //TODO: send SWI if needed
             if (lid_wake) {
                 gpio_set(&SWI_N, false);
 
@@ -121,17 +117,6 @@ void main(void) {
     init();
 
     INFO("\n");
-
-    extern struct Gpio __code SMI_N;
-    extern struct Gpio __code SCI_N;
-    extern struct Gpio __code SWI_N;
-    extern struct Gpio __code SB_KBCRST_N;
-    extern struct Gpio __code BT_EN;
-    extern struct Gpio __code USB_PWR_EN_N;
-    extern struct Gpio __code CCD_EN;
-    extern struct Gpio __code BKL_EN;
-    extern struct Gpio __code WLAN_EN;
-    extern struct Gpio __code WLAN_PWR_EN;
 
 #if GPIO_DEBUG
     gpio_debug();

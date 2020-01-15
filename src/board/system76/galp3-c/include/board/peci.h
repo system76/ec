@@ -9,6 +9,7 @@ extern uint8_t peci_duty;
 extern uint8_t peci_tcontrol;
 extern uint8_t peci_tjmax;
 
+void peci_init(void);
 void peci_event(void);
 
 #endif // _BOARD_PECI_H

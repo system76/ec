@@ -1,6 +1,42 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 
+struct Gpio __code ACIN_N =         GPIO(B, 6);
+struct Gpio __code AC_PRESENT =     GPIO(E, 7);
+struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
+struct Gpio __code BKL_EN =         GPIO(H, 2);
+struct Gpio __code BT_EN =          GPIO(F, 3);
+struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2);
+struct Gpio __code CCD_EN =         GPIO(G, 0);
+struct Gpio __code DD_ON =          GPIO(E, 4);
+struct Gpio __code EC_EN =          GPIO(E, 1);
+struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
+struct Gpio __code LED_ACIN =       GPIO(C, 7);
+struct Gpio __code LED_BAT_CHG =    GPIO(A, 5);
+struct Gpio __code LED_BAT_FULL =   GPIO(A, 6);
+struct Gpio __code LED_PWR =        GPIO(A, 7);
+struct Gpio __code LID_SW_N =       GPIO(D, 1);
+struct Gpio __code PCH_DPWROK_EC =  GPIO(A, 3);
+struct Gpio __code PCH_PWROK_EC =   GPIO(A, 4);
+struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0);
+struct Gpio __code PM_PWROK =       GPIO(C, 6);
+struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
+struct Gpio __code PWR_SW_N =       GPIO(D, 0);
+struct Gpio __code SB_KBCRST_N =    GPIO(E, 6);
+struct Gpio __code SCI_N =          GPIO(D, 4);
+struct Gpio __code SLP_SUS_N =      GPIO(I, 2);
+struct Gpio __code SMI_N =          GPIO(D, 3);
+struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
+struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
+struct Gpio __code SUSWARN_N =      GPIO(D, 7);
+struct Gpio __code SUS_PWR_ACK =    GPIO(J, 0);
+struct Gpio __code SWI_N =          GPIO(E, 0);
+struct Gpio __code USB_PWR_EN_N =   GPIO(F, 7);
+struct Gpio __code VA_EC_EN =       GPIO(E, 3);
+struct Gpio __code VR_ON =          GPIO(H, 4);
+struct Gpio __code WLAN_EN =        GPIO(H, 5);
+struct Gpio __code WLAN_PWR_EN =    GPIO(J, 4);
+
 void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;

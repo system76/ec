@@ -2,12 +2,9 @@
 #include <board/battery.h>
 #include <board/peci.h>
 #include <common/debug.h>
-#include <ec/gpio.h>
+#include <board/gpio.h>
 
 extern bool lid_wake;
-
-static struct Gpio __code ACIN_N = GPIO(B, 0);
-static struct Gpio __code LID_SW_N = GPIO(B, 1);
 
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;

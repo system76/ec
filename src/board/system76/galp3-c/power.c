@@ -1,33 +1,17 @@
+#include <mcs51/8051.h>
+
 #include <arch/delay.h>
+#include <board/battery.h>
+#include <board/gpio.h>
 #include <board/power.h>
+#include <board/pmc.h>
 #include <board/pnp.h>
 #include <common/debug.h>
-#include <ec/gpio.h>
 
 // Platform does not currently support Deep Sx
 #define DEEP_SX 0
 
 extern uint8_t main_cycle;
-
-static struct Gpio __code PCH_DPWROK_EC =   GPIO(A, 3);
-static struct Gpio __code PCH_PWROK_EC =    GPIO(A, 4);
-static struct Gpio __code LED_PWR =         GPIO(A, 7);
-static struct Gpio __code ALL_SYS_PWRGD =   GPIO(C, 0);
-static struct Gpio __code PM_PWROK =        GPIO(C, 6);
-static struct Gpio __code PWR_SW_N =        GPIO(D, 0);
-static struct Gpio __code BUF_PLT_RST_N =   GPIO(D, 2);
-static struct Gpio __code PWR_BTN_N =       GPIO(D, 5);
-static struct Gpio __code SUSWARN_N =       GPIO(D, 7);
-static struct Gpio __code EC_EN =           GPIO(E, 1);
-static struct Gpio __code VA_EC_EN =        GPIO(E, 3);
-static struct Gpio __code DD_ON =           GPIO(E, 4);
-static struct Gpio __code EC_RSMRST_N =     GPIO(E, 5);
-static struct Gpio __code AC_PRESENT =      GPIO(E, 7);
-static struct Gpio __code SUSC_N_PCH =      GPIO(H, 1);
-static struct Gpio __code VR_ON =           GPIO(H, 4);
-static struct Gpio __code SUSB_N_PCH =      GPIO(H, 6);
-static struct Gpio __code SLP_SUS_N =       GPIO(I, 2);
-static struct Gpio __code SUS_PWR_ACK =     GPIO(J, 0);
 
 // VccRTC stable (55%) to RTCRST# high
 #define tPCH01 delay_ms(9)
@@ -192,6 +176,35 @@ void power_event(void) {
         state = POWER_STATE_DS5;
     }
 
+    // Check if the adapter line goes low
+    static bool ac_send_sci = true;
+    static bool ac_last = true;
+    bool ac_new = gpio_get(&ACIN_N);
+    if (ac_new != ac_last) {
+        DEBUG("Power adapter ");
+        if (ac_new) {
+            DEBUG("unplugged\n");
+            battery_charger_disable();
+        } else {
+            DEBUG("plugged in\n");
+            battery_charger_enable();
+        }
+        battery_debug();
+
+        // Reset main loop cycle to force reading PECI and battery
+        main_cycle = 0;
+
+        // Send SCI to update AC and battery information
+        ac_send_sci = true;
+    }
+    if (ac_send_sci) {
+        // Send SCI 0x16 for AC detect event
+        if (pmc_sci(&PMC_1, 0x16)) {
+            ac_send_sci = false;
+        }
+    }
+    ac_last = ac_new;
+
     // Read power switch state
     static bool ps_last = true;
     bool ps_new = gpio_get(&PWR_SW_N);
@@ -278,16 +291,20 @@ void power_event(void) {
             DEBUG("%02X: SLP_S3# de-asserted\n", main_cycle);
         }
         s3_last = s3_new;
+    #endif
 
-        static bool s4_last = false;
-        bool s4_new = gpio_get(&SUSC_N_PCH);
+    static bool s4_last = false;
+    bool s4_new = gpio_get(&SUSC_N_PCH);
+    #if LEVEL >= LEVEL_DEBUG
         if (!s4_new && s4_last) {
             DEBUG("%02X: SLP_S4# asserted\n", main_cycle);
         } else if(s4_new && !s4_last) {
             DEBUG("%02X: SLP_S4# de-asserted\n", main_cycle);
         }
-        s4_last = s4_new;
+    #endif
+    s4_last = s4_new;
 
+    #if LEVEL >= LEVEL_DEBUG
         static bool sus_last = false;
         bool sus_new = gpio_get(&SLP_SUS_N);
         if (!sus_new && sus_last) {
@@ -305,7 +322,7 @@ void power_event(void) {
     if (ack_new && !ack_last) {
         DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
 
-        if (gpio_get(&SUSC_N_PCH)) {
+        if (s4_new) {
             DEBUG("%02X: entering S3 state\n", main_cycle);
         } else if (state == POWER_STATE_S5) {
             power_off_s5();
@@ -319,5 +336,47 @@ void power_event(void) {
     #endif
     ack_last = ack_new;
 
+    if (rst_new) {
+        // CPU on, green light
+        gpio_set(&LED_PWR, true);
+        gpio_set(&LED_ACIN, false);
+    } else if (s4_new) {
+        // Suspended, flashing green light
+        static int8_t suspend_timer = 0;
+        if (suspend_timer <= 0) {
+            gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+            // Suspend timer fires every 1 s
+            suspend_timer = 100;
+        }
+        gpio_set(&LED_ACIN, false);
+        
+        // If timer 1 is finished
+        if (TF1) {
+            // Stop timer 1 running
+            TR1 = 0;
+            // Clear timer 1 finished flag
+            TF1 = 0;
+            // Decrement suspend timer
+            suspend_timer -= 1;
+        }
+
+        // If timer 1 is not running
+        if (!TR1) {
+            // Start timer for 10 ms
+            // 65536-(10000 * 69 + 89)/90 = 0xE20C
+            TMOD = (TMOD & 0x0F) | 0x10;
+            TH1 = 0xE2;
+            TL1 = 0x0C;
+            TR1 = 1;
+        }
+    } else if (!ac_new) {
+        // AC plugged in, orange light
+        gpio_set(&LED_PWR, false);
+        gpio_set(&LED_ACIN, true);
+    } else {
+        // CPU off and AC adapter unplugged, no light
+        gpio_set(&LED_PWR, false);
+        gpio_set(&LED_ACIN, false);
+    }
 #endif // DEEP_SX
 }

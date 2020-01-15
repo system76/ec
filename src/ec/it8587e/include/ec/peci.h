@@ -13,5 +13,6 @@ static volatile uint8_t __xdata __at(0x3006) HOWRDR;
 static volatile uint8_t __xdata __at(0x3007) HORDDR;
 static volatile uint8_t __xdata __at(0x3008) HOCTL2R;
 static volatile uint8_t __xdata __at(0x3009) RWFCSV;
+static volatile uint8_t __xdata __at(0x300E) PADCTLR;
 
 #endif // _EC_PECI_H

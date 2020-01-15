@@ -1,7 +1,7 @@
 EC=it5570e
 
 # Add keymap to src
-KEYMAP?=jeremy
+KEYMAP?=default
 SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
 
 # Set log level

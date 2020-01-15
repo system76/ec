@@ -2,6 +2,7 @@
 
 #include <board/peci.h>
 #include <common/debug.h>
+#include <ec/gpio.h>
 #include <ec/pwm.h>
 
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
@@ -15,6 +16,16 @@ uint8_t peci_tjmax = T_JUNCTION;
 static bool peci_config_loaded = false;
 
 #define PECI_TEMP(X) (((int16_t)(X)) << 6)
+
+void peci_init(void) {
+    // Allow PECI pin to be used
+    GCR2 |= (1 << 4);
+
+    // Set frequency to 1MHz
+    HOCTL2R = 0x01;
+    // Set VTT to 1V
+    PADCTLR = 0x02;
+}
 
 // Read tjmax using index 16 of RdPkgConfig
 static void peci_config(void) {

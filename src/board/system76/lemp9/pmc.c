@@ -1,8 +1,8 @@
 #include <board/acpi.h>
+#include <board/gpio.h>
 #include <board/pmc.h>
 #include <board/scratch.h>
 #include <common/debug.h>
-#include <ec/gpio.h>
 
 void pmc_init(void) {
     *(PMC_1.control) = 0x41;
@@ -19,7 +19,6 @@ enum PmcState {
 };
 
 static uint8_t pmc_sci_queue = 0;
-static struct Gpio __code SCI_N =           GPIO(D, 3);
 
 bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
     bool update = pmc_sci_queue == 0;

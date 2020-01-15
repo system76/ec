@@ -1,7 +1,8 @@
 EC=it8587e
 
-# Add keymaps to include
-INCLUDE+=$(wildcard $(BOARD_DIR)/keymap/*.h)
+# Add keymap to src
+KEYMAP?=default
+SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
 
 # Set log level
 # 0 - NONE

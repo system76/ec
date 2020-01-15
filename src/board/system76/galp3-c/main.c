@@ -51,52 +51,9 @@ void init(void) {
     kbscan_init();
     pwm_init();
     smbus_init();
+    peci_init();
 
-    //TODO: INTC, PECI
-
-    // Allow PECI pin to be used
-    GCR2 |= (1 << 4);
-}
-
-void ac_adapter() {
-    static struct Gpio __code ACIN_N = GPIO(B, 6);
-    static struct Gpio __code LED_ACIN = GPIO(C, 7);
-
-    static bool send_sci = true;
-    static bool last = true;
-
-    // Check if the adapter line goes low
-    bool new = gpio_get(&ACIN_N);
-    // Set ACIN LED
-    gpio_set(&LED_ACIN, !new);
-
-    // If there has been a change, print
-    if (new != last) {
-        DEBUG("Power adapter ");
-        if (new) {
-            DEBUG("unplugged\n");
-            battery_charger_disable();
-        } else {
-            DEBUG("plugged in\n");
-            battery_charger_enable();
-        }
-        battery_debug();
-
-        // Reset main loop cycle to force reading PECI and battery
-        main_cycle = 0;
-
-        // Send SCI to update AC and battery information
-        send_sci = true;
-    }
-
-    if (send_sci) {
-        // Send SCI 0x16 for AC detect event
-        if (pmc_sci(&PMC_1, 0x16)) {
-            send_sci = false;
-        }
-    }
-
-    last = new;
+    //TODO: INTC
 }
 
 void touchpad_event(struct Ps2 * ps2) {
@@ -115,9 +72,8 @@ void touchpad_event(struct Ps2 * ps2) {
     }
 }
 
+bool lid_wake = false;
 void lid_event(void) {
-    static struct Gpio __code LID_SW_N = GPIO(D, 1);
-
     static bool send_sci = true;
     static bool last = true;
 
@@ -129,7 +85,16 @@ void lid_event(void) {
         if (new) {
             DEBUG("open\n");
 
-            //TODO: send SWI if needed
+            if (lid_wake) {
+                gpio_set(&SWI_N, false);
+
+                //TODO: find correct delay
+                delay_ticks(10);
+
+                gpio_set(&SWI_N, true);
+
+                lid_wake = false;
+            }
         } else {
             DEBUG("closed\n");
         }
@@ -155,20 +120,6 @@ void main(void) {
     init();
 
     INFO("\n");
-
-    static struct Gpio __code LED_BAT_CHG =     GPIO(A, 5);
-    static struct Gpio __code LED_BAT_FULL =    GPIO(A, 6);
-    static struct Gpio __code SMI_N =           GPIO(D, 3);
-    static struct Gpio __code SCI_N =           GPIO(D, 4);
-    static struct Gpio __code SWI_N =           GPIO(E, 0);
-    static struct Gpio __code SB_KBCRST_N =     GPIO(E, 6);
-    static struct Gpio __code BT_EN =           GPIO(F, 3);
-    static struct Gpio __code USB_PWR_EN_N =    GPIO(F, 7);
-    static struct Gpio __code CCD_EN =          GPIO(G, 0);
-    static struct Gpio __code PM_CLKRUN_N =     GPIO(H, 0);
-    static struct Gpio __code BKL_EN =          GPIO(H, 2);
-    static struct Gpio __code WLAN_EN =         GPIO(H, 5);
-    static struct Gpio __code WLAN_PWR_EN =     GPIO(J, 4);
 
     // Set the battery full LED (to know our firmware is loading)
     gpio_set(&LED_BAT_CHG, true);
@@ -199,8 +150,6 @@ void main(void) {
     INFO("Hello from System76 EC for %s!\n", xstr(__BOARD__));
 
     for(main_cycle = 0; ; main_cycle++) {
-        // Enables or disables battery charging based on AC adapter
-        ac_adapter();
         // Handle power states
         power_event();
         // Scans keyboard and sends keyboard packets
