@@ -2,167 +2,21 @@
 
 #include <board/keymap.h>
 
-#define K(V) {V, V}
-
-uint16_t __code KEYMAP[KM_OUT][KM_IN][KM_LAY] = {
-    {   //  0
-        K(0), // 0
-        K(0), // 1
-        K(0), // 2
-        K(0), // 3
-        K(0), // 4
-        K(0), // 5
-        K(K_LEFT_ALT), // 6
-        K(0), // 7
-    },
-    {   //  1
-        K(0), // 0
-        K(0), // 1
-        K(0), // 2
-        K(0), // 3
-        K(0), // 4
-        K(0), // 5
-        K(K_LEFT_CTRL), // 6
-        K(K_RIGHT_CTRL), // 7
-    },
-    {   //  2
-        K(0), // 0
-        K(0), // 1
-        K(0), // 2
-        K(0), // 3
-        K(0), // 4
-        K(0), // 5
-        K(K_LEFT_SUPER), // 6
-        K(KT_FN), // 7
-    },
-    {   //  3
-        K(0), // 0
-        K(0), // 1
-        K(0), // 2
-        K(0), // 3
-        K(0), // 4
-        K(0), // 5
-        K(K_LEFT_SHIFT), // 6
-        K(K_RIGHT_SHIFT), // 7
-    },
-    {   //  4
-        K(K_X), // 0
-        K(K_Z), // 1
-        K(KT_FN), // 2
-        K(K_A), // 3
-        K(K_TAB), // 4
-        K(0), // 5
-        {K_SPACE, K_BKSP}, // 6
-        K(K_Q), // 7
-    },
-    {   //  5
-        K(K_V), // 0
-        K(K_C), // 1
-        K(0), // 2
-        K(K_D), // 3
-        K(0), // 4
-        K(0), // 5
-        K(0), // 6
-        K(K_E), // 7
-    },
-    {   //  6
-        K(KT_FN), // 0
-        K(K_B), // 1
-        K(K_F), // 2
-        K(K_G), // 3
-        K(K_R), // 4
-        K(K_T), // 5
-        K(0), // 6
-        K(0), // 7
-    },
-    {   //  7
-        K(0), // 0
-        {K_N, K_END}, // 1
-        {K_H, K_LEFT}, // 2
-        K(K_Y), // 3
-        K(K_2), // 4
-        K(K_1), // 5
-        {K_TICK, K_PLAY_PAUSE}, // 6
-        K(K_ESC), // 7
-    },
-    {   //  8
-        {K_I, K_HOME}, // 0
-        K(K_M), // 1
-        {K_U, K_PGUP}, // 2
-        K(K_5), // 3
-        K(K_4), // 4
-        K(K_3), // 5
-        K(K_F2), // 6
-        {K_F1, K_TOUCHPAD}, // 7
-    },
-    {   //  9
-        K(K_W), // 0
-        {K_J, K_DOWN}, // 1
-        {K_K, K_UP}, // 2
-        K(0), // 3
-        K(K_7), // 4
-        K(K_6), // 5
-        K(K_F4), // 6
-        {K_F3, K_MUTE}, // 7
-    },
-    {   // 10
-        K(K_S), // 0
-        K(K_COMMA), // 1
-        {K_L, K_RIGHT}, // 2
-        {K_O, K_PGDN}, // 3
-        K(K_9), // 4
-        K(K_8), // 5
-        {K_F6, K_VOLUME_UP}, // 6
-        {K_F5, K_VOLUME_DOWN}, // 7
-    },
-    {   // 11
-        K(0), // 0
-        K(K_UP), // 1
-        K(K_PERIOD), // 2
-        {K_SEMICOLON, K_ESC}, // 3
-        K(K_P), // 4
-        K(K_0), // 5
-        {K_F8, KT_SCI | SCI_BRIGHTNESS_DOWN}, // 6
-        K(K_F7), // 7
-    },
-    {   // 12
-        K(0), // 0
-        K(0), // 1
-        K(K_SLASH), // 2
-        {K_QUOTE, K_DEL}, // 3
-        K(K_BRACE_OPEN), // 4
-        K(K_MINUS), // 5
-        K(K_F10), // 6
-        {K_F9, KT_SCI | SCI_BRIGHTNESS_UP}, // 7
-    },
-    {   // 13
-        K(0), // 0
-        K(0), // 1
-        K(0 /* TODO: PrtSc/SysRq */), // 2
-        K(K_BRACE_CLOSE), // 3
-        K(K_EQUALS), // 4
-        K(K_RIGHT), // 5
-        K(0 /* TODO: Pause/Break */), // 6
-        {K_F11, KT_SCI | SCI_AIRPLANE_MODE}, // 7
-    },
-    {   // 14
-        K(0), // 0
-        K(K_BACKSLASH), // 1
-        K(K_LEFT), // 2
-        {K_BKSP, K_DEL}, // 3
-        K(K_PGUP), // 4
-        K(K_INSERT), // 5
-        K(K_HOME), // 6
-        K(K_DEL), // 7
-    },
-    {   // 15
-        K(K_RIGHT_SUPER), // 0
-        K(0), // 1
-        K(K_ENTER), // 2
-        K(0), // 3
-        K(K_DOWN), // 4
-        {K_F12, KT_SCI | SCI_SUSPEND}, // 5
-        K(K_END), // 6
-        K(K_PGDN), // 7
-    },
+uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN] = {
+LAYOUT(
+    K_ESC, K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12, 0 /*prtsc*/, 0 /* pause */, K_INSERT, K_DEL,
+    K_TICK, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_0, K_MINUS, K_EQUALS, K_BKSP, K_HOME,
+    K_TAB, K_Q, K_W, K_E, K_R, K_T, K_Y, K_U, K_I, K_O, K_P, K_BRACE_OPEN, K_BRACE_CLOSE, K_BACKSLASH, K_PGUP,
+    KT_FN, K_A, K_S, K_D, K_F, K_G, K_H, K_J, K_K, K_L, K_SEMICOLON, K_QUOTE, K_ENTER, K_PGDN,
+    K_LEFT_SHIFT, K_Z, K_X, K_C, K_V, K_B, K_N, K_M, K_COMMA, K_PERIOD, K_SLASH, K_RIGHT_SHIFT, K_UP, K_END,
+    K_LEFT_CTRL, KT_FN, K_LEFT_SUPER, K_LEFT_ALT, K_SPACE, KT_FN, K_RIGHT_ALT, K_RIGHT_CTRL, K_LEFT, K_DOWN, K_RIGHT
+),
+LAYOUT(
+    K_ESC, K_TOUCHPAD, K_F2, K_MUTE, K_F4, K_VOLUME_DOWN, K_VOLUME_UP, K_F7, KT_SCI | SCI_BRIGHTNESS_DOWN, KT_SCI | SCI_BRIGHTNESS_UP, K_F10, KT_SCI | SCI_AIRPLANE_MODE, KT_SCI | SCI_SUSPEND, 0 /*prtsc*/, 0 /*pause*/, K_INSERT, K_DEL,
+    K_PLAY_PAUSE, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_0, K_MINUS, K_EQUALS, K_BKSP, K_HOME,
+    K_TAB, K_Q, K_W, K_E, K_R, K_T, K_Y, K_PGUP, K_HOME, K_PGDN, K_P, K_BRACE_OPEN, K_BRACE_CLOSE, K_BACKSLASH, K_PGUP,
+    KT_FN, K_A, K_S, K_D, K_F, K_G, K_LEFT, K_DOWN, K_UP, K_RIGHT, K_BKSP, K_DEL, K_ENTER, K_PGDN,
+    K_LEFT_SHIFT, K_Z, K_X, K_C, K_V, K_B, K_END, K_M, K_COMMA, K_PERIOD, K_SLASH, K_RIGHT_SHIFT, K_UP, K_END,
+    K_LEFT_CTRL, KT_FN, K_LEFT_ALT, K_LEFT_SUPER, K_ESC, KT_FN, K_RIGHT_ALT, K_RIGHT_CTRL, K_LEFT, K_DOWN, K_RIGHT
+)
 };
