@@ -46,16 +46,25 @@ void kbscan_event(void) {
         if (i < 8) {
             KSOLGOEN = 0;
             KSOLGOEN = 1 << i;
+            GPCRC3 = GPIO_IN;
+            GPCRC5 = GPIO_IN;
         } else if (i < 16) {
             KSOLGOEN = 0;
             KSOHGOEN = 1 << (i - 8);
+            GPCRC3 = GPIO_IN;
+            GPCRC5 = GPIO_IN;
         } else if (i == 16) {
             KSOLGOEN = 0;
             KSOHGOEN = 0;
+            GPCRC3 = GPIO_OUT;
+            GPCRC5 = GPIO_IN;
         } else if (i == 17) {
             KSOLGOEN = 0;
             KSOHGOEN = 0;
+            GPCRC3 = GPIO_IN;
+            GPCRC5 = GPIO_OUT;
         }
+        GPDRC &= ~((1 << 3) | (1 << 5));
 
         // TODO: figure out optimal delay
         delay_ticks(10);
@@ -155,6 +164,8 @@ void kbscan_event(void) {
     // Reset all lines to inputs
     KSOLGOEN = 0;
     KSOHGOEN = 0;
+    GPCRC3 = GPIO_IN;
+    GPCRC5 = GPIO_IN;
 
     // TODO: figure out optimal delay
     delay_ticks(10);

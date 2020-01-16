@@ -32,8 +32,8 @@
     { K56, ___, K3C, ___, K59, K0C, K4D, K3D } \
 }
 
-// Keymap output pins (16 for galago, 18 for darter)
-#define KM_OUT 18
+// Keymap output pins
+#define KM_OUT 16
 // Keymap input pins
 #define KM_IN 8
 // Keymap layers (normal, Fn)
