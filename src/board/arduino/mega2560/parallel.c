@@ -52,6 +52,8 @@
     DATA_BIT(6) \
     DATA_BIT(7)
 
+#define FLIP
+#if !defined(FLIP)
 // Mapping of 24-pin ribbon cable to GPIOs
 static struct Gpio GPIOS[24] = {
     GPIO(L, 4), GPIO(L, 5),
@@ -67,6 +69,24 @@ static struct Gpio GPIOS[24] = {
     GPIO(A, 3), GPIO(A, 2),
     GPIO(A, 1), GPIO(A, 0),
 };
+#else // !defined(FLIP)
+// Mapping of 24-pin ribbon cable to GPIOs, flipped
+static struct Gpio GPIOS[24] = {
+    GPIO(L, 5), GPIO(L, 4),
+    GPIO(L, 7), GPIO(L, 6),
+    GPIO(G, 1), GPIO(G, 0),
+    GPIO(D, 7), GPIO(G, 2),
+    GPIO(C, 1), GPIO(C, 0),
+    GPIO(C, 3), GPIO(C, 2),
+    GPIO(C, 5), GPIO(C, 4),
+    GPIO(C, 7), GPIO(C, 6),
+    GPIO(A, 6), GPIO(A, 7),
+    GPIO(A, 4), GPIO(A, 5),
+    GPIO(A, 2), GPIO(A, 3),
+    GPIO(A, 0), GPIO(A, 1),
+};
+#endif // !defined(FLIP)
+
 
 // Parallel struct definition
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm
@@ -101,7 +121,7 @@ void parallel_reset(struct Parallel * port) {
 
     // Wait 1 microsecond
     _delay_us(1);
-    
+
     // Make sure strobes are high outputs
     gpio_set(port->data_n, true);
     gpio_set(port->addr_n, true);
@@ -121,7 +141,7 @@ void parallel_reset(struct Parallel * port) {
     #undef DATA_BIT
 
     //TODO: something with straps
-    
+
     // Wait 1 microsecond
     _delay_us(1);
 
@@ -146,7 +166,7 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
     for (i = 0; i < length; i++) {
         // Wait for wait line to be low
         while (gpio_get(port->wait_n)) {}
-        
+
         if (!read) {
             // Set data low where necessary
             byte = data[i];
@@ -221,7 +241,7 @@ int parallel_spi_reset(struct Parallel *port) {
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
     if (res < 0) return res;
-    
+
     res = parallel_write(port, &SPI_ENABLE, 1);
     if (res < 0) return res;
 
@@ -237,7 +257,7 @@ int parallel_spi_transaction(struct Parallel *port, uint8_t * data, int length, 
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
     if (res < 0) return res;
-    
+
     res = parallel_write(port, &SPI_DATA, 1);
     if (res < 0) return res;
 
@@ -366,7 +386,7 @@ int parallel_main(void) {
                         data[i] = 0;
                     }
                 }
-                
+
                 // Write data to serial
                 res = serial_write(data, length);
                 if (res < 0) goto err;
