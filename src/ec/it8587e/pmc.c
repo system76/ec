@@ -9,6 +9,9 @@
 
 struct Pmc __code PMC_1 = PMC(1);
 struct Pmc __code PMC_2 = PMC(2);
+struct Pmc __code PMC_3 = PMC(3);
+struct Pmc __code PMC_4 = PMC(4);
+struct Pmc __code PMC_5 = PMC(5);
 
 uint8_t pmc_status(struct Pmc * pmc) {
     return *(pmc->status);
