@@ -3,11 +3,11 @@
 #include <common/i2c.h>
 
 int smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
-    return i2c_get(address, command, (uint8_t *)data, 2);
+    return i2c_get(NULL, address, command, (uint8_t *)data, 2);
 }
 
 int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
-    return i2c_set(address, command, (uint8_t *)&data, 2);
+    return i2c_set(NULL, address, command, (uint8_t *)&data, 2);
 }
 
 void battery_debug(void) {

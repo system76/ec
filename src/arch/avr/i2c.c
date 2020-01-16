@@ -7,7 +7,7 @@
 
 #define TIMEOUT (F_CPU/1000)
 
-int i2c_start(uint8_t addr, bool read) {
+int i2c_start(struct I2C * i2c, uint8_t addr, bool read) {
 	uint32_t count;
 
 	// reset TWI control register
@@ -38,12 +38,12 @@ int i2c_start(uint8_t addr, bool read) {
 	return 0;
 }
 
-void i2c_stop(void) {
+void i2c_stop(struct I2C * i2c) {
 	// transmit STOP condition
 	TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
 }
 
-int i2c_write(uint8_t * data, int length) {
+int i2c_write(struct I2C * i2c, uint8_t * data, int length) {
 	int i;
 	for (i = 0; i < length; i++) {
 		// load data into data register
@@ -62,7 +62,7 @@ int i2c_write(uint8_t * data, int length) {
 	return i;
 }
 
-int i2c_read(uint8_t * data, int length) {
+int i2c_read(struct I2C * i2c, uint8_t * data, int length) {
 	int i;
 	for (i = 0; i < length; i++) {
 	    if ((i + 1) < length) {
