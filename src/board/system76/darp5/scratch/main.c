@@ -10,83 +10,105 @@ volatile uint8_t __xdata __at(0x103D) ECINDAR2;
 volatile uint8_t __xdata __at(0x103E) ECINDAR3;
 volatile uint8_t __xdata __at(0x103F) ECINDDR;
 
-#define FLASH_SPI 0x00000000
-#define FLASH_EMBEDDED 0x40000000
+uint8_t acpi_read(uint8_t addr) {
+    uint8_t data = 0;
 
-static int flash_transaction(uint32_t offset, uint8_t * data, int length, bool read) {
-    int i;
-    for (i = 0; i < length; i++, offset++) {
-        ECINDAR3 = (uint8_t)(offset >> 24);
-        ECINDAR2 = (uint8_t)(offset >> 16);
-        ECINDAR1 = (uint8_t)(offset >> 8);
-        ECINDAR0 = (uint8_t)(offset);
-        if (read) {
-            data[i] = ECINDDR;
-        } else {
-            ECINDDR = data[i];
-        }
+    switch (addr) {
+        case 4:
+           data = ECINDAR0;
+           break;
+        case 5:
+           data = ECINDAR1;
+           break;
+        case 6:
+           data = ECINDAR2;
+           break;
+        case 7:
+           data = ECINDAR3;
+           break;
+        case 8:
+           data = ECINDDR;
+           break;
     }
-    return i;
+
+    return data;
+}
+
+void acpi_write(uint8_t addr, uint8_t data) {
+    switch (addr) {
+        case 4:
+           ECINDAR0 = data;
+           break;
+        case 5:
+           ECINDAR1 = data;
+           break;
+        case 6:
+           ECINDAR2 = data;
+           break;
+        case 7:
+           ECINDAR3 = data;
+           break;
+        case 8:
+           ECINDDR = data;
+           break;
+    }
 }
 
 enum PmcState {
     PMC_STATE_DEFAULT,
-    PMC_STATE_WRITE,
+    PMC_STATE_ACPI_READ,
+    PMC_STATE_ACPI_WRITE,
+    PMC_STATE_ACPI_WRITE_ADDR,
 };
 
-static void pmc_event(struct Pmc * pmc) {
+void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
+    static uint8_t state_data[2] = {0, 0};
 
     uint8_t sts = pmc_status(pmc);
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
-            printf_tiny("%x\n", data);
+            state = PMC_STATE_DEFAULT;
+            switch (data) {
+            case 0x80:
+                state = PMC_STATE_ACPI_READ;
+                break;
+            case 0x81:
+                state = PMC_STATE_ACPI_WRITE;
+                break;
+            case 0xEC:
+                // Clear processor caches
+                __asm__("mov 0xf7, #1");
+                __asm__("nop");
+                __asm__("mov 0xf7, #1");
+                __asm__("nop");
+                __asm__("mov 0xf7, #1");
+                __asm__("nop");
+                __asm__("mov 0xf7, #1");
+                __asm__("nop");
+                // Exit scratch ROM by going through trampoline
+                __asm__("ljmp 0x1000");
+               break;
+            }
+        } else {
             switch (state) {
-                case PMC_STATE_DEFAULT:
-                    switch (data) {
-                        case 0x01:
-                            // Enable follow
-                            ECINDAR3 = 0x0F;
-                            break;
-                        case 0x02:
-                            // Generate high CE#
-                            data = 0;
-                            flash_transaction(0x7FFFFE00, &data, 1, false);
-                            // Fall through
-                        case 0x03:
-                            state = PMC_STATE_WRITE;
-                            break;
-                        case 0x04:
-                            // Read data
-                            flash_transaction(0x7FFFFD00, &data, 1, true);
-                            pmc_write(pmc, data);
-                            printf_tiny("=%x\n", data);
-                            break;
-                        case 0x05:
-                            // Disable follow
-                            ECINDAR3 = 0x00;
-                            break;
-                        case 0xFC:
-                            // Clear processor caches
-                            __asm__("mov 0xf7, #1");
-                            __asm__("nop");
-                            __asm__("mov 0xf7, #1");
-                            __asm__("nop");
-                            __asm__("mov 0xf7, #1");
-                            __asm__("nop");
-                            __asm__("mov 0xf7, #1");
-                            __asm__("nop");
-                            // Exit scratch ROM by going through trampoline
-                            __asm__("ljmp 0x1000");
-                            break;
-                    }
-                    break;
-                case PMC_STATE_WRITE:
-                    // Write command or data
-                    flash_transaction(0x7FFFFD00, &data, 1, false);
-                    state = PMC_STATE_DEFAULT;
-                    break;
+            case PMC_STATE_ACPI_READ:
+                state = PMC_STATE_DEFAULT;
+                uint8_t value = acpi_read(data);
+                pmc_write(pmc, value);
+                break;
+            case PMC_STATE_ACPI_WRITE:
+                state = PMC_STATE_ACPI_WRITE_ADDR;
+                state_data[0] = data;
+                break;
+            case PMC_STATE_ACPI_WRITE_ADDR:
+                state = PMC_STATE_DEFAULT;
+                acpi_write(state_data[0], data);
+                break;
+            default:
+                state = PMC_STATE_DEFAULT;
+                break;
             }
         }
     }
@@ -96,6 +118,6 @@ static void pmc_event(struct Pmc * pmc) {
 void main(void) {
     printf_tiny("SCRATCH\n");
 	for (;;) {
-        pmc_event(&PMC_1);
+        pmc_event(&PMC_3);
     }
 }

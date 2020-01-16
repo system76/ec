@@ -76,9 +76,9 @@ void pmc_event(struct Pmc * pmc) {
                 pmc_sci_queue = 0;
                 break;
 
-            case 0xDC:
+            case 0xEC:
                 DEBUG("  scratch rom\n");
-                pmc_write(pmc, 0x33, PMC_TIMEOUT);
+                pmc_write(pmc, 0x76, PMC_TIMEOUT);
                 scratch_trampoline();
                 break;
             }
