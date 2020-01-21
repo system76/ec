@@ -75,6 +75,7 @@ uint16_t battery_current = 0;
 uint16_t battery_charge = 0;
 uint16_t battery_remaining_capacity = 0;
 uint16_t battery_full_capacity = 0;
+uint16_t battery_status = 0;
 uint16_t battery_design_capacity = 0;
 uint16_t battery_design_voltage = 0;
 
@@ -85,7 +86,6 @@ void battery_event(void) {
         res = smbus_read(0x0B, V, &N); \
         if (res < 0) { \
             N = 0; \
-            return; \
         } \
     }
 
@@ -95,6 +95,7 @@ void battery_event(void) {
     command(battery_charge, 0x0D);
     command(battery_remaining_capacity, 0x0F);
     command(battery_full_capacity, 0x10);
+    command(battery_status, 0x16);
     command(battery_design_capacity, 0x18);
     command(battery_design_voltage, 0x19);
 

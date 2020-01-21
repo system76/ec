@@ -9,6 +9,7 @@ extern uint16_t battery_current;
 extern uint16_t battery_charge;
 extern uint16_t battery_remaining_capacity;
 extern uint16_t battery_full_capacity;
+extern uint16_t battery_status;
 extern uint16_t battery_design_capacity;
 extern uint16_t battery_design_voltage;
 

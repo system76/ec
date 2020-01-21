@@ -1,3 +1,4 @@
+#include <board/gpio.h>
 #include <common/debug.h>
 #include <ec/i2c.h>
 
@@ -75,6 +76,7 @@ uint16_t battery_current = 0;
 uint16_t battery_charge = 0;
 uint16_t battery_remaining_capacity = 0;
 uint16_t battery_full_capacity = 0;
+uint16_t battery_status = 0;
 uint16_t battery_design_capacity = 0;
 uint16_t battery_design_voltage = 0;
 
@@ -85,7 +87,6 @@ void battery_event(void) {
         res = smbus_read(0x0B, V, &N); \
         if (res < 0) { \
             N = 0; \
-            return; \
         } \
     }
 
@@ -95,10 +96,27 @@ void battery_event(void) {
     command(battery_charge, 0x0D);
     command(battery_remaining_capacity, 0x0F);
     command(battery_full_capacity, 0x10);
+    command(battery_status, 0x16);
     command(battery_design_capacity, 0x18);
     command(battery_design_voltage, 0x19);
 
     #undef command
+    
+    if (gpio_get(&ACIN_N)) {
+        // Discharging (no AC adapter)
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, false);
+    } else if (battery_status & 0x0020) {
+        // Fully charged
+        // TODO: turn off charger
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, true);
+    } else {
+        // Charging
+        // TODO: detect no battery connected
+        gpio_set(&LED_BAT_CHG, true);
+        gpio_set(&LED_BAT_FULL, false);
+    }
 }
 
 void battery_debug(void) {
@@ -120,6 +138,7 @@ void battery_debug(void) {
     command(Voltage, 0x0B, 0x09);
     command(Current, 0x0B, 0x0A);
     command(Charge, 0x0B, 0x0D);
+    command(Status, 0x0B, 0x16);
 
     DEBUG("Charger:\n");
     command(ChargeOption0, 0x09, 0x12);
