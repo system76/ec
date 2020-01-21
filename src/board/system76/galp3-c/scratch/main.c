@@ -10,6 +10,9 @@ volatile uint8_t __xdata __at(0x103D) ECINDAR2;
 volatile uint8_t __xdata __at(0x103E) ECINDAR3;
 volatile uint8_t __xdata __at(0x103F) ECINDDR;
 
+volatile uint8_t __xdata __at(0x1F01) ETWCFG;
+volatile uint8_t __xdata __at(0x1F07) EWDKEYR;
+
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;
 
@@ -87,6 +90,9 @@ void pmc_event(struct Pmc * pmc) {
                 __asm__("nop");
                 __asm__("mov 0xf7, #1");
                 __asm__("nop");
+                // Attempt to trigger watchdog reset
+                ETWCFG |= (1 << 5);
+                EWDKEYR = 0;
                 // Exit scratch ROM by going through trampoline
                 __asm__("ljmp 0x1000");
                break;
