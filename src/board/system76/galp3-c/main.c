@@ -113,16 +113,10 @@ void lid_event(void) {
     last = new;
 }
 
-struct Gpio __code LED_SSD_N = GPIO(G, 6);
-struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
-
 void main(void) {
     init();
 
     INFO("\n");
-
-    // Set the battery full LED (to know our firmware is loading)
-    gpio_set(&LED_BAT_CHG, true);
 
 #if GPIO_DEBUG
     gpio_debug();
@@ -145,8 +139,6 @@ void main(void) {
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
 
-    // Set the battery full LED (to know our firmware is loaded)
-    gpio_set(&LED_BAT_FULL, true);
     INFO("Hello from System76 EC for %s!\n", xstr(__BOARD__));
 
     for(main_cycle = 0; ; main_cycle++) {

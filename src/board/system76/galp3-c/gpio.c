@@ -12,6 +12,7 @@ struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code EC_EN =          GPIO(E, 1);
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
+struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
 struct Gpio __code LED_BAT_CHG =    GPIO(A, 5);
 struct Gpio __code LED_BAT_FULL =   GPIO(A, 6);
 struct Gpio __code LED_PWR =        GPIO(A, 7);
@@ -48,7 +49,7 @@ void gpio_init() {
     GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
     GPDRE = 0;
     GPDRF = 0xC0; // (1 << 7) | (1 << 6)
-    GPDRG = 0;
+    GPDRG = (1 << 6);
     GPDRH = 0;
     GPDRI = 0;
     GPDRJ = 0;

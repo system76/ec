@@ -57,6 +57,13 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x2E, battery_remaining_capacity);
         ACPI_16(0x32, battery_voltage);
 
+        // Airplane mode LED
+        case 0xD9:
+            if (!gpio_get(&LED_AIRPLANE_N)) {
+                data |= (1 << 6);
+            }
+            break;
+
         // Set size of flash (from old firmware)
         ACPI_8 (0xE5, 0x80);
     }
@@ -73,6 +80,11 @@ void acpi_write(uint8_t addr, uint8_t data) {
         // Lid state and other flags
         case 0x03:
             lid_wake = (bool)(data & (1 << 2));
+            break;
+
+        // Airplane mode LED
+        case 0xD9:
+            gpio_set(&LED_AIRPLANE_N, !(bool)(data & (1 << 6)));
             break;
     }
 }
