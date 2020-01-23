@@ -2,6 +2,7 @@
 
 #include <board/peci.h>
 #include <common/debug.h>
+#include <common/macro.h>
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
@@ -16,6 +17,56 @@ uint8_t peci_tjmax = T_JUNCTION;
 static bool peci_config_loaded = false;
 
 #define PECI_TEMP(X) (((int16_t)(X)) << 6)
+#define PWM_DUTY(X) ((uint8_t)(((((uint16_t)(X)) * 255) + 99) / 100))
+
+struct FanPoint {
+    int16_t temp;
+    uint8_t duty;
+};
+
+#define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
+
+// Fan curve with temperature in degrees C, duty cycle in percent
+struct FanPoint __code FAN_POINTS[] = {
+    FAN_POINT(45,  40),
+    FAN_POINT(55,  50),
+    FAN_POINT(65,  65),
+    FAN_POINT(75,  85),
+    FAN_POINT(80, 100),
+};
+
+// Get duty cycle based on temperature, adapted from
+// https://github.com/pop-os/system76-power/blob/master/src/fan.rs
+uint8_t fan_duty(int16_t temp) {
+    for (int i = 0; i < ARRAY_SIZE(FAN_POINTS); i++) {
+        const struct FanPoint * cur = &FAN_POINTS[i];
+
+        // If exactly the current temp, return the current duty
+        if (temp == cur->temp) {
+            return cur->duty;
+        } else if (temp < cur->temp) {
+            // If lower than first temp, return 0%
+            if (i == 0) {
+                return PWM_DUTY(0);
+            } else {
+                const struct FanPoint * prev = &FAN_POINTS[i - 1];
+
+                // If in between current temp and previous temp, interpolate
+                if (temp > prev->temp) {
+                    int16_t dtemp = (cur->temp - prev->temp);
+                    int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
+                    return (uint8_t)(
+                        ((int16_t)prev->duty) +
+                        ((temp - prev->temp) * dduty) / dtemp
+                    );
+                }
+            }
+        }
+    }
+
+    // If no point is found, return 100%
+    return PWM_DUTY(100);
+}
 
 void peci_init(void) {
     // Allow PECI pin to be used
@@ -112,36 +163,12 @@ void peci_event(void) {
 
         // TODO: tjmax
         peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
-
-        // Set fan based on temp, adapted from
-        // https://github.com/pop-os/system76-power/blob/master/src/fan.rs#L218
-        if (peci_temp >= PECI_TEMP(90)) {
-            // 90C = 100%
-            peci_duty = 255;
-        } else if (peci_temp >= PECI_TEMP(80)) {
-            // 80C = 50%
-            peci_duty = 128;
-        } else if (peci_temp >= PECI_TEMP(75)) {
-            // 75C = 45%
-            peci_duty = 115;
-        } else if (peci_temp >= PECI_TEMP(65)) {
-            // 65C = 40%
-            peci_duty = 102;
-        } else if (peci_temp >= PECI_TEMP(55)) {
-            // 55C = 35%
-            peci_duty = 90;
-        } else if (peci_temp >= PECI_TEMP(45)) {
-            // 45C = 30%
-            peci_duty = 77;
-        } else {
-            // < 45C = 0%
-            peci_duty = 0;
-        }
+        peci_duty = fan_duty(peci_temp);
     } else {
         // Default to 50% if there is an error
         peci_offset = 0;
         peci_temp = 0;
-        peci_duty = 128;
+        peci_duty = PWM_DUTY(50);
     }
 
     if (peci_duty != DCR2) {

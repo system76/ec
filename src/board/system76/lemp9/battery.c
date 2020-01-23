@@ -121,6 +121,7 @@ void battery_debug(void) {
     command(Voltage, 0x0B, 0x09);
     command(Current, 0x0B, 0x0A);
     command(Charge, 0x0B, 0x0D);
+    command(Status, 0x0B, 0x16);
 
     DEBUG("Charger:\n");
     command(ChargeOption0, 0x09, 0x12);
