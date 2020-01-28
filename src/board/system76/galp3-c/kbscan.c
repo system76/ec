@@ -10,6 +10,8 @@
 
 bool kbscan_enabled = false;
 
+uint8_t sci_extra = 0;
+
 void kbscan_init(void) {
     KSOCTRL = 0x05;
     KSICTRLR = 0x04;
@@ -98,6 +100,15 @@ void kbscan_event(void) {
                             if (new_b) layer = 1;
                             else layer = 0;
                             break;
+                        case (KT_SCI_EXTRA):
+                            if (new_b) {
+                                uint8_t sci = SCI_EXTRA;
+                                sci_extra = (uint8_t)(key & 0xFF);
+                                if (!pmc_sci(&PMC_1, sci)) {
+                                    // In the case of ignored SCI, reset bit
+                                    new &= ~(1 << j);
+                                }
+                            }
                         case (KT_SCI):
                             if (new_b) {
                                 uint8_t sci = (uint8_t)(key & 0xFF);

@@ -7,6 +7,8 @@
 
 extern bool lid_wake;
 
+extern uint8_t sci_extra;
+
 uint8_t fcmd = 0;
 uint8_t fdat = 0;
 uint8_t fbuf[4] = { 0, 0, 0, 0 };
@@ -79,6 +81,8 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x2A, battery_current);
         ACPI_16(0x2E, battery_remaining_capacity);
         ACPI_16(0x32, battery_voltage);
+
+        ACPI_8(0xCC, sci_extra);
 
         // Airplane mode LED
         case 0xD9:
