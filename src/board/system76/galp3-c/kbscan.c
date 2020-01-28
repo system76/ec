@@ -113,6 +113,14 @@ void kbscan_event(void) {
                         case (KT_SCI):
                             if (new_b) {
                                 uint8_t sci = (uint8_t)(key & 0xFF);
+
+                                // HACK FOR HARDWARE HOTKEYS
+                                switch (sci) {
+                                    case SCI_CAMERA_TOGGLE:
+                                        gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
+                                        break;
+                                }
+
                                 if (!pmc_sci(&PMC_1, sci)) {
                                     // In the case of ignored SCI, reset bit
                                     new &= ~(1 << j);
