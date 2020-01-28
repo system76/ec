@@ -1,3 +1,4 @@
+#include <arch/delay.h>
 #include <board/acpi.h>
 #include <board/gpio.h>
 #include <board/pmc.h>
@@ -20,17 +21,34 @@ enum PmcState {
 
 static uint8_t pmc_sci_queue = 0;
 
-bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
-    bool update = pmc_sci_queue == 0;
-    // Set SCI queue if possible
-    if (update) pmc_sci_queue = sci;
-    // Set SCI pending bit
-    uint8_t sts = pmc_status(pmc);
-    pmc_set_status(pmc, sts | (1 << 5));
+void pmc_sci_interrupt(void) {
     // Start SCI interrupt
     gpio_set(&SCI_N, false);
-    *(SCI_N.control) = 0x40;
-    return update;
+    *(SCI_N.control) = GPIO_OUT;
+
+    // Delay T_HOLD (value assumed)
+    delay_us(1);
+
+    // Stop SCI interrupt
+    *(SCI_N.control) = GPIO_IN;
+    gpio_set(&SCI_N, true);
+}
+
+bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
+    // Set SCI queue if possible
+    if (pmc_sci_queue == 0) {
+        pmc_sci_queue = sci;
+
+        // Set SCI pending bit
+        pmc_set_status(pmc, pmc_status(pmc) | (1 << 5));
+
+        // Send SCI
+        pmc_sci_interrupt();
+
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void pmc_event(struct Pmc * pmc) {
@@ -75,9 +93,6 @@ void pmc_event(struct Pmc * pmc) {
                     pmc_set_status(pmc, sts & ~(1 << 5));
                     // Send SCI queue
                     pmc_write(pmc, pmc_sci_queue, PMC_TIMEOUT);
-                    // Stop SCI interrupt
-                    *(SCI_N.control) = 0x80;
-                    gpio_set(&SCI_N, true);
                     // Clear SCI queue
                     pmc_sci_queue = 0;
                     break;
