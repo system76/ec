@@ -37,7 +37,7 @@ void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
     static uint8_t state_data = 0;
 
-    uint16_t burst_timeout;
+    uint8_t burst_timeout;
     for (burst_timeout = 1; burst_timeout > 0; burst_timeout--) {
         uint8_t sts = pmc_status(pmc);
         if (sts & PMC_STS_IBF) {
@@ -55,8 +55,8 @@ void pmc_event(struct Pmc * pmc) {
                     break;
                 case 0x82:
                     DEBUG("  burst enable\n");
-                    // Run pmc_event in a tight loop for PMC_TIMEOUT iterations
-                    burst_timeout = PMC_TIMEOUT;
+                    // Run pmc_event in a tight loop for more iterations
+                    burst_timeout = 100;
                     // Set burst bit
                     pmc_set_status(pmc, sts | (1 << 4));
                     // Send acknowledgement byte
