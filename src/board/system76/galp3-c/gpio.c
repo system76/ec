@@ -210,7 +210,7 @@ void gpio_init() {
     // WLAN_PWR_EN
     GPCRJ4 = GPIO_OUT | GPIO_UP;
     // KBLIGHT_ADJ
-    GPCRJ5 = GPIO_OUT;
+    GPCRJ5 = GPIO_ALT;
     // 3G_PWR_EN
     GPCRJ6 = GPIO_OUT | GPIO_UP;
     // NC
