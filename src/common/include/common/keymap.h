@@ -20,6 +20,7 @@ uint16_t keymap_translate(uint16_t key);
 
 #define SCI_BRIGHTNESS_DOWN (0x11)
 #define SCI_BRIGHTNESS_UP (0x12)
+#define SCI_CAMERA_TOGGLE (0x13)
 #define SCI_AIRPLANE_MODE (0x14)
 #define SCI_SUSPEND (0x15)
 
