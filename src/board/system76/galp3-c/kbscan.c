@@ -109,6 +109,7 @@ void kbscan_event(void) {
                                     new &= ~(1 << j);
                                 }
                             }
+                            break;
                         case (KT_SCI):
                             if (new_b) {
                                 uint8_t sci = (uint8_t)(key & 0xFF);
