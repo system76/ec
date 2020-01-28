@@ -35,7 +35,7 @@ bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
 
 void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
-    static uint8_t state_data[2] = {0, 0};
+    static uint8_t state_data = 0;
 
     uint16_t burst_timeout;
     for (burst_timeout = 1; burst_timeout > 0; burst_timeout--) {
@@ -94,16 +94,16 @@ void pmc_event(struct Pmc * pmc) {
                 switch (state) {
                 case PMC_STATE_ACPI_READ:
                     state = PMC_STATE_DEFAULT;
-                    uint8_t value = acpi_read(data);
-                    pmc_write(pmc, value, PMC_TIMEOUT);
+                    state_data = acpi_read(data);
+                    pmc_write(pmc, state_data, PMC_TIMEOUT);
                     break;
                 case PMC_STATE_ACPI_WRITE:
                     state = PMC_STATE_ACPI_WRITE_ADDR;
-                    state_data[0] = data;
+                    state_data = data;
                     break;
                 case PMC_STATE_ACPI_WRITE_ADDR:
                     state = PMC_STATE_DEFAULT;
-                    acpi_write(state_data[0], data);
+                    acpi_write(state_data, data);
                     break;
                 default:
                     state = PMC_STATE_DEFAULT;
