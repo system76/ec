@@ -1,10 +1,25 @@
 #include <board/acpi.h>
 #include <board/battery.h>
+#include <board/gpio.h>
 #include <board/peci.h>
 #include <common/debug.h>
-#include <board/gpio.h>
 
 extern bool lid_wake;
+
+extern uint8_t sci_extra;
+
+uint8_t fcmd = 0;
+uint8_t fdat = 0;
+uint8_t fbuf[4] = { 0, 0, 0, 0 };
+
+void fcommand(void) {
+    switch (fcmd) {
+        // Keyboard backlight
+        case 0xCA:
+            // TODO
+            break;
+    }
+}
 
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;
@@ -57,6 +72,8 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x2E, battery_remaining_capacity);
         ACPI_16(0x32, battery_voltage);
 
+        ACPI_8(0xCC, sci_extra);
+
         // Airplane mode LED
         case 0xD9:
             if (!gpio_get(&LED_AIRPLANE_N)) {
@@ -66,6 +83,13 @@ uint8_t acpi_read(uint8_t addr) {
 
         // Set size of flash (from old firmware)
         ACPI_8 (0xE5, 0x80);
+
+        ACPI_8 (0xF8, fcmd);
+        ACPI_8 (0xF9, fdat);
+        ACPI_8 (0xFA, fbuf[0]);
+        ACPI_8 (0xFB, fbuf[1]);
+        ACPI_8 (0xFC, fbuf[2]);
+        ACPI_8 (0xFD, fbuf[3]);
     }
 
     DEBUG("acpi_read %02X = %02X\n", addr, data);
@@ -85,6 +109,26 @@ void acpi_write(uint8_t addr, uint8_t data) {
         // Airplane mode LED
         case 0xD9:
             gpio_set(&LED_AIRPLANE_N, !(bool)(data & (1 << 6)));
+            break;
+
+        case 0xF8:
+            fcmd = data;
+            fcommand();
+            break;
+        case 0xF9:
+            fdat = data;
+            break;
+        case 0xFA:
+            fbuf[0] = data;
+            break;
+        case 0xFB:
+            fbuf[1] = data;
+            break;
+        case 0xFC:
+            fbuf[2] = data;
+            break;
+        case 0xFD:
+            fbuf[3] = data;
             break;
     }
 }

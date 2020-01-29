@@ -3,6 +3,11 @@
 
 #include <common/keymap.h>
 
+// Extra SCI layer for keyboard backlight control
+#define KT_SCI_EXTRA (0x4000)
+
+#define SCI_EXTRA (0x50)
+
 #define ___ 0
 
 // Conversion of physical layout to keyboard matrix

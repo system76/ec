@@ -205,7 +205,7 @@ void gpio_init() {
     // KBC_MUTE#
     GPCRJ1 = GPIO_IN;
     // KBLIGHT_ADJ
-    GPCRJ2 = GPIO_OUT;
+    GPCRJ2 = GPIO_ALT;
     // SLP_SUS#
     GPCRJ3 = GPIO_IN;
     // VA_EC_EN
