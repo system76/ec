@@ -25,11 +25,15 @@ struct FanPoint {
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 struct FanPoint __code FAN_POINTS[] = {
-    FAN_POINT(45,  40),
-    FAN_POINT(55,  50),
-    FAN_POINT(65,  65),
-    FAN_POINT(75,  85),
-    FAN_POINT(80, 100),
+    FAN_POINT(65,  30),
+    FAN_POINT(70,  35),
+    FAN_POINT(75,  40),
+    FAN_POINT(78,  45),
+    FAN_POINT(80,  50),
+    FAN_POINT(81,  55),
+    FAN_POINT(82,  65),
+    FAN_POINT(83,  75),
+    FAN_POINT(84, 100),
 };
 
 // Get duty cycle based on temperature, adapted from
