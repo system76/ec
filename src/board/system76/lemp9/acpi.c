@@ -1,7 +1,7 @@
 #include <board/acpi.h>
 #include <board/battery.h>
-#include <board/dac.h>
 #include <board/gpio.h>
+#include <board/kbled.h>
 #include <board/peci.h>
 #include <common/debug.h>
 
@@ -9,9 +9,9 @@ extern bool lid_wake;
 
 extern uint8_t sci_extra;
 
-uint8_t fcmd = 0;
-uint8_t fdat = 0;
-uint8_t fbuf[4] = { 0, 0, 0, 0 };
+static uint8_t fcmd = 0;
+static uint8_t fdat = 0;
+static uint8_t fbuf[4] = { 0, 0, 0, 0 };
 
 void fcommand(void) {
     switch (fcmd) {
@@ -20,11 +20,11 @@ void fcommand(void) {
             switch (fdat) {
                 // Set white LED brightness
                 case 0x00:
-                    DACDAT2 = fbuf[0];
+                    kbled_set(fbuf[0]);
                     break;
                 // Get white LED brightness
                 case 0x01:
-                    fbuf[0] = DACDAT2;
+                    fbuf[0] = kbled_get();
                     break;
             }
             break;
