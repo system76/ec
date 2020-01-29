@@ -3,12 +3,12 @@
 #include <common/macro.h>
 
 static uint8_t __code levels[] = {
-    0,
-    48,
-    72,
-    96,
-    192,
-    255
+    0x00,
+    0x80,
+    0x90,
+    0xA8,
+    0xC0,
+    0xFF
 };
 
 uint8_t kbled_get(void) {
