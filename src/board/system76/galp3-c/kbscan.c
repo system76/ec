@@ -3,6 +3,7 @@
 #include <arch/delay.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
+#include <board/kbled.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
 #include <board/pmc.h>
@@ -104,6 +105,14 @@ void kbscan_event(void) {
                             if (new_b) {
                                 uint8_t sci = SCI_EXTRA;
                                 sci_extra = (uint8_t)(key & 0xFF);
+                                
+                                // HACK FOR HARDWARE HOTKEYS
+                                switch (sci_extra) {
+                                    case SCI_EXTRA_KBD_BKL:
+                                        kbled_set(kbled_get() + 1);
+                                        break;
+                                }
+
                                 if (!pmc_sci(&PMC_1, sci)) {
                                     // In the case of ignored SCI, reset bit
                                     new &= ~(1 << j);
