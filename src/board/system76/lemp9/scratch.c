@@ -36,7 +36,7 @@ void scratch_trampoline(void) {
         // Disable scratch RAM mapping
         SCAR0H = 0b11;
     } else {
-        int i;
+        int __data i;
         // Copy scratch ROM
         for (i = 0; i < ARRAY_SIZE(scratch_rom) && i < ARRAY_SIZE(scratch_ram); i++) {
             scratch_ram[i] = scratch_rom[i];

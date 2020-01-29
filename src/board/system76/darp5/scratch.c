@@ -45,6 +45,8 @@ static void scratch_start(void) __naked {
 void scratch_trampoline(void) {
 	// Uses SCAR0, 1, 2, 3, and 4 which are mapped at 0x0000 in data space and are
     // 4096 bytes in size.
+    
+    //TODO: ensure pdata is not used!
 
     if ((SCAR0H == 0x00) || (SCAR1H == 0x00) || (SCAR2H == 0x00) || (SCAR3H == 0x00) || (SCAR4H == 0x00)) {
         // Disable scratch RAM mapping
@@ -54,7 +56,7 @@ void scratch_trampoline(void) {
         SCAR3H = 0b11;
         SCAR4H = 0b11;
     } else {
-        int i;
+        int __data i;
         // Copy scratch ROM
         for (i = 0; i < ARRAY_SIZE(scratch_rom) && i < ARRAY_SIZE(scratch_ram); i++) {
             scratch_ram[i] = scratch_rom[i];
