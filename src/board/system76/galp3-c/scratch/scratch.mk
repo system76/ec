@@ -7,8 +7,9 @@ SCRATCH_INCLUDE+=\
 	src/ec/$(EC)/include/ec/*.h
 SCRATCH_CFLAGS+=\
 	-Isrc/common/include \
-	-Isrc/ec/$(EC)/include \
-	-DI2C_DEBUGGER=0x76
+	-Isrc/ec/$(EC)/include
+
+#SCRATCH_CFLAGS+=-DI2C_DEBUGGER=0x76
 
 SCRATCH_BUILD=$(BUILD)/scratch
 SCRATCH_OBJ=$(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC))
