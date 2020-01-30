@@ -9,7 +9,11 @@ SCRATCH_CFLAGS+=\
 	-Isrc/common/include \
 	-Isrc/ec/$(EC)/include
 
-#SCRATCH_CFLAGS+=-DI2C_DEBUGGER=0x76
+# Enable I2C debug on 0x76
+SCRATCH_CFLAGS+=-DI2C_DEBUGGER=0x76
+
+# Set battery I2C bus
+SCRATCH_CFLAGS+=-DI2C_SMBUS=I2C_4
 
 SCRATCH_BUILD=$(BUILD)/scratch
 SCRATCH_OBJ=$(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC))

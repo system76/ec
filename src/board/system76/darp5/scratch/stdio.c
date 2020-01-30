@@ -14,7 +14,7 @@ int putchar(int c) {
     SBUF = byte;
 #endif
 #ifdef I2C_DEBUGGER
-    i2c_send(&I2C_0, I2C_DEBUGGER, &byte, 1);
+    i2c_send(&I2C_SMBUS, I2C_DEBUGGER, &byte, 1);
 #endif
     return (int)byte;
 }

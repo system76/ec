@@ -17,5 +17,13 @@ void smbus_init(void) {
     SMB45P3USH = 0x01;
 
     // Set up for i2c usage
-    i2c_reset(&I2C_0, true);
+    i2c_reset(&I2C_SMBUS, true);
+}
+
+int smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
+    return i2c_get(&I2C_SMBUS, address, command, (uint8_t *)data, 2);
+}
+
+int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
+    return i2c_set(&I2C_SMBUS, address, command, (uint8_t *)&data, 2);
 }

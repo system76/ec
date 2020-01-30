@@ -1,14 +1,7 @@
 #include <board/gpio.h>
+#include <board/smbus.h>
 #include <common/debug.h>
-#include <ec/i2c.h>
 
-int smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
-    return i2c_get(&I2C_0, address, command, (uint8_t *)data, 2);
-}
-
-int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
-    return i2c_set(&I2C_0, address, command, (uint8_t *)&data, 2);
-}
 
 // ChargeOption0 flags
 // Low Power Mode Enable

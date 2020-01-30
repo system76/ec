@@ -16,6 +16,9 @@ CFLAGS+=-DLEVEL=2
 # Enable I2C debug on 0x76
 CFLAGS+=-DI2C_DEBUGGER=0x76
 
+# Set battery I2C bus
+CFLAGS+=-DI2C_SMBUS=I2C_4
+
 # Add scratch ROM source
 SCRATCH_DIR=$(BOARD_DIR)/scratch
 SCRATCH_SRC=$(wildcard $(SCRATCH_DIR)/*.c)
