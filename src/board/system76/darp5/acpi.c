@@ -13,12 +13,7 @@ uint8_t fdat = 0;
 uint8_t fbuf[4] = { 0, 0, 0, 0 };
 
 void fcommand(void) {
-    switch (fcmd) {
-        // Keyboard backlight
-        case 0xCA:
-            // TODO
-            break;
-    }
+    // TODO
 }
 
 uint8_t acpi_read(uint8_t addr) {
