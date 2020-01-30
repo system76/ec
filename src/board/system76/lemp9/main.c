@@ -4,10 +4,10 @@
 
 #include <arch/delay.h>
 #include <board/battery.h>
-#include <board/dac.h>
 #include <board/gpio.h>
 #include <board/gctrl.h>
 #include <board/kbc.h>
+#include <board/kbled.h>
 #include <board/kbscan.h>
 #include <board/peci.h>
 #include <board/pmc.h>
@@ -47,10 +47,10 @@ void timer_2(void) __interrupt(5) {
 void init(void) {
     gpio_init();
     gctrl_init();
-    dac_init();
     pwm_init();
 
     kbc_init();
+    kbled_init();
     kbscan_init();
     pmc_init();
     peci_init();

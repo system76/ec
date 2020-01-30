@@ -1,6 +1,6 @@
-#include <board/dac.h>
 #include <board/kbled.h>
 #include <common/macro.h>
+#include <ec/dac.h>
 
 static uint8_t __code levels[] = {
     0x00,
@@ -10,6 +10,13 @@ static uint8_t __code levels[] = {
     0xC0,
     0xFF
 };
+
+void kbled_init(void) {
+    // Enable DAC5, used for KBLIGHT_ADJ
+    DACPDREG &= ~(1 << 5);
+    // Set DAC5 to 0V
+    DACDAT5 = 0;
+}
 
 uint8_t kbled_get(void) {
     uint8_t level;

@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+void kbled_init(void);
 uint8_t kbled_get(void);
 void kbled_set(uint8_t level);
 
