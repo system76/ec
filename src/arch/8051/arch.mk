@@ -1,4 +1,4 @@
-CC=sdcc -mmcs51 --model-medium --Werror
+CC=sdcc -mmcs51 --model-large --Werror
 OBJ=$(patsubst src/%.c,$(BUILD)/%.rel,$(SRC))
 
 # Run EC rom in simulator
