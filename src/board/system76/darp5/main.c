@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include <arch/arch.h>
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/battery.h>
@@ -20,28 +21,8 @@
 
 uint8_t main_cycle = 0;
 
-void external_0(void) __interrupt(0) {
-    TRACE("external_0\n");
-}
-
-void external_1(void) __interrupt(2) {
-    TRACE("external_1\n");
-}
-
-void timer_1(void) __interrupt(3) {
-    TRACE("timer_1\n");
-}
-
-void serial(void) __interrupt(4) {
-    TRACE("serial\n");
-}
-
-void timer_2(void) __interrupt(5) {
-    TRACE("timer_2\n");
-}
-
 void init(void) {
-    time_init();
+    arch_init();
 
     gpio_init();
     gctrl_init();

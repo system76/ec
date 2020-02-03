@@ -1,7 +1,6 @@
 // Uses timer 0 to keep track of global time
 
 #include <8051.h>
-#include <stdint.h>
 
 #include <arch/time.h>
 
@@ -9,7 +8,7 @@ static volatile uint32_t time_overflows = 0;
 
 void timer_0(void) __interrupt(1) {
     time_overflows++;
-    
+
     // Restart timer
     TR0 = 0;
     TF0 = 0;
