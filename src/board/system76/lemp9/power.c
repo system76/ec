@@ -1,6 +1,7 @@
 #include <mcs51/8051.h>
 
 #include <arch/delay.h>
+#include <arch/time.h>
 #include <board/battery.h>
 #include <board/gpio.h>
 #include <board/power.h>
@@ -342,33 +343,17 @@ void power_event(void) {
         gpio_set(&LED_ACIN, false);
     } else if (s4_new) {
         // Suspended, flashing green light
-        static int8_t suspend_timer = 0;
-        if (suspend_timer <= 0) {
+        static uint32_t last_time = 0;
+        uint32_t time = time_get();
+        if (
+            (time < last_time) // overflow
+            ||
+            (time >= (last_time + 1000)) // timeout
+        ) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
-            // Suspend timer fires every 1 s
-            suspend_timer = 100;
+            last_time = time;
         }
         gpio_set(&LED_ACIN, false);
-        
-        // If timer 1 is finished
-        if (TF1) {
-            // Stop timer 1 running
-            TR1 = 0;
-            // Clear timer 1 finished flag
-            TF1 = 0;
-            // Decrement suspend timer
-            suspend_timer -= 1;
-        }
-
-        // If timer 1 is not running
-        if (!TR1) {
-            // Start timer for 10 ms
-            // 65536-(10000 * 69 + 89)/90 = 0xE20C
-            TMOD = (TMOD & 0x0F) | 0x10;
-            TH1 = 0xE2;
-            TL1 = 0x0C;
-            TR1 = 1;
-        }
     } else if (!ac_new) {
         // AC plugged in, orange light
         gpio_set(&LED_PWR, false);

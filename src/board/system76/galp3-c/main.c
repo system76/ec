@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include <arch/delay.h>
+#include <arch/time.h>
 #include <board/battery.h>
 #include <board/gpio.h>
 #include <board/gctrl.h>
@@ -24,10 +25,6 @@ void external_0(void) __interrupt(0) {
     TRACE("external_0\n");
 }
 
-void timer_0(void) __interrupt(1) {
-    TRACE("timer_0\n");
-}
-
 void external_1(void) __interrupt(2) {
     TRACE("external_1\n");
 }
@@ -45,6 +42,8 @@ void timer_2(void) __interrupt(5) {
 }
 
 void init(void) {
+    time_init();
+
     gpio_init();
     gctrl_init();
     pwm_init();
