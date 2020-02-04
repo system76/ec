@@ -44,11 +44,15 @@ void gpio_init() {
 
     // Set GPIO data
     GPDRA = 0;
+    // NC
     GPDRB = (1 << 0);
     GPDRC = 0;
+    // PWR_BTN#, SCI#, SMI#
     GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
     GPDRE = 0;
+    // USB_PWR_EN#, H_PECI
     GPDRF = 0xC0; // (1 << 7) | (1 << 6)
+    // AIRPLAN_LED#
     GPDRG = (1 << 6);
     GPDRH = 0;
     GPDRI = 0;
@@ -66,15 +70,15 @@ void gpio_init() {
     // PCH_PWROK_EC
     GPCRA4 = GPIO_OUT;
     // LED_BAT_CHG
-    GPCRA5 = GPIO_OUT | GPIO_UP;
+    GPCRA5 = GPIO_OUT;
     // LED_BAT_FULL
-    GPCRA6 = GPIO_OUT | GPIO_UP;
+    GPCRA6 = GPIO_OUT;
     // LED_PWR
-    GPCRA7 = GPIO_OUT | GPIO_UP;
+    GPCRA7 = GPIO_OUT;
     // NC
-    GPCRB0 = GPIO_OUT | GPIO_UP;
+    GPCRB0 = GPIO_OUT;
     // H_PROCHOT_EC
-    GPCRB1 = GPIO_OUT | GPIO_UP;
+    GPCRB1 = GPIO_OUT;
     // LAN_WAKEUP#
     GPCRB2 = GPIO_IN | GPIO_UP;
     // SMC_BAT
@@ -82,7 +86,7 @@ void gpio_init() {
     // SMD_BAT
     GPCRB4 = GPIO_ALT;
     // GA20
-    GPCRB5 = GPIO_OUT | GPIO_UP;
+    GPCRB5 = GPIO_OUT;
     // AC_IN#
     GPCRB6 = GPIO_IN | GPIO_UP;
     // FP_RST#
@@ -96,13 +100,13 @@ void gpio_init() {
     // KSO16 (Darter)
     GPCRC3 = GPIO_IN;
     // CNVI_DET#
-    GPCRC4 = GPIO_OUT | GPIO_UP;
+    GPCRC4 = GPIO_OUT;
     // KSO17 (Darter)
     GPCRC5 = GPIO_IN;
     // PM_PWROK
     GPCRC6 = GPIO_OUT;
     // LED_ACIN
-    GPCRC7 = GPIO_OUT | GPIO_UP;
+    GPCRC7 = GPIO_OUT;
     // PWR_SW#
     GPCRD0 = GPIO_IN | GPIO_UP;
     // LID_SW#
@@ -114,35 +118,35 @@ void gpio_init() {
     // SCI#
     GPCRD4 = GPIO_IN;
     // PWR_BTN#
-    GPCRD5 = GPIO_OUT | GPIO_UP;
+    GPCRD5 = GPIO_OUT;
     // CPU_FANSEN
     GPCRD6 = GPIO_IN;
     // SUSWARN#
     GPCRD7 = GPIO_IN;
     // SWI#
-    GPCRE0 = GPIO_OUT | GPIO_UP;
+    GPCRE0 = GPIO_OUT;
     // EC_EN
-    GPCRE1 = GPIO_OUT | GPIO_UP;
+    GPCRE1 = GPIO_OUT;
     // PCH_SLP_WLAN#_R
     GPCRE2 = GPIO_IN;
     // VA_EC_EN
     GPCRE3 = GPIO_OUT;
     // DD_ON
-    GPCRE4 = GPIO_OUT | GPIO_DOWN;
+    GPCRE4 = GPIO_OUT;
     // EC_RSMRST#
     GPCRE5 = GPIO_OUT;
     // SB_KBCRST#
-    GPCRE6 = GPIO_OUT | GPIO_UP;
+    GPCRE6 = GPIO_OUT;
     // AC_PRESENT / PM_PWROK
-    GPCRE7 = GPIO_OUT | GPIO_UP;
+    GPCRE7 = GPIO_OUT;
     // 80CLK
     GPCRF0 = GPIO_IN;
     // USB_CHARGE_EN
-    GPCRF1 = GPIO_OUT | GPIO_UP;
+    GPCRF1 = GPIO_OUT;
     // 3IN1
     GPCRF2 = GPIO_IN | GPIO_UP;
     // BT_EN
-    GPCRF3 = GPIO_OUT | GPIO_UP;
+    GPCRF3 = GPIO_OUT;
     // TP_CLK
     GPCRF4 = GPIO_ALT;
     // TP_DATA
@@ -152,9 +156,9 @@ void gpio_init() {
     // USB_PWR_EN#
     GPCRF7 = GPIO_OUT;
     // CCD_EN
-    GPCRG0 = GPIO_OUT | GPIO_UP;
+    GPCRG0 = GPIO_OUT;
     // 3G_EN
-    GPCRG1 = GPIO_OUT | GPIO_UP;
+    GPCRG1 = GPIO_OUT;
     // VDD3
     GPCRG2 = GPIO_OUT;
     // HSPI_CE#
@@ -164,7 +168,7 @@ void gpio_init() {
     // HSPI_MSO
     GPCRG5 = GPIO_ALT;
     // AIRPLAN_LED#
-    GPCRG6 = GPIO_OUT | GPIO_UP;
+    GPCRG6 = GPIO_OUT;
     // HCPI_SCLK
     GPCRG7 = GPIO_ALT;
     // EC_CLKRUN#
@@ -172,13 +176,13 @@ void gpio_init() {
     // SUSC#_PCH
     GPCRH1 = GPIO_IN;
     // BKL_EN
-    GPCRH2 = GPIO_OUT | GPIO_UP;
+    GPCRH2 = GPIO_OUT;
     // NC
-    GPCRH3 = GPIO_OUT | GPIO_UP;
+    GPCRH3 = GPIO_OUT;
     // VR_ON
     GPCRH4 = GPIO_IN;
     // WLAN_EN
-    GPCRH5 = GPIO_OUT | GPIO_UP;
+    GPCRH5 = GPIO_OUT;
     // SUSB#_PCH
     GPCRH6 = GPIO_IN;
     // Unknown
@@ -208,11 +212,11 @@ void gpio_init() {
     // SOC_TYPE
     GPCRJ3 = GPIO_IN;
     // WLAN_PWR_EN
-    GPCRJ4 = GPIO_OUT | GPIO_UP;
+    GPCRJ4 = GPIO_OUT;
     // KBLIGHT_ADJ
-    GPCRJ5 = GPIO_OUT;
+    GPCRJ5 = GPIO_ALT;
     // 3G_PWR_EN
-    GPCRJ6 = GPIO_OUT | GPIO_UP;
+    GPCRJ6 = GPIO_OUT;
     // NC
     GPCRJ7 = GPIO_IN;
     // LPC_AD0
