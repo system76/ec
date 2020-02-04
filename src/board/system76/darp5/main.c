@@ -1,3 +1,4 @@
+#include <8051.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -151,5 +152,7 @@ void main(void) {
         }
         // Handles ACPI communication
         pmc_event(&PMC_1);
+        // Idle until next timer interrupt
+        PCON |= 1;
     }
 }

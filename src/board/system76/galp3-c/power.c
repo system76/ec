@@ -1,5 +1,3 @@
-#include <mcs51/8051.h>
-
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/battery.h>
