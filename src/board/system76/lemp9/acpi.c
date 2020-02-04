@@ -2,10 +2,9 @@
 #include <board/battery.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
+#include <board/lid.h>
 #include <board/peci.h>
 #include <common/debug.h>
-
-extern bool lid_wake;
 
 extern uint8_t sci_extra;
 

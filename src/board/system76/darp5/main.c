@@ -1,6 +1,4 @@
 #include <8051.h>
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdio.h>
 
 #include <arch/arch.h>
@@ -12,6 +10,7 @@
 #include <board/gctrl.h>
 #include <board/kbc.h>
 #include <board/kbscan.h>
+#include <board/lid.h>
 #include <board/peci.h>
 #include <board/pmc.h>
 #include <board/power.h>
@@ -64,47 +63,6 @@ void touchpad_event(struct Ps2 * ps2) {
         TRACE("touchpad: %02X\n", data);
         kbc_mouse(&KBC, data, 1000);
     }
-}
-
-bool lid_wake = false;
-void lid_event(void) {
-    static bool send_sci = true;
-    static bool last = true;
-
-    // Check if the adapter line goes low
-    bool new = gpio_get(&LID_SW_N);
-    // If there has been a change, print
-    if (new != last) {
-        DEBUG("Lid ");
-        if (new) {
-            DEBUG("open\n");
-
-            if (lid_wake) {
-                gpio_set(&SWI_N, false);
-
-                //TODO: find correct delay
-                delay_ticks(10);
-
-                gpio_set(&SWI_N, true);
-
-                lid_wake = false;
-            }
-        } else {
-            DEBUG("closed\n");
-        }
-
-        // Send SCI
-        send_sci = true;
-    }
-
-    if (send_sci) {
-        // Send SCI 0x1B for lid event
-        if (pmc_sci(&PMC_1, 0x1B)) {
-            send_sci = false;
-        }
-    }
-
-    last = new;
 }
 
 void main(void) {
