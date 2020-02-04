@@ -7,11 +7,12 @@
 static volatile uint32_t time_overflows = 0;
 
 void timer_0(void) __interrupt(1) {
+    // Stop timer
+    TR0 = 0;
+
     time_overflows++;
 
-    // Restart timer
-    TR0 = 0;
-    TF0 = 0;
+    // Start timer
     TH0 = 0xFD;
     TL0 = 0x01;
     TR0 = 1;

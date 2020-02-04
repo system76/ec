@@ -19,6 +19,15 @@
 #include <common/debug.h>
 #include <common/macro.h>
 
+
+void external_0(void) __interrupt(0) {}
+// timer_0 is in time.c
+void timer_0(void) __interrupt(1);
+void external_1(void) __interrupt(2) {}
+void timer_1(void) __interrupt(3) {}
+void serial(void) __interrupt(4) {}
+void timer_2(void) __interrupt(5) {}
+
 uint8_t main_cycle = 0;
 
 void init(void) {
