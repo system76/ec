@@ -1,3 +1,4 @@
+#include <8051.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -29,7 +30,7 @@ static void scratch_start(void) __naked {
 void scratch_trampoline(void) {
     // Uses SCAR0 which is mapped at 0x0000 in data space and are
     // 4096 bytes in size.
-    
+
     // Disable interrupts
     EA = 0;
 
@@ -49,7 +50,7 @@ void scratch_trampoline(void) {
     SCAR0L = 0x00;
     SCAR0M = 0x00;
     SCAR0H = 0x00;
- 
+
     // Jump to reset function
     __asm__("ljmp 0");
 }

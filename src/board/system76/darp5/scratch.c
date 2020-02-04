@@ -1,3 +1,4 @@
+#include <8051.h>
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -45,7 +46,7 @@ static void scratch_start(void) __naked {
 void scratch_trampoline(void) {
     // Uses SCAR0, 1, 2, 3, and 4 which are mapped at 0x0000 in data space and are
     // 4096 bytes in size.
-    
+
     // Disable interrupts
     EA = 0;
 
