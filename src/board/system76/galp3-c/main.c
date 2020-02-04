@@ -7,6 +7,7 @@
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/battery.h>
+#include <board/ecpm.h>
 #include <board/gpio.h>
 #include <board/gctrl.h>
 #include <board/kbc.h>
@@ -33,17 +34,19 @@ void timer_2(void) __interrupt(5) {}
 uint8_t main_cycle = 0;
 
 void init(void) {
+    // Must happen first
     arch_init();
-
-    gpio_init();
     gctrl_init();
-    pwm_init();
+    gpio_init();
 
+    // Can happen in any order
+    ecpm_init();
     kbc_init();
     kbled_init();
     kbscan_init();
-    pmc_init();
     peci_init();
+    pmc_init();
+    pwm_init();
     smbus_init();
 
     //TODO: INTC
