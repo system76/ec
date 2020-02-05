@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdint.h>
 
 #include <scratch/pmc.h>
@@ -81,22 +80,12 @@ void pmc_event(struct Pmc * pmc) {
                 state = PMC_STATE_ACPI_WRITE;
                 break;
             case 0xEC:
-                printf_tiny("RESET\n");
-                // Attempt to trigger watchdog reset
-                ETWCFG |= (1 << 5);
-                EWDKEYR = 0;
-                // Clear processor caches
-                __asm__("mov 0xf7, #1");
-                __asm__("nop");
-                __asm__("mov 0xf7, #1");
-                __asm__("nop");
-                __asm__("mov 0xf7, #1");
-                __asm__("nop");
-                __asm__("mov 0xf7, #1");
-                __asm__("nop");
-                // Exit scratch ROM by going through trampoline
-                __asm__("ljmp 0x1000");
-               break;
+                for (;;) {
+                    // Attempt to trigger watchdog reset
+                    ETWCFG |= (1 << 5);
+                    EWDKEYR = 0;
+                }
+                break;
             }
         } else {
             switch (state) {
@@ -123,7 +112,6 @@ void pmc_event(struct Pmc * pmc) {
 
 // Main program while running in scratch ROM
 void main(void) {
-    printf_tiny("SCRATCH\n");
 	for (;;) {
         pmc_event(&PMC_3);
     }

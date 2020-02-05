@@ -15,11 +15,7 @@ struct Pmc {
     volatile uint8_t * control;
 };
 
-extern struct Pmc __code PMC_1;
-extern struct Pmc __code PMC_2;
 extern struct Pmc __code PMC_3;
-extern struct Pmc __code PMC_4;
-extern struct Pmc __code PMC_5;
 
 #define PMC_STS_OBF (1 << 0)
 #define PMC_STS_IBF (1 << 1)
