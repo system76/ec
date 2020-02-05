@@ -1,33 +1,17 @@
-# Enable I2C debugging
-SCRATCH_SRC+=\
-	src/common/i2c.c \
-	src/ec/$(EC)/i2c.c
-SCRATCH_INCLUDE+=\
-	src/common/include/common/*.h \
-	src/ec/$(EC)/include/ec/*.h
-SCRATCH_CFLAGS+=\
-	-Isrc/common/include \
-	-Isrc/ec/$(EC)/include
-
-# Enable I2C debug on 0x76
-SCRATCH_CFLAGS+=-DI2C_DEBUGGER=0x76
-
-# Set battery I2C bus
-SCRATCH_CFLAGS+=-DI2C_SMBUS=I2C_0
-
 SCRATCH_BUILD=$(BUILD)/scratch
 SCRATCH_OBJ=$(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC))
 SCRATCH_CC=\
 	sdcc \
 	-mmcs51 \
 	--model-small \
-	--code-size 4096 \
+	--code-loc $(SCRATCH_OFFSET) \
+	--code-size $(SCRATCH_SIZE) \
 	--Werror
 
 # Convert from binary file to C header
 $(BUILD)/include/scratch.h: $(SCRATCH_BUILD)/scratch.rom
 	@mkdir -p $(@D)
-	xxd --include < $< > $@
+	xxd -s $(SCRATCH_OFFSET) --include < $< > $@
 
 # Convert from Intel Hex file to binary file
 $(SCRATCH_BUILD)/scratch.rom: $(SCRATCH_BUILD)/scratch.ihx
