@@ -37,3 +37,37 @@ Features specific to Atmel embedded controllers:
 Acronym | Feature                      | Description
 ------- | ---------------------------- | -----------
 USB     | Universal serial bus         | Can be used to provide access to EC functions either to the host or to a remote machine
+
+## Flashing
+
+Requirements:
+
+- [sdcc](http://sdcc.sourceforge.net/)
+- [Rust](https://www.rust-lang.org/)
+
+### Internal programmer
+
+Use this method for flashing a system already running System76 EC.
+
+```
+make BOARD=<vendor>/<model> flash
+```
+
+### External programmer
+
+Use this method for first-time flashing or flashing a bricked controller.
+
+**The system must not have any power!**
+
+1. Turn off the computer
+2. Unplug the AC adapter
+3. Remove the bottom panel
+4. Disconnect the battery
+5. Ground the laptop to the programmer
+6. Disconnect the keyboard from its port
+7. Attach the programmer to the keyboard port
+8. Flash the firmware
+
+```
+make BOARD=<vendor>/<model> isp
+```
