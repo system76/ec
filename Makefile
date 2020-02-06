@@ -1,9 +1,9 @@
 # Parameter for current board
-#BOARD?=system76/galp3-c
-BOARD?=system76/lemp9
-#BOARD?=arduino/mega2560
-#BOARD?=arduino/micro
-#BOARD?=arduino/uno
+ifeq ($(BOARD),)
+$(info $(shell echo Please set BOARD to one of the following))
+$(info $(shell cd src/board && echo */*))
+$(error BOARD not set)
+endif
 
 # Set build directory
 BUILD=build/$(BOARD)
