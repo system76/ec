@@ -73,22 +73,25 @@ void kbscan_event(void) {
                 if (new_b != last_b) {
                     // If timer 2 is running
                     if (TR2) {
-                        // Debounce releases
-                        if (!new_b) {
+                        // Debounce presses and releases
+                        if (new_b) {
+                            // Restore bit, so that this press can be handled later
+                            new &= ~(1 << j);
+                            // Skip processing of press
+                            continue;
+                        } else {
                             // Restore bit, so that this release can be handled later
                             new |= (1 << j);
                             // Skip processing of release
                             continue;
                         }
                     } else {
-                        // Begin debouncing on press
-                        if (new_b) {
-                            // Run timer 2 for 20 ms
-                            // 65536-(20000 * 69 + 89)/90 = 0xC419
-                            TH2 = 0xC4;
-                            TL2 = 0x19;
-                            TR2 = 1;
-                        }
+                        // Begin debouncing on press or release
+                        // Run timer 2 for 20 ms
+                        // 65536-(20000 * 69 + 89)/90 = 0xC419
+                        TH2 = 0xC4;
+                        TL2 = 0x19;
+                        TR2 = 1;
                     }
 
                     uint16_t key = keymap(i, j, kbscan_layer);
