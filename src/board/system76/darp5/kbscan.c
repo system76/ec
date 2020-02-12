@@ -28,6 +28,72 @@ void kbscan_init(void) {
 // Debounce time in milliseconds
 #define DEBOUNCE_DELAY 20
 
+bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
+    switch (key & KT_MASK) {
+        case (KT_NORMAL):
+            if (kbscan_enabled) {
+                kbc_scancode(&KBC, key, pressed);
+            }
+            break;
+        case (KT_FN):
+            if (layer != NULL) {
+                if (pressed) *layer = 1;
+                else *layer = 0;
+            } else {
+                // In the case no layer can be set, reset bit
+                return false;
+            }
+            break;
+        case (KT_COMBO):
+            switch (key & 0xFF) {
+                case COMBO_PRINT_SCREEN:
+                    if (kbscan_enabled) {
+                        if (pressed) {
+                            kbc_scancode(&KBC, K_E0 | 0x12, pressed);
+                            kbc_scancode(&KBC, K_E0 | 0x7C, pressed);
+                        } else {
+                            kbc_scancode(&KBC, K_E0 | 0x7C, pressed);
+                            kbc_scancode(&KBC, K_E0 | 0x12, pressed);
+                        }
+                    }
+                    break;
+            }
+            break;
+        case (KT_SCI):
+            if (pressed) {
+                uint8_t sci = (uint8_t)(key & 0xFF);
+
+                // HACK FOR HARDWARE HOTKEYS
+                switch (sci) {
+                    case SCI_DISPLAY_TOGGLE:
+                        gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
+                        break;
+                    case SCI_CAMERA_TOGGLE:
+                        gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
+                        break;
+                }
+
+                if (!pmc_sci(&PMC_1, sci)) {
+                    // In the case of ignored SCI, reset bit
+                    return false;
+                }
+            }
+            break;
+        case (KT_SCI_EXTRA):
+            if (pressed) {
+                uint8_t sci = SCI_EXTRA;
+                sci_extra = (uint8_t)(key & 0xFF);
+
+                if (!pmc_sci(&PMC_1, sci)) {
+                    // In the case of ignored SCI, reset bit
+                    return false;
+                }
+            }
+            break;
+    }
+    return true;
+}
+
 void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
     uint8_t layer = kbscan_layer;
@@ -86,66 +152,37 @@ void kbscan_event(void) {
                 bool new_b = new & (1 << j);
                 bool last_b = last & (1 << j);
                 if (new_b != last_b) {
+                    bool reset = false;
+
                     // If debouncing
                     if (debounce) {
                         // Debounce presses and releases
-                        if (new_b) {
-                            // Restore bit, so that this press can be handled later
-                            new &= ~(1 << j);
-                        } else {
-                            // Restore bit, so that this release can be handled later
-                            new |= (1 << j);
-                        }
-                        // Skip processing of press
-                        continue;
+                        reset = true;
                     } else {
                         // Begin debounce
                         debounce = true;
                         debounce_time = time_get();
+
+                        // Handle key press/release
+                        uint16_t key = keymap(i, j, kbscan_layer);
+                        if (key) {
+                            DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                            if(!kbscan_press(key, new_b, &layer)){
+                                // In the case of ignored key press/release, reset bit
+                                reset = true;
+                            }
+                        } else {
+                            WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
+                        }
                     }
 
-                    uint16_t key = keymap(i, j, kbscan_layer);
-                    DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
-                    if (!key) {
-                        WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
-                    }
-                    switch (key & KT_MASK) {
-                        case (KT_FN):
-                            if (new_b) layer = 1;
-                            else layer = 0;
-                            break;
-                        case (KT_SCI_EXTRA):
-                            if (new_b) {
-                                uint8_t sci = SCI_EXTRA;
-                                sci_extra = (uint8_t)(key & 0xFF);
-                                if (!pmc_sci(&PMC_1, sci)) {
-                                    // In the case of ignored SCI, reset bit
-                                    new &= ~(1 << j);
-                                }
-                            }
-                            break;
-                        case (KT_SCI):
-                            if (new_b) {
-                                uint8_t sci = (uint8_t)(key & 0xFF);
-
-                                // HACK FOR HARDWARE HOTKEYS
-                                switch (sci) {
-                                    case SCI_CAMERA_TOGGLE:
-                                        gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
-                                        break;
-                                }
-
-                                if (!pmc_sci(&PMC_1, sci)) {
-                                    // In the case of ignored SCI, reset bit
-                                    new &= ~(1 << j);
-                                }
-                            }
-                            break;
-                        case (KT_NORMAL):
-                            if (kbscan_enabled && key) {
-                                kbc_scancode(&KBC, key, new_b);
-                            }
-                            break;
+                    // Reset bit to last state
+                    if (reset) {
+                        if (last_b) {
+                            new |= (1 << j);
+                        } else {
+                            new &= ~(1 << j);
+                        }
                     }
                 }
             }
@@ -167,14 +204,27 @@ void kbscan_event(void) {
                     bool new_b = new & (1 << j);
                     bool last_b = last & (1 << j);
                     if (new_b != last_b) {
+                        bool reset = false;
+
+                        // Handle key press/release
                         uint16_t key = keymap(i, j, kbscan_layer);
-                        DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
-                        switch (key & KT_MASK) {
-                            case (KT_NORMAL):
-                                if (kbscan_enabled && key) {
-                                    kbc_scancode(&KBC, key, new_b);
-                                }
-                                break;
+                        if (key) {
+                            DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                            if(!kbscan_press(key, new_b, NULL)){
+                                // In the case of ignored key press/release, reset bit
+                                reset = true;
+                            }
+                        } else {
+                            WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
+                        }
+
+                        // Reset bit to last state
+                        if (reset) {
+                            if (last_b) {
+                                new |= (1 << j);
+                            } else {
+                                new &= ~(1 << j);
+                            }
                         }
                     }
                 }
