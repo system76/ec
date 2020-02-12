@@ -15,14 +15,28 @@ uint16_t keymap_translate(uint16_t key);
 // Layer selection
 #define KT_FN (0x1000)
 
-// SCI
-#define KT_SCI (0x2000)
+// Combinations
+#define KT_COMBO (0x2000)
 
+#define COMBO_PRINT_SCREEN 0
+#define K_PRINT_SCREEN (KT_COMBO | COMBO_PRINT_SCREEN)
+
+// SCI
+#define KT_SCI (0x4000)
+
+#define SCI_DISPLAY_TOGGLE (0x0B)
+#define SCI_DISPLAY_MODE (0x10)
 #define SCI_BRIGHTNESS_DOWN (0x11)
 #define SCI_BRIGHTNESS_UP (0x12)
 #define SCI_CAMERA_TOGGLE (0x13)
 #define SCI_AIRPLANE_MODE (0x14)
 #define SCI_SUSPEND (0x15)
+#define SCI_EXTRA (0x50)
+
+// Extra SCI layer for keyboard backlight control
+#define KT_SCI_EXTRA (0x8000)
+
+#define SCI_EXTRA_KBD_BKL (0x8A)
 
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
