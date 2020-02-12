@@ -50,22 +50,22 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
                 case COMBO_DISPLAY_MODE:
                     if (kbscan_enabled) {
                         if (pressed) {
-                            kbc_scancode(&KBC, K_LEFT_SUPER, pressed);
-                            kbc_scancode(&KBC, K_P, pressed);
+                            kbc_scancode(&KBC, K_LEFT_SUPER, true);
+                            kbc_scancode(&KBC, K_P, true);
+                            kbc_scancode(&KBC, K_P, false);
                         } else {
-                            kbc_scancode(&KBC, K_P, pressed);
-                            kbc_scancode(&KBC, K_LEFT_SUPER, pressed);
+                            kbc_scancode(&KBC, K_LEFT_SUPER, false);
                         }
                     }
                     break;
                 case COMBO_PRINT_SCREEN:
                     if (kbscan_enabled) {
                         if (pressed) {
-                            kbc_scancode(&KBC, K_E0 | 0x12, pressed);
-                            kbc_scancode(&KBC, K_E0 | 0x7C, pressed);
+                            kbc_scancode(&KBC, K_E0 | 0x12, true);
+                            kbc_scancode(&KBC, K_E0 | 0x7C, true);
                         } else {
-                            kbc_scancode(&KBC, K_E0 | 0x7C, pressed);
-                            kbc_scancode(&KBC, K_E0 | 0x12, pressed);
+                            kbc_scancode(&KBC, K_E0 | 0x7C, false);
+                            kbc_scancode(&KBC, K_E0 | 0x12, false);
                         }
                     }
                     break;
