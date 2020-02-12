@@ -7,9 +7,11 @@
 
 extern uint8_t sci_extra;
 
-uint8_t fcmd = 0;
-uint8_t fdat = 0;
-uint8_t fbuf[4] = { 0, 0, 0, 0 };
+uint8_t ecos = 0;
+
+static uint8_t fcmd = 0;
+static uint8_t fdat = 0;
+static uint8_t fbuf[4] = { 0, 0, 0, 0 };
 
 void fcommand(void) {
     // TODO
@@ -66,6 +68,8 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x2E, battery_remaining_capacity);
         ACPI_16(0x32, battery_voltage);
 
+        ACPI_8(0x68, ecos);
+
         ACPI_8(0xCC, sci_extra);
 
         // Airplane mode LED
@@ -98,6 +102,10 @@ void acpi_write(uint8_t addr, uint8_t data) {
         // Lid state and other flags
         case 0x03:
             lid_wake = (bool)(data & (1 << 2));
+            break;
+
+        case 0x68:
+            ecos = data;
             break;
 
         // Airplane mode LED
