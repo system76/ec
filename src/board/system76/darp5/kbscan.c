@@ -1,6 +1,5 @@
-#include <mcs51/8052.h>
-
 #include <arch/delay.h>
+#include <arch/time.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
 #include <board/kbscan.h>
@@ -24,22 +23,30 @@ void kbscan_init(void) {
     KSOHGCTRL = 0xFF;
     KSOHGOEN = 0;
     KSOH2 = 0;
-
-    // Make sure timer 2 is stopped
-    T2CON = 0;
 }
+
+// Debounce time in milliseconds
+#define DEBOUNCE_DELAY 20
 
 void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
     uint8_t layer = kbscan_layer;
     static uint8_t kbscan_last[KM_OUT] = { 0 };
 
-    // If timer 2 is finished
-    if (TF2) {
-        // Stop timer 2 running
-        TR2 = 0;
-        // Clear timer 2 finished flag
-        TF2 = 0;
+    static bool debounce = false;
+    static uint32_t debounce_time = 0;
+
+    // If debounce complete
+    if (debounce) {
+        uint32_t time = time_get();
+        //TODO: time test with overflow
+        if (time < debounce_time) {
+            // Overflow, reset debounce_time
+            debounce_time = time;
+        } else if (time >= (debounce_time + DEBOUNCE_DELAY)) {
+            // Finish debounce
+            debounce = false;
+        }
     }
 
     int i;
@@ -79,27 +86,22 @@ void kbscan_event(void) {
                 bool new_b = new & (1 << j);
                 bool last_b = last & (1 << j);
                 if (new_b != last_b) {
-                    // If timer 2 is running
-                    if (TR2) {
+                    // If debouncing
+                    if (debounce) {
                         // Debounce presses and releases
                         if (new_b) {
                             // Restore bit, so that this press can be handled later
                             new &= ~(1 << j);
-                            // Skip processing of press
-                            continue;
                         } else {
                             // Restore bit, so that this release can be handled later
                             new |= (1 << j);
-                            // Skip processing of release
-                            continue;
                         }
+                        // Skip processing of press
+                        continue;
                     } else {
-                        // Begin debouncing on press or release
-                        // Run timer 2 for 20 ms
-                        // 65536-(20000 * 69 + 89)/90 = 0xC419
-                        TH2 = 0xC4;
-                        TL2 = 0x19;
-                        TR2 = 1;
+                        // Begin debounce
+                        debounce = true;
+                        debounce_time = time_get();
                     }
 
                     uint16_t key = keymap(i, j, kbscan_layer);
