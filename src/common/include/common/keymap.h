@@ -18,14 +18,15 @@ uint16_t keymap_translate(uint16_t key);
 // Combinations
 #define KT_COMBO (0x2000)
 
-#define COMBO_PRINT_SCREEN 0
+#define COMBO_DISPLAY_MODE 0
+#define K_DISPLAY_MODE (KT_COMBO | COMBO_DISPLAY_MODE)
+#define COMBO_PRINT_SCREEN 1
 #define K_PRINT_SCREEN (KT_COMBO | COMBO_PRINT_SCREEN)
 
 // SCI
 #define KT_SCI (0x4000)
 
 #define SCI_DISPLAY_TOGGLE (0x0B)
-#define SCI_DISPLAY_MODE (0x10)
 #define SCI_BRIGHTNESS_DOWN (0x11)
 #define SCI_BRIGHTNESS_UP (0x12)
 #define SCI_CAMERA_TOGGLE (0x13)

@@ -47,6 +47,17 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
             break;
         case (KT_COMBO):
             switch (key & 0xFF) {
+                case COMBO_DISPLAY_MODE:
+                    if (kbscan_enabled) {
+                        if (pressed) {
+                            kbc_scancode(&KBC, K_LEFT_SUPER, pressed);
+                            kbc_scancode(&KBC, K_P, pressed);
+                        } else {
+                            kbc_scancode(&KBC, K_P, pressed);
+                            kbc_scancode(&KBC, K_LEFT_SUPER, pressed);
+                        }
+                    }
+                    break;
                 case COMBO_PRINT_SCREEN:
                     if (kbscan_enabled) {
                         if (pressed) {
