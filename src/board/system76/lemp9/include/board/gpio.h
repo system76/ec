@@ -22,6 +22,7 @@ extern struct Gpio __code CCD_EN;
 extern struct Gpio __code DD_ON;
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;
+extern struct Gpio __code EC_SMD_EN_N;
 extern struct Gpio __code LED_ACIN;
 extern struct Gpio __code LED_PWR;
 extern struct Gpio __code LID_SW_N;

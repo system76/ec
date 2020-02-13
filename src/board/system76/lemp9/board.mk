@@ -19,6 +19,9 @@ CFLAGS+=-DI2C_DEBUGGER=0x76
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_4
 
+# Set type-c port manager I2C bus
+CFLAGS+=-DI2C_TCPM=I2C_1
+
 # Set scratch ROM parameters
 SCRATCH_OFFSET=1024
 SCRATCH_SIZE=1024

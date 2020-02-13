@@ -18,6 +18,7 @@
 #include <board/ps2.h>
 #include <board/pwm.h>
 #include <board/smbus.h>
+#include <board/tcpm.h>
 #include <common/debug.h>
 #include <common/macro.h>
 
@@ -47,6 +48,7 @@ void init(void) {
     pmc_init();
     pwm_init();
     smbus_init();
+    tcpm_init();
 
     //TODO: INTC
 }
@@ -112,6 +114,8 @@ void main(void) {
             peci_event();
             // Updates battery status
             battery_event();
+            // Updates type-c port
+            tcpm_event();
         }
         // Handles ACPI communication
         pmc_event(&PMC_1);

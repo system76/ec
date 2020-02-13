@@ -14,6 +14,14 @@ struct I2C {
     volatile uint8_t * trasla;
 };
 
+struct I2C __code I2C_1 = {
+    .hosta = HOSTAB,
+    .hoctl = HOCTLB,
+    .hoctl2 = HOCTL2B,
+    .hobdb = HOBDBB,
+    .trasla = TRASLAB,
+};
+
 struct I2C __code I2C_4 = {
     .hosta = HOSTAE,
     .hoctl = HOCTLE,

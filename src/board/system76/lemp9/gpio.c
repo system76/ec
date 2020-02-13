@@ -11,6 +11,7 @@ struct Gpio __code CCD_EN =         GPIO(D, 1);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code EC_EN =          GPIO(J, 6);
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
+struct Gpio __code EC_SMD_EN_N =    GPIO(I, 6);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
@@ -91,9 +92,9 @@ void gpio_init() {
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // SMB_CLK_EC
-    GPCRC1 = GPIO_OUT;
+    GPCRC1 = GPIO_ALT;
     // SMB_DATA_EC
-    GPCRC2 = GPIO_OUT;
+    GPCRC2 = GPIO_ALT;
     // PCIE_WAKE#
     GPCRC3 = GPIO_IN;
     // CNVI_DET#
