@@ -20,7 +20,7 @@
 #include <board/smbus.h>
 #include <common/debug.h>
 #include <common/macro.h>
-
+#include <common/version.h>
 
 void external_0(void) __interrupt(0) {}
 // timer_0 is in time.c
@@ -93,7 +93,7 @@ void main(void) {
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
 
-    INFO("Hello from System76 EC for %s!\n", xstr(__BOARD__));
+    INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
     for(main_cycle = 0; ; main_cycle++) {
         // Handle power states

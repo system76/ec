@@ -5,11 +5,17 @@ $(info $(shell cd src/board && echo */*))
 $(error BOARD not set)
 endif
 
+# Calculate version
+DATE=$(shell git show --format="%cd" --date="format:%Y-%m-%d" --no-patch)
+REV=$(shell git describe --always --dirty)
+VERSION=$(DATE)_$(REV)
+
 # Set build directory
-BUILD=build/$(BOARD)
+BUILD=build/$(BOARD)/$(VERSION)
 
 # Default target - build the board's EC firmware
 all: $(BUILD)/ec.rom
+	$(info Built '$(VERSION)' for '$(BOARD)')
 
 # Target to remove build artifacts
 clean:
@@ -19,7 +25,7 @@ clean:
 COMMON_DIR=src/common
 SRC=$(wildcard $(COMMON_DIR)/*.c)
 INCLUDE=$(wildcard $(COMMON_DIR)/include/common/*.h) $(COMMON_DIR)/common.mk
-CFLAGS=-I$(COMMON_DIR)/include
+CFLAGS=-I$(COMMON_DIR)/include -D__VERSION__=$(VERSION)
 include $(COMMON_DIR)/common.mk
 
 # Include the board's source
