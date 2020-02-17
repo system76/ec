@@ -54,99 +54,92 @@ void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
     static uint8_t state_data = 0;
 
-    uint8_t burst_timeout;
-    for (burst_timeout = 1; burst_timeout > 0; burst_timeout--) {
-        uint8_t sts = pmc_status(pmc);
-        if (!(sts & PMC_STS_OBF)) {
-            switch (state) {
-                case PMC_STATE_WRITE:
-                    DEBUG("pmc write: %02X\n", state_data);
-                    state = PMC_STATE_DEFAULT;
-                    pmc_write(pmc, state_data);
-                    // Send SCI for OBF=1
-                    pmc_sci_interrupt();
-                    break;
-            }
-        }
-        
-        if (sts & PMC_STS_IBF) {
-            uint8_t data = pmc_read(pmc);
-            if (sts & PMC_STS_CMD) {
-                DEBUG("pmc cmd: %02X\n", data);
-
+    uint8_t sts = pmc_status(pmc);
+    if (!(sts & PMC_STS_OBF)) {
+        switch (state) {
+            case PMC_STATE_WRITE:
+                DEBUG("pmc write: %02X\n", state_data);
                 state = PMC_STATE_DEFAULT;
-                switch (data) {
-                case 0x80:
-                    state = PMC_STATE_ACPI_READ;
-                    // Send SCI for IBF=0
-                    pmc_sci_interrupt();
-                    break;
-                case 0x81:
-                    state = PMC_STATE_ACPI_WRITE;
-                    // Send SCI for IBF=0
-                    pmc_sci_interrupt();
-                    break;
-                case 0x82:
-                    DEBUG("  burst enable\n");
-                    // Run pmc_event in a tight loop for more iterations
-                    burst_timeout = 100;
-                    // Set burst bit
-                    pmc_set_status(pmc, sts | (1 << 4));
-                    // Send acknowledgement byte
-                    state = PMC_STATE_WRITE;
-                    state_data = 0x90;
-                    break;
-                case 0x83:
-                    DEBUG("  burst disable\n");
-                    // Exit pmc_event tight loop
-                    burst_timeout = 0;
-                    // Clear burst bit
-                    pmc_set_status(pmc, sts & ~(1 << 4));
-                    // Send SCI for IBF=0
-                    pmc_sci_interrupt();
-                    break;
-                case 0x84:
-                    DEBUG("  SCI queue\n");
-                    // Clear SCI pending bit
-                    pmc_set_status(pmc, sts & ~(1 << 5));
-                    // Send SCI queue
-                    state = PMC_STATE_WRITE;
-                    state_data = pmc_sci_queue;
-                    // Clear SCI queue
-                    pmc_sci_queue = 0;
-                    break;
+                pmc_write(pmc, state_data);
+                // Send SCI for OBF=1
+                pmc_sci_interrupt();
+                break;
+        }
+    }
+    
+    if (sts & PMC_STS_IBF) {
+        uint8_t data = pmc_read(pmc);
+        if (sts & PMC_STS_CMD) {
+            DEBUG("pmc cmd: %02X\n", data);
 
-                case 0xEC:
-                    DEBUG("  scratch rom\n");
-                    pmc_write(pmc, 0x76);
-                    scratch_trampoline();
-                    break;
-                }
-            } else {
-                DEBUG("pmc data: %02X\n", data);
+            state = PMC_STATE_DEFAULT;
+            switch (data) {
+            case 0x80:
+                state = PMC_STATE_ACPI_READ;
+                // Send SCI for IBF=0
+                pmc_sci_interrupt();
+                break;
+            case 0x81:
+                state = PMC_STATE_ACPI_WRITE;
+                // Send SCI for IBF=0
+                pmc_sci_interrupt();
+                break;
+            case 0x82:
+                DEBUG("  burst enable\n");
+                // Set burst bit
+                pmc_set_status(pmc, sts | (1 << 4));
+                // Send acknowledgement byte
+                state = PMC_STATE_WRITE;
+                state_data = 0x90;
+                break;
+            case 0x83:
+                DEBUG("  burst disable\n");
+                // Clear burst bit
+                pmc_set_status(pmc, sts & ~(1 << 4));
+                // Send SCI for IBF=0
+                pmc_sci_interrupt();
+                break;
+            case 0x84:
+                DEBUG("  SCI queue\n");
+                // Clear SCI pending bit
+                pmc_set_status(pmc, sts & ~(1 << 5));
+                // Send SCI queue
+                state = PMC_STATE_WRITE;
+                state_data = pmc_sci_queue;
+                // Clear SCI queue
+                pmc_sci_queue = 0;
+                break;
 
-                switch (state) {
-                case PMC_STATE_ACPI_READ:
-                    // Send byte from ACPI space
-                    state = PMC_STATE_WRITE;
-                    state_data = acpi_read(data);
-                    break;
-                case PMC_STATE_ACPI_WRITE:
-                    state = PMC_STATE_ACPI_WRITE_ADDR;
-                    state_data = data;
-                    // Send SCI for IBF=0
-                    pmc_sci_interrupt();
-                    break;
-                case PMC_STATE_ACPI_WRITE_ADDR:
-                    state = PMC_STATE_DEFAULT;
-                    acpi_write(state_data, data);
-                    // Send SCI for IBF=0
-                    pmc_sci_interrupt();
-                    break;
-                default:
-                    state = PMC_STATE_DEFAULT;
-                    break;
-                }
+            case 0xEC:
+                DEBUG("  scratch rom\n");
+                pmc_write(pmc, 0x76);
+                scratch_trampoline();
+                break;
+            }
+        } else {
+            DEBUG("pmc data: %02X\n", data);
+
+            switch (state) {
+            case PMC_STATE_ACPI_READ:
+                // Send byte from ACPI space
+                state = PMC_STATE_WRITE;
+                state_data = acpi_read(data);
+                break;
+            case PMC_STATE_ACPI_WRITE:
+                state = PMC_STATE_ACPI_WRITE_ADDR;
+                state_data = data;
+                // Send SCI for IBF=0
+                pmc_sci_interrupt();
+                break;
+            case PMC_STATE_ACPI_WRITE_ADDR:
+                state = PMC_STATE_DEFAULT;
+                acpi_write(state_data, data);
+                // Send SCI for IBF=0
+                pmc_sci_interrupt();
+                break;
+            default:
+                state = PMC_STATE_DEFAULT;
+                break;
             }
         }
     }
