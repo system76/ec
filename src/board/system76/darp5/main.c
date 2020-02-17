@@ -17,6 +17,7 @@
 #include <board/ps2.h>
 #include <board/pwm.h>
 #include <board/smbus.h>
+#include <board/smfi.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
@@ -45,6 +46,7 @@ void init(void) {
     pmc_init();
     pwm_init();
     smbus_init();
+    smfi_init();
 
     //TODO: INTC
 }
@@ -113,7 +115,9 @@ void main(void) {
         }
         // Handles ACPI communication
         pmc_event(&PMC_1);
+        // AP/EC communication over SMFI
+        smfi_event();
         // Idle until next timer interrupt
-        PCON |= 1;
+        //Disabled until interrupts used: PCON |= 1;
     }
 }
