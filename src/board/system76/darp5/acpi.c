@@ -59,9 +59,15 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x1A, battery_full_capacity);
         ACPI_16(0x22, battery_design_voltage);
 
-        // Bypass status test in ACPI - TODO
         case 0x26:
-            data |= 1 << 1;
+            // If AC adapter connected
+            if (!gpio_get(&ACIN_N)) {
+                // And battery is not fully charged
+                if (!(battery_status & 0x0020)) {
+                    // Battery is charging
+                    data |= 1 << 1;
+                }
+            }
             break;
 
         ACPI_16(0x2A, battery_current);
