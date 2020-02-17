@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <board/smfi.h>
 #include <common/macro.h>
 #include <common/version.h>
 
