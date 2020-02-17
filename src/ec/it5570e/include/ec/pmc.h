@@ -28,7 +28,7 @@ extern struct Pmc __code PMC_5;
 uint8_t pmc_status(struct Pmc * pmc);
 void pmc_set_status(struct Pmc * pmc, uint8_t status);
 uint8_t pmc_read(struct Pmc * pmc);
-bool pmc_write(struct Pmc * pmc, uint8_t data, int timeout);
+void pmc_write(struct Pmc * pmc, uint8_t data);
 
 volatile uint8_t __xdata __at(0x1500) PM1STS;
 volatile uint8_t __xdata __at(0x1501) PM1DO;

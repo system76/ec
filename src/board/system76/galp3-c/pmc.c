@@ -10,10 +10,9 @@ void pmc_init(void) {
     *(PMC_2.control) = 0x41;
 }
 
-#define PMC_TIMEOUT 10000
-
 enum PmcState {
     PMC_STATE_DEFAULT,
+    PMC_STATE_WRITE,
     PMC_STATE_ACPI_READ,
     PMC_STATE_ACPI_WRITE,
     PMC_STATE_ACPI_WRITE_ADDR,
@@ -58,6 +57,18 @@ void pmc_event(struct Pmc * pmc) {
     uint8_t burst_timeout;
     for (burst_timeout = 1; burst_timeout > 0; burst_timeout--) {
         uint8_t sts = pmc_status(pmc);
+        if (!(sts & PMC_STS_OBF)) {
+            switch (state) {
+                case PMC_STATE_WRITE:
+                    DEBUG("pmc write: %02X\n", state_data);
+                    state = PMC_STATE_DEFAULT;
+                    pmc_write(pmc, state_data);
+                    // Send SCI for OBF=1
+                    pmc_sci_interrupt();
+                    break;
+            }
+        }
+        
         if (sts & PMC_STS_IBF) {
             uint8_t data = pmc_read(pmc);
             if (sts & PMC_STS_CMD) {
@@ -82,9 +93,8 @@ void pmc_event(struct Pmc * pmc) {
                     // Set burst bit
                     pmc_set_status(pmc, sts | (1 << 4));
                     // Send acknowledgement byte
-                    pmc_write(pmc, 0x90, PMC_TIMEOUT);
-                    // Send SCI for OBF=1
-                    pmc_sci_interrupt();
+                    state = PMC_STATE_WRITE;
+                    state_data = 0x90;
                     break;
                 case 0x83:
                     DEBUG("  burst disable\n");
@@ -100,16 +110,15 @@ void pmc_event(struct Pmc * pmc) {
                     // Clear SCI pending bit
                     pmc_set_status(pmc, sts & ~(1 << 5));
                     // Send SCI queue
-                    pmc_write(pmc, pmc_sci_queue, PMC_TIMEOUT);
+                    state = PMC_STATE_WRITE;
+                    state_data = pmc_sci_queue;
                     // Clear SCI queue
                     pmc_sci_queue = 0;
-                    // Send SCI for OBF=1
-                    pmc_sci_interrupt();
                     break;
 
                 case 0xEC:
                     DEBUG("  scratch rom\n");
-                    pmc_write(pmc, 0x76, PMC_TIMEOUT);
+                    pmc_write(pmc, 0x76);
                     scratch_trampoline();
                     break;
                 }
@@ -118,11 +127,9 @@ void pmc_event(struct Pmc * pmc) {
 
                 switch (state) {
                 case PMC_STATE_ACPI_READ:
-                    state = PMC_STATE_DEFAULT;
+                    // Send byte from ACPI space
+                    state = PMC_STATE_WRITE;
                     state_data = acpi_read(data);
-                    pmc_write(pmc, state_data, PMC_TIMEOUT);
-                    // Send SCI for OBF=1
-                    pmc_sci_interrupt();
                     break;
                 case PMC_STATE_ACPI_WRITE:
                     state = PMC_STATE_ACPI_WRITE_ADDR;
