@@ -11,10 +11,10 @@ SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
 # 3 - INFO
 # 4 - DEBUG
 # 5 - TRACE
-CFLAGS+=-DLEVEL=2
+CFLAGS+=-DLEVEL=4
 
 # Enable I2C debug on 0x76
-CFLAGS+=-DI2C_DEBUGGER=0x76
+#CFLAGS+=-DI2C_DEBUGGER=0x76
 
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_4
@@ -38,6 +38,10 @@ include $(SCRATCH_DIR)/scratch.mk
 CFLAGS+=-I$(BUILD)/include
 INCLUDE+=$(BUILD)/include/scratch.h
 
+console:
+	cargo build --manifest-path ecflash/Cargo.toml --example smfi --release
+	sudo ecflash/target/release/examples/smfi
+
 flash: $(BUILD)/ec.rom
 	cargo build --manifest-path ecflash/Cargo.toml --example isp --release
 	sudo ecflash/target/release/examples/isp --internal $<
@@ -45,7 +49,3 @@ flash: $(BUILD)/ec.rom
 isp: $(BUILD)/ec.rom
 	cargo build --manifest-path ecflash/Cargo.toml --example isp --release
 	sudo ecflash/target/release/examples/isp $<
-
-version:
-	cargo build --manifest-path ecflash/Cargo.toml --example smfi --release
-	sudo ecflash/target/release/examples/smfi

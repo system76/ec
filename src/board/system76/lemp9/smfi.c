@@ -27,6 +27,7 @@ enum SmfiCmd {
     SMFI_CMD_PROBE = 1,
     SMFI_CMD_BOARD = 2,
     SMFI_CMD_VERSION = 3,
+    SMFI_CMD_DEBUG = 4,
     //TODO
 };
 
@@ -63,6 +64,7 @@ void smfi_init(void) {
 }
 
 void smfi_event(void) {
+    int i;
     if (smfi_cmd[0]) {
         // Default to success
         smfi_cmd[1] = SMFI_RES_OK;
@@ -81,19 +83,29 @@ void smfi_event(void) {
             case SMFI_CMD_VERSION:
                 strncpy(&smfi_cmd[2], version(), ARRAY_SIZE(smfi_cmd) - 2);
                 break;
+            case SMFI_CMD_DEBUG:
+                for (i = 2; i < ARRAY_SIZE(smfi_cmd) - 2; i++) {
+                    uint8_t b = smfi_cmd[i];
+                    if (b == 0) break;
+                    putchar(b);
+                }
+            default:
+                // Command not found
+                smfi_cmd[1] = SMFI_RES_ERR;
+                break;
         }
 
         // Mark command as finished
         smfi_cmd[0] = SMFI_CMD_NONE;
     }
+}
 
-    if (smfi_dbg[0]) {
-        int i;
-        for(i = 1; (i <= (int)smfi_dbg[0]) && (i < ARRAY_SIZE(smfi_dbg)); i++) {
-            putchar(smfi_dbg[i]);
-        }
-
-        // Mark debug transaction as complete
-        smfi_dbg[0] = 0;
+void smfi_debug(unsigned char byte) {
+    int tail = (int)smfi_dbg[0];
+    tail++;
+    if (tail >= ARRAY_SIZE(smfi_dbg)) {
+        tail = 1;
     }
+    smfi_dbg[tail] = byte;
+    smfi_dbg[0] = (uint8_t)tail;
 }

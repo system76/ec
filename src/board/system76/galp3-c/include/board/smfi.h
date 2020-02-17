@@ -3,5 +3,6 @@
 
 void smfi_init(void);
 void smfi_event(void);
+void smfi_debug(unsigned char byte);
 
 #endif // _BOARD_SMFI_H

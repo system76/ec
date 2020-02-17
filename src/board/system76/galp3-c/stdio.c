@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <board/smfi.h>
+
 #ifdef SERIAL_DEBUGGER
     #include <mcs51/8051.h>
 #endif
@@ -10,6 +12,7 @@
 
 int putchar(int c) {
     unsigned char byte = (unsigned char)c;
+    smfi_debug(byte);
 #ifdef SERIAL_DEBUGGER
     SBUF = byte;
 #endif
