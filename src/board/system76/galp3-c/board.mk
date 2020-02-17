@@ -42,3 +42,7 @@ flash: $(BUILD)/ec.rom
 isp: $(BUILD)/ec.rom
 	cargo build --manifest-path ecflash/Cargo.toml --example isp --release
 	sudo ecflash/target/release/examples/isp $<
+
+version:
+	cargo build --manifest-path ecflash/Cargo.toml --example smfi --release
+	sudo ecflash/target/release/examples/smfi
