@@ -106,8 +106,8 @@ void main(void) {
         lid_event();
         // Checks for keyboard/mouse packets from host
         kbc_event(&KBC);
-        // Only run the following once out of every 256 loops
-        if (main_cycle == 0) {
+        // Only run the following once a second
+        if (time_get() % 1000 == 0) {
             // Updates fan status and temps
             peci_event();
             // Updates battery status
