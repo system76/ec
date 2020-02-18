@@ -1,12 +1,17 @@
 #include <common/macro.h>
 
+// Prevent failures to compile on AVR
+#ifndef __SDCC
+    #define __code
+#endif
+
 static const char __code BOARD[] =
     "76EC_BOARD="
     xstr(__BOARD__);
 
 static const char __code VERSION[] =
     "76EC_VERSION="
-    xstr(__VERSION__);
+    xstr(__FIRMWARE_VERSION__);
 
 const char * board() {
     return &BOARD[11];
