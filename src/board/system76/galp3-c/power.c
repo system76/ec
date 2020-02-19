@@ -50,6 +50,8 @@ extern uint8_t main_cycle;
 // RSMRST# de-assertion to SUSPWRDNACK valid
 #define tPLT01 delay_ms(200)
 
+enum PowerState power_state = POWER_STATE_DEFAULT;
+
 // Enable deep sleep well power
 void power_on_ds5() {
     DEBUG("%02X: power_on_ds5\n", main_cycle);
@@ -158,22 +160,11 @@ void power_off_s5() {
 #endif // DEEP_SX
 }
 
-enum PowerState {
-    POWER_STATE_DEFAULT,
-    POWER_STATE_DS5,
-    POWER_STATE_S5,
-    POWER_STATE_DS3,
-    POWER_STATE_S3,
-    POWER_STATE_S0,
-};
-
 void power_event(void) {
-    static enum PowerState state = POWER_STATE_DEFAULT;
-
     // Always switch to ds5 if EC is running
-    if (state == POWER_STATE_DEFAULT) {
+    if (power_state == POWER_STATE_DEFAULT) {
         power_on_ds5();
-        state = POWER_STATE_DS5;
+        power_state = POWER_STATE_DS5;
     }
 
     // Check if the adapter line goes low
@@ -222,9 +213,9 @@ void power_event(void) {
             DEBUG("%02X: Power switch press\n", main_cycle);
 
             // Enable S5 power if necessary, before sending PWR_BTN
-            if (state == POWER_STATE_DS5) {
+            if (power_state == POWER_STATE_DS5) {
                 power_on_s5();
-                state = POWER_STATE_S5;
+                power_state = POWER_STATE_S5;
             }
         }
     }
@@ -328,9 +319,9 @@ void power_event(void) {
 
         if (s4_new) {
             DEBUG("%02X: entering S3 state\n", main_cycle);
-        } else if (state == POWER_STATE_S5) {
+        } else if (power_state == POWER_STATE_S5) {
             power_off_s5();
-            state = POWER_STATE_DS5;
+            power_state = POWER_STATE_DS5;
         }
     }
     #if LEVEL >= LEVEL_DEBUG
