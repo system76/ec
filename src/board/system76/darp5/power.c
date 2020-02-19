@@ -82,6 +82,8 @@ void power_on_ds5() {
     // tPCH04 is the ideal delay
     tPCH04;
 #endif // DEEP_SX
+
+    power_state = POWER_STATE_DS5;
 }
 
 // Enable S5 power
@@ -128,6 +130,8 @@ void power_on_s5() {
     // Extra wait - TODO remove
     delay_ms(200);
 #endif // DEEP_SX
+
+    power_state = POWER_STATE_S5;
 }
 
 void power_off_s5() {
@@ -159,13 +163,14 @@ void power_off_s5() {
     gpio_set(&PCH_DPWROK_EC, false);
     tPCH14;
 #endif // DEEP_SX
+
+    power_state = POWER_STATE_DS5;
 }
 
 void power_event(void) {
     // Always switch to ds5 if EC is running
     if (power_state == POWER_STATE_DEFAULT) {
         power_on_ds5();
-        power_state = POWER_STATE_DS5;
     }
 
     // Check if the adapter line goes low
@@ -216,7 +221,6 @@ void power_event(void) {
             // Enable S5 power if necessary, before sending PWR_BTN
             if (power_state == POWER_STATE_DS5) {
                 power_on_s5();
-                power_state = POWER_STATE_S5;
             }
         }
     }
@@ -277,6 +281,8 @@ void power_event(void) {
         //TODO: reset KBC and touchpad states
 
         kbled_reset();
+
+        power_state = POWER_STATE_S0;
     }
     rst_last = rst_new;
 
@@ -322,9 +328,9 @@ void power_event(void) {
 
         if (s4_new) {
             DEBUG("%02X: entering S3 state\n", main_cycle);
+            power_state = POWER_STATE_S3;
         } else if (power_state == POWER_STATE_S5) {
             power_off_s5();
-            power_state = POWER_STATE_DS5;
         }
     }
     #if LEVEL >= LEVEL_DEBUG
