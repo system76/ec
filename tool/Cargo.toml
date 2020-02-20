@@ -1,0 +1,13 @@
+[package]
+name = "system76_ectool"
+version = "0.1.0"
+edition = "2018"
+description = "System76 EC tool"
+authors = ["Jeremy Soller <jeremy@system76.com>"]
+repository = "https://github.com/system76/ec"
+
+[lib]
+name = "ectool"
+
+[dependencies]
+redox_hwio = "0.1"
