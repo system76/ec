@@ -83,12 +83,12 @@ impl<T: Timeout> Ec<T> {
     /// Finish an EC command
     pub unsafe fn command_finish(&mut self) -> Result<(), Error> {
         if self.can_command() {
-            Err(Error::WouldBlock)
-        } else {
             match self.read(1) {
                 0 => Ok(()),
                 err => Err(Error::Protocol(err)),
             }
+        } else {
+            Err(Error::WouldBlock)
         }
     }
 
