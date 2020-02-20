@@ -6,3 +6,6 @@
 	path = ecflash
 	url = https://github.com/system76/ecflash.git
 	branch = master
+[submodule "ecspy"]
+	path = ecspy
+	url = https://github.com/system76/ecspy.git
