@@ -9,6 +9,7 @@
 #include <board/gpio.h>
 #include <board/gctrl.h>
 #include <board/kbc.h>
+#include <board/kbled.h>
 #include <board/kbscan.h>
 #include <board/lid.h>
 #include <board/peci.h>
@@ -41,6 +42,7 @@ void init(void) {
     // Can happen in any order
     ecpm_init();
     kbc_init();
+    kbled_init();
     kbscan_init();
     peci_init();
     pmc_init();

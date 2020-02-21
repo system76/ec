@@ -94,9 +94,9 @@ void gpio_init() {
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // SMC_VGA_THERM
-    GPCRC1 = GPIO_IN | GPIO_UP;
+    GPCRC1 = GPIO_ALT;
     // SMD_VGA_THERM
-    GPCRC2 = GPIO_IN | GPIO_UP;
+    GPCRC2 = GPIO_ALT;
     // KSO16 (Darter)
     GPCRC3 = GPIO_IN;
     // CNVI_DET#
