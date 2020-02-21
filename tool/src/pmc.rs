@@ -1,17 +1,25 @@
 use hwio::{Io, Pio};
 
-pub struct Pmc {
+use crate::{
+    Error,
+    Timeout,
+    timeout
+};
+
+pub struct Pmc<T: Timeout> {
     data: Pio<u8>,
     cmd: Pio<u8>,
+    timeout: T,
 }
 
-impl Pmc {
+impl<T: Timeout> Pmc<T> {
     /// Create a new PMC instance. `base` identifies the data port. The command
     /// port will be `base + 4`
-    pub fn new(base: u16) -> Self {
+    pub fn new(base: u16, timeout: T) -> Self {
         Self {
             data: Pio::new(base),
             cmd: Pio::new(base + 4),
+            timeout,
         }
     }
 
@@ -26,31 +34,39 @@ impl Pmc {
     }
 
     /// Write a command to the PMC. Returns None if unable to write
-    pub unsafe fn command(&mut self, data: u8) -> Option<()> {
+    pub unsafe fn command(&mut self, data: u8) -> Result<(), Error> {
         if self.can_write() {
             self.cmd.write(data);
-            Some(())
+            Ok(())
         } else {
-            None
+            Err(Error::WouldBlock)
         }
     }
 
     /// Read data from the PMC. Returns None if unable to read
-    pub unsafe fn read(&mut self) -> Option<u8> {
+    pub unsafe fn read(&mut self) -> Result<u8, Error> {
         if self.can_read() {
-            Some(self.data.read())
+            Ok(self.data.read())
         } else {
-            None
+            Err(Error::WouldBlock)
         }
     }
 
     /// Write data to the PMC. Returns false if unable to write
-    pub unsafe fn write(&mut self, data: u8) -> Option<()> {
+    pub unsafe fn write(&mut self, data: u8) -> Result<(), Error> {
         if self.can_write() {
             self.data.write(data);
-            Some(())
+            Ok(())
         } else {
-            None
+            Err(Error::WouldBlock)
         }
+    }
+
+    pub unsafe fn acpi_read(&mut self, addr: u8) -> Result<u8, Error> {
+        self.timeout.reset();
+
+        timeout!(self.timeout, self.command(0x80))?;
+        timeout!(self.timeout, self.write(addr))?;
+        timeout!(self.timeout, self.read())
     }
 }

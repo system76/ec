@@ -1,8 +1,11 @@
 use hwio::{Io, Pio};
 
-use crate::error::Error;
-use crate::super_io::SuperIo;
-use crate::timeout::Timeout;
+use crate::{
+    Error,
+    SuperIo,
+    Timeout,
+    timeout
+};
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
@@ -96,27 +99,8 @@ impl<T: Timeout> Ec<T> {
     pub unsafe fn command(&mut self, cmd: EcCmd) -> Result<(), Error> {
         self.timeout.reset();
 
-        while self.timeout.running() {
-            match self.command_start(cmd) {
-                Ok(()) => break,
-                Err(err) => match err {
-                    Error::WouldBlock => (),
-                    _ => return Err(err)
-                },
-            }
-        }
-
-        while self.timeout.running() {
-            match self.command_finish() {
-                Ok(ok) => return Ok(ok),
-                Err(err) => match err {
-                    Error::WouldBlock => (),
-                    _ => return Err(err)
-                },
-            }
-        }
-
-        Err(Error::Timeout)
+        timeout!(self.timeout, self.command_start(cmd))?;
+        timeout!(self.timeout, self.command_finish())
     }
 
     /// Probe for EC

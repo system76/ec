@@ -1,7 +1,7 @@
 use ectool::{
-    ec::Ec,
-    error::Error,
-    timeout::Timeout,
+    Ec,
+    Error,
+    Timeout,
 };
 use std::{
     io,

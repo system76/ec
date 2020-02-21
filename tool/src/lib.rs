@@ -1,7 +1,16 @@
 #![no_std]
 
-pub mod ec;
-pub mod error;
-pub mod pmc;
-pub mod super_io;
-pub mod timeout;
+pub use self::ec::Ec;
+mod ec;
+
+pub use self::error::Error;
+mod error;
+
+pub use self::pmc::Pmc;
+mod pmc;
+
+pub use self::super_io::SuperIo;
+mod super_io;
+
+pub use self::timeout::Timeout;
+mod timeout;
