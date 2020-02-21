@@ -2,6 +2,7 @@
 #include <arch/time.h>
 #include <board/battery.h>
 #include <board/gpio.h>
+#include <board/kbled.h>
 #include <board/lid.h>
 #include <board/power.h>
 #include <board/pmc.h>
@@ -283,6 +284,8 @@ void power_event(void) {
         // LPC was just reset, enable PNP devices
         pnp_enable();
         //TODO: reset KBC and touchpad states
+
+        kbled_reset();
     }
     rst_last = rst_new;
 
