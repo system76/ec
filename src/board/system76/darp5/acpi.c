@@ -1,6 +1,7 @@
 #include <board/acpi.h>
 #include <board/battery.h>
 #include <board/gpio.h>
+#include <board/kbled.h>
 #include <board/lid.h>
 #include <board/peci.h>
 #include <common/debug.h>
@@ -14,7 +15,25 @@ static uint8_t fdat = 0;
 static uint8_t fbuf[4] = { 0, 0, 0, 0 };
 
 void fcommand(void) {
-    // TODO
+    switch (fcmd) {
+        // Keyboard backlight
+        case 0xCA:
+            switch (fdat) {
+                // Set LED color
+                case 0x03:
+                    kbled_set_color(
+                        ((uint32_t)fbuf[0]) |
+                        ((uint32_t)fbuf[1] << 16) |
+                        ((uint32_t)fbuf[2] << 8)
+                    );
+                    break;
+                // Set LED brightness
+                case 0x06:
+                    kbled_set(fbuf[0]);
+                    break;
+            }
+            break;
+    }
 }
 
 uint8_t acpi_read(uint8_t addr) {

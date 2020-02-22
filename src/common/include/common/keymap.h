@@ -37,7 +37,11 @@ uint16_t keymap_translate(uint16_t key);
 // Extra SCI layer for keyboard backlight control
 #define KT_SCI_EXTRA (0x8000)
 
+#define SCI_EXTRA_KBD_COLOR (0x80)
+#define SCI_EXTRA_KBD_DOWN (0x81)
+#define SCI_EXTRA_KBD_UP (0x82)
 #define SCI_EXTRA_KBD_BKL (0x8A)
+#define SCI_EXTRA_KBD_TOGGLE (0x9F)
 
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
