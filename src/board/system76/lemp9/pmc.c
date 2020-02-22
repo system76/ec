@@ -26,11 +26,14 @@ void pmc_sci_interrupt(void) {
     *(SCI_N.control) = GPIO_OUT;
 
     // Delay T_HOLD (value assumed)
-    delay_us(1);
+    delay_us(65);
 
     // Stop SCI interrupt
     *(SCI_N.control) = GPIO_IN;
     gpio_set(&SCI_N, true);
+
+    // Delay T_HOLD (value assumed)
+    delay_us(65);
 }
 
 bool pmc_sci(struct Pmc * pmc, uint8_t sci) {

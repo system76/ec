@@ -97,7 +97,10 @@ void main(void) {
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
+    uint32_t last_time = 0;
     for(main_cycle = 0; ; main_cycle++) {
+        uint32_t time = time_get();
+
         // Handle power states
         power_event();
         // Scans keyboard and sends keyboard packets
@@ -109,7 +112,8 @@ void main(void) {
         // Checks for keyboard/mouse packets from host
         kbc_event(&KBC);
         // Only run the following once a second
-        if (time_get() % 1000 == 0) {
+        if (last_time > time || (time - last_time) >= 1000) {
+            last_time = time;
             // Updates fan status and temps
             peci_event();
             // Updates battery status
