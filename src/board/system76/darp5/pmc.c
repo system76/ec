@@ -58,18 +58,8 @@ void pmc_event(struct Pmc * pmc) {
     static uint8_t state_data = 0;
 
     uint8_t sts = pmc_status(pmc);
-    if (!(sts & PMC_STS_OBF)) {
-        switch (state) {
-            case PMC_STATE_WRITE:
-                DEBUG("pmc write: %02X\n", state_data);
-                state = PMC_STATE_DEFAULT;
-                pmc_write(pmc, state_data);
-                // Send SCI for OBF=1
-                pmc_sci_interrupt();
-                break;
-        }
-    }
-    
+
+    // Read command/data if available
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
@@ -144,6 +134,19 @@ void pmc_event(struct Pmc * pmc) {
                 state = PMC_STATE_DEFAULT;
                 break;
             }
+        }
+    }
+
+    // Write data if possible
+    if (!(sts & PMC_STS_OBF)) {
+        switch (state) {
+            case PMC_STATE_WRITE:
+                DEBUG("pmc write: %02X\n", state_data);
+                state = PMC_STATE_DEFAULT;
+                pmc_write(pmc, state_data);
+                // Send SCI for OBF=1
+                pmc_sci_interrupt();
+                break;
         }
     }
 }
