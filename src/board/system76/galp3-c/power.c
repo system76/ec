@@ -91,8 +91,34 @@ void power_on_s5() {
 
 #if DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
+    // TODO - signal timing graph
+    // See Figure 12-24 in Whiskey Lake Platform Design Guide
+    // TODO - rail timing graph
+    
+    // TODO: Must have SL_SUS# set high by PCH
+    
+    // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
+    // avoid leakage
+    gpio_set(&VA_EC_EN, true);
+    tPCH06;
 
-    // TODO
+    // Enable VDD5
+    gpio_set(&DD_ON, true);
+
+    //TODO: Should SUS_ACK# be de-asserted here?
+    tPCH03;
+
+    // De-assert RSMRST#
+    gpio_set(&EC_RSMRST_N, true);
+
+    // Wait for PCH stability
+    tPCH18;
+
+    // Allow processor to control SUSB# and SUSC#
+    gpio_set(&EC_EN, true);
+
+    // Extra wait - TODO remove
+    delay_ms(200);
 #else // DEEP_SX
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // TODO - signal timing graph
