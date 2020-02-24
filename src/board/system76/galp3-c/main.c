@@ -99,26 +99,43 @@ void main(void) {
 
     uint32_t last_time = 0;
     for(main_cycle = 0; ; main_cycle++) {
-        uint32_t time = time_get();
-
-        // Handle power states
-        power_event();
-        // Scans keyboard and sends keyboard packets
-        kbscan_event();
-        // Passes through touchpad packets
-        touchpad_event(&PS2_3);
-        // Handle lid close/open
-        lid_event();
-        // Checks for keyboard/mouse packets from host
-        kbc_event(&KBC);
-        // Only run the following once a second
-        if (last_time > time || (time - last_time) >= 1000) {
-            last_time = time;
-            // Updates fan status and temps
-            peci_event();
-            // Updates battery status
-            battery_event();
+        switch (main_cycle % 5) {
+            case 0:
+                // Handle power states
+                power_event();
+                break;
+            case 1:
+                // Scans keyboard and sends keyboard packets
+                kbscan_event();
+                break;
+            case 2:
+                // Passes through touchpad packets
+                touchpad_event(&PS2_3);
+                break;
+            case 3:
+                // Checks for keyboard/mouse packets from host
+                kbc_event(&KBC);
+                break;
+            case 4:
+                // Handle lid close/open
+                lid_event();
+                break;
         }
+
+        if (main_cycle == 0) {
+            uint32_t time = time_get();
+            // Only run the following once a second
+            if (last_time > time || (time - last_time) >= 1000) {
+                last_time = time;
+
+                // Updates fan status and temps
+                peci_event();
+
+                // Updates battery status
+                battery_event();
+            }
+        }
+
         // Handles ACPI communication
         pmc_event(&PMC_1);
         // AP/EC communication over SMFI
