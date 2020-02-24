@@ -9,6 +9,9 @@ mod error;
 pub use self::firmware::Firmware;
 mod firmware;
 
+pub use self::legacy::EcLegacy;
+mod legacy;
+
 pub use self::pmc::Pmc;
 mod pmc;
 
