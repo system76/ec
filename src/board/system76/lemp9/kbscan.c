@@ -6,6 +6,7 @@
 #include <board/kbscan.h>
 #include <board/keymap.h>
 #include <board/pmc.h>
+#include <board/power.h>
 #include <common/debug.h>
 
 bool kbscan_enabled = false;
@@ -30,6 +31,13 @@ void kbscan_init(void) {
 #define DEBOUNCE_DELAY 20
 
 bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
+    if (pressed &&
+        (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3)) {
+        gpio_set(&SWI_N, false);
+        delay_ticks(10); //TODO: find correct delay
+        gpio_set(&SWI_N, true);
+    }
+
     switch (key & KT_MASK) {
         case (KT_NORMAL):
             if (kbscan_enabled) {

@@ -63,7 +63,7 @@ void pmc_event(struct Pmc * pmc) {
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
-            DEBUG("pmc cmd: %02X\n", data);
+            TRACE("pmc cmd: %02X\n", data);
 
             state = PMC_STATE_DEFAULT;
             switch (data) {
@@ -78,7 +78,7 @@ void pmc_event(struct Pmc * pmc) {
                 pmc_sci_interrupt();
                 break;
             case 0x82:
-                DEBUG("  burst enable\n");
+                TRACE("  burst enable\n");
                 // Set burst bit
                 pmc_set_status(pmc, sts | (1 << 4));
                 // Send acknowledgement byte
@@ -86,14 +86,14 @@ void pmc_event(struct Pmc * pmc) {
                 state_data = 0x90;
                 break;
             case 0x83:
-                DEBUG("  burst disable\n");
+                TRACE("  burst disable\n");
                 // Clear burst bit
                 pmc_set_status(pmc, sts & ~(1 << 4));
                 // Send SCI for IBF=0
                 pmc_sci_interrupt();
                 break;
             case 0x84:
-                DEBUG("  SCI queue\n");
+                TRACE("  SCI queue\n");
                 // Clear SCI pending bit
                 pmc_set_status(pmc, sts & ~(1 << 5));
                 // Send SCI queue
@@ -104,13 +104,13 @@ void pmc_event(struct Pmc * pmc) {
                 break;
 
             case 0xEC:
-                DEBUG("  scratch rom\n");
+                TRACE("  scratch rom\n");
                 pmc_write(pmc, 0x76);
                 scratch_trampoline();
                 break;
             }
         } else {
-            DEBUG("pmc data: %02X\n", data);
+            TRACE("pmc data: %02X\n", data);
 
             switch (state) {
             case PMC_STATE_ACPI_READ:
@@ -141,7 +141,7 @@ void pmc_event(struct Pmc * pmc) {
     if (!(sts & PMC_STS_OBF)) {
         switch (state) {
             case PMC_STATE_WRITE:
-                DEBUG("pmc write: %02X\n", state_data);
+                TRACE("pmc write: %02X\n", state_data);
                 state = PMC_STATE_DEFAULT;
                 pmc_write(pmc, state_data);
                 // Send SCI for OBF=1
