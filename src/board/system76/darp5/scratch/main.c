@@ -58,6 +58,7 @@ void acpi_write(uint8_t addr, uint8_t data) {
 
 enum PmcState {
     PMC_STATE_DEFAULT,
+    PMC_STATE_WRITE,
     PMC_STATE_ACPI_READ,
     PMC_STATE_ACPI_WRITE,
     PMC_STATE_ACPI_WRITE_ADDR,
@@ -65,9 +66,11 @@ enum PmcState {
 
 void pmc_event(struct Pmc * pmc) {
     static enum PmcState state = PMC_STATE_DEFAULT;
-    static uint8_t state_data[2] = {0, 0};
+    static uint8_t state_data = 0;
 
     uint8_t sts = pmc_status(pmc);
+
+    // Read command/data if available
     if (sts & PMC_STS_IBF) {
         uint8_t data = pmc_read(pmc);
         if (sts & PMC_STS_CMD) {
@@ -90,22 +93,31 @@ void pmc_event(struct Pmc * pmc) {
         } else {
             switch (state) {
             case PMC_STATE_ACPI_READ:
-                state = PMC_STATE_DEFAULT;
-                uint8_t value = acpi_read(data);
-                pmc_write(pmc, value);
+                state = PMC_STATE_WRITE;
+                state_data = acpi_read(data);
                 break;
             case PMC_STATE_ACPI_WRITE:
                 state = PMC_STATE_ACPI_WRITE_ADDR;
-                state_data[0] = data;
+                state_data = data;
                 break;
             case PMC_STATE_ACPI_WRITE_ADDR:
                 state = PMC_STATE_DEFAULT;
-                acpi_write(state_data[0], data);
+                acpi_write(state_data, data);
                 break;
             default:
                 state = PMC_STATE_DEFAULT;
                 break;
             }
+        }
+    }
+
+    // Write data if possible
+    if (!(sts & PMC_STS_OBF)) {
+        switch (state) {
+            case PMC_STATE_WRITE:
+                state = PMC_STATE_DEFAULT;
+                pmc_write(pmc, state_data);
+                break;
         }
     }
 }

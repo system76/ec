@@ -100,7 +100,6 @@ unsafe fn flash(path: &str) -> Result<(), Error> {
     }
 
     {
-        print!("ec version: ");
         let mut data = [0; 256];
         let size = ec.version(&mut data)?;
 

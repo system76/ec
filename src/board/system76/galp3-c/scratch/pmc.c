@@ -18,7 +18,6 @@ uint8_t pmc_read(struct Pmc * pmc) {
 }
 
 bool pmc_write(struct Pmc * pmc, uint8_t data) {
-    while (pmc_status(pmc) & PMC_STS_OBF) {}
     *(pmc->data_out) = data;
     return true;
 }
