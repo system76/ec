@@ -138,8 +138,8 @@ void kbscan_event(void) {
     for (i = 0; i < KM_OUT; i++) {
         // Set current line as output
         if (i < 8) {
-            KSOLGOEN = 0;
             KSOLGOEN = 1 << i;
+            KSOHGOEN = 0;
             GPCRC3 = GPIO_IN;
             GPCRC5 = GPIO_IN;
         } else if (i < 16) {

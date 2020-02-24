@@ -146,8 +146,8 @@ void kbscan_event(void) {
     for (i = 0; i < KM_OUT; i++) {
         // Set current line as output
         if (i < 8) {
-            KSOLGOEN = 0;
             KSOLGOEN = 1 << i;
+            KSOHGOEN = 0;
         } else if (i < 16) {
             KSOLGOEN = 0;
             KSOHGOEN = 1 << (i - 8);
