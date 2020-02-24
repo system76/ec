@@ -2,7 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef __SCRATCH__
+    #include <board/scratch.h>
+#endif
 #include <board/smfi.h>
+#include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
 
@@ -19,23 +23,17 @@ volatile uint8_t __xdata __at(0x105D) HRAMW0AAS;
 // Host RAM window 1 access allow size
 volatile uint8_t __xdata __at(0x105E) HRAMW1AAS;
 
+volatile uint8_t __xdata __at(0x103B) ECINDAR0;
+volatile uint8_t __xdata __at(0x103C) ECINDAR1;
+volatile uint8_t __xdata __at(0x103D) ECINDAR2;
+volatile uint8_t __xdata __at(0x103E) ECINDAR3;
+volatile uint8_t __xdata __at(0x103F) ECINDDR;
+
+volatile uint8_t __xdata __at(0x1F01) ETWCFG;
+volatile uint8_t __xdata __at(0x1F07) EWDKEYR;
+
 static volatile uint8_t __xdata __at(0xC00) smfi_cmd[256];
 static volatile uint8_t __xdata __at(0xD00) smfi_dbg[256];
-
-enum SmfiCmd {
-    SMFI_CMD_NONE = 0,
-    SMFI_CMD_PROBE = 1,
-    SMFI_CMD_BOARD = 2,
-    SMFI_CMD_VERSION = 3,
-    SMFI_CMD_DEBUG = 4,
-    //TODO
-};
-
-enum SmfiRes {
-    SMFI_RES_OK = 0,
-    SMFI_RES_ERR = 1,
-    //TODO
-};
 
 void smfi_init(void) {
     int i;
@@ -63,40 +61,103 @@ void smfi_init(void) {
     HRAMWC |= 0x13;
 }
 
-void smfi_event(void) {
+enum Result cmd_debug(void) {
     int i;
-    if (smfi_cmd[0]) {
-        // Default to success
-        smfi_cmd[1] = SMFI_RES_OK;
+    for (i = 2; i < ARRAY_SIZE(smfi_cmd); i++) {
+        uint8_t b = smfi_cmd[i];
+        if (b == 0) break;
+        putchar(b);
+    }
 
+    return RES_OK;
+}
+
+enum Result cmd_spi(void) {
+#ifdef __SCRATCH__
+    uint8_t flags = smfi_cmd[2];
+    int len = (int)smfi_cmd[3];
+
+    // Enable chip (internal)
+    ECINDAR3 = 0x7F;
+    ECINDAR2 = 0xFF;
+    ECINDAR1 = 0xFD;
+    ECINDAR0 = 0x00;
+
+    // Read or write len bytes
+    int i;
+    for (i = 4; i < ARRAY_SIZE(smfi_cmd) && len > 0; i++, len--) {
+        if (flags & CMD_SPI_FLAG_READ) {
+            smfi_cmd[i] = ECINDDR;
+        } else {
+            ECINDDR = smfi_cmd[i];
+        }
+    }
+
+    if (flags & CMD_SPI_FLAG_DISABLE) {
+        // Disable chip
+        ECINDAR1 = 0xFE;
+        ECINDDR = 0;
+    }
+
+    return RES_OK;
+#else
+    if (smfi_cmd[2] & CMD_SPI_FLAG_SCRATCH) {
+        scratch_trampoline();
+    }
+
+    // Cannot use SPI bus while running EC from SPI, or trampoline failed
+    return RES_ERR;
+#endif
+}
+
+enum Result cmd_reset(void) {
+    // Attempt to trigger watchdog reset
+    ETWCFG |= (1 << 5);
+    EWDKEYR = 0;
+
+    // Failed if it got this far
+    return RES_ERR;
+}
+
+void smfi_event(void) {
+    if (smfi_cmd[0]) {
         switch (smfi_cmd[0]) {
-            case SMFI_CMD_PROBE:
+            case CMD_PROBE:
                 // Signature
                 smfi_cmd[2] = 0x76;
                 smfi_cmd[3] = 0xEC;
                 // Version
                 smfi_cmd[4] = 0x01;
+                // Always successful
+                smfi_cmd[1] = RES_OK;
                 break;
-            case SMFI_CMD_BOARD:
+            case CMD_BOARD:
                 strncpy(&smfi_cmd[2], board(), ARRAY_SIZE(smfi_cmd) - 2);
+                // Always successful
+                smfi_cmd[1] = RES_OK;
                 break;
-            case SMFI_CMD_VERSION:
+            case CMD_VERSION:
                 strncpy(&smfi_cmd[2], version(), ARRAY_SIZE(smfi_cmd) - 2);
+                // Always successful
+                smfi_cmd[1] = RES_OK;
                 break;
-            case SMFI_CMD_DEBUG:
-                for (i = 2; i < ARRAY_SIZE(smfi_cmd) - 2; i++) {
-                    uint8_t b = smfi_cmd[i];
-                    if (b == 0) break;
-                    putchar(b);
-                }
+            case CMD_DEBUG:
+                smfi_cmd[1] = cmd_debug();
+                break;
+            case CMD_SPI:
+                smfi_cmd[1] = cmd_spi();
+                break;
+            case CMD_RESET:
+                smfi_cmd[1] = cmd_reset();
+                break;
             default:
                 // Command not found
-                smfi_cmd[1] = SMFI_RES_ERR;
+                smfi_cmd[1] = RES_ERR;
                 break;
         }
 
         // Mark command as finished
-        smfi_cmd[0] = SMFI_CMD_NONE;
+        smfi_cmd[0] = CMD_NONE;
     }
 }
 

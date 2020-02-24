@@ -24,11 +24,15 @@ SCRATCH_OFFSET=1024
 SCRATCH_SIZE=1024
 CFLAGS+=-DSCRATCH_OFFSET=$(SCRATCH_OFFSET) -DSCRATCH_SIZE=$(SCRATCH_SIZE)
 
+# Copy parameters to use when compiling scratch ROM
+SCRATCH_INCLUDE=$(INCLUDE)
+SCRATCH_CFLAGS=$(CFLAGS)
+
 # Add scratch ROM source
 SCRATCH_DIR=$(BOARD_DIR)/scratch
 SCRATCH_SRC=$(wildcard $(SCRATCH_DIR)/*.c)
-SCRATCH_INCLUDE=$(wildcard $(SCRATCH_DIR)/include/scratch/*.h) $(SCRATCH_DIR)/scratch.mk
-SCRATCH_CFLAGS=-I$(SCRATCH_DIR)/include
+SCRATCH_INCLUDE+=$(wildcard $(SCRATCH_DIR)/include/scratch/*.h) $(SCRATCH_DIR)/scratch.mk
+SCRATCH_CFLAGS+=-I$(SCRATCH_DIR)/include -D__SCRATCH__
 include $(SCRATCH_DIR)/scratch.mk
 
 # Include scratch header in main firmware
