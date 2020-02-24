@@ -6,6 +6,9 @@ mod ec;
 pub use self::error::Error;
 mod error;
 
+pub use self::firmware::Firmware;
+mod firmware;
+
 pub use self::pmc::Pmc;
 mod pmc;
 
