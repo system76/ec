@@ -129,6 +129,10 @@ void kbscan_event(void) {
     static bool debounce = false;
     static uint32_t debounce_time = 0;
 
+    static bool repeat = false;
+    static uint16_t repeat_key = 0;
+    static uint32_t repeat_key_time = 0;
+
     // If debounce complete
     if (debounce) {
         uint32_t time = time_get();
@@ -165,6 +169,7 @@ void kbscan_event(void) {
         uint8_t new = ~KSI;
         uint8_t last = kbscan_last[i];
         if (new != last) {
+            // A key was pressed or released
             int j;
             for (j = 0; j < KM_IN; j++) {
                 bool new_b = new & (1 << j);
@@ -189,6 +194,17 @@ void kbscan_event(void) {
                                 // In the case of ignored key press/release, reset bit
                                 reset = true;
                             }
+
+                            if (new_b) {
+                                // New key pressed, update last key
+                                repeat_key = key;
+                                repeat_key_time = time_get();
+                                repeat = false;
+                            } else if (key == repeat_key) {
+                                // Repeat key was released
+                                repeat_key = 0;
+                                repeat = false;
+                            }
                         } else {
                             WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
                         }
@@ -206,6 +222,29 @@ void kbscan_event(void) {
             }
 
             kbscan_last[i] = new;
+        } else if (new && repeat_key != 0) {
+            // A key is being pressed
+            uint32_t time = time_get();
+            static uint32_t repeat_start = 0;
+
+            if (!repeat) {
+                if (time < repeat_key_time) {
+                    // Overflow, reset repeat_key_time
+                    repeat_key_time = time;
+                } else if ((time - repeat_key_time) >= 500) {
+                    // Typematic repeat
+                    repeat = true;
+                    repeat_start = time;
+                }
+            }
+
+            if (repeat) {
+                // FIXME: resend key at typematic rate
+                if ((time - repeat_start) > 60) {
+                    kbscan_press(repeat_key, true, &layer);
+                    repeat_start = time;
+                }
+            }
         }
     }
 
