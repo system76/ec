@@ -40,8 +40,8 @@ CFLAGS+=-I$(BUILD)/include
 INCLUDE+=$(BUILD)/include/scratch.h
 
 console:
-	cargo build --manifest-path ecflash/Cargo.toml --example smfi --release
-	sudo ecflash/target/release/examples/smfi
+	cargo build --manifest-path tool/Cargo.toml --release
+	sudo tool/target/release/system76_ectool console
 
 flash: $(BUILD)/ec.rom
 	cargo build --manifest-path ecflash/Cargo.toml --example isp --release
