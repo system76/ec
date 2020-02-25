@@ -22,6 +22,42 @@ bool kbc_second = false;
 // for basically no good reason
 static bool kbc_translate = true;
 
+// Values from linux/drivers/input/keyboard/atkbd.c
+static const uint16_t kbc_typematic_period[32] = {
+    33,     // 30.0 cps = ~33.33ms
+    37,     // 26.7 cps = ~37.45ms
+    42,     // 24.0 cps = ~41.67ms
+    46,     // 21.8 cps = ~45.87ms
+    50,     // 20.7 cps = ~48.30ms
+    54,     // 18.5 cps = ~54.05ms
+    58,     // 17.1 cps = ~58.48ms
+    63,     // 16.0 cps = ~62.50ms
+    67,     // 15.0 cps = ~66.67ms
+    75,     // 13.3 cps = ~75.19ms
+    83,     // 12.0 cps = ~83.33ms
+    92,     // 10.9 cps = ~91.74ms
+    100,    // 10.0 cps = 100ms
+    109,    //  9.2 cps = ~108.70ms
+    116,    //  8.6 cps = ~116.28ms
+    125,    //  8.0 cps = 125ms
+    133,    //  7.5 cps = ~133.33ms
+    149,    //  6.7 cps = ~149.25ms
+    167,    //  6.0 cps = ~166.67ms
+    182,    //  5.5 cps = ~181.82ms
+    200,    //  5.0 cps = 200ms
+    217,    //  4.6 cps = ~217.39ms
+    232,    //  4.3 cps = ~232.56ms
+    250,    //  4.0 cps = 250ms
+    270,    //  3.7 cps = ~270.27ms
+    303,    //  3.3 cps = ~303.03ms
+    333,    //  3.0 cps = ~333.33ms
+    370,    //  2.7 cps = ~370.37ms
+    400,    //  2.5 cps = 400ms
+    435,    //  2.3 cps = ~434.78ms
+    470,    //  2.1 cps = ~478.19ms
+    500,    //  2.0 cps = 500ms
+};
+
 bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed) {
     if (!kbc_first) return true;
     if (kbc_translate) {
@@ -55,6 +91,7 @@ enum KbcState {
     KBC_STATE_WRITE_CONFIG,
     KBC_STATE_SET_LEDS,
     KBC_STATE_SCANCODE,
+    KBC_STATE_TYPEMATIC,
     KBC_STATE_WRITE_PORT,
     KBC_STATE_FIRST_PORT_OUTPUT,
     KBC_STATE_SECOND_PORT_OUTPUT,
@@ -172,6 +209,11 @@ void kbc_event(struct Kbc * kbc) {
                                 }
                             }
                             break;
+                        case 0xF3:
+                            TRACE("    set typematic rate/delay\n");
+                            state = KBC_STATE_TYPEMATIC;
+                            kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
+                            break;
                         case 0xF4:
                             TRACE("    enable scanning\n");
                             kbscan_enabled = true;
@@ -226,6 +268,21 @@ void kbc_event(struct Kbc * kbc) {
                                 break;
                         }
                     #endif
+                    kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
+                    break;
+                case KBC_STATE_TYPEMATIC:
+                    TRACE("  set typematic rate/delay\n");
+                    state = KBC_STATE_NORMAL;
+                    {
+                        // Rate: bits 0-4
+                        uint16_t period = kbc_typematic_period[data & 0x1F];
+                        kbscan_repeat_period = period;
+
+                        // Delay: bits 5-6
+                        static const uint16_t delay[4] = {250, 500, 750, 1000};
+                        uint8_t idx = (data & 0x60) >> 5;
+                        kbscan_repeat_delay = delay[idx];
+                    }
                     kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                     break;
                 case KBC_STATE_WRITE_PORT:

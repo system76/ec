@@ -10,6 +10,8 @@
 #include <common/debug.h>
 
 bool kbscan_enabled = false;
+uint16_t kbscan_repeat_period = 91;
+uint16_t kbscan_repeat_delay = 500;
 
 uint8_t sci_extra = 0;
 
@@ -231,7 +233,7 @@ void kbscan_event(void) {
                 if (time < repeat_key_time) {
                     // Overflow, reset repeat_key_time
                     repeat_key_time = time;
-                } else if ((time - repeat_key_time) >= 500) {
+                } else if ((time - repeat_key_time) >= kbscan_repeat_delay) {
                     // Typematic repeat
                     repeat = true;
                     repeat_start = time;
@@ -239,8 +241,7 @@ void kbscan_event(void) {
             }
 
             if (repeat) {
-                // FIXME: resend key at typematic rate
-                if ((time - repeat_start) > 60) {
+                if ((time - repeat_start) > kbscan_repeat_period) {
                     kbscan_press(repeat_key, true, &layer);
                     repeat_start = time;
                 }
