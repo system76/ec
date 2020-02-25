@@ -1,4 +1,3 @@
-use core::cmp;
 use hwio::{Io, Pio};
 
 use crate::{
@@ -188,36 +187,36 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
         let flags =
             CMD_SPI_FLAG_READ |
             if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
-        self.ec.write(2, flags);
 
-        let len = cmp::min(data.len(), 256 - 4);
-        self.ec.write(3, len as u8);
+        for chunk in data.chunks_mut(256 - 4) {
+            self.ec.write(2, flags);
+            self.ec.write(3, chunk.len() as u8);
+            self.ec.command(Cmd::Spi)?;
 
-        self.ec.command(Cmd::Spi)?;
-
-        for i in 0..len {
-            data[i] = self.ec.read(i as u8 + 4);
+            for i in 0..chunk.len() {
+                chunk[i] = self.ec.read(i as u8 + 4);
+            }
         }
 
-        Ok(len)
+        Ok(data.len())
     }
 
     /// SPI write
     unsafe fn write(&mut self, data: &[u8]) -> Result<usize, Error> {
         let flags =
             if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
-        self.ec.write(2, flags);
 
-        let len = cmp::min(data.len(), 256 - 4);
-        self.ec.write(3, len as u8);
+        for chunk in data.chunks(256 - 4) {
+            for i in 0..chunk.len() {
+                self.ec.write(i as u8 + 4, chunk[i]);
+            }
 
-        for i in 0..len {
-            self.ec.write(i as u8 + 4, data[i]);
+            self.ec.write(2, flags);
+            self.ec.write(3, chunk.len() as u8);
+            self.ec.command(Cmd::Spi)?;
         }
 
-        self.ec.command(Cmd::Spi)?;
-
-        Ok(len)
+        Ok(data.len())
     }
 }
 
