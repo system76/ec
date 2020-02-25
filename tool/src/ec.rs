@@ -174,12 +174,13 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
         let flags =
             CMD_SPI_FLAG_DISABLE |
             if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
+
         self.ec.write(2, flags);
+        self.ec.write(3, 0);
+        self.ec.command(Cmd::Spi)?;
+        assert_eq!(self.ec.read(3), 0);
 
-        let len = 0;
-        self.ec.write(3, len);
-
-        self.ec.command(Cmd::Spi)
+        Ok(())
     }
 
     /// SPI read
@@ -192,6 +193,7 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
             self.ec.write(2, flags);
             self.ec.write(3, chunk.len() as u8);
             self.ec.command(Cmd::Spi)?;
+            assert_eq!(self.ec.read(3), chunk.len() as u8);
 
             for i in 0..chunk.len() {
                 chunk[i] = self.ec.read(i as u8 + 4);
@@ -214,6 +216,7 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
             self.ec.write(2, flags);
             self.ec.write(3, chunk.len() as u8);
             self.ec.command(Cmd::Spi)?;
+            assert_eq!(self.ec.read(3), chunk.len() as u8);
         }
 
         Ok(data.len())

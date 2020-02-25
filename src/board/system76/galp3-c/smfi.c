@@ -77,8 +77,9 @@ static enum Result cmd_debug(void) {
 }
 
 static enum Result cmd_spi(void) {
-#ifdef __SCRATCH__
     uint8_t flags = smfi_cmd[2];
+
+#ifdef __SCRATCH__
     int len = (int)smfi_cmd[3];
 
     // Enable chip (internal)
@@ -89,13 +90,16 @@ static enum Result cmd_spi(void) {
 
     // Read or write len bytes
     int i;
-    for (i = 4; i < ARRAY_SIZE(smfi_cmd) && len > 0; i++, len--) {
+    for (i = 0; i < len && (i + 4) < ARRAY_SIZE(smfi_cmd); i++) {
         if (flags & CMD_SPI_FLAG_READ) {
-            smfi_cmd[i] = ECINDDR;
+            smfi_cmd[i + 4] = ECINDDR;
         } else {
-            ECINDDR = smfi_cmd[i];
+            ECINDDR = smfi_cmd[i + 4];
         }
     }
+
+    // Set actually read/written count
+    smfi_cmd[3] = (uint8_t)i;
 
     if (flags & CMD_SPI_FLAG_DISABLE) {
         // Disable chip
@@ -105,7 +109,7 @@ static enum Result cmd_spi(void) {
 
     return RES_OK;
 #else
-    if (smfi_cmd[2] & CMD_SPI_FLAG_SCRATCH) {
+    if (flags & CMD_SPI_FLAG_SCRATCH) {
         scratch_trampoline();
     }
 
