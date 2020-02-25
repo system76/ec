@@ -200,8 +200,26 @@ unsafe fn flash(path: &str) -> Result<(), Error> {
         println!("ec version: {:?}", str::from_utf8(ec_version));
     }
 
+    // Wait for any key releases
+    eprintln!("Waiting 5 seconds for all keys to be released");
+    thread::sleep(Duration::new(5, 0));
+
+    eprintln!("Sync");
+    let _ = process::Command::new("sync").status();
+
     let res = flash_inner(&mut ec, &firmware);
+
+    eprintln!("Sync");
+    let _ = process::Command::new("sync").status();
+
+    eprintln!("System will shut off in 5 seconds");
+    thread::sleep(Duration::new(5, 0));
+
+    eprintln!("Sync");
+    let _ = process::Command::new("sync").status();
+
     ec.reset()?;
+
     res
 }
 
