@@ -32,8 +32,8 @@ pub struct Ec<T: Timeout> {
 
 impl<T: Timeout> Ec<T> {
     /// Probes for a compatible EC
-    pub unsafe fn new(primary: bool, timeout: T) -> Result<Self, Error> {
-        let mut sio = SuperIo::new(if primary { 0x2E } else { 0x4E });
+    pub unsafe fn new(timeout: T) -> Result<Self, Error> {
+        let mut sio = SuperIo::new(0x2E);
 
         let id =
             (sio.read(0x20) as u16) << 8 |
@@ -45,8 +45,8 @@ impl<T: Timeout> Ec<T> {
         }
 
         let mut ec = Ec {
-            cmd: if primary { 0xC00 } else { 0xE00 },
-            dbg: if primary { 0xD00 } else { 0xF00 },
+            cmd: 0xE00,
+            dbg: 0xF00,
             timeout,
         };
 

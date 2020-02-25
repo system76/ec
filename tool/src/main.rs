@@ -54,7 +54,6 @@ unsafe fn console() -> Result<(), Error> {
     iopl();
 
     let mut ec = Ec::new(
-        true,
         StdTimeout::new(Duration::new(1, 0)),
     )?;
 
@@ -184,7 +183,6 @@ unsafe fn flash(path: &str) -> Result<(), Error> {
     iopl();
 
     let mut ec = Ec::new(
-        true,
         StdTimeout::new(Duration::new(1, 0)),
     )?;
 
@@ -235,7 +233,6 @@ unsafe fn info() -> Result<(), Error> {
     iopl();
 
     let mut ec = Ec::new(
-        true,
         StdTimeout::new(Duration::new(1, 0)),
     )?;
 
