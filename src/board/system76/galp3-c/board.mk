@@ -44,8 +44,8 @@ console:
 	sudo tool/target/release/system76_ectool console
 
 flash: $(BUILD)/ec.rom
-	cargo build --manifest-path ecflash/Cargo.toml --example isp --release
-	sudo ecflash/target/release/examples/isp --internal $<
+	cargo build --manifest-path tool/Cargo.toml --release
+	sudo tool/target/release/system76_ectool flash $<
 
 isp: $(BUILD)/ec.rom
 	cargo build --manifest-path ecflash/Cargo.toml --example isp --release

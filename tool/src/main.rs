@@ -97,8 +97,6 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<()
     eprintln!("Saving ROM to backup.rom");
     fs::write("backup.rom", &rom).map_err(|_| Error::Verify)?;
 
-    return Ok(());
-
     let mut matches = true;
     for i in 0..rom.len() {
         if &rom[i] != firmware.data.get(i).unwrap_or(&0xFF) {
@@ -214,6 +212,7 @@ unsafe fn flash(path: &str) -> Result<(), Error> {
     let _ = process::Command::new("sync").status();
 
     let res = flash_inner(&mut ec, &firmware);
+    eprintln!("Result: {:X?}", res);
 
     eprintln!("Sync");
     let _ = process::Command::new("sync").status();
