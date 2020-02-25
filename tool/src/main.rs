@@ -83,16 +83,10 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<()
         StdTimeout::new(Duration::new(1, 0))
     );
 
+    // Read entire ROM
     let mut rom = vec![0; rom_size];
-    {
-        let mut address = 0;
-        while address < rom_size {
-            // Read entire ROM
-            eprintln!("SPI read {:06X}", address);
-            spi.read_at(address as u32, &mut rom[address..address + sector_size])?;
-            address += sector_size;
-        }
-    }
+    eprintln!("SPI read");
+    spi.read_at(0, &mut rom)?;
 
     eprintln!("Saving ROM to backup.rom");
     fs::write("backup.rom", &rom).map_err(|_| Error::Verify)?;
