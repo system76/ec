@@ -39,14 +39,18 @@ void smfi_init(void) {
     int i;
 
     // Clear command region
-    for (i = 0; i < ARRAY_SIZE(smfi_cmd); i++) {
+    for (i = 1; i < ARRAY_SIZE(smfi_cmd); i++) {
         smfi_cmd[i] = 0x00;
     }
+    // Clear host command last
+    smfi_cmd[0] = 0x00;
 
     // Clear debug region
-    for (i = 0; i < ARRAY_SIZE(smfi_dbg); i++) {
+    for (i = 1; i < ARRAY_SIZE(smfi_dbg); i++) {
         smfi_dbg[i] = 0x00;
     }
+    // Clear tail last
+    smfi_dbg[0] = 0x00;
 
 
     // H2RAM window 0 address 0xC00 - 0xCFF, read/write
@@ -61,7 +65,7 @@ void smfi_init(void) {
     HRAMWC |= 0x13;
 }
 
-enum Result cmd_debug(void) {
+static enum Result cmd_debug(void) {
     int i;
     for (i = 2; i < ARRAY_SIZE(smfi_cmd); i++) {
         uint8_t b = smfi_cmd[i];
@@ -72,7 +76,7 @@ enum Result cmd_debug(void) {
     return RES_OK;
 }
 
-enum Result cmd_spi(void) {
+static enum Result cmd_spi(void) {
 #ifdef __SCRATCH__
     uint8_t flags = smfi_cmd[2];
     int len = (int)smfi_cmd[3];
@@ -110,7 +114,7 @@ enum Result cmd_spi(void) {
 #endif
 }
 
-enum Result cmd_reset(void) {
+static enum Result cmd_reset(void) {
     // Attempt to trigger watchdog reset
     ETWCFG |= (1 << 5);
     EWDKEYR = 0;
