@@ -90,7 +90,7 @@ static enum Result cmd_spi(void) {
 
     // Read or write len bytes
     int i;
-    for (i = 0; i < len && (i + 4) < ARRAY_SIZE(smfi_cmd); i++) {
+    for (i = 0; (i < len) && ((i + 4) < ARRAY_SIZE(smfi_cmd)); i++) {
         if (flags & CMD_SPI_FLAG_READ) {
             smfi_cmd[i + 4] = ECINDDR;
         } else {

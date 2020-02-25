@@ -76,6 +76,8 @@ unsafe fn console() -> Result<(), Error> {
 
 unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<(), Error> {
     let rom_size = 128 * 1024;
+    let sector_size = 1024;
+
     let mut spi_bus = ec.spi(true)?;
     let mut spi = SpiRom::new(
         &mut spi_bus,
@@ -84,9 +86,13 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<()
 
     let mut rom = vec![0; rom_size];
     {
-        // Read entire ROM
-        eprintln!("SPI read");
-        spi.read_at(0, &mut rom)?;
+        let mut address = 0;
+        while address < rom_size {
+            // Read entire ROM
+            eprintln!("SPI read {:06X}", address);
+            spi.read_at(address as u32, &mut rom[address..address + sector_size])?;
+            address += sector_size;
+        }
     }
 
     eprintln!("Saving ROM to backup.rom");
@@ -116,7 +122,7 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<()
         let mut address = 0;
         while address < rom_size {
             let mut erased = true;
-            for &b in &rom[address..address + 1024] {
+            for &b in &rom[address..address + sector_size] {
                 if b != 0xFF {
                     erased =false;
                     break;
@@ -125,7 +131,7 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<()
 
             if erased {
                 eprintln!("SPI sector already erased {:06X}", address);
-                address += 1024;
+                address += sector_size;
             } else {
                 eprintln!("SPI sector erase {:06X}", address);
                 address += spi.erase_sector(address as u32)?;
