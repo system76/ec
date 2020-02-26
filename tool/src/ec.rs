@@ -3,6 +3,7 @@ use hwio::{Io, Pio};
 use crate::{
     Error,
     Spi,
+    SpiTarget,
     SuperIo,
     Timeout,
     timeout
@@ -23,6 +24,7 @@ pub enum Cmd {
 pub const CMD_SPI_FLAG_READ: u8 = (1 << 0);
 pub const CMD_SPI_FLAG_DISABLE: u8 = (1 << 1);
 pub const CMD_SPI_FLAG_SCRATCH: u8 = (1 << 2);
+pub const CMD_SPI_FLAG_BACKUP: u8 = (1 << 3);
 
 pub struct Ec<T: Timeout> {
     cmd: u16,
@@ -149,9 +151,10 @@ impl<T: Timeout> Ec<T> {
         Ok(i)
     }
 
-    pub unsafe fn spi(&mut self, scratch: bool) -> Result<EcSpi<T>, Error> {
+    pub unsafe fn spi(&mut self, target: SpiTarget, scratch: bool) -> Result<EcSpi<T>, Error> {
         let mut spi = EcSpi {
             ec: self,
+            target,
             scratch,
         };
         spi.reset()?;
@@ -165,49 +168,71 @@ impl<T: Timeout> Ec<T> {
 
 pub struct EcSpi<'a, T: Timeout> {
     ec: &'a mut Ec<T>,
+    target: SpiTarget,
     scratch: bool,
+}
+
+impl<'a, T: Timeout> EcSpi<'a, T> {
+    fn flags(&self, read: bool, disable: bool) -> u8 {
+        let mut flags = 0;
+
+        if read {
+            flags |= CMD_SPI_FLAG_READ;
+        }
+
+        if disable {
+            flags |= CMD_SPI_FLAG_DISABLE;
+        }
+
+        if self.scratch {
+            flags |= CMD_SPI_FLAG_SCRATCH;
+        }
+
+        match self.target {
+            SpiTarget::Main => (),
+            SpiTarget::Backup => {
+                flags |= CMD_SPI_FLAG_BACKUP;
+            },
+        }
+
+        flags
+    }
 }
 
 impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
     /// Disable SPI chip, must be done before and after a transaction
     unsafe fn reset(&mut self) -> Result<(), Error> {
-        let flags =
-            CMD_SPI_FLAG_DISABLE |
-            if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
-
+        let flags = self.flags(false, true);
         self.ec.write(2, flags);
         self.ec.write(3, 0);
         self.ec.command(Cmd::Spi)?;
-        assert_eq!(self.ec.read(3), 0);
-
+        if self.ec.read(3) != 0 {
+            return Err(Error::Verify);
+        }
         Ok(())
     }
 
     /// SPI read
     unsafe fn read(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        let flags =
-            CMD_SPI_FLAG_READ |
-            if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
-
+        let flags = self.flags(true, false);
         for chunk in data.chunks_mut(256 - 4) {
             self.ec.write(2, flags);
             self.ec.write(3, chunk.len() as u8);
             self.ec.command(Cmd::Spi)?;
-            assert_eq!(self.ec.read(3), chunk.len() as u8);
+            if self.ec.read(3) != chunk.len() as u8 {
+                return Err(Error::Verify);
+            }
 
             for i in 0..chunk.len() {
                 chunk[i] = self.ec.read(i as u8 + 4);
             }
         }
-
         Ok(data.len())
     }
 
     /// SPI write
     unsafe fn write(&mut self, data: &[u8]) -> Result<usize, Error> {
-        let flags =
-            if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
-
+        let flags = self.flags(false, false);
         for chunk in data.chunks(256 - 4) {
             for i in 0..chunk.len() {
                 self.ec.write(i as u8 + 4, chunk[i]);
@@ -216,9 +241,10 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
             self.ec.write(2, flags);
             self.ec.write(3, chunk.len() as u8);
             self.ec.command(Cmd::Spi)?;
-            assert_eq!(self.ec.read(3), chunk.len() as u8);
+            if self.ec.read(3) != chunk.len() as u8 {
+                return Err(Error::Verify);
+            }
         }
-
         Ok(data.len())
     }
 }

@@ -3,6 +3,7 @@ use ectool::{
     Error,
     Firmware,
     SpiRom,
+    SpiTarget,
     Timeout,
 };
 use std::{
@@ -77,7 +78,7 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<()
     let rom_size = 128 * 1024;
     let sector_size = 1024;
 
-    let mut spi_bus = ec.spi(true)?;
+    let mut spi_bus = ec.spi(SpiTarget::Main, true)?;
     let mut spi = SpiRom::new(
         &mut spi_bus,
         StdTimeout::new(Duration::new(1, 0))

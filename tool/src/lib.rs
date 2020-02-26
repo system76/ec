@@ -15,7 +15,7 @@ mod legacy;
 pub use self::pmc::Pmc;
 mod pmc;
 
-pub use self::spi::{Spi, SpiRom};
+pub use self::spi::{Spi, SpiRom, SpiTarget};
 mod spi;
 
 pub use self::super_io::SuperIo;

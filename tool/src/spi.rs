@@ -9,6 +9,10 @@ pub trait Spi {
     unsafe fn write(&mut self, data: &[u8]) -> Result<usize, Error>;
 }
 
+pub enum SpiTarget {
+    Main,
+    Backup,
+}
 
 pub struct SpiRom<'a, S: Spi, T: Timeout> {
     spi: &'a mut S,

@@ -34,6 +34,8 @@ enum CommandSpiFlag {
     CMD_SPI_FLAG_DISABLE = (1 << 1),
     // Run firmware from scratch RAM if necessary
     CMD_SPI_FLAG_SCRATCH = (1 << 2),
+    // Write to backup ROM instead
+    CMD_SPI_FLAG_BACKUP = (1 << 3),
 };
 
 #endif // _COMMON_COMMAND_H

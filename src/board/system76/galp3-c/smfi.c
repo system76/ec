@@ -82,8 +82,12 @@ static enum Result cmd_spi(void) {
 #ifdef __SCRATCH__
     uint8_t len = smfi_cmd[3];
 
-    // Enable chip (internal)
-    ECINDAR3 = 0x7F;
+    // Enable chip
+    if (flags & CMD_SPI_FLAG_BACKUP) {
+        ECINDAR3 = 0xFF;
+    } else {
+        ECINDAR3 = 0x7F;
+    }
     ECINDAR2 = 0xFF;
     ECINDAR1 = 0xFD;
     ECINDAR0 = 0x00;
