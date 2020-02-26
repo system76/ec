@@ -122,14 +122,12 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
             return Err(Error::Parameter);
         }
 
-        //TODO: Support programming with any length
-        if (data.len() % 2) != 0 {
-            return Err(Error::Parameter);
-        }
-
         self.write_enable()?;
 
-        for (i, word) in data.chunks_exact(2).enumerate() {
+        for (i, word) in data.chunks(2).enumerate() {
+            let low = *word.get(0).unwrap_or(&0xFF);
+            let high = *word.get(1).unwrap_or(&0xFF);
+
             self.spi.reset()?;
             if i == 0 {
                 self.spi.write(&[
@@ -137,14 +135,14 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
                     (address >> 16) as u8,
                     (address >> 8) as u8,
                     address as u8,
-                    word[0],
-                    word[1]
+                    low,
+                    high
                 ])?;
             } else {
                 self.spi.write(&[
                     0xAD,
-                    word[0],
-                    word[1]
+                    low,
+                    high
                 ])?;
             }
 

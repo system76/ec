@@ -80,7 +80,7 @@ static enum Result cmd_spi(void) {
     uint8_t flags = smfi_cmd[2];
 
 #ifdef __SCRATCH__
-    int len = (int)smfi_cmd[3];
+    uint8_t len = smfi_cmd[3];
 
     // Enable chip (internal)
     ECINDAR3 = 0x7F;
@@ -89,7 +89,7 @@ static enum Result cmd_spi(void) {
     ECINDAR0 = 0x00;
 
     // Read or write len bytes
-    int i;
+    uint8_t i;
     for (i = 0; (i < len) && ((i + 4) < ARRAY_SIZE(smfi_cmd)); i++) {
         if (flags & CMD_SPI_FLAG_READ) {
             smfi_cmd[i + 4] = ECINDDR;
@@ -99,7 +99,7 @@ static enum Result cmd_spi(void) {
     }
 
     // Set actually read/written count
-    smfi_cmd[3] = (uint8_t)i;
+    smfi_cmd[3] = i;
 
     if (flags & CMD_SPI_FLAG_DISABLE) {
         // Disable chip
