@@ -2,7 +2,6 @@
 #include <board/acpi.h>
 #include <board/gpio.h>
 #include <board/pmc.h>
-#include <board/scratch.h>
 #include <common/debug.h>
 
 void pmc_init(void) {
@@ -101,12 +100,6 @@ void pmc_event(struct Pmc * pmc) {
                 state_data = pmc_sci_queue;
                 // Clear SCI queue
                 pmc_sci_queue = 0;
-                break;
-
-            case 0xEC:
-                TRACE("  scratch rom\n");
-                pmc_write(pmc, 0x76);
-                scratch_trampoline();
                 break;
             }
         } else {

@@ -2,6 +2,7 @@ use ectool::{
     Ec,
     Error,
     Firmware,
+    SpiRom,
     Timeout,
 };
 use std::{
@@ -53,7 +54,6 @@ unsafe fn console() -> Result<(), Error> {
     iopl();
 
     let mut ec = Ec::new(
-        true,
         StdTimeout::new(Duration::new(1, 0)),
     )?;
 
@@ -73,6 +73,98 @@ unsafe fn console() -> Result<(), Error> {
     }
 }
 
+unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<(), Error> {
+    let rom_size = 128 * 1024;
+    let sector_size = 1024;
+
+    let mut spi_bus = ec.spi(true)?;
+    let mut spi = SpiRom::new(
+        &mut spi_bus,
+        StdTimeout::new(Duration::new(1, 0))
+    );
+
+    // Read entire ROM
+    let mut rom = vec![0; rom_size];
+    eprintln!("SPI read");
+    spi.read_at(0, &mut rom)?;
+
+    eprintln!("Saving ROM to backup.rom");
+    fs::write("backup.rom", &rom).map_err(|_| Error::Verify)?;
+
+    let mut matches = true;
+    for i in 0..rom.len() {
+        if &rom[i] != firmware.data.get(i).unwrap_or(&0xFF) {
+            matches = false;
+            break;
+        }
+    }
+
+    if matches {
+        eprintln!("ROM matches specified firmware");
+        return Ok(());
+    }
+
+    {
+        // Chip erase
+        // eprintln!("SPI chip erase");
+        // spi.erase_chip()?;
+
+        // Sector erase
+        let mut address = 0;
+        while address < rom_size {
+            let mut erased = true;
+            for &b in &rom[address..address + sector_size] {
+                if b != 0xFF {
+                    erased =false;
+                    break;
+                }
+            }
+
+            if erased {
+                eprintln!("SPI sector already erased {:06X}", address);
+                address += sector_size;
+            } else {
+                eprintln!("SPI sector erase {:06X}", address);
+                address += spi.erase_sector(address as u32)?;
+            }
+        }
+
+        // Read entire ROM
+        eprintln!("SPI read");
+        spi.read_at(0, &mut rom)?;
+    }
+
+    // Verify chip erase
+    for i in 0..rom.len() {
+        if rom[i] != 0xFF {
+            eprintln!("Failed to erase: {:X} is {:X} instead of {:X}", i, rom[i], 0xFF);
+            return Err(Error::Verify);
+        }
+    }
+
+    // Program
+    {
+        eprintln!("SPI AAI word program");
+        spi.write_at(0, &firmware.data)?;
+
+        // Read entire ROM
+        eprintln!("SPI read");
+        spi.read_at(0, &mut rom)?;
+    }
+
+    // Verify program
+    for i in 0..rom.len() {
+        if &rom[i] != firmware.data.get(i).unwrap_or(&0xFF) {
+            eprintln!("Failed to program: {:X} is {:X} instead of {:X}", i, rom[i], firmware.data[i]);
+            return Err(Error::Verify);
+        }
+    }
+
+    eprintln!("Successfully programmed SPI ROM");
+
+    Ok(())
+}
+
 unsafe fn flash(path: &str) -> Result<(), Error> {
     //TODO: remove unwraps
     let firmware_data = fs::read(path).unwrap();
@@ -83,7 +175,6 @@ unsafe fn flash(path: &str) -> Result<(), Error> {
     iopl();
 
     let mut ec = Ec::new(
-        true,
         StdTimeout::new(Duration::new(1, 0)),
     )?;
 
@@ -107,14 +198,34 @@ unsafe fn flash(path: &str) -> Result<(), Error> {
         println!("ec version: {:?}", str::from_utf8(ec_version));
     }
 
-    Ok(())
+    // Wait for any key releases
+    eprintln!("Waiting 5 seconds for all keys to be released");
+    thread::sleep(Duration::new(5, 0));
+
+    eprintln!("Sync");
+    let _ = process::Command::new("sync").status();
+
+    let res = flash_inner(&mut ec, &firmware);
+    eprintln!("Result: {:X?}", res);
+
+    eprintln!("Sync");
+    let _ = process::Command::new("sync").status();
+
+    eprintln!("System will shut off in 5 seconds");
+    thread::sleep(Duration::new(5, 0));
+
+    eprintln!("Sync");
+    let _ = process::Command::new("sync").status();
+
+    ec.reset()?;
+
+    res
 }
 
 unsafe fn info() -> Result<(), Error> {
     iopl();
 
     let mut ec = Ec::new(
-        true,
         StdTimeout::new(Duration::new(1, 0)),
     )?;
 

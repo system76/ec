@@ -2,6 +2,7 @@ use hwio::{Io, Pio};
 
 use crate::{
     Error,
+    Spi,
     SuperIo,
     Timeout,
     timeout
@@ -9,12 +10,19 @@ use crate::{
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
-pub enum EcCmd {
+pub enum Cmd {
     None = 0,
     Probe = 1,
     Board = 2,
     Version = 3,
+    Debug = 4,
+    Spi = 5,
+    Reset = 6,
 }
+
+pub const CMD_SPI_FLAG_READ: u8 = (1 << 0);
+pub const CMD_SPI_FLAG_DISABLE: u8 = (1 << 1);
+pub const CMD_SPI_FLAG_SCRATCH: u8 = (1 << 2);
 
 pub struct Ec<T: Timeout> {
     cmd: u16,
@@ -24,8 +32,8 @@ pub struct Ec<T: Timeout> {
 
 impl<T: Timeout> Ec<T> {
     /// Probes for a compatible EC
-    pub unsafe fn new(primary: bool, timeout: T) -> Result<Self, Error> {
-        let mut sio = SuperIo::new(if primary { 0x2E } else { 0x4E });
+    pub unsafe fn new(timeout: T) -> Result<Self, Error> {
+        let mut sio = SuperIo::new(0x2E);
 
         let id =
             (sio.read(0x20) as u16) << 8 |
@@ -37,8 +45,8 @@ impl<T: Timeout> Ec<T> {
         }
 
         let mut ec = Ec {
-            cmd: if primary { 0xC00 } else { 0xE00 },
-            dbg: if primary { 0xD00 } else { 0xF00 },
+            cmd: 0xE00,
+            dbg: 0xF00,
             timeout,
         };
 
@@ -68,44 +76,39 @@ impl<T: Timeout> Ec<T> {
         ).read()
     }
 
-    /// Returns true if a command can be sent
-    pub unsafe fn can_command(&mut self) -> bool {
-        self.read(0) == EcCmd::None as u8
-    }
-
-    /// Start an EC command
-    pub unsafe fn command_start(&mut self, cmd: EcCmd) -> Result<(), Error> {
-        if self.can_command() {
-            self.write(0, cmd as u8);
+    /// Returns Ok if a command can be sent
+    unsafe fn command_check(&mut self) -> Result<(), Error> {
+        if self.read(0) == Cmd::None as u8 {
             Ok(())
         } else {
             Err(Error::WouldBlock)
         }
     }
 
-    /// Finish an EC command
-    pub unsafe fn command_finish(&mut self) -> Result<(), Error> {
-        if self.can_command() {
-            match self.read(1) {
-                0 => Ok(()),
-                err => Err(Error::Protocol(err)),
-            }
-        } else {
-            Err(Error::WouldBlock)
-        }
+    /// Wait until a command can be sent
+    unsafe fn command_wait(&mut self) -> Result<(), Error> {
+        self.timeout.reset();
+        timeout!(self.timeout, self.command_check())
     }
 
-    /// Run an EC command (start and finish)
-    pub unsafe fn command(&mut self, cmd: EcCmd) -> Result<(), Error> {
-        self.timeout.reset();
-
-        timeout!(self.timeout, self.command_start(cmd))?;
-        timeout!(self.timeout, self.command_finish())
+    /// Run an EC command
+    pub unsafe fn command(&mut self, cmd: Cmd) -> Result<(), Error> {
+        // All previous commands should be finished
+        self.command_check()?;
+        // Write command byte
+        self.write(0, cmd as u8);
+        // Wait for command to finish
+        self.command_wait()?;
+        // Read response byte and test for error
+        match self.read(1) {
+            0 => Ok(()),
+            err => Err(Error::Protocol(err)),
+        }
     }
 
     /// Probe for EC
     pub unsafe fn probe(&mut self) -> Result<u8, Error> {
-        self.command(EcCmd::Probe)?;
+        self.command(Cmd::Probe)?;
         let signature = (
             self.read(2),
             self.read(3)
@@ -120,7 +123,7 @@ impl<T: Timeout> Ec<T> {
 
     /// Read board from EC
     pub unsafe fn board(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        self.command(EcCmd::Board)?;
+        self.command(Cmd::Board)?;
         let mut i = 0;
         while i < data.len() && (i + 2) < 256 {
             data[i] = self.read((i + 2) as u8);
@@ -134,7 +137,7 @@ impl<T: Timeout> Ec<T> {
 
     /// Read version from EC
     pub unsafe fn version(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        self.command(EcCmd::Version)?;
+        self.command(Cmd::Version)?;
         let mut i = 0;
         while i < data.len() && (i + 2) < 256 {
             data[i] = self.read((i + 2) as u8);
@@ -144,5 +147,86 @@ impl<T: Timeout> Ec<T> {
             i += 1;
         }
         Ok(i)
+    }
+
+    pub unsafe fn spi(&mut self, scratch: bool) -> Result<EcSpi<T>, Error> {
+        let mut spi = EcSpi {
+            ec: self,
+            scratch,
+        };
+        spi.reset()?;
+        Ok(spi)
+    }
+
+    pub unsafe fn reset(&mut self) -> Result<(), Error> {
+        self.command(Cmd::Reset)
+    }
+}
+
+pub struct EcSpi<'a, T: Timeout> {
+    ec: &'a mut Ec<T>,
+    scratch: bool,
+}
+
+impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
+    /// Disable SPI chip, must be done before and after a transaction
+    unsafe fn reset(&mut self) -> Result<(), Error> {
+        let flags =
+            CMD_SPI_FLAG_DISABLE |
+            if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
+
+        self.ec.write(2, flags);
+        self.ec.write(3, 0);
+        self.ec.command(Cmd::Spi)?;
+        assert_eq!(self.ec.read(3), 0);
+
+        Ok(())
+    }
+
+    /// SPI read
+    unsafe fn read(&mut self, data: &mut [u8]) -> Result<usize, Error> {
+        let flags =
+            CMD_SPI_FLAG_READ |
+            if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
+
+        for chunk in data.chunks_mut(256 - 4) {
+            self.ec.write(2, flags);
+            self.ec.write(3, chunk.len() as u8);
+            self.ec.command(Cmd::Spi)?;
+            assert_eq!(self.ec.read(3), chunk.len() as u8);
+
+            for i in 0..chunk.len() {
+                chunk[i] = self.ec.read(i as u8 + 4);
+            }
+        }
+
+        Ok(data.len())
+    }
+
+    /// SPI write
+    unsafe fn write(&mut self, data: &[u8]) -> Result<usize, Error> {
+        let flags =
+            if self.scratch { CMD_SPI_FLAG_SCRATCH } else { 0 };
+
+        for chunk in data.chunks(256 - 4) {
+            for i in 0..chunk.len() {
+                self.ec.write(i as u8 + 4, chunk[i]);
+            }
+
+            self.ec.write(2, flags);
+            self.ec.write(3, chunk.len() as u8);
+            self.ec.command(Cmd::Spi)?;
+            assert_eq!(self.ec.read(3), chunk.len() as u8);
+        }
+
+        Ok(data.len())
+    }
+}
+
+impl<'a, T: Timeout> Drop for EcSpi<'a, T> {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = self.reset();
+        }
     }
 }

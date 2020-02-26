@@ -1,3 +1,7 @@
+SCRATCH_SRC+=\
+	$(COMMON_DIR)/version.c \
+	$(BOARD_DIR)/smfi.c
+
 SCRATCH_BUILD=$(BUILD)/scratch
 SCRATCH_OBJ=$(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC))
 SCRATCH_CC=\

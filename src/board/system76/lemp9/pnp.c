@@ -28,10 +28,6 @@ void pnp_enable() {
     // Enable PMC1
     pnp_write(0x07, 0x11);
     pnp_write(0x30, 0x01);
-    //
-    // Enable PMC3
-    pnp_write(0x07, 0x17);
-    pnp_write(0x30, 0x01);
 
     // Enable KBC keyboard
     pnp_write(0x07, 0x06);
