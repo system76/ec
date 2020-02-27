@@ -74,11 +74,11 @@ unsafe fn console() -> Result<(), Error> {
     }
 }
 
-unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<(), Error> {
+unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
     let rom_size = 128 * 1024;
     let sector_size = 1024;
 
-    let mut spi_bus = ec.spi(SpiTarget::Main, true)?;
+    let mut spi_bus = ec.spi(target, scratch)?;
     let mut spi = SpiRom::new(
         &mut spi_bus,
         StdTimeout::new(Duration::new(1, 0))
@@ -167,6 +167,9 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware) -> Result<()
 }
 
 unsafe fn flash(path: &str) -> Result<(), Error> {
+    let target = SpiTarget::Backup;
+    let scratch = true;
+
     //TODO: remove unwraps
     let firmware_data = fs::read(path).unwrap();
     let firmware = Firmware::new(&firmware_data).unwrap();
@@ -199,26 +202,30 @@ unsafe fn flash(path: &str) -> Result<(), Error> {
         println!("ec version: {:?}", str::from_utf8(ec_version));
     }
 
-    // Wait for any key releases
-    eprintln!("Waiting 5 seconds for all keys to be released");
-    thread::sleep(Duration::new(5, 0));
+    if scratch {
+        // Wait for any key releases
+        eprintln!("Waiting 5 seconds for all keys to be released");
+        thread::sleep(Duration::new(5, 0));
+    }
 
     eprintln!("Sync");
     let _ = process::Command::new("sync").status();
 
-    let res = flash_inner(&mut ec, &firmware);
+    let res = flash_inner(&mut ec, &firmware, target, scratch);
     eprintln!("Result: {:X?}", res);
 
     eprintln!("Sync");
     let _ = process::Command::new("sync").status();
 
-    eprintln!("System will shut off in 5 seconds");
-    thread::sleep(Duration::new(5, 0));
+    if scratch {
+        eprintln!("System will shut off in 5 seconds");
+        thread::sleep(Duration::new(5, 0));
 
-    eprintln!("Sync");
-    let _ = process::Command::new("sync").status();
+        eprintln!("Sync");
+        let _ = process::Command::new("sync").status();
 
-    ec.reset()?;
+        ec.reset()?;
+    }
 
     res
 }
