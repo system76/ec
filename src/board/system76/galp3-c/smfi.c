@@ -22,7 +22,10 @@ volatile uint8_t __xdata __at(0x105C) HRAMW1BA;
 volatile uint8_t __xdata __at(0x105D) HRAMW0AAS;
 // Host RAM window 1 access allow size
 volatile uint8_t __xdata __at(0x105E) HRAMW1AAS;
+// Flash control register 3
+volatile uint8_t __xdata __at(0x1063) FLHCTRL3;
 
+// EC indirect flash access
 volatile uint8_t __xdata __at(0x103B) ECINDAR0;
 volatile uint8_t __xdata __at(0x103C) ECINDAR1;
 volatile uint8_t __xdata __at(0x103D) ECINDAR2;
@@ -35,51 +38,8 @@ volatile uint8_t __xdata __at(0x1F07) EWDKEYR;
 static volatile uint8_t __xdata __at(0xE00) smfi_cmd[256];
 static volatile uint8_t __xdata __at(0xF00) smfi_dbg[256];
 
-void smfi_init(void) {
-    int i;
-
-    // Clear command region
-    for (i = 1; i < ARRAY_SIZE(smfi_cmd); i++) {
-        smfi_cmd[i] = 0x00;
-    }
-    // Clear host command last
-    smfi_cmd[0] = 0x00;
-
-    // Clear debug region
-    for (i = 1; i < ARRAY_SIZE(smfi_dbg); i++) {
-        smfi_dbg[i] = 0x00;
-    }
-    // Clear tail last
-    smfi_dbg[0] = 0x00;
-
-
-    // H2RAM window 0 address 0xE00 - 0xEFF, read/write
-    HRAMW0BA = 0xE0;
-    HRAMW0AAS = 0x04;
-
-    // H2RAM window 1 address 0xF00 - 0xFFF, read/write
-    HRAMW1BA = 0xF0;
-    HRAMW1AAS = 0x04;
-
-    // Enable H2RAM window 0 and 1 using LPC I/O
-    HRAMWC |= 0x13;
-}
-
-static enum Result cmd_debug(void) {
-    int i;
-    for (i = 2; i < ARRAY_SIZE(smfi_cmd); i++) {
-        uint8_t b = smfi_cmd[i];
-        if (b == 0) break;
-        putchar(b);
-    }
-
-    return RES_OK;
-}
-
-static enum Result cmd_spi(void) {
+static enum Result cmd_spi_scratch(void) __critical {
     uint8_t flags = smfi_cmd[2];
-
-#ifdef __SCRATCH__
     uint8_t len = smfi_cmd[3];
 
     // Enable chip
@@ -112,12 +72,61 @@ static enum Result cmd_spi(void) {
     }
 
     return RES_OK;
+}
+
+void smfi_init(void) {
+    int i;
+
+    // Clear command region
+    for (i = 1; i < ARRAY_SIZE(smfi_cmd); i++) {
+        smfi_cmd[i] = 0x00;
+    }
+    // Clear host command last
+    smfi_cmd[0] = 0x00;
+
+    // Clear debug region
+    for (i = 1; i < ARRAY_SIZE(smfi_dbg); i++) {
+        smfi_dbg[i] = 0x00;
+    }
+    // Clear tail last
+    smfi_dbg[0] = 0x00;
+
+
+    // H2RAM window 0 address 0xE00 - 0xEFF, read/write
+    HRAMW0BA = 0xE0;
+    HRAMW0AAS = 0x04;
+
+    // H2RAM window 1 address 0xF00 - 0xFFF, read/write
+    HRAMW1BA = 0xF0;
+    HRAMW1AAS = 0x04;
+
+    // Enable H2RAM window 0 and 1 using LPC I/O
+    HRAMWC |= 0x13;
+
+    // Enable backup ROM access
+    FLHCTRL3 |= (1 << 3);
+}
+
+static enum Result cmd_debug(void) {
+    int i;
+    for (i = 2; i < ARRAY_SIZE(smfi_cmd); i++) {
+        uint8_t b = smfi_cmd[i];
+        if (b == 0) break;
+        putchar(b);
+    }
+
+    return RES_OK;
+}
+
+static enum Result cmd_spi(void) {
+#ifdef __SCRATCH__
+    return cmd_spi_scratch();
 #else
-    if (flags & CMD_SPI_FLAG_SCRATCH) {
+    if (smfi_cmd[2] & CMD_SPI_FLAG_SCRATCH) {
         scratch_trampoline();
     }
 
-    // Cannot use SPI bus while running EC from SPI, or trampoline failed
+    // Cannot use follow mode unless running from scratch rom
     return RES_ERR;
 #endif
 }

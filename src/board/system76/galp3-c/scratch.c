@@ -8,9 +8,10 @@ uint8_t __code __at(SCRATCH_OFFSET) scratch_rom[] = {
     #include <scratch.h>
 };
 
-volatile uint8_t __xdata __at(0x1040) SCAR0L;
-volatile uint8_t __xdata __at(0x1041) SCAR0M;
-volatile uint8_t __xdata __at(0x1042) SCAR0H;
+// SCAR1 is in xram at 0x800-0xC00
+volatile uint8_t __xdata __at(0x1043) SCAR1L;
+volatile uint8_t __xdata __at(0x1044) SCAR1M;
+volatile uint8_t __xdata __at(0x1045) SCAR1H;
 
 // Enter or exit scratch ROM
 void scratch_trampoline(void) {
@@ -18,10 +19,10 @@ void scratch_trampoline(void) {
     EA = 0;
 
     // Use DMA mapping to copy flash data
-    SCAR0H = 0x80;
-    SCAR0L = (uint8_t)(SCRATCH_OFFSET);
-    SCAR0M = (uint8_t)(SCRATCH_OFFSET >> 8);
-    SCAR0H = 0;
+    SCAR1H = 0x80;
+    SCAR1L = (uint8_t)(SCRATCH_OFFSET);
+    SCAR1M = (uint8_t)(SCRATCH_OFFSET >> 8);
+    SCAR1H = 0;
 
     // Jump to scratch reset function
     __asm__("ljmp " xstr(SCRATCH_OFFSET));
