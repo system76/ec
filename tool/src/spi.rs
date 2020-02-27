@@ -81,7 +81,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         Ok(())
     }
 
-    pub unsafe fn erase_sector(&mut self, address: u32) -> Result<usize, Error> {
+    pub unsafe fn erase_sector(&mut self, address: u32) -> Result<(), Error> {
         if (address & 0xFF00_0000) > 0 {
             return Err(Error::Parameter);
         }
@@ -90,7 +90,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
 
         self.spi.reset()?;
         self.spi.write(&[
-            0xD7,
+            0x20,
             (address >> 16) as u8,
             (address >> 8) as u8,
             address as u8,
@@ -101,8 +101,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
 
         self.write_disable()?;
 
-        //TODO: dynamically figure out this value
-        Ok(1024)
+        Ok(())
     }
 
     pub unsafe fn read_at(&mut self, address: u32, data: &mut [u8]) -> Result<usize, Error> {

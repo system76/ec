@@ -2,6 +2,7 @@ use ectool::{
     Ec,
     Error,
     Firmware,
+    Spi,
     SpiRom,
     SpiTarget,
     Timeout,
@@ -74,9 +75,30 @@ unsafe fn console() -> Result<(), Error> {
     }
 }
 
+unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], sector_size: usize) -> Result<(), Error> {
+    let mut address = 0;
+    while address < rom.len() {
+        eprint!("\rSPI Read {}K", address / 1024);
+        let next_address = address + sector_size;
+        let count = spi.read_at(address as u32, &mut rom[address..next_address])?;
+        if count != sector_size {
+            eprintln!("\ncount {} did not match sector size {}", count, sector_size);
+            return Err(Error::Verify);
+        }
+        address = next_address;
+    }
+    eprintln!("\rSPI Read {}K", address / 1024);
+    Ok(())
+}
+
 unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
     let rom_size = 128 * 1024;
-    let sector_size = 1024;
+    let sector_size = 4096;
+
+    let mut new_rom = firmware.data.to_vec();
+    while new_rom.len() < rom_size {
+        new_rom.push(0xFF);
+    }
 
     let mut spi_bus = ec.spi(target, scratch)?;
     let mut spi = SpiRom::new(
@@ -84,10 +106,8 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiT
         StdTimeout::new(Duration::new(1, 0))
     );
 
-    // Read entire ROM
-    let mut rom = vec![0; rom_size];
-    eprintln!("SPI read");
-    spi.read_at(0, &mut rom)?;
+    let mut rom = vec![0xFF; rom_size];
+    flash_read(&mut spi, &mut rom, sector_size)?;
 
     eprintln!("Saving ROM to backup.rom");
     fs::write("backup.rom", &rom).map_err(|_| Error::Verify)?;
@@ -105,59 +125,68 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiT
         return Ok(());
     }
 
+    // Erase entire chip, sector by sector
     {
-        // Chip erase
-        // eprintln!("SPI chip erase");
-        // spi.erase_chip()?;
-
-        // Sector erase
         let mut address = 0;
         while address < rom_size {
+            eprint!("\rSPI Erase {}K", address / 1024);
+            let next_address = address + sector_size;
             let mut erased = true;
-            for &b in &rom[address..address + sector_size] {
+            for &b in &rom[address..next_address] {
                 if b != 0xFF {
                     erased =false;
                     break;
                 }
             }
+            if ! erased {
+                spi.erase_sector(address as u32)?;
+            }
+            address = next_address;
+        }
+        eprintln!("\rSPI Erase {}K", address / 1024);
 
-            if erased {
-                eprintln!("SPI sector already erased {:06X}", address);
-                address += sector_size;
-            } else {
-                eprintln!("SPI sector erase {:06X}", address);
-                address += spi.erase_sector(address as u32)?;
+        // Verify chip erase
+        flash_read(&mut spi, &mut rom, sector_size)?;
+        for i in 0..rom.len() {
+            if rom[i] != 0xFF {
+                eprintln!("Failed to erase: {:X} is {:X} instead of {:X}", i, rom[i], 0xFF);
+                return Err(Error::Verify);
             }
         }
-
-        // Read entire ROM
-        eprintln!("SPI read");
-        spi.read_at(0, &mut rom)?;
     }
 
-    // Verify chip erase
-    for i in 0..rom.len() {
-        if rom[i] != 0xFF {
-            eprintln!("Failed to erase: {:X} is {:X} instead of {:X}", i, rom[i], 0xFF);
-            return Err(Error::Verify);
-        }
-    }
-
-    // Program
+    // Write entire chip, sector by sector
+    //TODO: write signature last
     {
-        eprintln!("SPI AAI word program");
-        spi.write_at(0, &firmware.data)?;
+        let mut address = 0;
+        while address < rom_size {
+            eprint!("\rSPI Write {}K", address / 1024);
+            let next_address = address + sector_size;
+            let mut erased = true;
+            for &b in &new_rom[address..next_address] {
+                if b != 0xFF {
+                    erased =false;
+                    break;
+                }
+            }
+            if ! erased {
+                let count = spi.write_at(address as u32, &new_rom[address..next_address])?;
+                if count != sector_size {
+                    eprintln!("\nWrite count {} did not match sector size {}", count, sector_size);
+                    return Err(Error::Verify);
+                }
+            }
+            address = next_address;
+        }
+        eprintln!("\rSPI Write {}K", address / 1024);
 
-        // Read entire ROM
-        eprintln!("SPI read");
-        spi.read_at(0, &mut rom)?;
-    }
-
-    // Verify program
-    for i in 0..rom.len() {
-        if &rom[i] != firmware.data.get(i).unwrap_or(&0xFF) {
-            eprintln!("Failed to program: {:X} is {:X} instead of {:X}", i, rom[i], firmware.data[i]);
-            return Err(Error::Verify);
+        // Verify chip write
+        flash_read(&mut spi, &mut rom, sector_size)?;
+        for i in 0..rom.len() {
+            if rom[i] != new_rom[i] {
+                eprintln!("Failed to program: {:X} is {:X} instead of {:X}", i, rom[i], new_rom[i]);
+                return Err(Error::Verify);
+            }
         }
     }
 
