@@ -90,7 +90,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
 
         self.spi.reset()?;
         self.spi.write(&[
-            0x20,
+            0xD7,
             (address >> 16) as u8,
             (address >> 8) as u8,
             address as u8,

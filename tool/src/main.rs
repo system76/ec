@@ -93,7 +93,7 @@ unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], se
 
 unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
     let rom_size = 128 * 1024;
-    let sector_size = 4096;
+    let sector_size = 1024;
 
     let mut new_rom = firmware.data.to_vec();
     while new_rom.len() < rom_size {
