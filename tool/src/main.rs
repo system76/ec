@@ -112,70 +112,43 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiT
     eprintln!("Saving ROM to backup.rom");
     fs::write("backup.rom", &rom).map_err(|_| Error::Verify)?;
 
-    let mut matches = true;
-    for i in 0..rom.len() {
-        if &rom[i] != firmware.data.get(i).unwrap_or(&0xFF) {
-            matches = false;
-            break;
-        }
-    }
-
-    if matches {
-        eprintln!("ROM matches specified firmware");
-        return Ok(());
-    }
-
-    // Erase entire chip, sector by sector
-    {
-        let mut address = 0;
-        while address < rom_size {
-            eprint!("\rSPI Erase {}K", address / 1024);
-            let next_address = address + sector_size;
-            let mut erased = true;
-            for &b in &rom[address..next_address] {
-                if b != 0xFF {
-                    erased =false;
-                    break;
-                }
-            }
-            if ! erased {
-                spi.erase_sector(address as u32)?;
-            }
-            address = next_address;
-        }
-        eprintln!("\rSPI Erase {}K", address / 1024);
-
-        // Verify chip erase
-        flash_read(&mut spi, &mut rom, sector_size)?;
-        for i in 0..rom.len() {
-            if rom[i] != 0xFF {
-                eprintln!("Failed to erase: {:X} is {:X} instead of {:X}", i, rom[i], 0xFF);
-                return Err(Error::Verify);
-            }
-        }
-    }
-
-    // Write entire chip, sector by sector
+    // Program chip, sector by sector
     //TODO: write signature last
     {
         let mut address = 0;
         while address < rom_size {
             eprint!("\rSPI Write {}K", address / 1024);
+
             let next_address = address + sector_size;
+
+            let mut matches = true;
             let mut erased = true;
-            for &b in &new_rom[address..next_address] {
-                if b != 0xFF {
-                    erased =false;
-                    break;
+            let mut new_erased = true;
+            for i in address..next_address {
+                if rom[i] != new_rom[i] {
+                    matches = false;
+                }
+                if rom[i] != 0xFF {
+                    erased = false;
+                }
+                if new_rom[i] != 0xFF {
+                    new_erased = false;
                 }
             }
-            if ! erased {
-                let count = spi.write_at(address as u32, &new_rom[address..next_address])?;
-                if count != sector_size {
-                    eprintln!("\nWrite count {} did not match sector size {}", count, sector_size);
-                    return Err(Error::Verify);
+
+            if ! matches {
+                if ! erased {
+                    spi.erase_sector(address as u32)?;
+                }
+                if ! new_erased {
+                    let count = spi.write_at(address as u32, &new_rom[address..next_address])?;
+                    if count != sector_size {
+                        eprintln!("\nWrite count {} did not match sector size {}", count, sector_size);
+                        return Err(Error::Verify);
+                    }
                 }
             }
+
             address = next_address;
         }
         eprintln!("\rSPI Write {}K", address / 1024);
