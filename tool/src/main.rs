@@ -167,7 +167,7 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiT
 }
 
 unsafe fn flash(path: &str) -> Result<(), Error> {
-    let target = SpiTarget::Backup;
+    let target = SpiTarget::Main;
     let scratch = true;
 
     //TODO: remove unwraps
