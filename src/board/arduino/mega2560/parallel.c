@@ -112,41 +112,75 @@ void parallel_hiz(struct Parallel * port) {
     #undef PIN
 }
 
+// Place all data lines in high or low impendance state
+void parallel_data_dir(struct Parallel * port, bool dir) {
+    #define DATA_BIT(B) gpio_set_dir(port->d ## B, dir);
+    DATA_BITS
+    #undef DATA_BIT
+}
+#define parallel_data_forward(P) parallel_data_dir(P, true)
+#define parallel_data_reverse(P) parallel_data_dir(P, false)
+
+void parallel_data_set_high(struct Parallel * port, uint8_t byte) {
+    // By convention all lines are high, so only set the ones needed
+    #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, true);
+    DATA_BITS
+    #undef DATA_BIT
+}
+
 // Set port to initial state required before being able to perform cycles
-void parallel_reset(struct Parallel * port) {
+void parallel_reset(struct Parallel * port, bool host) {
     parallel_hiz(port);
 
-    // Set reset line low
-    gpio_set_dir(port->reset_n, true);
+    // nRESET: output on host, input on peripherals
+    gpio_set_dir(port->reset_n, host);
 
-    // Wait 1 microsecond
     _delay_us(1);
 
-    // Make sure strobes are high outputs
+    // nDATASTB: output on host, input on peripherals
     gpio_set(port->data_n, true);
+    gpio_set_dir(port->data_n, host);
+
+    // nADDRSTB: output on host, input on peripherals
     gpio_set(port->addr_n, true);
-    gpio_set_dir(port->data_n, true);
-    gpio_set_dir(port->addr_n, true);
+    gpio_set_dir(port->addr_n, host);
 
-    // Set write line high output
+    // nWRITE: output on host, input on peripherals
     gpio_set(port->write_n, true);
-    gpio_set_dir(port->write_n, true);
+    gpio_set_dir(port->write_n, host);
 
-    // Pull up wait line
-    gpio_set(port->wait_n, true);
+    // nWAIT: input on host, output on peripherals
+    gpio_set(port->wait_n, host);
+    gpio_set_dir(port->wait_n, !host);
 
-    // Pull up data lines
-    #define DATA_BIT(B) gpio_set(port->d ## B, true);
+    // Pull up data lines on host, leave floating on peripherals
+    #define DATA_BIT(B) gpio_set(port->d ## B, host);
     DATA_BITS
     #undef DATA_BIT
 
     //TODO: something with straps
 
-    // Wait 1 microsecond
     _delay_us(1);
 
-    // Set reset line high, ending reset
-    gpio_set(port->reset_n, true);
+    if (host) {
+        // Set reset line high, ending reset
+        gpio_set(port->reset_n, true);
+    }
+}
+
+uint8_t parallel_read_data(struct Parallel * port) {
+    uint8_t byte = 0;
+    #define DATA_BIT(B) if (gpio_get(port->d ## B)) byte |= (1 << B);
+    DATA_BITS
+    #undef DATA_BIT
+    return byte;
+}
+
+void parallel_write_data(struct Parallel * port, uint8_t byte) {
+    // By convention all lines are high, so only set the ones needed
+    #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, false);
+    DATA_BITS
+    #undef DATA_BIT
 }
 
 //TODO: timeout
@@ -155,24 +189,20 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
         // Set write line low
         gpio_set(port->write_n, false);
 
-        // Set data direction out
-        #define DATA_BIT(B) gpio_set_dir(port->d ## B, true);
-        DATA_BITS
-        #undef DATA_BIT
+        // Set data lines as outputs to write to peripheral
+        parallel_data_forward(port);
     }
 
     int i;
-    uint8_t byte;
+    uint8_t byte = 0;
     for (i = 0; i < length; i++) {
-        // Wait for wait line to be low
+        // Wait for peripheral to indicate it's ready for next cycle
         while (gpio_get(port->wait_n)) {}
 
         if (!read) {
-            // Set data low where necessary
             byte = data[i];
-            #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, false);
-            DATA_BITS
-            #undef DATA_BIT
+            parallel_write_data(port, byte);
+            _delay_us(1);
         }
 
         if (addr) {
@@ -182,16 +212,13 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             // Set data strobe low
             gpio_set(port->data_n, false);
         }
+        _delay_us(1);
 
-        // Wait for wait line to be high
+        // Wait for peripheral to indicate it's ready
         while (!gpio_get(port->wait_n)) {}
 
         if (read) {
-            byte = 0;
-            #define DATA_BIT(B) if (gpio_get(port->d ## B)) byte |= (1 << B);
-            DATA_BITS
-            #undef DATA_BIT
-            data[i] = byte;
+            data[i] = parallel_read_data(port);
         }
 
         if (addr) {
@@ -201,20 +228,18 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             // Set data strobe high
             gpio_set(port->data_n, true);
         }
+        // XXX: Arduino peripheral not fast enough to get the data?
+        _delay_us(5);
 
         if (!read) {
-            // Set data high where necessary
-            #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, true);
-            DATA_BITS
-            #undef DATA_BIT
+            // Reset data lines to high
+            parallel_data_set_high(port, byte);
         }
     }
 
     if (!read) {
-        // Set data direction in
-        #define DATA_BIT(B) gpio_set_dir(port->d ## B, false);
-        DATA_BITS
-        #undef DATA_BIT
+        // Set data lines back to inputs
+        parallel_data_reverse(port);
 
         // Set write line high
         gpio_set(port->write_n, true);
@@ -227,6 +252,45 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
 #define parallel_set_address(P, D, L) parallel_transaction(P, D, L, false, true)
 #define parallel_read(P, D, L) parallel_transaction(P, D, L, true, false)
 #define parallel_write(P, D, L) parallel_transaction(P, D, L, false, false)
+
+// host write -> peripheral read
+// host read -> peripheral write
+bool parallel_peripheral_cycle(struct Parallel * port, uint8_t * data, bool * read, bool * addr) {
+    if (!gpio_get(port->reset_n)) {
+        // XXX: Give host some time to get ready
+        _delay_ms(1);
+        return false;
+    }
+
+    while (gpio_get(port->data_n) && gpio_get(port->addr_n)) {}
+
+    *read = gpio_get(port->write_n);
+    *addr = !gpio_get(port->addr_n);
+
+    if (*read) {
+        // Host is reading, send the data
+        parallel_data_forward(port);
+        parallel_write_data(port, *data);
+    }
+
+    gpio_set(port->wait_n, true);
+
+    // Wait for host to finish strobe
+    while (!gpio_get(port->addr_n) || !gpio_get(port->data_n)) {}
+
+    if (*read) {
+        // Set data lines back to inputs
+        parallel_data_reverse(port);
+    } else {
+        // Host is writing, read the data
+        *data = parallel_read_data(port);
+    }
+
+    // Tell host we're ready for next cycle
+    gpio_set(port->wait_n, false);
+
+    return true;
+}
 
 static uint8_t ADDRESS_INDAR1 = 0x05;
 static uint8_t ADDRESS_INDDR = 0x08;
@@ -343,7 +407,7 @@ int parallel_main(void) {
     int res = 0;
 
     struct Parallel * port = &PORT;
-    parallel_reset(port);
+    parallel_reset(port, true);
 
     static uint8_t data[128];
     char command;
@@ -352,6 +416,9 @@ int parallel_main(void) {
     uint8_t address;
     bool set_address = false;
     bool program_aai = false;
+
+    unsigned char console_msg[] = "Entering console mode\n";
+
     for (;;) {
         // Read command and length
         res = serial_read(data, 2);
@@ -390,6 +457,26 @@ int parallel_main(void) {
                 // Write data to serial
                 res = serial_write(data, length);
                 if (res < 0) goto err;
+
+                break;
+
+            // Debug console
+            case 'C':
+                serial_write(console_msg, sizeof(console_msg));
+
+                // Reconfigure as a peripheral
+                parallel_reset(port, false);
+
+                for (;;) {
+                    bool read = false;
+                    bool addr = false;
+                    bool ret = parallel_peripheral_cycle(port, data, &read, &addr);
+
+                    if (ret && !read && !addr) {
+                        res = serial_write(data, 1);
+                        if (res < 0) goto err;
+                    }
+                }
 
                 break;
 
