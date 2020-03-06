@@ -19,6 +19,9 @@ CFLAGS+=-DLEVEL=4
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_0
 
+# Enable debug logging over keyboard parallel port
+#CFLAGS+=-DPARPORT_DEBUG
+
 # Set scratch ROM parameters
 SCRATCH_OFFSET=1024
 SCRATCH_SIZE=1024
