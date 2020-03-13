@@ -10,75 +10,31 @@
 #include <arch/uart.h>
 
 // Mapping of 24-pin ribbon cable to parallel pins. See schematic
-#define IT8587
-#if defined(IT8587)
 #define PINS \
     /* Data (KSO0 - KSO7) - bi-directional */ \
     PIN(d0, 1) \
     PIN(d1, 2) \
     PIN(d2, 3) \
-    PIN(d3, 7) \
-    PIN(d4, 9) \
-    PIN(d5, 10) \
-    PIN(d6, 13) \
-    PIN(d7, 16) \
+    PIN(d3, 4) \
+    PIN(d4, 5) \
+    PIN(d5, 6) \
+    PIN(d6, 7) \
+    PIN(d7, 8) \
     /* Wait# (KSO9) - input */ \
     /*  low to indicate cycle may begin, high to indicate cycle may end */ \
-    PIN(wait_n, 18) \
+    PIN(wait_n, 9) \
     /* Write# (KSI0) - output */ \
     /*  low to indicate write cycle, high to indicate read cycle */ \
-    PIN(write_n, 4) \
+    PIN(write_n, 10) \
     /* DataStrobe# (KSI1) - output */ \
     /*  low indicates a data cycle */ \
-    PIN(data_n, 5) \
+    PIN(data_n, 11) \
     /* Reset# (KSI2) - output */ \
     /*  low requests device reset */ \
-    PIN(reset_n, 6) \
+    PIN(reset_n, 12) \
     /* AddressStrobe# (KSI3) - output */ \
     /*  low indicates an address cycle */ \
-    PIN(addr_n, 8) \
-    /* Strap0 (KSI4) */ \
-    /*  1K-Ohm pull-down resistor */ \
-    PIN(strap_0, 11) \
-    /* Strap1 (KSI5) */ \
-    /*  1K-Ohm pull-down resistor */ \
-    PIN(strap_1, 12)
-#elif defined(IT5570)
-#define PINS \
-    /* Data (KSO0 - KSO7) - bi-directional */ \
-    PIN(d0, 24) \
-    PIN(d1, 23) \
-    PIN(d2, 22) \
-    PIN(d3, 18) \
-    PIN(d4, 16) \
-    PIN(d5, 15) \
-    PIN(d6, 12) \
-    PIN(d7, 9) \
-    /* Wait# (KSO9) - input */ \
-    /*  low to indicate cycle may begin, high to indicate cycle may end */ \
-    PIN(wait_n, 7) \
-    /* Write# (KSI0) - output */ \
-    /*  low to indicate write cycle, high to indicate read cycle */ \
-    PIN(write_n, 21) \
-    /* DataStrobe# (KSI1) - output */ \
-    /*  low indicates a data cycle */ \
-    PIN(data_n, 20) \
-    /* Reset# (KSI2) - output */ \
-    /*  low requests device reset */ \
-    PIN(reset_n, 19) \
-    /* AddressStrobe# (KSI3) - output */ \
-    /*  low indicates an address cycle */ \
-    PIN(addr_n, 17) \
-    /* Strap0 (KSI4) */ \
-    /*  1K-Ohm pull-down resistor */ \
-    PIN(strap_0, 14) \
-    /* Strap1 (KSI5) */ \
-    /*  1K-Ohm pull-down resistor */ \
-    PIN(strap_1, 13)
-#else
-    #error "Unknown pin configuration: EC not specified"
-#endif
-
+    PIN(addr_n, 13) \
 
 #define DATA_BITS \
     DATA_BIT(0) \
@@ -90,40 +46,22 @@
     DATA_BIT(6) \
     DATA_BIT(7)
 
-#define FLIP
-#if !defined(FLIP)
 // Mapping of 24-pin ribbon cable to GPIOs
-static struct Gpio GPIOS[24] = {
-    GPIO(L, 4), GPIO(L, 5),
-    GPIO(L, 6), GPIO(L, 7),
-    GPIO(G, 0), GPIO(G, 1),
-    GPIO(G, 2), GPIO(D, 7),
-    GPIO(C, 0), GPIO(C, 1),
-    GPIO(C, 2), GPIO(C, 3),
-    GPIO(C, 4), GPIO(C, 5),
-    GPIO(C, 6), GPIO(C, 7),
-    GPIO(A, 7), GPIO(A, 6),
-    GPIO(A, 5), GPIO(A, 4),
-    GPIO(A, 3), GPIO(A, 2),
-    GPIO(A, 1), GPIO(A, 0),
+static struct Gpio GPIOS[13] = {
+    GPIO(D, 2),
+    GPIO(D, 3),
+    GPIO(D, 4),
+    GPIO(D, 5),
+    GPIO(D, 6),
+    GPIO(D, 7),
+    GPIO(B, 0),
+    GPIO(B, 1),
+    GPIO(B, 2),
+    GPIO(C, 3),
+    GPIO(C, 2),
+    GPIO(C, 1),
+    GPIO(C, 0),
 };
-#else // !defined(FLIP)
-// Mapping of 24-pin ribbon cable to GPIOs, flipped
-static struct Gpio GPIOS[24] = {
-    GPIO(L, 5), GPIO(L, 4),
-    GPIO(L, 7), GPIO(L, 6),
-    GPIO(G, 1), GPIO(G, 0),
-    GPIO(D, 7), GPIO(G, 2),
-    GPIO(C, 1), GPIO(C, 0),
-    GPIO(C, 3), GPIO(C, 2),
-    GPIO(C, 5), GPIO(C, 4),
-    GPIO(C, 7), GPIO(C, 6),
-    GPIO(A, 6), GPIO(A, 7),
-    GPIO(A, 4), GPIO(A, 5),
-    GPIO(A, 2), GPIO(A, 3),
-    GPIO(A, 0), GPIO(A, 1),
-};
-#endif // !defined(FLIP)
 
 
 // Parallel struct definition

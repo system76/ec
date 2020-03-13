@@ -50,7 +50,7 @@ Requirements:
 Use this method for flashing a system already running System76 EC.
 
 ```
-make BOARD=<vendor>/<model> flash
+make BOARD=<vendor>/<model> flash_internal
 ```
 
 ### External programmer
@@ -69,5 +69,5 @@ Use this method for first-time flashing or flashing a bricked controller.
 8. Flash the firmware
 
 ```
-make BOARD=<vendor>/<model> isp
+make BOARD=<vendor>/<model> flash_external
 ```

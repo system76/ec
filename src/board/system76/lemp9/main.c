@@ -24,6 +24,10 @@
 #include <common/macro.h>
 #include <common/version.h>
 
+#ifdef PARPORT_DEBUG
+    #include <ec/parallel.h>
+#endif
+
 void external_0(void) __interrupt(0) {}
 // timer_0 is in time.c
 void timer_0(void) __interrupt(1);
@@ -44,7 +48,11 @@ void init(void) {
     ecpm_init();
     kbc_init();
     kbled_init();
+#ifdef PARPORT_DEBUG
+    parport_init();
+#else
     kbscan_init();
+#endif
     peci_init();
     pmc_init();
     pwm_init();
@@ -107,8 +115,10 @@ void main(void) {
                 power_event();
                 break;
             case 1:
+#ifndef PARPORT_DEBUG
                 // Scans keyboard and sends keyboard packets
                 kbscan_event();
+#endif
                 break;
             case 2:
                 // Passes through touchpad packets

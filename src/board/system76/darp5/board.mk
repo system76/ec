@@ -22,6 +22,9 @@ CFLAGS+=-DI2C_SMBUS=I2C_0
 # Set keyboard LED I2C bus
 CFLAGS+=-DI2C_KBLED=I2C_1
 
+# Enable debug logging over keyboard parallel port
+#CFLAGS+=-DPARPORT_DEBUG
+
 # Set scratch ROM parameters
 SCRATCH_OFFSET=1024
 SCRATCH_SIZE=1024
