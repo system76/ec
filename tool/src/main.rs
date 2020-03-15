@@ -262,10 +262,23 @@ unsafe fn info() -> Result<(), Error> {
     Ok(())
 }
 
+unsafe fn print(message: &[u8]) -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    ec.print(message)?;
+
+    Ok(())
+}
+
 fn usage() {
     eprintln!("  console");
     eprintln!("  flash [file]");
     eprintln!("  info");
+    eprintln!("  print [message]");
 }
 
 fn main() {
@@ -299,6 +312,16 @@ fn main() {
                     eprintln!("failed to read info: {:X?}", err);
                     process::exit(1);
                 },
+            },
+            "print" => for mut arg in args {
+                arg.push('\n');
+                match unsafe { print(&arg.as_bytes()) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to print '{}': {:X?}", arg, err);
+                        process::exit(1);
+                    },
+                }
             },
             _ => {
                 eprintln!("unknown subcommand '{}'", arg);

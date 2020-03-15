@@ -16,7 +16,7 @@ pub enum Cmd {
     Probe = 1,
     Board = 2,
     Version = 3,
-    Debug = 4,
+    Print = 4,
     Spi = 5,
     Reset = 6,
 }
@@ -149,6 +149,23 @@ impl<T: Timeout> Ec<T> {
             i += 1;
         }
         Ok(i)
+    }
+
+    pub unsafe fn print(&mut self, data: &[u8]) -> Result<usize, Error> {
+        let flags = 0;
+        for chunk in data.chunks(256 - 4) {
+            for i in 0..chunk.len() {
+                self.write(i as u8 + 4, chunk[i]);
+            }
+
+            self.write(2, flags);
+            self.write(3, chunk.len() as u8);
+            self.command(Cmd::Print)?;
+            if self.read(3) != chunk.len() as u8 {
+                return Err(Error::Verify);
+            }
+        }
+        Ok(data.len())
     }
 
     pub unsafe fn spi(&mut self, target: SpiTarget, scratch: bool) -> Result<EcSpi<T>, Error> {
