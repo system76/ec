@@ -107,13 +107,16 @@ void smfi_init(void) {
     FLHCTRL3 |= (1 << 3);
 }
 
-static enum Result cmd_debug(void) {
-    int i;
-    for (i = 2; i < ARRAY_SIZE(smfi_cmd); i++) {
-        uint8_t b = smfi_cmd[i];
-        if (b == 0) break;
-        putchar(b);
+static enum Result cmd_print(void) {
+    uint8_t flags = smfi_cmd[2];
+    uint8_t len = smfi_cmd[3];
+
+    uint8_t i;
+    for (i = 0; (i < len) && ((i + 4) < ARRAY_SIZE(smfi_cmd)); i++) {
+        putchar(smfi_cmd[i + 4]);
     }
+
+    smfi_cmd[3] = i;
 
     return RES_OK;
 }
@@ -162,8 +165,8 @@ void smfi_event(void) {
                 // Always successful
                 smfi_cmd[1] = RES_OK;
                 break;
-            case CMD_DEBUG:
-                smfi_cmd[1] = cmd_debug();
+            case CMD_PRINT:
+                smfi_cmd[1] = cmd_print();
                 break;
             case CMD_SPI:
                 smfi_cmd[1] = cmd_spi();

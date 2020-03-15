@@ -11,7 +11,7 @@ enum Command {
     // Read version string
     CMD_VERSION = 3,
     // Write bytes to console
-    CMD_DEBUG = 4,
+    CMD_PRINT = 4,
     // Access SPI chip
     CMD_SPI = 5,
     // Reset EC
