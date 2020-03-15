@@ -125,6 +125,12 @@ static struct Gpio GPIOS[24] = {
 };
 #endif // !defined(FLIP)
 
+enum ParallelState {
+    PARALLEL_STATE_UNKNOWN,
+    PARALLEL_STATE_HIZ,
+    PARALLEL_STATE_HOST,
+    PARALLEL_STATE_PERIPHERAL,
+};
 
 // Parallel struct definition
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm
@@ -132,6 +138,7 @@ struct Parallel {
     #define PIN(N, P) struct Gpio * N;
     PINS
     #undef PIN
+    enum ParallelState state;
 };
 
 // Parallel struct instance
@@ -139,6 +146,7 @@ static struct Parallel PORT = {
     #define PIN(N, P) .N = &GPIOS[P - 1],
     PINS
     #undef PIN
+    .state = PARALLEL_STATE_UNKNOWN,
 };
 
 // Set port to all high-impedance inputs
@@ -203,6 +211,25 @@ void parallel_reset(struct Parallel * port, bool host) {
     if (host) {
         // Set reset line high, ending reset
         gpio_set(port->reset_n, true);
+    }
+}
+
+void parallel_state(struct Parallel * port, enum ParallelState state) {
+    if (port->state != state) {
+        switch (state) {
+            case PARALLEL_STATE_UNKNOWN:
+                return;
+            case PARALLEL_STATE_HIZ:
+                parallel_hiz(port);
+                break;
+            case PARALLEL_STATE_HOST:
+                parallel_reset(port, true);
+                break;
+            case PARALLEL_STATE_PERIPHERAL:
+                parallel_reset(port, false);
+                break;
+        }
+        port->state = state;
     }
 }
 
@@ -445,7 +472,7 @@ int parallel_main(void) {
     int res = 0;
 
     struct Parallel * port = &PORT;
-    parallel_reset(port, true);
+    parallel_state(port, PARALLEL_STATE_HIZ);
 
     static uint8_t data[128];
     char command;
@@ -500,10 +527,9 @@ int parallel_main(void) {
 
             // Debug console
             case 'C':
-                serial_write(console_msg, sizeof(console_msg));
+                parallel_state(port, PARALLEL_STATE_PERIPHERAL);
 
-                // Reconfigure as a peripheral
-                parallel_reset(port, false);
+                serial_write(console_msg, sizeof(console_msg));
 
                 for (;;) {
                     bool read = false;
@@ -532,6 +558,8 @@ int parallel_main(void) {
 
             // Read data
             case 'R':
+                parallel_state(port, PARALLEL_STATE_HOST);
+
                 // Update parallel address if necessary
                 if (set_address) {
                     res = parallel_set_address(port, &address, 1);
@@ -551,6 +579,8 @@ int parallel_main(void) {
 
             // Accelerated program function
             case 'P':
+                parallel_state(port, PARALLEL_STATE_HOST);
+
                 // Read data from serial
                 res = serial_read(data, length);
                 if (res < 0) goto err;
@@ -569,6 +599,8 @@ int parallel_main(void) {
 
             // Write data
             case 'W':
+                parallel_state(port, PARALLEL_STATE_HOST);
+
                 // Read data from serial
                 res = serial_read(data, length);
                 if (res < 0) goto err;
@@ -594,7 +626,7 @@ int parallel_main(void) {
     }
 
 err:
-    parallel_hiz(port);
+    parallel_state(port, PARALLEL_STATE_HIZ);
 
     return res;
 }
