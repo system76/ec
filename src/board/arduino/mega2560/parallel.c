@@ -90,22 +90,22 @@
     DATA_BIT(6) \
     DATA_BIT(7)
 
-#define FLIP
+//#define FLIP
 #if !defined(FLIP)
 // Mapping of 24-pin ribbon cable to GPIOs
 static struct Gpio GPIOS[24] = {
-    GPIO(L, 4), GPIO(L, 5),
-    GPIO(L, 6), GPIO(L, 7),
-    GPIO(G, 0), GPIO(G, 1),
-    GPIO(G, 2), GPIO(D, 7),
-    GPIO(C, 0), GPIO(C, 1),
-    GPIO(C, 2), GPIO(C, 3),
-    GPIO(C, 4), GPIO(C, 5),
-    GPIO(C, 6), GPIO(C, 7),
-    GPIO(A, 7), GPIO(A, 6),
-    GPIO(A, 5), GPIO(A, 4),
-    GPIO(A, 3), GPIO(A, 2),
     GPIO(A, 1), GPIO(A, 0),
+    GPIO(A, 3), GPIO(A, 2),
+    GPIO(A, 5), GPIO(A, 4),
+    GPIO(A, 7), GPIO(A, 6),
+    GPIO(C, 6), GPIO(C, 7),
+    GPIO(C, 4), GPIO(C, 5),
+    GPIO(C, 2), GPIO(C, 3),
+    GPIO(C, 0), GPIO(C, 1),
+    GPIO(G, 2), GPIO(D, 7),
+    GPIO(G, 0), GPIO(G, 1),
+    GPIO(L, 6), GPIO(L, 7),
+    GPIO(L, 4), GPIO(L, 5),
 };
 #else // !defined(FLIP)
 // Mapping of 24-pin ribbon cable to GPIOs, flipped
