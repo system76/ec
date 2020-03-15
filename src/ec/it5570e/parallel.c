@@ -30,7 +30,7 @@ void parport_init(void) {
     // XXX: Needed? Pull-ups, open-drain are always disabled in GPIO mode
     KSOCTRL = 0;
     // XXX: Needed? OVRPPK is for KBS mode, pull-ups are always disabled in GPIO mode
-    KSICTRLR = (1 << 4);
+    KSICTRLR = 0;
 
     // Set all outputs to GPIO mode, low, and inputs
     KSOL = 0;
@@ -93,9 +93,8 @@ int parport_write(uint8_t * data, int length) {
 
         // Assert nDATASTB
         KSIGDAT &= ~CTL_DATA;
-        delay_us(1);
 
-        // Wait for peripheral to indicate it's ready
+        // Wait for peripheral to indicate it's processing
         if (!parport_wait_peripheral(STS_WAIT, STS_WAIT)) {
             KSIGDAT |= CTL_DATA;
             break;
@@ -103,10 +102,11 @@ int parport_write(uint8_t * data, int length) {
 
         // Deassert nDATASTB
         KSIGDAT |= CTL_DATA;
-        delay_us(1);
 
-        // XXX: Arduino takes a while to read?
-        delay_us(5);
+        // Wait for peripheral to indicate it's ready for next cycle
+        if (!parport_wait_peripheral(STS_WAIT, 0)) {
+            break;
+        }
 
         // Reset data lines to high
         KSOL = 0xFF;
