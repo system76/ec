@@ -267,7 +267,6 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
         if (!read) {
             byte = data[i];
             parallel_write_data(port, byte);
-            _delay_us(1);
         }
 
         if (addr) {
@@ -277,9 +276,8 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             // Set data strobe low
             gpio_set(port->data_n, false);
         }
-        _delay_us(1);
 
-        // Wait for peripheral to indicate it's ready
+        // Wait for peripheral to indicate it's processing
         while (!gpio_get(port->wait_n)) {}
 
         if (read) {
@@ -293,8 +291,9 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             // Set data strobe high
             gpio_set(port->data_n, true);
         }
-        // XXX: Arduino peripheral not fast enough to get the data?
-        _delay_us(5);
+        
+        // Wait for peripheral to indicate it's ready for next cycle
+        while (gpio_get(port->wait_n)) {}
 
         if (!read) {
             // Reset data lines to high
