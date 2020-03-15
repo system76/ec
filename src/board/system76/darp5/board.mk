@@ -45,9 +45,13 @@ include $(SCRATCH_DIR)/scratch.mk
 CFLAGS+=-I$(BUILD)/include
 INCLUDE+=$(BUILD)/include/scratch.h
 
-console:
+console_internal:
 	cargo build --manifest-path tool/Cargo.toml --release
 	sudo tool/target/release/system76_ectool console
+
+console_external:
+	sleep 1 && echo C | sudo tee /dev/ttyACM* &
+	sudo tio -b 1000000 -m INLCRNL /dev/ttyACM*
 
 flash_internal: $(BUILD)/ec.rom
 	cargo build --manifest-path tool/Cargo.toml --release
