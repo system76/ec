@@ -10,8 +10,6 @@
 #include <arch/uart.h>
 
 // Mapping of 24-pin ribbon cable to parallel pins. See schematic
-#define IT8587
-#if defined(IT8587)
 #define PINS \
     /* Data (KSO0 - KSO7) - bi-directional */ \
     PIN(d0, 1) \
@@ -43,42 +41,6 @@
     /* Strap1 (KSI5) */ \
     /*  1K-Ohm pull-down resistor */ \
     PIN(strap_1, 12)
-#elif defined(IT5570)
-#define PINS \
-    /* Data (KSO0 - KSO7) - bi-directional */ \
-    PIN(d0, 24) \
-    PIN(d1, 23) \
-    PIN(d2, 22) \
-    PIN(d3, 18) \
-    PIN(d4, 16) \
-    PIN(d5, 15) \
-    PIN(d6, 12) \
-    PIN(d7, 9) \
-    /* Wait# (KSO9) - input */ \
-    /*  low to indicate cycle may begin, high to indicate cycle may end */ \
-    PIN(wait_n, 7) \
-    /* Write# (KSI0) - output */ \
-    /*  low to indicate write cycle, high to indicate read cycle */ \
-    PIN(write_n, 21) \
-    /* DataStrobe# (KSI1) - output */ \
-    /*  low indicates a data cycle */ \
-    PIN(data_n, 20) \
-    /* Reset# (KSI2) - output */ \
-    /*  low requests device reset */ \
-    PIN(reset_n, 19) \
-    /* AddressStrobe# (KSI3) - output */ \
-    /*  low indicates an address cycle */ \
-    PIN(addr_n, 17) \
-    /* Strap0 (KSI4) */ \
-    /*  1K-Ohm pull-down resistor */ \
-    PIN(strap_0, 14) \
-    /* Strap1 (KSI5) */ \
-    /*  1K-Ohm pull-down resistor */ \
-    PIN(strap_1, 13)
-#else
-    #error "Unknown pin configuration: EC not specified"
-#endif
-
 
 #define DATA_BITS \
     DATA_BIT(0) \
@@ -94,18 +56,18 @@
 #if !defined(FLIP)
 // Mapping of 24-pin ribbon cable to GPIOs
 static struct Gpio GPIOS[24] = {
-    GPIO(A, 1), GPIO(A, 0),
-    GPIO(A, 3), GPIO(A, 2),
-    GPIO(A, 5), GPIO(A, 4),
-    GPIO(A, 7), GPIO(A, 6),
-    GPIO(C, 6), GPIO(C, 7),
-    GPIO(C, 4), GPIO(C, 5),
-    GPIO(C, 2), GPIO(C, 3),
-    GPIO(C, 0), GPIO(C, 1),
-    GPIO(G, 2), GPIO(D, 7),
-    GPIO(G, 0), GPIO(G, 1),
-    GPIO(L, 6), GPIO(L, 7),
-    GPIO(L, 4), GPIO(L, 5),
+    GPIO(A, 0), GPIO(A, 1),
+    GPIO(A, 2), GPIO(A, 3),
+    GPIO(A, 4), GPIO(A, 5),
+    GPIO(A, 6), GPIO(A, 7),
+    GPIO(C, 7), GPIO(C, 6),
+    GPIO(C, 5), GPIO(C, 4),
+    GPIO(C, 3), GPIO(C, 2),
+    GPIO(C, 1), GPIO(C, 0),
+    GPIO(D, 7), GPIO(G, 2),
+    GPIO(G, 1), GPIO(G, 0),
+    GPIO(L, 7), GPIO(L, 6),
+    GPIO(L, 5), GPIO(L, 4),
 };
 #else // !defined(FLIP)
 // Mapping of 24-pin ribbon cable to GPIOs, flipped
