@@ -53,8 +53,78 @@ extern uint8_t main_cycle;
 
 enum PowerState power_state = POWER_STATE_DEFAULT;
 
+enum PowerState calculate_power_state(void) {
+    //TODO: Deep Sx states using SLP_SUS#
+
+    if (gpio_get(&BUF_PLT_RST_N)) {
+        // CPU powered
+        return POWER_STATE_S0;
+    }
+
+    if (gpio_get(&SUSB_N_PCH)) {
+        // S3 plane powered
+        return POWER_STATE_S3;
+    }
+
+    if (gpio_get(&SUSC_N_PCH)) {
+        // S4 plane powered
+        return POWER_STATE_S4;
+    }
+
+    if (gpio_get(&EC_RSMRST_N)) {
+        // S5 plane powered
+        return POWER_STATE_S5;
+    }
+
+#if DEEP_SX
+    if (gpio_get(&PCH_DPWROK_EC)) {
+        return POWER_STATE_DS5;
+    }
+
+    return POWER_STATE_DEFAULT;
+#else
+    return POWER_STATE_DS5;
+#endif
+}
+
+void update_power_state(void) {
+    enum PowerState new_power_state = calculate_power_state();
+    if (power_state != new_power_state) {
+        power_state = new_power_state;
+
+    #if LEVEL >= LEVEL_DEBUG
+        switch (power_state) {
+            case POWER_STATE_DEFAULT:
+                DEBUG("POWER_STATE_DEFAULT\n");
+                break;
+            case POWER_STATE_DS5:
+                DEBUG("POWER_STATE_DS5\n");
+                break;
+            case POWER_STATE_S5:
+                DEBUG("POWER_STATE_S5\n");
+                break;
+            case POWER_STATE_DS4:
+                DEBUG("POWER_STATE_DS4\n");
+                break;
+            case POWER_STATE_S4:
+                DEBUG("POWER_STATE_S4\n");
+                break;
+            case POWER_STATE_DS3:
+                DEBUG("POWER_STATE_DS3\n");
+                break;
+            case POWER_STATE_S3:
+                DEBUG("POWER_STATE_S3\n");
+                break;
+            case POWER_STATE_S0:
+                DEBUG("POWER_STATE_S0\n");
+                break;
+        }
+    #endif
+    }
+}
+
 // Enable deep sleep well power
-void power_on_ds5() {
+void power_on_ds5(void) {
     DEBUG("%02X: power_on_ds5\n", main_cycle);
 
 #if DEEP_SX
@@ -70,7 +140,7 @@ void power_on_ds5() {
     tPCH02;
 
     // Deep sleep well is a-ok
-    gpio_set(PCH_DPWROK_EC, true);
+    gpio_set(&PCH_DPWROK_EC, true);
     // Wait for deep sleep well to propogate
     tPCH32;
 #else // DEEP_SX
@@ -83,11 +153,11 @@ void power_on_ds5() {
     tPCH04;
 #endif // DEEP_SX
 
-    power_state = POWER_STATE_DS5;
+    update_power_state();
 }
 
 // Enable S5 power
-void power_on_s5() {
+void power_on_s5(void) {
     DEBUG("%02X: power_on_s5\n", main_cycle);
 
 #if DEEP_SX
@@ -157,10 +227,10 @@ void power_on_s5() {
     delay_ms(200);
 #endif // DEEP_SX
 
-    power_state = POWER_STATE_S5;
+    update_power_state();
 }
 
-void power_off_s5() {
+void power_off_s5(void) {
     DEBUG("%02X: power_off_s5\n", main_cycle);
 
 #if DEEP_SX
@@ -190,7 +260,7 @@ void power_off_s5() {
     tPCH14;
 #endif // DEEP_SX
 
-    power_state = POWER_STATE_DS5;
+    update_power_state();
 }
 
 void power_event(void) {
@@ -245,6 +315,7 @@ void power_event(void) {
             DEBUG("%02X: Power switch press\n", main_cycle);
 
             // Enable S5 power if necessary, before sending PWR_BTN
+            update_power_state();
             if (power_state == POWER_STATE_DS5) {
                 power_on_s5();
             }
@@ -260,11 +331,12 @@ void power_event(void) {
     // Send power signal to PCH
     gpio_set(&PWR_BTN_N, ps_new);
 
+    // Update power state before determining actions
+    update_power_state();
+
 #if DEEP_SX
     //TODO
 #else // DEEP_SX
-    //TODO: set power state as necessary
-
     // If system power is good
     static bool pg_last = false;
     bool pg_new = gpio_get(&ALL_SYS_PWRGD);
@@ -307,32 +379,8 @@ void power_event(void) {
         //TODO: reset KBC and touchpad states
 
         kbled_reset();
-
-        power_state = POWER_STATE_S0;
     }
     rst_last = rst_new;
-
-    #if LEVEL >= LEVEL_DEBUG
-        static bool s3_last = false;
-        bool s3_new = gpio_get(&SUSB_N_PCH);
-        if (!s3_new && s3_last) {
-            DEBUG("%02X: SLP_S3# asserted\n", main_cycle);
-        } else if(s3_new && !s3_last) {
-            DEBUG("%02X: SLP_S3# de-asserted\n", main_cycle);
-        }
-        s3_last = s3_new;
-    #endif
-
-    static bool s4_last = false;
-    bool s4_new = gpio_get(&SUSC_N_PCH);
-    #if LEVEL >= LEVEL_DEBUG
-        if (!s4_new && s4_last) {
-            DEBUG("%02X: SLP_S4# asserted\n", main_cycle);
-        } else if(s4_new && !s4_last) {
-            DEBUG("%02X: SLP_S4# de-asserted\n", main_cycle);
-        }
-    #endif
-    s4_last = s4_new;
 
     #if LEVEL >= LEVEL_DEBUG
         static bool sus_last = false;
@@ -351,13 +399,6 @@ void power_event(void) {
     bool ack_new = gpio_get(&SUSWARN_N);
     if (ack_new && !ack_last) {
         DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
-
-        if (s4_new) {
-            DEBUG("%02X: entering S3 state\n", main_cycle);
-            power_state = POWER_STATE_S3;
-        } else if (power_state == POWER_STATE_S5) {
-            power_off_s5();
-        }
     }
     #if LEVEL >= LEVEL_DEBUG
         else if (!ack_new && ack_last) {
@@ -366,11 +407,18 @@ void power_event(void) {
     #endif
     ack_last = ack_new;
 
-    if (rst_new) {
+    if (ack_new) {
+        // Disable S5 power plane if not needed
+        if (power_state == POWER_STATE_S5) {
+            power_off_s5();
+        }
+    }
+
+    if (power_state == POWER_STATE_S0) {
         // CPU on, green light
         gpio_set(&LED_PWR, true);
         gpio_set(&LED_ACIN, false);
-    } else if (s4_new) {
+    } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
         static uint32_t last_time = 0;
         uint32_t time = time_get();
