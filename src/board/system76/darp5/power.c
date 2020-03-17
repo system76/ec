@@ -56,19 +56,14 @@ enum PowerState power_state = POWER_STATE_DEFAULT;
 enum PowerState calculate_power_state(void) {
     //TODO: Deep Sx states using SLP_SUS#
 
-    if (gpio_get(&BUF_PLT_RST_N)) {
-        // CPU powered
+    if (gpio_get(&SUSB_N_PCH)) {
+        // S3, S4, and S5 planes powered
         return POWER_STATE_S0;
     }
 
-    if (gpio_get(&SUSB_N_PCH)) {
-        // S3 plane powered
-        return POWER_STATE_S3;
-    }
-
     if (gpio_get(&SUSC_N_PCH)) {
-        // S4 plane powered
-        return POWER_STATE_S4;
+        // S4 and S5 planes powered
+        return POWER_STATE_S3;
     }
 
     if (gpio_get(&EC_RSMRST_N)) {
@@ -102,12 +97,6 @@ void update_power_state(void) {
                 break;
             case POWER_STATE_S5:
                 DEBUG("POWER_STATE_S5\n");
-                break;
-            case POWER_STATE_DS4:
-                DEBUG("POWER_STATE_DS4\n");
-                break;
-            case POWER_STATE_S4:
-                DEBUG("POWER_STATE_S4\n");
                 break;
             case POWER_STATE_DS3:
                 DEBUG("POWER_STATE_DS3\n");
@@ -165,9 +154,9 @@ void power_on_s5(void) {
     // TODO - signal timing graph
     // See Figure 12-24 in Whiskey Lake Platform Design Guide
     // TODO - rail timing graph
-    
+
     // TODO: Must have SL_SUS# set high by PCH
-    
+
     // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
     // avoid leakage
     gpio_set(&VA_EC_EN, true);
