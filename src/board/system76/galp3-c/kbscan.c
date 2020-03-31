@@ -54,6 +54,41 @@ static uint8_t kbscan_get_row(int i) {
     return ~KSI;
 }
 
+static inline bool popcount_more_than_one(uint8_t rowdata) {
+    return rowdata & (rowdata - 1);
+}
+
+static uint8_t kbscan_get_real_keys(int row, uint8_t rowdata) {
+    // Remove any "active" blanks from the matrix.
+    uint8_t realdata = 0;
+    for (uint8_t col = 0; col < KM_IN; col++) {
+        if (KEYMAP[0][row][col] && (rowdata & (1 << col))) {
+            realdata |=  1 << col;
+        }
+    }
+
+    return realdata;
+}
+
+static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
+    rowdata = kbscan_get_real_keys(row, rowdata);
+
+    // No ghosts exist when  less than 2 keys in the row are active.
+    if (!popcount_more_than_one(rowdata)) {
+        return false;
+    }
+
+    // Check against other rows to see if more than one column matches.
+    for (int i = 0; i < KM_OUT; i++) {
+        uint8_t otherrow = kbscan_get_real_keys(i, kbscan_get_row(i));
+        if (i != row && popcount_more_than_one(otherrow & rowdata)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
     if (pressed &&
         (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3)) {
@@ -175,6 +210,11 @@ void kbscan_event(void) {
         uint8_t new = kbscan_get_row(i);
         uint8_t last = kbscan_last[i];
         if (new != last) {
+            if (kbscan_has_ghost_in_row(i, new)) {
+                kbscan_last[i] = new;
+                continue;
+            }
+
             // A key was pressed or released
             int j;
             for (j = 0; j < KM_IN; j++) {
