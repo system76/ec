@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "system76_ectool"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "redox_hwio 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
