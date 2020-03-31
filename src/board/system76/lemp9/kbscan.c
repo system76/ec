@@ -32,6 +32,28 @@ void kbscan_init(void) {
 // Debounce time in milliseconds
 #define DEBOUNCE_DELAY 20
 
+static uint8_t kbscan_get_row(int i) {
+        // Set current line as output
+        if (i < 8) {
+            KSOLGOEN = 1 << i;
+            KSOHGOEN = 0;
+        } else if (i < 16) {
+            KSOLGOEN = 0;
+            KSOHGOEN = 1 << (i - 8);
+        } else if (i == 16) {
+            KSOLGOEN = 0;
+            KSOHGOEN = 0;
+        } else if (i == 17) {
+            KSOLGOEN = 0;
+            KSOHGOEN = 0;
+        }
+
+        // TODO: figure out optimal delay
+        delay_ticks(10);
+
+        return ~KSI;
+}
+
 bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
     if (pressed &&
         (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3)) {
@@ -150,25 +172,7 @@ void kbscan_event(void) {
 
     int i;
     for (i = 0; i < KM_OUT; i++) {
-        // Set current line as output
-        if (i < 8) {
-            KSOLGOEN = 1 << i;
-            KSOHGOEN = 0;
-        } else if (i < 16) {
-            KSOLGOEN = 0;
-            KSOHGOEN = 1 << (i - 8);
-        } else if (i == 16) {
-            KSOLGOEN = 0;
-            KSOHGOEN = 0;
-        } else if (i == 17) {
-            KSOLGOEN = 0;
-            KSOHGOEN = 0;
-        }
-
-        // TODO: figure out optimal delay
-        delay_ticks(10);
-
-        uint8_t new = ~KSI;
+        uint8_t new = kbscan_get_row(i);
         uint8_t last = kbscan_last[i];
         if (new != last) {
             // A key was pressed or released
