@@ -1,6 +1,6 @@
 [package]
 name = "system76_ectool"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2018"
 description = "System76 EC tool"
 license = "MIT"
@@ -11,4 +11,8 @@ repository = "https://github.com/system76/ec"
 name = "ectool"
 
 [dependencies]
-redox_hwio = "0.1"
+redox_hwio = "0.1.1"
+
+[features]
+default = []
+stable = ["redox_hwio/stable"]
