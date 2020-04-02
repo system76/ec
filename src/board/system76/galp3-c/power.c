@@ -369,7 +369,7 @@ void power_event(void) {
     rst_last = rst_new;
 
     #if LEVEL >= LEVEL_DEBUG
-        static bool sus_last = false;
+        static bool sus_last = true;
         bool sus_new = gpio_get(&SLP_SUS_N);
         if (!sus_new && sus_last) {
             DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);

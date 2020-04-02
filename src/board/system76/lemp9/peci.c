@@ -1,6 +1,7 @@
 #include <stdbool.h>
 
 #include <board/peci.h>
+#include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <ec/gpio.h>
@@ -77,40 +78,49 @@ void peci_init(void) {
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 void peci_event(void) {
-    // Wait for completion
-    while (HOSTAR & 1) {}
-    // Clear status
-    HOSTAR = HOSTAR;
+    if (power_state == POWER_STATE_S0) {
+        // Use PECI if in S0 state
 
-    // Enable PECI, clearing data fifo's
-    HOCTLR = (1 << 5) | (1 << 3);
-    // Set address to default
-    HOTRADDR = 0x30;
-    // Set write length
-    HOWRLR = 1;
-    // Set read length
-    HORDLR = 2;
-    // Set command
-    HOCMDR = 1;
-    // Start transaction
-    HOCTLR |= 1;
+        // Wait for completion
+        while (HOSTAR & 1) {}
+        // Clear status
+        HOSTAR = HOSTAR;
 
-    // Wait for completion
-    while (HOSTAR & 1) {}
+        // Enable PECI, clearing data fifo's
+        HOCTLR = (1 << 5) | (1 << 3);
+        // Set address to default
+        HOTRADDR = 0x30;
+        // Set write length
+        HOWRLR = 1;
+        // Set read length
+        HORDLR = 2;
+        // Set command
+        HOCMDR = 1;
+        // Start transaction
+        HOCTLR |= 1;
 
-    if (HOSTAR & (1 << 1)) {
-        // Use result if finished successfully
-        uint8_t low = HORDDR;
-        uint8_t high = HORDDR;
-        peci_offset = ((int16_t)high << 8) | (int16_t)low;
+        // Wait for completion
+        while (HOSTAR & 1) {}
 
-        peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
-        peci_duty = fan_duty(peci_temp);
+        if (HOSTAR & (1 << 1)) {
+            // Use result if finished successfully
+            uint8_t low = HORDDR;
+            uint8_t high = HORDDR;
+            peci_offset = ((int16_t)high << 8) | (int16_t)low;
+
+            peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
+            peci_duty = fan_duty(peci_temp);
+        } else {
+            // Default to 50% if there is an error
+            peci_offset = 0;
+            peci_temp = 0;
+            peci_duty = PWM_DUTY(50);
+        }
     } else {
-        // Default to 50% if there is an error
+        // Turn fan off if not in S0 state
         peci_offset = 0;
         peci_temp = 0;
-        peci_duty = PWM_DUTY(50);
+        peci_duty = PWM_DUTY(0);
     }
 
     if (peci_duty != DCR2) {
