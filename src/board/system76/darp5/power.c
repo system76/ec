@@ -386,11 +386,10 @@ void power_event(void) {
     // state is S3
     static bool ack_last = false;
     bool ack_new = gpio_get(&SUSWARN_N);
-    if (ack_new && !ack_last) {
-        DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
-    }
     #if LEVEL >= LEVEL_DEBUG
-        else if (!ack_new && ack_last) {
+        if (ack_new && !ack_last) {
+            DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
+        } else if (!ack_new && ack_last) {
             DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
         }
     #endif

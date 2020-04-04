@@ -9,6 +9,7 @@
 #include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <ec/pwm.h>
 
 // Shared memory host semaphore
 volatile uint8_t __xdata __at(0x1022) SMHSR;
@@ -143,6 +144,30 @@ static enum Result cmd_reset(void) {
     return RES_ERR;
 }
 
+static enum Result cmd_fan_get(void) {
+    // If setting fan 0
+    if (smfi_cmd[2] == 0) {
+        // Get duty of fan 0
+        smfi_cmd[3] = DCR2;
+        return RES_OK;
+    }
+
+    // Failed if fan not found
+    return RES_ERR;
+}
+
+static enum Result cmd_fan_set(void) {
+    // If setting fan 0
+    if (smfi_cmd[2] == 0) {
+        // Set duty cycle of fan 0
+        DCR2 = smfi_cmd[3];
+        return RES_OK;
+    }
+
+    // Failed if fan not found
+    return RES_ERR;
+}
+
 void smfi_event(void) {
     if (smfi_cmd[0]) {
         switch (smfi_cmd[0]) {
@@ -174,6 +199,14 @@ void smfi_event(void) {
             case CMD_RESET:
                 smfi_cmd[1] = cmd_reset();
                 break;
+#ifndef __SCRATCH__
+            case CMD_FAN_GET:
+                smfi_cmd[1] = cmd_fan_get();
+                break;
+            case CMD_FAN_SET:
+                smfi_cmd[1] = cmd_fan_set();
+                break;
+#endif // __SCRATCH__
             default:
                 // Command not found
                 smfi_cmd[1] = RES_ERR;
