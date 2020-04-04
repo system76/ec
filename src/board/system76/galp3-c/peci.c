@@ -57,14 +57,12 @@ uint8_t fan_duty(int16_t temp) {
 
                 // If in between current temp and previous temp, interpolate
                 if (temp > prev->temp) {
-                    return prev->duty;
-
-                    // int16_t dtemp = (cur->temp - prev->temp);
-                    // int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
-                    // return (uint8_t)(
-                    //     ((int16_t)prev->duty) +
-                    //     ((temp - prev->temp) * dduty) / dtemp
-                    // );
+                    int16_t dtemp = (cur->temp - prev->temp);
+                    int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
+                    return (uint8_t)(
+                        ((int16_t)prev->duty) +
+                        ((temp - prev->temp) * dduty) / dtemp
+                    );
                 }
             }
         }
