@@ -15,8 +15,7 @@ do
     if [ "${header}" == "1" ]
     then
         F="Time    "
-        F="${F}\tBAT V"
-        F="${F}\tBAT A"
+        F="${F}\tBAT W"
         F="${F}\tCPU W"
         F="${F}\tCPU C"
         F="${F}\tFAN %"
@@ -25,11 +24,10 @@ do
 
         uV="$(cat /sys/class/power_supply/BAT0/voltage_now)"
         V="$(echo "${uV}/1000000" | bc -lq)"
-        F="${F}\t$(printf "%.2f" "${V}")"
-
         uA="$(cat /sys/class/power_supply/BAT0/current_now)"
         A="$(echo "${uA}/1000000" | bc -lq)"
-        F="${F}\t$(printf "%.2f" "${A}")"
+        bat_W="$(echo "${V} * ${A}" | bc -lq)"
+        F="${F}\t$(printf "%.2f" "${bat_W}")"
 
         last_E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
         sleep 1
