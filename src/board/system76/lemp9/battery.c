@@ -42,8 +42,8 @@ int battery_charger_enable(void) {
     res = battery_charger_disable();
     if (res < 0) return res;
 
-    // Set charge current to 3.264 A
-    res = smbus_write(0x09, 0x14, 0x0CF2);
+    // Set charge current to 3.264 A / 2
+    res = smbus_write(0x09, 0x14, 0x0CF2 / 2);
     if (res < 0) return res;
 
     // Set charge voltage to 8.8 V
