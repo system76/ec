@@ -282,7 +282,7 @@ unsafe fn fan_get(index: u8) -> Result<(), Error> {
     )?;
 
     let duty = ec.fan_get(index)?;
-    eprintln!("{}", duty);
+    println!("{}", duty);
 
     Ok(())
 }
