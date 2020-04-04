@@ -1,3 +1,5 @@
+-include config.mk
+
 # Parameter for current board
 ifeq ($(BOARD),)
 $(info $(shell echo Please set BOARD to one of the following))
