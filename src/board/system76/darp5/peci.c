@@ -7,6 +7,12 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
+// Fan speed is the lowest requested over HEATUP seconds
+#define HEATUP 5
+
+// Fan speed is the highest HEATUP speed over COOLDOWN seconds
+#define COOLDOWN 10
+
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
 #define T_JUNCTION 100
 
@@ -30,7 +36,7 @@ struct FanPoint __code FAN_POINTS[] = {
     FAN_POINT(70,  45),
     FAN_POINT(75,  55),
     FAN_POINT(80,  75),
-    FAN_POINT(84, 100),
+    FAN_POINT(84, 100)
 };
 
 // Get duty cycle based on temperature, adapted from
@@ -51,12 +57,14 @@ uint8_t fan_duty(int16_t temp) {
 
                 // If in between current temp and previous temp, interpolate
                 if (temp > prev->temp) {
-                    int16_t dtemp = (cur->temp - prev->temp);
-                    int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
-                    return (uint8_t)(
-                        ((int16_t)prev->duty) +
-                        ((temp - prev->temp) * dduty) / dtemp
-                    );
+                    return prev->duty;
+
+                    // int16_t dtemp = (cur->temp - prev->temp);
+                    // int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
+                    // return (uint8_t)(
+                    //     ((int16_t)prev->duty) +
+                    //     ((temp - prev->temp) * dduty) / dtemp
+                    // );
                 }
             }
         }
@@ -64,6 +72,40 @@ uint8_t fan_duty(int16_t temp) {
 
     // If no point is found, return 100%
     return PWM_DUTY(100);
+}
+
+uint8_t fan_heatup(uint8_t duty) {
+    static uint8_t history[HEATUP] = { 0 };
+    uint8_t lowest = duty;
+
+    int i;
+    for (i = 0; (i + 1) < ARRAY_SIZE(history); i++) {
+        uint8_t value = history[i + 1];
+        if (value < lowest) {
+            lowest = value;
+        }
+        history[i] = value;
+    }
+    history[i] = duty;
+
+    return lowest;
+}
+
+uint8_t fan_cooldown(uint8_t duty) {
+    static uint8_t history[COOLDOWN] = { 0 };
+    uint8_t highest = duty;
+
+    int i;
+    for (i = 0; (i + 1) < ARRAY_SIZE(history); i++) {
+        uint8_t value = history[i + 1];
+        if (value > highest) {
+            highest = value;
+        }
+        history[i] = value;
+    }
+    history[i] = duty;
+
+    return highest;
 }
 
 void peci_init(void) {
@@ -123,8 +165,10 @@ void peci_event(void) {
         peci_duty = PWM_DUTY(0);
     }
 
-    if (peci_duty != DCR2) {
-        DCR2 = peci_duty;
-        DEBUG("PECI offset=%d, temp=%d = %d\n", peci_offset, peci_temp, peci_duty);
+    uint8_t heatup_duty = fan_heatup(peci_duty);
+    uint8_t cooldown_duty = fan_cooldown(heatup_duty);
+    if (cooldown_duty != DCR2) {
+        DCR2 = cooldown_duty;
+        DEBUG("PECI offset=%d, temp=%d = %d\n", peci_offset, peci_temp, cooldown_duty);
     }
 }

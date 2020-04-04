@@ -16,6 +16,10 @@ enum Command {
     CMD_SPI = 5,
     // Reset EC
     CMD_RESET = 6,
+    // Get fan speeds
+    CMD_FAN_GET = 7,
+    // Set fan speeds
+    CMD_FAN_SET = 8,
     //TODO
 };
 

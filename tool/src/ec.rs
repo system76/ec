@@ -19,12 +19,14 @@ pub enum Cmd {
     Print = 4,
     Spi = 5,
     Reset = 6,
+    FanGet = 7,
+    FanSet = 8,
 }
 
-pub const CMD_SPI_FLAG_READ: u8 = (1 << 0);
-pub const CMD_SPI_FLAG_DISABLE: u8 = (1 << 1);
-pub const CMD_SPI_FLAG_SCRATCH: u8 = (1 << 2);
-pub const CMD_SPI_FLAG_BACKUP: u8 = (1 << 3);
+pub const CMD_SPI_FLAG_READ: u8 = 1 << 0;
+pub const CMD_SPI_FLAG_DISABLE: u8 = 1 << 1;
+pub const CMD_SPI_FLAG_SCRATCH: u8 = 1 << 2;
+pub const CMD_SPI_FLAG_BACKUP: u8 = 1 << 3;
 
 pub struct Ec<T: Timeout> {
     cmd: u16,
@@ -180,6 +182,18 @@ impl<T: Timeout> Ec<T> {
 
     pub unsafe fn reset(&mut self) -> Result<(), Error> {
         self.command(Cmd::Reset)
+    }
+
+    pub unsafe fn fan_get(&mut self, index: u8) -> Result<u8, Error> {
+        self.write(2, index);
+        self.command(Cmd::FanGet)?;
+        Ok(self.read(3))
+    }
+
+    pub unsafe fn fan_set(&mut self, index: u8, duty: u8) -> Result<(), Error> {
+        self.write(2, index);
+        self.write(3, duty);
+        self.command(Cmd::FanSet)
     }
 }
 

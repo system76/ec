@@ -274,9 +274,33 @@ unsafe fn print(message: &[u8]) -> Result<(), Error> {
     Ok(())
 }
 
+unsafe fn fan_get(index: u8) -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    let duty = ec.fan_get(index)?;
+    println!("{}", duty);
+
+    Ok(())
+}
+
+unsafe fn fan_set(index: u8, duty: u8) -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    ec.fan_set(index, duty)
+}
+
 fn usage() {
     eprintln!("  console");
     eprintln!("  flash [file]");
+    eprintln!("  fan [index] <duty>");
     eprintln!("  info");
     eprintln!("  print [message]");
 }
@@ -290,6 +314,40 @@ fn main() {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to read console: {:X?}", err);
+                    process::exit(1);
+                },
+            },
+            "fan" => match args.next() {
+                Some(index_str) => match index_str.parse::<u8>() {
+                    Ok(index) => match args.next() {
+                        Some(duty_str) => match duty_str.parse::<u8>() {
+                            Ok(duty) => match unsafe { fan_set(index, duty) } {
+                                Ok(()) => (),
+                                Err(err) => {
+                                    eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
+                                    process::exit(1);
+                                },
+                            },
+                            Err(err) => {
+                                eprintln!("failed to parse '{}': {:X?}", duty_str, err);
+                                process::exit(1);
+                            },
+                        },
+                        None => match unsafe { fan_get(index) } {
+                            Ok(()) => (),
+                            Err(err) => {
+                                eprintln!("failed to get fan {}: {:X?}", index, err);
+                                process::exit(1);
+                            },
+                        },
+                    },
+                    Err(err) => {
+                        eprintln!("failed to parse '{}': {:X?}", index_str, err);
+                        process::exit(1);
+                    },
+                },
+                None => {
+                    eprintln!("no index provided");
                     process::exit(1);
                 },
             },
