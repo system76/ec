@@ -46,5 +46,6 @@ extern struct Gpio __code VA_EC_EN;
 extern struct Gpio __code VR_ON;
 extern struct Gpio __code WLAN_EN;
 extern struct Gpio __code WLAN_PWR_EN;
+extern struct Gpio __code XLP_OUT;
 
 #endif // _BOARD_GPIO_H

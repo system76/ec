@@ -35,6 +35,7 @@ struct Gpio __code VA_EC_EN =       GPIO(J, 4);
 struct Gpio __code VR_ON =          GPIO(H, 4);
 struct Gpio __code WLAN_EN =        GPIO(G, 1);
 struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
+struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init() {
     // Enable LPC reset on GPD2
