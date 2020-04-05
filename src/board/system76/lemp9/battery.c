@@ -46,7 +46,7 @@ int battery_charger_enable(void) {
     res = battery_charger_disable();
     if (res < 0) return res;
 
-    // Set charge current to ~1.54A
+    // Set charge current to ~1.54 A
     res = smbus_write(0x09, 0x14, 0x061C);
     if (res < 0) return res;
 
@@ -55,7 +55,8 @@ int battery_charger_enable(void) {
     if (res < 0) return res;
 
     // Set input current to ~3.2 A
-    res = smbus_write(0x09, 0x3F, 0x0C80);
+    // TODO: figure out why input current must be divided by 2
+    res = smbus_write(0x09, 0x3F, 0x0C80 / 2);
     if (res < 0) return res;
 
     // Set charge option 0 with watchdog disabled
