@@ -34,6 +34,10 @@ int battery_charger_disable(void) {
     res = smbus_write(0x09, 0x15, 0);
     if (res < 0) return res;
 
+    // Disable input current
+    res = smbus_write(0x09, 0x3F, 0);
+    if (res < 0) return res;
+
     return 0;
 }
 
@@ -49,6 +53,10 @@ int battery_charger_enable(void) {
 
     // Set charge voltage to ~13 V
     res = smbus_write(0x09, 0x15, 0x3300);
+    if (res < 0) return res;
+
+    // Set input current to ~1.92 A
+    res = smbus_write(0x09, 0x3F, 0x0780);
     if (res < 0) return res;
 
     // Set charge option 0 with watchdog disabled
