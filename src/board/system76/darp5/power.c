@@ -402,14 +402,14 @@ void power_event(void) {
         }
     }
 
+    static uint32_t last_time = 0;
+    uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
         // CPU on, green light
         gpio_set(&LED_PWR, true);
         gpio_set(&LED_ACIN, false);
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
-        static uint32_t last_time = 0;
-        uint32_t time = time_get();
         if (
             (time < last_time) // overflow
             ||
@@ -424,9 +424,16 @@ void power_event(void) {
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, true);
     } else {
-        // CPU off and AC adapter unplugged, no light
+        // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
-        gpio_set(&LED_ACIN, false);
+        if (
+            (time < last_time) // overflow
+            ||
+            (time >= (last_time + 1000)) // timeout
+        ) {
+            gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
+            last_time = time;
+        }
     }
 #endif // DEEP_SX
 }

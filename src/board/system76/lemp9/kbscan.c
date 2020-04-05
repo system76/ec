@@ -33,25 +33,25 @@ void kbscan_init(void) {
 #define DEBOUNCE_DELAY 20
 
 static uint8_t kbscan_get_row(int i) {
-        // Set current line as output
-        if (i < 8) {
-            KSOLGOEN = 1 << i;
-            KSOHGOEN = 0;
-        } else if (i < 16) {
-            KSOLGOEN = 0;
-            KSOHGOEN = 1 << (i - 8);
-        } else if (i == 16) {
-            KSOLGOEN = 0;
-            KSOHGOEN = 0;
-        } else if (i == 17) {
-            KSOLGOEN = 0;
-            KSOHGOEN = 0;
-        }
+    // Set current line as output
+    if (i < 8) {
+        KSOLGOEN = 1 << i;
+        KSOHGOEN = 0;
+    } else if (i < 16) {
+        KSOLGOEN = 0;
+        KSOHGOEN = 1 << (i - 8);
+    } else if (i == 16) {
+        KSOLGOEN = 0;
+        KSOHGOEN = 0;
+    } else if (i == 17) {
+        KSOLGOEN = 0;
+        KSOHGOEN = 0;
+    }
 
-        // TODO: figure out optimal delay
-        delay_ticks(10);
+    // TODO: figure out optimal delay
+    delay_ticks(10);
 
-        return ~KSI;
+    return ~KSI;
 }
 
 static inline bool popcount_more_than_one(uint8_t rowdata) {
