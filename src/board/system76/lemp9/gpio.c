@@ -64,15 +64,15 @@ void gpio_init() {
     // CPU_FAN
     GPCRA2 = GPIO_ALT;
     // WLAN_PWR_EN
-    GPCRA3 = GPIO_OUT | GPIO_UP;
+    GPCRA3 = GPIO_OUT;
     // NC
     GPCRA4 = GPIO_IN;
     // NC
     GPCRA5 = GPIO_IN;
     // PCH_PWROK_EC
-    GPCRA6 = GPIO_OUT | GPIO_UP;
+    GPCRA6 = GPIO_OUT;
     // PCH_DPWROK_EC
-    GPCRA7 = GPIO_IN;
+    GPCRA7 = GPIO_OUT;
     // AC_IN#
     GPCRB0 = GPIO_IN | GPIO_UP;
     // LID_SW#
@@ -84,7 +84,7 @@ void gpio_init() {
     // XLP_OUT
     GPCRB4 = GPIO_OUT;
     // SWI#
-    GPCRB5 = GPIO_OUT | GPIO_UP;
+    GPCRB5 = GPIO_OUT;
     // NC
     GPCRB6 = GPIO_IN;
     // NC
@@ -104,11 +104,11 @@ void gpio_init() {
     // PM_PWROK
     GPCRC6 = GPIO_OUT;
     // LED_ACIN
-    GPCRC7 = GPIO_OUT | GPIO_UP;
+    GPCRC7 = GPIO_OUT;
     // LED_PWR
-    GPCRD0 = GPIO_OUT | GPIO_UP;
+    GPCRD0 = GPIO_OUT;
     // CCD_EN
-    GPCRD1 = GPIO_OUT | GPIO_UP;
+    GPCRD1 = GPIO_OUT;
     // BUF_PLT_RST#
     GPCRD2 = GPIO_ALT;
     // SCI#
@@ -116,7 +116,7 @@ void gpio_init() {
     // SMI#
     GPCRD4 = GPIO_IN;
     // PWR_BTN#
-    GPCRD5 = GPIO_OUT | GPIO_UP;
+    GPCRD5 = GPIO_OUT;
     // CPU_FANSEN
     GPCRD6 = GPIO_IN;
     // SUSWARN#
@@ -124,13 +124,13 @@ void gpio_init() {
     // SMC_BAT
     GPCRE0 = GPIO_ALT;
     // AC_PRESENT
-    GPCRE1 = GPIO_OUT | GPIO_UP;
+    GPCRE1 = GPIO_OUT;
     // LEDKB_DET#
     GPCRE2 = GPIO_IN;
     // USB_PWR_EN#
-    GPCRE3 = GPIO_OUT | GPIO_UP;
+    GPCRE3 = GPIO_OUT;
     // DD_ON
-    GPCRE4 = GPIO_OUT | GPIO_DOWN;
+    GPCRE4 = GPIO_OUT;
     // EC_RSMRST#
     GPCRE5 = GPIO_OUT;
     // SB_KBCRST#
@@ -140,11 +140,11 @@ void gpio_init() {
     // 80CLK
     GPCRF0 = GPIO_IN;
     // USB_CHARGE_EN
-    GPCRF1 = GPIO_OUT | GPIO_UP;
+    GPCRF1 = GPIO_OUT;
     // 3IN1
     GPCRF2 = GPIO_IN | GPIO_UP;
     // EC_BT_EN
-    GPCRF3 = GPIO_OUT | GPIO_UP;
+    GPCRF3 = GPIO_OUT;
     // TP_CLK
     GPCRF4 = GPIO_ALT;
     // TP_DATA
@@ -154,9 +154,9 @@ void gpio_init() {
     // CPU_C10_GATE#
     GPCRF7 = GPIO_IN;
     // NC
-    GPCRG0 = GPIO_OUT | GPIO_UP;
+    GPCRG0 = GPIO_OUT;
     // WLAN_EN
-    GPCRG1 = GPIO_OUT | GPIO_UP;
+    GPCRG1 = GPIO_OUT;
     // Pull up to VDD3?
     GPCRG2 = GPIO_OUT;
     // ALSPI_CE#
@@ -166,7 +166,7 @@ void gpio_init() {
     // ALSPI_MSO
     GPCRG5 = GPIO_ALT;
     // H_PROCHOT_EC
-    GPCRG6 = GPIO_OUT | GPIO_UP;
+    GPCRG6 = GPIO_OUT;
     // ALSPI_SCLK
     GPCRG7 = GPIO_ALT;
     // EC_CLKRUN#
@@ -174,9 +174,9 @@ void gpio_init() {
     // SUSC#_PCH
     GPCRH1 = GPIO_IN;
     // BKL_EN
-    GPCRH2 = GPIO_OUT | GPIO_UP;
+    GPCRH2 = GPIO_OUT;
     // EC_GPIO
-    GPCRH3 = GPIO_OUT | GPIO_UP;
+    GPCRH3 = GPIO_OUT;
     // VR_ON
     GPCRH4 = GPIO_IN;
     // SINK_CTRL_EC
@@ -214,7 +214,7 @@ void gpio_init() {
     // VBATT_BOOST#
     GPCRJ5 = GPIO_IN;
     // EC_EN
-    GPCRJ6 = GPIO_OUT | GPIO_UP;
+    GPCRJ6 = GPIO_OUT;
     // SUS_PWR_ACK
     GPCRJ7 = GPIO_IN;
     // LPC_AD0
