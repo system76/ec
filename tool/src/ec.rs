@@ -231,6 +231,10 @@ impl<'a, T: Timeout> EcSpi<'a, T> {
 }
 
 impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
+    fn target(&self) -> SpiTarget {
+        self.target
+    }
+
     /// Disable SPI chip, must be done before and after a transaction
     unsafe fn reset(&mut self) -> Result<(), Error> {
         let flags = self.flags(false, true);

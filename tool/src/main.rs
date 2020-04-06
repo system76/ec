@@ -93,7 +93,6 @@ unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], se
 
 unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
     let rom_size = 128 * 1024;
-    let sector_size = 1024;
 
     let mut new_rom = firmware.data.to_vec();
     while new_rom.len() < rom_size {
@@ -105,6 +104,7 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiT
         &mut spi_bus,
         StdTimeout::new(Duration::new(1, 0))
     );
+    let sector_size = spi.sector_size();
 
     let mut rom = vec![0xFF; rom_size];
     flash_read(&mut spi, &mut rom, sector_size)?;
@@ -168,8 +168,7 @@ unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiT
     Ok(())
 }
 
-unsafe fn flash(path: &str) -> Result<(), Error> {
-    let target = SpiTarget::Main;
+unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
     let scratch = true;
 
     //TODO: remove unwraps
@@ -258,7 +257,7 @@ unsafe fn info() -> Result<(), Error> {
         }
         println!();
     }
-    
+
     Ok(())
 }
 
@@ -300,6 +299,7 @@ unsafe fn fan_set(index: u8, duty: u8) -> Result<(), Error> {
 fn usage() {
     eprintln!("  console");
     eprintln!("  flash [file]");
+    eprintln!("  flash_backup [file]");
     eprintln!("  fan [index] <duty>");
     eprintln!("  info");
     eprintln!("  print [message]");
@@ -352,7 +352,20 @@ fn main() {
                 },
             },
             "flash" => match args.next() {
-                Some(path) => match unsafe { flash(&path) } {
+                Some(path) => match unsafe { flash(&path, SpiTarget::Main) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to flash '{}': {:X?}", path, err);
+                        process::exit(1);
+                    },
+                },
+                None => {
+                    eprintln!("no file provided");
+                    process::exit(1);
+                }
+            },
+            "flash_backup" => match args.next() {
+                Some(path) => match unsafe { flash(&path, SpiTarget::Backup) } {
                     Ok(()) => (),
                     Err(err) => {
                         eprintln!("failed to flash '{}': {:X?}", path, err);
