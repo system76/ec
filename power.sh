@@ -17,10 +17,15 @@ do
         F="Time    "
         F="${F}\tBAT W"
         F="${F}\tCPU W"
+        F="${F}\tCPU PL1"
+        F="${F}\tCPU PL2"
         F="${F}\tCPU C"
         F="${F}\tFAN %"
     else
         F="$(date "+%T")"
+
+        last_E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
+        sleep 1
 
         uV="$(cat /sys/class/power_supply/BAT0/voltage_now)"
         V="$(echo "${uV}/1000000" | bc -lq)"
@@ -29,10 +34,20 @@ do
         bat_W="$(echo "${V} * ${A}" | bc -lq)"
         F="${F}\t$(printf "%.2f" "${bat_W}")"
 
-        last_E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
-        sleep 1
-        next_E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
-        W="$(echo "(${next_E} - ${last_E})/1000000" | bc -lq)"
+        E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
+        W="$(echo "(${E} - ${last_E})/1000000" | bc -lq)"
+        F="${F}\t$(printf "%.1f" "${W}")"
+
+        PL1_uW="$(cat /sys/class/powercap/intel-rapl\:0/constraint_0_power_limit_uw)"
+        PL1_W="$(echo "${PL1_uW}/1000000" | bc -lq)"
+        F="${F}\t$(printf "%.1f" "${PL1_W}")"
+
+        PL2_uW="$(cat /sys/class/powercap/intel-rapl\:0/constraint_1_power_limit_uw)"
+        PL2_W="$(echo "${PL2_uW}/1000000" | bc -lq)"
+        F="${F}\t$(printf "%.1f" "${PL2_W}")"
+
+        E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
+        W="$(echo "(${E} - ${last_E})/1000000" | bc -lq)"
         F="${F}\t$(printf "%.1f" "${W}")"
 
         T="$(cat /sys/devices/platform/coretemp.0/hwmon/hwmon*/temp1_input)"
