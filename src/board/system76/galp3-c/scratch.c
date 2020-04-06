@@ -3,6 +3,7 @@
 
 #include <board/smfi.h>
 #include <common/macro.h>
+#include <ec/pwm.h>
 
 // Include scratch ROM
 uint8_t __code __at(SCRATCH_OFFSET) scratch_rom[] = {
@@ -16,6 +17,12 @@ volatile uint8_t __xdata __at(0x1045) SCAR1H;
 
 // Enter or exit scratch ROM
 void scratch_trampoline(void) {
+    // Set fans to 100%
+    DCR2 = 0xFF;
+
+    //TODO: Clear keyboard presses
+
+    // Start watchdog timer
     smfi_watchdog();
 
     // Disable interrupts
