@@ -10,7 +10,7 @@ endif
 # Calculate version
 DATE=$(shell git show --format="%cd" --date="format:%Y-%m-%d" --no-patch)
 REV=$(shell git describe --always --dirty)
-VERSION=$(DATE)_$(REV)
+VERSION?=$(DATE)_$(REV)
 
 # Set build directory
 BUILD=build/$(BOARD)/$(VERSION)
