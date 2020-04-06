@@ -9,6 +9,7 @@
 #include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <ec/etwd.h>
 #include <ec/pwm.h>
 
 // Shared memory host semaphore
@@ -32,9 +33,6 @@ volatile uint8_t __xdata __at(0x103C) ECINDAR1;
 volatile uint8_t __xdata __at(0x103D) ECINDAR2;
 volatile uint8_t __xdata __at(0x103E) ECINDAR3;
 volatile uint8_t __xdata __at(0x103F) ECINDDR;
-
-volatile uint8_t __xdata __at(0x1F01) ETWCFG;
-volatile uint8_t __xdata __at(0x1F07) EWDKEYR;
 
 static volatile uint8_t __xdata __at(0xE00) smfi_cmd[256];
 static volatile uint8_t __xdata __at(0xF00) smfi_dbg[256];
@@ -144,6 +142,7 @@ static enum Result cmd_reset(void) {
     return RES_ERR;
 }
 
+#ifndef __SCRATCH__
 static enum Result cmd_fan_get(void) {
     // If setting fan 0
     if (smfi_cmd[2] == 0) {
@@ -167,9 +166,22 @@ static enum Result cmd_fan_set(void) {
     // Failed if fan not found
     return RES_ERR;
 }
+#endif
+
+// Set a watchdog timer of 10 seconds
+void smfi_watchdog(void) {
+    ET1CNTLLR = 0xFF;
+    EWDCNTLLR = 0xFF;
+    EWDCNTLHR = 0x04;
+}
 
 void smfi_event(void) {
     if (smfi_cmd[0]) {
+#ifdef __SCRATCH__
+        // If in scratch ROM, restart watchdog timer when command received
+        smfi_watchdog();
+#endif
+
         switch (smfi_cmd[0]) {
             case CMD_PROBE:
                 // Signature

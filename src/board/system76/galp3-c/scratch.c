@@ -1,6 +1,7 @@
 #include <8051.h>
 #include <stdint.h>
 
+#include <board/smfi.h>
 #include <common/macro.h>
 
 // Include scratch ROM
@@ -15,6 +16,8 @@ volatile uint8_t __xdata __at(0x1045) SCAR1H;
 
 // Enter or exit scratch ROM
 void scratch_trampoline(void) {
+    smfi_watchdog();
+
     // Disable interrupts
     EA = 0;
 
