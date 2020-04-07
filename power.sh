@@ -46,10 +46,6 @@ do
         PL2_W="$(echo "${PL2_uW}/1000000" | bc -lq)"
         F="${F}\t$(printf "%.1f" "${PL2_W}")"
 
-        E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
-        W="$(echo "(${E} - ${last_E})/1000000" | bc -lq)"
-        F="${F}\t$(printf "%.1f" "${W}")"
-
         T="$(cat /sys/devices/platform/coretemp.0/hwmon/hwmon*/temp1_input)"
         C="$(echo "${T}/1000" | bc -lq)"
         F="${F}\t$(printf "%.1f" "${C}")"
