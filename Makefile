@@ -1,5 +1,9 @@
 -include config.mk
 
+# Target to remove build artifacts
+clean:
+	rm -rf build
+
 # Parameter for current board
 ifeq ($(BOARD),)
 $(info $(shell echo Please set BOARD to one of the following))
@@ -18,10 +22,6 @@ BUILD=build/$(BOARD)/$(VERSION)
 # Default target - build the board's EC firmware
 all: $(BUILD)/ec.rom
 	$(info Built '$(VERSION)' for '$(BOARD)')
-
-# Target to remove build artifacts
-clean:
-	rm -rf build
 
 # Include common source
 COMMON_DIR=src/common
