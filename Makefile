@@ -1,16 +1,14 @@
 -include config.mk
 
-# Target to remove build artifacts
-clean:
-	rm -rf build
-
 # Parameter for current board
 ifeq ($(BOARD),)
-$(info $(shell echo Please set BOARD to one of the following))
-$(info $(shell cd src/board && echo */*))
-$(error BOARD not set)
-endif
-
+all:
+	@echo "Please set BOARD to one of the following:"
+	@cd src/board && for board in */*; do \
+		echo "  $$board"; \
+	done
+	@exit 1
+else
 # Calculate version
 DATE=$(shell git show --format="%cd" --date="format:%Y-%m-%d" --no-patch)
 REV=$(shell git describe --always --dirty)
@@ -54,3 +52,8 @@ CFLAGS+=-I$(ARCH_DIR)/include -D__ARCH__=$(ARCH)
 include $(ARCH_DIR)/arch.mk
 
 # The architecture defines build targets, no more is required
+endif
+
+# Target to remove build artifacts
+clean:
+	rm -rf build
