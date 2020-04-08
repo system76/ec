@@ -22,6 +22,9 @@ void scratch_trampoline(void) {
 
     //TODO: Clear keyboard presses
 
+    // Clear power on key
+    BRAM[0x76] = 0;
+
     // Start watchdog timer
     smfi_watchdog();
 

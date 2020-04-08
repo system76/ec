@@ -7,6 +7,7 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <common/debug.h>
+#include <ec/bram.h>
 
 // Platform does not currently support Deep Sx
 #define DEEP_SX 0
@@ -255,6 +256,15 @@ void power_event(void) {
     // Always switch to ds5 if EC is running
     if (power_state == POWER_STATE_DEFAULT) {
         power_on_ds5();
+
+        // If power on key is not found
+        if (BRAM[0x76] != 0xEC) {
+            // Set the key
+            BRAM[0x76] = 0xEC;
+
+            // Power on system
+            power_on_s5();
+        }
     }
 
     // Check if the adapter line goes low
