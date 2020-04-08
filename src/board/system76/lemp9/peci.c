@@ -8,10 +8,13 @@
 #include <ec/pwm.h>
 
 // Fan speed is the lowest requested over HEATUP seconds
-#define HEATUP 5
+#define HEATUP 10
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
 #define COOLDOWN 10
+
+// Interpolate duty cycle
+#define INTERPOLATE 0
 
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
 #define T_JUNCTION 100
@@ -54,6 +57,7 @@ uint8_t fan_duty(int16_t temp) {
             } else {
                 const struct FanPoint * prev = &FAN_POINTS[i - 1];
 
+#if INTERPOLATE
                 // If in between current temp and previous temp, interpolate
                 if (temp > prev->temp) {
                     int16_t dtemp = (cur->temp - prev->temp);
@@ -63,6 +67,9 @@ uint8_t fan_duty(int16_t temp) {
                         ((temp - prev->temp) * dduty) / dtemp
                     );
                 }
+#else // INTERPOLATE
+                return prev->duty;
+#endif // INTERPOLATE
             }
         }
     }
