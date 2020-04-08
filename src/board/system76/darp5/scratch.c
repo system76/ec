@@ -3,6 +3,7 @@
 
 #include <board/smfi.h>
 #include <common/macro.h>
+#include <ec/bram.h>
 #include <ec/pwm.h>
 
 // Include scratch ROM
