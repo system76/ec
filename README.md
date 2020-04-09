@@ -1,4 +1,4 @@
-# System76 EC (WIP)
+# System76 EC
 
 System76 EC is a GPLv3 licensed embedded controller firmware for System76
 laptops. It is designed to be portable to boards using several 8-bit
