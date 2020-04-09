@@ -3,7 +3,6 @@
 
 #include <board/smfi.h>
 #include <common/macro.h>
-#include <ec/bram.h>
 #include <ec/pwm.h>
 
 // Include scratch ROM
@@ -22,9 +21,6 @@ void scratch_trampoline(void) {
     DCR2 = 0xFF;
 
     //TODO: Clear keyboard presses
-
-    // Clear power on key
-    BRAM[0x76] = 0;
 
     // Start watchdog timer
     smfi_watchdog();
