@@ -19,6 +19,7 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
+#include <board/touchpad.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
@@ -59,22 +60,6 @@ void init(void) {
     smfi_init();
 
     //TODO: INTC
-}
-
-void touchpad_event(struct Ps2 * ps2) {
-    if (kbc_second) {
-        *(ps2->control) = 0x07;
-    } else {
-        ps2_reset(ps2);
-    }
-
-    uint8_t status = *(ps2->status);
-    *(ps2->status) = status;
-    if (status & (1 << 3)) {
-        uint8_t data = *(ps2->data);
-        TRACE("touchpad: %02X\n", data);
-        kbc_mouse(&KBC, data, 1000);
-    }
 }
 
 void main(void) {
@@ -120,7 +105,7 @@ void main(void) {
                 break;
             case 2:
                 // Passes through touchpad packets
-                touchpad_event(&PS2_3);
+                touchpad_event();
                 break;
             case 3:
                 // Checks for keyboard/mouse packets from host

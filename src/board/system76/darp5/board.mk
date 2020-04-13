@@ -19,6 +19,9 @@ CFLAGS+=-DLEVEL=4
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_0
 
+# Set touchpad PS2 bus
+CFLAGS+=-DPS2_TOUCHPAD=PS2_3
+
 # Set smart charger parameters
 CFLAGS+=\
 	-DCHARGER_CHARGE_CURRENT=1536 \
