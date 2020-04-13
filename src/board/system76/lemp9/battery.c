@@ -1,7 +1,6 @@
 #include <board/smbus.h>
 #include <common/debug.h>
 
-
 // ChargeOption0 flags
 // Low Power Mode Enable
 #define SBC_EN_LWPWR        ((uint16_t)(1 << 15))
@@ -46,17 +45,16 @@ int battery_charger_enable(void) {
     res = battery_charger_disable();
     if (res < 0) return res;
 
-    // Set charge current to ~1.54 A
-    res = smbus_write(0x09, 0x14, 0x061C);
+    // Set charge current in mA
+    res = smbus_write(0x09, 0x14, CHARGER_CHARGE_CURRENT);
     if (res < 0) return res;
 
-    // Set charge voltage to 8.8 V
-    res = smbus_write(0x09, 0x15, 0x2260);
+    // Set charge voltage in mV
+    res = smbus_write(0x09, 0x15, CHARGER_CHARGE_VOLTAGE);
     if (res < 0) return res;
 
-    // Set input current to ~3.2 A
-    // TODO: figure out why input current must be divided by 2
-    res = smbus_write(0x09, 0x3F, 0x0C80 / 2);
+    // Set input current in mA
+    res = smbus_write(0x09, 0x3F, CHARGER_INPUT_CURRENT);
     if (res < 0) return res;
 
     // Set charge option 0 with watchdog disabled

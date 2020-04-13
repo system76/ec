@@ -19,6 +19,13 @@ CFLAGS+=-DLEVEL=4
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_4
 
+# Set smart charger parameters
+#TODO: Find out why input current must by divided by two
+CFLAGS+=\
+	-DCHARGER_CHARGE_CURRENT=1536 \
+	-DCHARGER_CHARGE_VOLTAGE=8800 \
+	-DCHARGER_INPUT_CURRENT=1600
+
 # Set type-c port manager I2C bus
 CFLAGS+=-DI2C_TCPM=I2C_1
 
