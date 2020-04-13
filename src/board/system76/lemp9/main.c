@@ -19,7 +19,6 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
-#include <board/tcpm.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
@@ -58,7 +57,6 @@ void init(void) {
     pwm_init();
     smbus_init();
     smfi_init();
-    tcpm_init();
 
     //TODO: INTC
 }
@@ -145,9 +143,6 @@ void main(void) {
 
                 // Updates battery status
                 battery_event();
-
-                // Updates type-c port
-                tcpm_event();
             }
         }
 
