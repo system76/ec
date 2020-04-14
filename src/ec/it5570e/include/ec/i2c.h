@@ -3,6 +3,7 @@
 
 #include <common/i2c.h>
 
+extern struct I2C __code I2C_0;
 extern struct I2C __code I2C_1;
 extern struct I2C __code I2C_4;
 

@@ -4,8 +4,8 @@
 ifeq ($(BOARD),)
 all:
 	@echo "Please set BOARD to one of the following:"
-	@cd src/board && for board in */*; do \
-		echo "  $$board"; \
+	@cd src/board && for board in */*/board.mk; do \
+		echo "  $$(dirname "$$board")"; \
 	done
 	@exit 1
 else
