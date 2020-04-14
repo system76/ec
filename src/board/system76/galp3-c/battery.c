@@ -2,6 +2,9 @@
 #include <board/smbus.h>
 #include <common/debug.h>
 
+#define BATTERY_ADDRESS 0x0B
+#define CHARGER_ADDRESS 0x09
+
 // ChargeOption0 flags
 // Low Power Mode Enable
 #define SBC_EN_LWPWR        ((uint16_t)(1 << 15))
@@ -17,7 +20,7 @@ int battery_charger_disable(void) {
 
     // Set charge option 0 with 175s watchdog
     res = smbus_write(
-        0x09,
+        CHARGER_ADDRESS,
         0x12,
         SBC_EN_LWPWR |
         SBC_WDTMR_ADJ_175S |
@@ -26,15 +29,15 @@ int battery_charger_disable(void) {
     );
 
     // Disable charge current
-    res = smbus_write(0x09, 0x14, 0);
+    res = smbus_write(CHARGER_ADDRESS, 0x14, 0);
     if (res < 0) return res;
 
     // Disable charge voltage
-    res = smbus_write(0x09, 0x15, 0);
+    res = smbus_write(CHARGER_ADDRESS, 0x15, 0);
     if (res < 0) return res;
 
     // Disable input current
-    res = smbus_write(0x09, 0x3F, 0);
+    res = smbus_write(CHARGER_ADDRESS, 0x3F, 0);
     if (res < 0) return res;
 
     return 0;
@@ -47,20 +50,20 @@ int battery_charger_enable(void) {
     if (res < 0) return res;
 
     // Set charge current in mA
-    res = smbus_write(0x09, 0x14, CHARGER_CHARGE_CURRENT);
+    res = smbus_write(CHARGER_ADDRESS, 0x14, CHARGER_CHARGE_CURRENT);
     if (res < 0) return res;
 
     // Set charge voltage in mV
-    res = smbus_write(0x09, 0x15, CHARGER_CHARGE_VOLTAGE);
+    res = smbus_write(CHARGER_ADDRESS, 0x15, CHARGER_CHARGE_VOLTAGE);
     if (res < 0) return res;
 
     // Set input current in mA
-    res = smbus_write(0x09, 0x3F, CHARGER_INPUT_CURRENT);
+    res = smbus_write(CHARGER_ADDRESS, 0x3F, CHARGER_INPUT_CURRENT);
     if (res < 0) return res;
 
     // Set charge option 0 with watchdog disabled
     res = smbus_write(
-        0x09,
+        CHARGER_ADDRESS,
         0x12,
         SBC_EN_LWPWR |
         SBC_PWM_FREQ_800KHZ |
@@ -84,7 +87,7 @@ void battery_event(void) {
     int res = 0;
 
     #define command(N, V) { \
-        res = smbus_read(0x0B, V, &N); \
+        res = smbus_read(BATTERY_ADDRESS, V, &N); \
         if (res < 0) { \
             N = 0; \
         } \
@@ -134,24 +137,24 @@ void battery_debug(void) {
     }
 
     DEBUG("Battery:\n");
-    command(Temperature, 0x0B, 0x08);
-    command(Voltage, 0x0B, 0x09);
-    command(Current, 0x0B, 0x0A);
-    command(Charge, 0x0B, 0x0D);
-    command(Status, 0x0B, 0x16);
+    command(Temperature, BATTERY_ADDRESS, 0x08);
+    command(Voltage, BATTERY_ADDRESS, 0x09);
+    command(Current, BATTERY_ADDRESS, 0x0A);
+    command(Charge, BATTERY_ADDRESS, 0x0D);
+    command(Status, BATTERY_ADDRESS, 0x16);
 
     DEBUG("Charger:\n");
-    command(ChargeOption0, 0x09, 0x12);
-    command(ChargeOption1, 0x09, 0x3B);
-    command(ChargeOption2, 0x09, 0x38);
-    command(ChargeOption3, 0x09, 0x37);
-    command(ChargeCurrent, 0x09, 0x14);
-    command(ChargeVoltage, 0x09, 0x15);
-    command(DishargeCurrent, 0x09, 0x39);
-    command(InputCurrent, 0x09, 0x3F);
-    command(ProchotOption0, 0x09, 0x3C);
-    command(ProchotOption1, 0x09, 0x3D);
-    command(ProchotStatus, 0x09, 0x3A);
+    command(ChargeOption0, CHARGER_ADDRESS, 0x12);
+    command(ChargeOption1, CHARGER_ADDRESS, 0x3B);
+    command(ChargeOption2, CHARGER_ADDRESS, 0x38);
+    command(ChargeOption3, CHARGER_ADDRESS, 0x37);
+    command(ChargeCurrent, CHARGER_ADDRESS, 0x14);
+    command(ChargeVoltage, CHARGER_ADDRESS, 0x15);
+    command(DishargeCurrent, CHARGER_ADDRESS, 0x39);
+    command(InputCurrent, CHARGER_ADDRESS, 0x3F);
+    command(ProchotOption0, CHARGER_ADDRESS, 0x3C);
+    command(ProchotOption1, CHARGER_ADDRESS, 0x3D);
+    command(ProchotStatus, CHARGER_ADDRESS, 0x3A);
 
     #undef command
 }
