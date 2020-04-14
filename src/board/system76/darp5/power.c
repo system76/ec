@@ -252,6 +252,14 @@ void power_off_s5(void) {
     update_power_state();
 }
 
+// This function is run when the CPU is reset
+static void power_cpu_reset(void) {
+    // LPC was just reset, enable PNP devices
+    pnp_enable();
+    //TODO: reset KBC and touchpad states
+    kbled_reset();
+}
+
 void power_event(void) {
     // Always switch to ds5 if EC is running
     if (power_state == POWER_STATE_DEFAULT) {
@@ -362,12 +370,7 @@ void power_event(void) {
     #endif
     if(rst_new && !rst_last) {
         DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
-
-        // LPC was just reset, enable PNP devices
-        pnp_enable();
-        //TODO: reset KBC and touchpad states
-
-        kbled_reset();
+        power_cpu_reset();
     }
     rst_last = rst_new;
 

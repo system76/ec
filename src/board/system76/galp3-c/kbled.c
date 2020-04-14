@@ -17,8 +17,11 @@ static uint8_t __code levels[] = {
 void kbled_init(void) {
     // Enable DAC used for KBLIGHT_ADJ
     DACPDREG &= ~(1 << KBLED_DAC);
-    // Set DAC to 0V
-    KBLED_DACDAT = 0;
+    kbled_reset();
+}
+
+void kbled_reset(void) {
+    kbled_set(0);
 }
 
 uint8_t kbled_get(void) {
