@@ -214,6 +214,7 @@ void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
     uint8_t layer = kbscan_layer;
     static uint8_t kbscan_last[KM_OUT] = { 0 };
+    static uint8_t kbscan_last_layer[KM_OUT][KM_IN] = { { 0 } };
 
     static bool debounce = false;
     static uint32_t debounce_time = 0;
@@ -263,9 +264,14 @@ void kbscan_event(void) {
                         debounce_time = time_get();
 
                         // Handle key press/release
-                        uint16_t key = keymap(i, j, kbscan_layer);
+                        if (new_b) {
+                            // On a press, cache the layer the key was pressed on
+                            kbscan_last_layer[i][j] = kbscan_layer;
+                        }
+                        uint8_t key_layer = kbscan_last_layer[i][j];
+                        uint16_t key = keymap(i, j, key_layer);
                         if (key) {
-                            DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
+                            DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
                             if(!kbscan_press(key, new_b, &layer)){
                                 // In the case of ignored key press/release, reset bit
                                 reset = true;
@@ -323,50 +329,7 @@ void kbscan_event(void) {
         }
     }
 
-    if (layer != kbscan_layer) {
-        //TODO: unpress keys before going to scratch rom
-
-        // Unpress all currently pressed keys
-        for (i = 0; i < KM_OUT; i++) {
-            uint8_t new = 0;
-            uint8_t last = kbscan_last[i];
-            if (last) {
-                int j;
-                for (j = 0; j < KM_IN; j++) {
-                    bool new_b = new & (1 << j);
-                    bool last_b = last & (1 << j);
-                    if (new_b != last_b) {
-                        bool reset = false;
-
-                        // Handle key press/release
-                        uint16_t key = keymap(i, j, kbscan_layer);
-                        if (key) {
-                            DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, kbscan_layer, key, new_b);
-                            if(!kbscan_press(key, new_b, NULL)){
-                                // In the case of ignored key press/release, reset bit
-                                reset = true;
-                            }
-                        } else {
-                            WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
-                        }
-
-                        // Reset bit to last state
-                        if (reset) {
-                            if (last_b) {
-                                new |= (1 << j);
-                            } else {
-                                new &= ~(1 << j);
-                            }
-                        }
-                    }
-                }
-            }
-
-            kbscan_last[i] = new;
-        }
-
-        kbscan_layer = layer;
-    }
+    kbscan_layer = layer;
 
     // Reset all lines to inputs
     KSOLGOEN = 0;
