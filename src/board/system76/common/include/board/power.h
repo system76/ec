@@ -12,6 +12,7 @@ enum PowerState {
 
 extern enum PowerState power_state;
 
+void power_init(void);
 void power_event(void);
 
 #endif // _BOARD_POWER_H

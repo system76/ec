@@ -8,6 +8,7 @@
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
+#include <common/config.h>
 #include <common/debug.h>
 
 #define GPIO_SET_DEBUG(G, V) { \
@@ -62,6 +63,18 @@
 #ifndef HAVE_XLP_OUT
     #define HAVE_XLP_OUT 1
 #endif
+
+config_t power_ccd_en = {
+    .config_id = {'C', 'C', 'D', 'E'},
+    .config_short = "Default Camera State",
+    .config_desc = "When set, the camera is enabled on system reset",
+    .value = {
+        .min_value = 0,
+        .max_value = 1,
+        .value = 1 /* Default to enabled */
+    },
+    .set_callback = NULL,
+};
 
 extern uint8_t main_cycle;
 
@@ -129,6 +142,10 @@ enum PowerState calculate_power_state(void) {
 #endif // HAVE_PCH_DPWROK_EC && DEEP_SX
 
     return POWER_STATE_DS5;
+}
+
+void power_init(void) {
+    config_register(&power_ccd_en);
 }
 
 void update_power_state(void) {
@@ -329,6 +346,9 @@ static void power_cpu_reset(void) {
     pnp_enable();
     //TODO: reset KBC and touchpad states
     kbled_reset();
+
+    gpio_set(&CCD_EN, power_ccd_en.value.value);
+
 }
 
 void power_event(void) {

@@ -71,7 +71,7 @@ void init(void) {
     pwm_init();
     smbus_init();
     smfi_init();
-
+    power_init();
     //TODO: INTC
 
     // Must happen last
