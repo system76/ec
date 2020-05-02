@@ -30,7 +30,7 @@ void kbscan_init(void) {
 }
 
 // Debounce time in milliseconds
-#define DEBOUNCE_DELAY 20
+#define DEBOUNCE_DELAY 15
 
 static uint8_t kbscan_get_row(int i) {
     // Set current line as output
@@ -192,7 +192,7 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
             if (pressed) {
                 uint8_t sci = SCI_EXTRA;
                 sci_extra = (uint8_t)(key & 0xFF);
-                
+
                 // HACK FOR HARDWARE HOTKEYS
                 switch (sci_extra) {
                     case SCI_EXTRA_KBD_BKL:
@@ -215,6 +215,7 @@ void kbscan_event(void) {
     uint8_t layer = kbscan_layer;
     static uint8_t kbscan_last[KM_OUT] = { 0 };
     static uint8_t kbscan_last_layer[KM_OUT][KM_IN] = { { 0 } };
+    static bool kbscan_ghost[KM_OUT] = { false };
 
     static bool debounce = false;
     static uint32_t debounce_time = 0;
@@ -242,8 +243,12 @@ void kbscan_event(void) {
         uint8_t last = kbscan_last[i];
         if (new != last) {
             if (kbscan_has_ghost_in_row(i, new)) {
-                kbscan_last[i] = new;
+                kbscan_ghost[i] = true;
                 continue;
+            } else if (kbscan_ghost[i]) {
+                kbscan_ghost[i] = false;
+                // Debounce to allow remaining ghosts to settle.
+                debounce = true;
             }
 
             // A key was pressed or released
