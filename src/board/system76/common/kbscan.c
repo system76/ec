@@ -227,11 +227,7 @@ void kbscan_event(void) {
     // If debounce complete
     if (debounce) {
         uint32_t time = time_get();
-        //TODO: time test with overflow
-        if (time < debounce_time) {
-            // Overflow, reset debounce_time
-            debounce_time = time;
-        } else if (time >= (debounce_time + DEBOUNCE_DELAY)) {
+        if ((time - debounce_time) >= DEBOUNCE_DELAY) {
             // Finish debounce
             debounce = false;
         }
@@ -249,6 +245,7 @@ void kbscan_event(void) {
                 kbscan_ghost[i] = false;
                 // Debounce to allow remaining ghosts to settle.
                 debounce = true;
+                debounce_time = time_get();
             }
 
             // A key was pressed or released
