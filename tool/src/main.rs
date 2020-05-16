@@ -296,11 +296,94 @@ unsafe fn fan_set(index: u8, duty: u8) -> Result<(), Error> {
     ec.fan_set(index, duty)
 }
 
+unsafe fn config_dump() -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    let mut i = 0;
+    loop {
+        match ec.config_get_name(i) {
+            Err(err) => {
+                if 0 == i {
+                    // No configuration entries found.
+                    return Err(err);
+                }
+
+                // At least one entry found.
+                return Ok(());
+            },
+            Ok(name) => {
+                let desc = ec.config_get_desc(i)?;
+                let value = ec.config_get_value(i)?;
+                println!("{}: {}", name, desc);
+                println!("{}", value);
+            }
+        };
+        i += 1;
+    }
+}
+
+
+unsafe fn config_dump_name(name: String) -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    // Find config entry with name
+    let mut i = 0;
+    loop {
+        match ec.config_get_name(i) {
+            Err(err) => return Err(err),
+            Ok(read_name) => {
+                if name == read_name {
+                    let desc = ec.config_get_desc(i)?;
+                    let value = ec.config_get_value(i)?;
+                    println!("{}: {}", name, desc);
+                    println!("{}", value);
+                    return Ok(());
+                }
+            },
+        }
+
+        i += 1;
+    }
+}
+
+
+unsafe fn config_set_value(name: String, value: i32) -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    // Find config entry with name
+    let mut i = 0;
+    loop {
+        match ec.config_get_name(i) {
+            Err(err) => return Err(err),
+            Ok(read_name) => {
+                if name == read_name {
+                    return ec.config_set_value(i, value);
+                }
+            },
+        }
+
+        i += 1;
+    }
+}
+
 fn usage() {
     eprintln!("  console");
     eprintln!("  flash [file]");
     eprintln!("  flash_backup [file]");
     eprintln!("  fan [index] <duty>");
+    eprintln!("  config <name> <value>");
     eprintln!("  info");
     eprintln!("  print [message]");
 }
@@ -377,6 +460,56 @@ fn main() {
                     process::exit(1);
                 }
             },
+            "config" => {
+                let config_short = args.next();
+                let config_value = args.next();
+
+                if None == config_short {
+                    // Dump all configuration
+                    match unsafe { config_dump() } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to read configuration: {:X?}", err);
+                            process::exit(1);
+                        },
+                    }
+
+                }
+                else if None == config_value {
+                    // Dump specific config
+                    let name = config_short.expect("No config name specified");
+                    println!("Dump {:?}", name);
+                    match unsafe { config_dump_name(name) } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to read configuration: {:X?}", err);
+                            process::exit(1);
+                        },
+                    }
+
+                }
+                else {
+                    // Set specific config
+                    let name = config_short.expect("No config name specified");
+                    match config_value.expect("No config value specified").parse::<i32>() {
+                        Ok(v) => {
+                            match unsafe { config_set_value(name, v) } {
+                                Ok(()) => (),
+                                Err(err) => {
+                                    eprintln!("failed to set configuration: {:X?}", err);
+                                    process::exit(1);
+                                },
+                            }
+                        },
+                        Err(e) => {
+                            eprintln!("Unable to set config due to {:X?}", e);
+                            process::exit(1);
+                        }
+                    };
+                }
+            },
+
+
             "info" => match unsafe { info() } {
                 Ok(()) => (),
                 Err(err) => {

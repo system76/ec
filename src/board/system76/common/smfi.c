@@ -9,6 +9,7 @@
 #include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <common/config.h>
 #include <ec/etwd.h>
 #include <ec/pwm.h>
 
@@ -176,6 +177,58 @@ static enum Result cmd_fan_set(void) {
     // Failed if fan not found
     return RES_ERR;
 }
+
+static enum Result cmd_config_get_short_by_index(void) {
+    uint8_t index = smfi_cmd[2];
+
+    config_t *entry = config_index(index);
+    if (entry) {
+        strncpy(&smfi_cmd[2], entry->config_short, ARRAY_SIZE(smfi_cmd) - 2);
+        return RES_OK;
+    }
+
+    return RES_ERR;
+}
+
+static enum Result cmd_config_get_desc_by_index(void) {
+    uint8_t index = smfi_cmd[2];
+
+    config_t *entry = config_index(index);
+    if (entry) {
+        strncpy(&smfi_cmd[2], entry->config_desc, ARRAY_SIZE(smfi_cmd) - 2);
+        return RES_OK;
+    }
+
+    return RES_ERR;
+}
+
+static enum Result cmd_config_get_value_by_index(void) {
+    uint8_t index = smfi_cmd[2];
+
+    config_t *entry = config_index(index);
+    if (entry) {
+        memcpy(&smfi_cmd[2], &entry->value, sizeof(entry->value));
+        return RES_OK;
+    }
+
+    return RES_ERR;
+}
+
+static enum Result cmd_config_set_value_by_index(void) {
+    uint8_t index = smfi_cmd[2];
+
+    config_t *entry = config_index(index);
+    if (entry) {
+        int32_t value = 0;
+        memcpy(&value, &smfi_cmd[3], sizeof(value));
+        if (config_set_value(entry, value)) {
+            return RES_OK;
+        }
+    }
+
+    return RES_ERR;
+}
+
 #endif
 
 // Set a watchdog timer of 10 seconds
@@ -228,6 +281,24 @@ void smfi_event(void) {
             case CMD_FAN_SET:
                 smfi_cmd[1] = cmd_fan_set();
                 break;
+
+            /* Config related commands */
+            case CMD_GET_CONFIG_NAME:
+                smfi_cmd[1] = cmd_config_get_short_by_index();
+                break;
+
+            case CMD_GET_CONFIG_DESC:
+                smfi_cmd[1] = cmd_config_get_desc_by_index();
+                break;
+
+            case CMD_GET_CONFIG_VALUE:
+                smfi_cmd[1] = cmd_config_get_value_by_index();
+                break;
+
+            case CMD_SET_CONFIG_VALUE:
+                smfi_cmd[1] = cmd_config_set_value_by_index();
+                break;
+
 #endif // __SCRATCH__
             default:
                 // Command not found

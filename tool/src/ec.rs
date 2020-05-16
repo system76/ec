@@ -1,4 +1,7 @@
 use hwio::{Io, Pio};
+extern crate std;
+use std::fmt;
+use std::string::String;
 
 use crate::{
     Error,
@@ -21,6 +24,11 @@ pub enum Cmd {
     Reset = 6,
     FanGet = 7,
     FanSet = 8,
+
+    ConfigGetName = 32,
+    ConfigGetDesc = 33,
+    ConfigGetValue = 34,
+    ConfigSetValue = 35,
 }
 
 pub const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -32,6 +40,22 @@ pub struct Ec<T: Timeout> {
     cmd: u16,
     dbg: u16,
     timeout: T,
+}
+
+pub struct Value {
+    max: i32,
+    min: i32,
+    value: i32,
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Min: {}", self.min)?;
+        writeln!(f, "Max: {}", self.max)?;
+        writeln!(f, "Current Value: {}", self.value)?;
+
+        Ok(())
+    }
 }
 
 impl<T: Timeout> Ec<T> {
@@ -66,11 +90,63 @@ impl<T: Timeout> Ec<T> {
         ).read()
     }
 
+    /// Read from the command space
+    pub unsafe fn read16(&mut self, addr: u8) -> u16 {
+        Pio::<u8>::new(
+            self.cmd + (addr as u16)
+        ).read() as u16 |
+        (Pio::<u8>::new(
+            self.cmd + (addr as u16) + 1
+        ).read() as u16) << 8
+
+    }
+
+    /// Read from the command space
+    pub unsafe fn read32(&mut self, addr: u8) -> u32 {
+        Pio::<u8>::new(
+            self.cmd + (addr as u16)
+        ).read() as u32 |
+        (Pio::<u8>::new(
+            self.cmd + (addr as u16) + 1
+        ).read() as u32) << 8 |
+        (Pio::<u8>::new(
+            self.cmd + (addr as u16) + 2
+        ).read() as u32) << 16 |
+        (Pio::<u8>::new(
+            self.cmd + (addr as u16) + 3
+        ).read() as u32) << 24
+
+    }
+
     /// Write to the command space
     pub unsafe fn write(&mut self, addr: u8, data: u8) {
         Pio::<u8>::new(
             self.cmd + (addr as u16)
         ).write(data)
+    }
+
+    pub unsafe fn write16(&mut self, addr: u8, data: u16) {
+        Pio::<u8>::new(
+            self.cmd + (addr as u16)
+        ).write(data as u8);
+        Pio::<u8>::new(
+            self.cmd + (addr as u16) + 1
+        ).write((data >> 8) as u8)
+    }
+
+    pub unsafe fn write32(&mut self, addr: u8, data: u32) {
+        Pio::<u8>::new(
+            self.cmd + (addr as u16)
+        ).write(data as u8);
+        Pio::<u8>::new(
+            self.cmd + (addr as u16) + 1
+        ).write((data >> 8) as u8);
+        Pio::<u8>::new(
+            self.cmd + (addr as u16) + 2
+        ).write((data >> 16) as u8);
+        Pio::<u8>::new(
+            self.cmd + (addr as u16) + 3
+        ).write((data >> 24) as u8)
     }
 
     /// Read from the debug space
@@ -194,6 +270,61 @@ impl<T: Timeout> Ec<T> {
         self.write(2, index);
         self.write(3, duty);
         self.command(Cmd::FanSet)
+    }
+
+    pub unsafe fn config_get_name(&mut self, index: u8) -> Result<String, Error> {
+        self.write(2, index);
+        self.command(Cmd::ConfigGetName)?;
+        let mut i = 0;
+        let mut str = String::from("");
+
+        while (i + 2) < 256 {
+            let data = self.read((i + 2) as u8) as char;
+            if data == '\0' {
+                break;
+            }
+            i += 1;
+            str.push(data);
+        }
+        Ok(str)
+    }
+
+    pub unsafe fn config_get_desc(&mut self, index: u8) -> Result<String, Error> {
+        self.write(2, index);
+        self.command(Cmd::ConfigGetDesc)?;
+        let mut i = 0;
+        let mut str = String::from("");
+
+        while (i + 2) < 256 {
+            let data = self.read((i + 2) as u8) as char;
+            if data == '\0' {
+                break;
+            }
+            i += 1;
+            str.push(data);
+        }
+        Ok(str)
+    }
+
+    pub unsafe fn config_get_value(&mut self, index: u8) -> Result<Value, Error> {
+        self.write(2, index);
+        self.command(Cmd::ConfigGetValue)?;
+
+        let value = Value {
+            min: self.read32(2) as i32,
+            max: self.read32(6) as i32,
+            value: self.read32(10) as i32,
+        };
+
+        Ok(value)
+    }
+
+    pub unsafe fn config_set_value(&mut self, index: u8, value: i32) -> Result<(), Error> {
+        self.write32(3, value as u32);
+        self.write(2, index);
+        self.command(Cmd::ConfigSetValue)?;
+
+        Ok(())
     }
 }
 

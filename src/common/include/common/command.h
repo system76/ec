@@ -20,6 +20,16 @@ enum Command {
     CMD_FAN_GET = 7,
     // Set fan speeds
     CMD_FAN_SET = 8,
+
+    // Get Config by name from index.
+    CMD_GET_CONFIG_NAME = 32,
+    // Get configuration descrption from index.
+    CMD_GET_CONFIG_DESC = 33,
+    // Get config value from index
+    CMD_GET_CONFIG_VALUE = 34,
+    // Set config value from index
+    CMD_SET_CONFIG_VALUE = 35,
+
     //TODO
 };
 
