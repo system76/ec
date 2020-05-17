@@ -19,7 +19,7 @@ $(BUILD)/ec.rom: $(BUILD)/ec.ihx
 # Link object files into Intel Hex file
 $(BUILD)/ec.ihx: $(OBJ)
 	@mkdir -p $(@D)
-	$(CC) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^
 
 # Compile C files into object files
 $(OBJ): $(BUILD)/%.rel: src/%.c $(INCLUDE)
