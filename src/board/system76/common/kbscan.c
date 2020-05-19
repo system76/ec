@@ -7,7 +7,20 @@
 #include <board/keymap.h>
 #include <board/pmc.h>
 #include <board/power.h>
+#include <common/config.h>
 #include <common/debug.h>
+
+config_t kbscan_cfg_fnlock = {
+    .config_id = {'K', 'F' , 'N' ,'L'},
+    .config_short = "Fn Lock",
+    .config_desc = "When enabled, F1-F12 will activate their alternative function",
+    .value = {
+        .min_value = 0,
+        .max_value = 1,
+        .value = 0 /* Default to disable */
+    },
+    .set_callback = NULL,
+};
 
 bool kbscan_enabled = false;
 uint16_t kbscan_repeat_period = 91;
@@ -32,6 +45,8 @@ void kbscan_init(void) {
     KSIGCTRL = 0;
     KSIGOEN = 0;
     KSIGDAT = 0;
+
+    config_register(&kbscan_cfg_fnlock);
 }
 
 // Debounce time in milliseconds
@@ -292,7 +307,7 @@ void kbscan_event(void) {
                             kbscan_last_layer[i][j] = kbscan_layer;
                         }
                         uint8_t key_layer = kbscan_last_layer[i][j];
-                        uint16_t key = keymap(i, j, key_layer);
+                        uint16_t key = kbscan_cfg_fnlock.value.value ? keymap_fnlock(i, j, key_layer) : keymap(i, j, key_layer);
                         if (key) {
                             DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
                             if(!kbscan_press(key, new_b, &layer)){
