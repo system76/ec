@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-CC=sdcc -mmcs51 --model-large --xram-size $(SRAM_SIZE) --Werror
+CC=sdcc -mmcs51 --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
 OBJ=$(patsubst src/%.c,$(BUILD)/%.rel,$(SRC))
 
 # Run EC rom in simulator
@@ -14,7 +14,7 @@ sim: $(BUILD)/ec.rom
 # Convert from Intel Hex file to binary file
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx
 	@mkdir -p $(@D)
-	makebin -p < $< > $@
+	makebin -s $(CODE_SIZE) -p < $< > $@
 
 # Link object files into Intel Hex file
 $(BUILD)/ec.ihx: $(OBJ)
