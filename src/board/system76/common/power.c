@@ -129,7 +129,7 @@ void power_on_ds5(void) {
     tPCH02;
 
     // Deep sleep well is a-ok
-    gpio_set(&PCH_DPWROK_EC, true);
+    //gpio_set(&PCH_DPWROK_EC, true);
     // Wait for deep sleep well to propogate
     tPCH32;
 #else // DEEP_SX
@@ -194,11 +194,11 @@ void power_on_s5(void) {
     gpio_set(&DD_ON, true);
 
     // De-assert SUS_ACK# - TODO is this needed on non-dsx?
-    gpio_set(&SUS_PWR_ACK, true);
+    //gpio_set(&SUS_PWR_ACK, true);
     tPCH03;
 
     // Assert DSW_PWROK
-    gpio_set(&PCH_DPWROK_EC, true);
+    //gpio_set(&PCH_DPWROK_EC, true);
 
     // De-assert RSMRST#
     gpio_set(&EC_RSMRST_N, true);
@@ -226,7 +226,7 @@ void power_off_s5(void) {
     // TODO
 #else // DEEP_SX
     // De-assert SYS_PWROK
-    gpio_set(&PCH_PWROK_EC, false);
+    //gpio_set(&PCH_PWROK_EC, false);
 
     // De-assert PCH_PWROK
     gpio_set(&PM_PWROK, false);
@@ -245,7 +245,7 @@ void power_off_s5(void) {
     gpio_set(&VA_EC_EN, false);
 
     // De-assert DSW_PWROK
-    gpio_set(&PCH_DPWROK_EC, false);
+    //gpio_set(&PCH_DPWROK_EC, false);
     tPCH14;
 #endif // DEEP_SX
 
@@ -349,12 +349,12 @@ void power_event(void) {
         delay_ms(10);
 
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
-        gpio_set(&PCH_PWROK_EC, true);
+        //gpio_set(&PCH_PWROK_EC, true);
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
         // De-assert SYS_PWROK
-        gpio_set(&PCH_PWROK_EC, false);
+        //gpio_set(&PCH_PWROK_EC, false);
 
         // De-assert PCH_PWROK
         gpio_set(&PM_PWROK, false);
@@ -375,16 +375,17 @@ void power_event(void) {
     rst_last = rst_new;
 
     #if LEVEL >= LEVEL_DEBUG
-        static bool sus_last = true;
+        /*static bool sus_last = true;
         bool sus_new = gpio_get(&SLP_SUS_N);
         if (!sus_new && sus_last) {
             DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
         } else if (sus_new && !sus_last) {
             DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
         }
-        sus_last = sus_new;
+        sus_last = sus_new;*/
     #endif
 
+    /*
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
     static bool ack_last = false;
@@ -398,7 +399,7 @@ void power_event(void) {
     #endif
     ack_last = ack_new;
 
-    if (ack_new) {
+    if (ack_new)*/ {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
             power_off_s5();
