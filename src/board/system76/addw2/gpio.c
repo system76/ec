@@ -49,7 +49,7 @@ void gpio_init() {
     GPDRE = 0x40;
     GPDRF = 0x40;
     GPDRG = 0x41;
-    GPDRH = 0x00;
+    GPDRH = 0x80;
     GPDRI = 0x00;
     GPDRJ = 0x0C;
 
