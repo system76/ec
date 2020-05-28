@@ -48,10 +48,10 @@ void gpio_init() {
     GPDRD = 0x38;
     GPDRE = 0x40;
     GPDRF = 0x40;
-    GPDRG = 0x40;
+    GPDRG = 0x41;
     GPDRH = 0x00;
     GPDRI = 0x00;
-    GPDRJ = 0x00;
+    GPDRJ = 0x0C;
 
     // Set GPIO control
     // EC_PWM_LEDKB_P

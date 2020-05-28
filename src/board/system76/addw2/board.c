@@ -9,11 +9,6 @@ extern uint8_t main_cycle;
 
 void board_init(void) {
     RSTS = 0x44;
-
-    // Turn off keyboard LEDs
-    gpio_set(&LED_SCROLL_N, true);
-    gpio_set(&LED_NUM_N, true);
-    gpio_set(&LED_CAP_N, true);
 }
 
 void board_event(void) {
