@@ -19,6 +19,7 @@ volatile uint8_t __xdata __at(0x1042) SCAR0H;
 void scratch_trampoline(void) {
     // Set fans to 100%
     DCR2 = 0xFF;
+    DCR4 = 0xFF;
 
     //TODO: Clear keyboard presses
 
