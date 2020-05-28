@@ -21,6 +21,8 @@ bool kbc_second = false;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
+// LED state
+uint8_t kbc_leds = 0;
 
 // Values from linux/drivers/input/keyboard/atkbd.c
 static const uint16_t kbc_typematic_period[32] = {
@@ -256,6 +258,7 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_SET_LEDS:
                     TRACE("  set leds\n");
                     state = KBC_STATE_NORMAL;
+                    kbc_leds = data;
                     kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                     break;
                 case KBC_STATE_SCANCODE:

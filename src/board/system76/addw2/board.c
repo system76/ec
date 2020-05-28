@@ -2,15 +2,23 @@
 #include <board/board.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
+#include <board/kbc.h>
 #include <board/power.h>
 
 extern uint8_t main_cycle;
 
 void board_init(void) {
     RSTS = 0x44;
+
+    // Turn off keyboard LEDs
+    gpio_set(&LED_SCROLL_N, true);
+    gpio_set(&LED_NUM_N, true);
+    gpio_set(&LED_CAP_N, true);
 }
 
 void board_event(void) {
+    static uint8_t last_kbc_leds = 0;
+
     if (main_cycle == 0) {
         if (gpio_get(&ACIN_N)) {
             // Discharging (no AC adapter)
@@ -34,5 +42,13 @@ void board_event(void) {
             // Power off VDD3 if system should be off
             gpio_set(&XLP_OUT, 0);
         }
+    }
+
+    // Set keyboard LEDs
+    if (kbc_leds != last_kbc_leds) {
+        gpio_set(&LED_SCROLL_N, (kbc_leds & 1) == 0);
+        gpio_set(&LED_NUM_N, (kbc_leds & 2) == 0);
+        gpio_set(&LED_CAP_N, (kbc_leds & 4) == 0);
+        last_kbc_leds = kbc_leds;
     }
 }

@@ -7,6 +7,7 @@
 
 extern bool kbc_first;
 extern bool kbc_second;
+extern uint8_t kbc_leds;
 
 void kbc_init(void);
 bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed);
