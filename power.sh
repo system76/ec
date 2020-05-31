@@ -26,11 +26,12 @@ do
         F="${F}\tCPU PL1"
         F="${F}\tCPU PL2"
         F="${F}\tCPU C"
-        F="${F}\tFAN %"
+        F="${F}\tCPU FAN"
         if [ "${has_dgpu}" == "1" ]
         then
             F="${F}\tGPU W"
             F="${F}\tGPU C"
+            F="${F}\tGPU FAN"
         fi
     else
         F="$(date "+%T")"
@@ -72,6 +73,10 @@ do
 
             DGPU_T="$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader)"
             F="${F}\t${DGPU_T}"
+
+            D="$(sudo tool/target/release/system76_ectool fan 1)"
+            P="$(echo "(${D} * 100)/255" | bc -lq)"
+            F="${F}\t$(printf "%.0f" "${P}")"
         fi
     fi
 
