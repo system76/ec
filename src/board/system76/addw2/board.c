@@ -1,5 +1,7 @@
+#include <arch/time.h>
 #include <board/battery.h>
 #include <board/board.h>
+#include <board/dgpu.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
@@ -7,8 +9,12 @@
 
 extern uint8_t main_cycle;
 
-void board_init(void) {
+void board_early_init(void) {
     RSTS = 0x44;
+}
+
+void board_init(void) {
+    dgpu_init();
 }
 
 void board_event(void) {
@@ -36,6 +42,16 @@ void board_event(void) {
         } else if (gpio_get(&ACIN_N)) {
             // Power off VDD3 if system should be off
             gpio_set(&XLP_OUT, 0);
+        }
+
+        static uint32_t last_time = 0;
+        uint32_t time = time_get();
+        // Only run the following once a second
+        if (last_time > time || (time - last_time) >= 1000) {
+            last_time = time;
+
+            // Updates discrete GPU fan status and temps
+            dgpu_event();
         }
     }
 

@@ -16,6 +16,9 @@ CFLAGS+=-DLEVEL=4
 # Enable I2C debug on 0x76
 #CFLAGS+=-DI2C_DEBUGGER=0x76
 
+# Set discrete GPU I2C bus
+CFLAGS+=-DI2C_DGPU=I2C_1
+
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_4
 

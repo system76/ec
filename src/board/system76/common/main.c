@@ -42,7 +42,7 @@ uint8_t main_cycle = 0;
 void init(void) {
     // Must happen first
     arch_init();
-    board_init();
+    board_early_init();
     gctrl_init();
     gpio_init();
 
@@ -62,6 +62,9 @@ void init(void) {
     smfi_init();
 
     //TODO: INTC
+
+    // Must happen last
+    board_init();
 }
 
 void main(void) {

@@ -49,7 +49,7 @@ void gpio_init() {
     GPDRE = 0x40;
     GPDRF = 0x40;
     GPDRG = 0x41;
-    GPDRH = 0x80;
+    GPDRH = 0x90;
     GPDRI = 0x00;
     GPDRJ = 0x0C;
 
@@ -89,9 +89,9 @@ void gpio_init() {
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // SMC_VGA_THERM
-    GPCRC1 = GPIO_IN;
+    GPCRC1 = GPIO_ALT;
     // SMD_VGA_THERM
-    GPCRC2 = GPIO_IN;
+    GPCRC2 = GPIO_ALT;
     // KB-SO16
     GPCRC3 = 0x04;
     // CNVI_DET#_EC
@@ -175,7 +175,7 @@ void gpio_init() {
     // GC6_FB_EN_PCH
     GPCRH3 = GPIO_IN;
     // DGPU_PWR_EN
-    GPCRH4 = GPIO_IN;
+    GPCRH4 = GPIO_OUT;
     // LED_BAT_CHG
     GPCRH5 = GPIO_OUT | GPIO_UP;
     // SUSB#_PCH
