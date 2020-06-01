@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <board/gpio.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
@@ -115,9 +116,8 @@ void dgpu_init(void) {
 }
 
 void dgpu_event(void) {
-    if (power_state == POWER_STATE_S0) {
+    if (power_state == POWER_STATE_S0 && gpio_get(&DGPU_PWR_EN)) {
         // Use I2CS if in S0 state
-
         int8_t rlts;
         int res = i2c_get(&I2C_DGPU, 0x4F, 0x00, &rlts, 1);
         if (res == 1) {
@@ -130,7 +130,7 @@ void dgpu_event(void) {
             dgpu_duty = PWM_DUTY(50);
         }
     } else {
-        // Turn fan off if not in S0 state
+        // Turn fan off if not in S0 state or GPU power not on
         dgpu_temp = 0;
         dgpu_duty = PWM_DUTY(0);
     }

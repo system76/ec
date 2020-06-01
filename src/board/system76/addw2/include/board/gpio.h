@@ -19,6 +19,7 @@ extern struct Gpio __code BKL_EN;
 extern struct Gpio __code BUF_PLT_RST_N;
 extern struct Gpio __code CCD_EN;
 extern struct Gpio __code DD_ON;
+extern struct Gpio __code DGPU_PWR_EN;
 extern struct Gpio __code EC_EN; // renamed to SUSBC_EN
 extern struct Gpio __code EC_RSMRST_N;
 extern struct Gpio __code LED_ACIN;
