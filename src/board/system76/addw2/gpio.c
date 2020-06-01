@@ -49,7 +49,7 @@ void gpio_init() {
     GPDRE = 0x40;
     GPDRF = 0x40;
     GPDRG = 0x41;
-    GPDRH = 0x90;
+    GPDRH = 0x80;
     GPDRI = 0x00;
     GPDRJ = 0x0C;
 
@@ -175,7 +175,7 @@ void gpio_init() {
     // GC6_FB_EN_PCH
     GPCRH3 = GPIO_IN;
     // DGPU_PWR_EN
-    GPCRH4 = GPIO_OUT;
+    GPCRH4 = GPIO_IN;
     // LED_BAT_CHG
     GPCRH5 = GPIO_OUT | GPIO_UP;
     // SUSB#_PCH
