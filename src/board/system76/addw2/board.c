@@ -6,6 +6,7 @@
 #include <board/gpio.h>
 #include <board/kbc.h>
 #include <board/power.h>
+#include <common/debug.h>
 
 extern uint8_t main_cycle;
 
@@ -18,7 +19,14 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    static uint8_t last_kbc_leds = 0;
+    // Read POST codes
+    if (P80H81HS & 1) {
+        uint8_t p80h = P80HD;
+        uint8_t p81h = P81HD;
+        P80H81HS = 1;
+
+        DEBUG("POST %02X%02X\n", p81h, p80h);
+    }
 
     if (main_cycle == 0) {
         if (gpio_get(&ACIN_N)) {
@@ -56,6 +64,7 @@ void board_event(void) {
     }
 
     // Set keyboard LEDs
+    static uint8_t last_kbc_leds = 0;
     if (kbc_leds != last_kbc_leds) {
         gpio_set(&LED_SCROLL_N, (kbc_leds & 1) == 0);
         gpio_set(&LED_NUM_N, (kbc_leds & 2) == 0);
