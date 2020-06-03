@@ -13,7 +13,7 @@ console_internal:
 
 console_external:
 	sleep 1 && echo C | sudo tee /dev/ttyACM* &
-	sudo tio -b 1000000 -m INLCRNL /dev/ttyACM*
+	sudo tio -b 1000000 -m INLCRNL -t /dev/ttyACM*
 
 flash_internal: $(BUILD)/ec.rom
 	cargo build --manifest-path tool/Cargo.toml --release
