@@ -31,14 +31,19 @@ extern struct Gpio __code LED_NUM_N;
 extern struct Gpio __code LED_PWR;
 extern struct Gpio __code LED_SCROLL_N;
 extern struct Gpio __code LID_SW_N;
+#define HAVE_PCH_DPWROK_EC 0
+#define HAVE_PCH_PWROK_EC 0
 extern struct Gpio __code PM_CLKRUN_N; // renamed to ECCLKRUN#
 extern struct Gpio __code PM_PWROK;
 extern struct Gpio __code PWR_BTN_N;
 extern struct Gpio __code PWR_SW_N;
 extern struct Gpio __code SCI_N;
+#define HAVE_SLP_SUS_N 0
 extern struct Gpio __code SMI_N;
 extern struct Gpio __code SUSB_N_PCH;
 extern struct Gpio __code SUSC_N_PCH;
+#define HAVE_SUSWARN_N 0
+#define HAVE_SUS_PWR_ACK 0
 extern struct Gpio __code SWI_N;
 extern struct Gpio __code VA_EC_EN;
 extern struct Gpio __code WLAN_EN;
