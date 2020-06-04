@@ -1,5 +1,6 @@
 #include <8051.h>
 
+#include <arch/arch.h>
 #include <arch/time.h>
 
 void arch_init(void) {

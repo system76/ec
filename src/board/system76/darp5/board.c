@@ -5,9 +5,7 @@
 
 extern uint8_t main_cycle;
 
-void board_init(void) {
-    RSTS = 0x84;
-}
+void board_init(void) {}
 
 void board_event(void) {
     if (main_cycle == 0) {

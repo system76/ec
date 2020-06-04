@@ -10,10 +10,6 @@
 
 extern uint8_t main_cycle;
 
-void board_early_init(void) {
-    RSTS = 0x44;
-}
-
 void board_init(void) {
     dgpu_init();
 }
