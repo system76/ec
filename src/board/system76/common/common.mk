@@ -4,6 +4,9 @@ SRC+=$(wildcard $(SYSTEM76_COMMON_DIR)/*.c)
 INCLUDE+=$(wildcard $(SYSTEM76_COMMON_DIR)/include/common/*.h) $(SYSTEM76_COMMON_DIR)/common.mk
 CFLAGS+=-I$(SYSTEM76_COMMON_DIR)/include
 
+# Uncomment to print POST codes
+#CFLAGS+=-DPOST_DEBUG
+
 # Add scratch ROM
 include $(SYSTEM76_COMMON_DIR)/scratch/scratch.mk
 

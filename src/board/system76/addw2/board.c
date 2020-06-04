@@ -2,7 +2,6 @@
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/dgpu.h>
-#include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
 #include <board/power.h>
@@ -15,15 +14,6 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    // Read POST codes
-    if (P80H81HS & 1) {
-        uint8_t p80h = P80HD;
-        uint8_t p81h = P81HD;
-        P80H81HS |= 1;
-
-        DEBUG("POST %02X%02X\n", p81h, p80h);
-    }
-
     if (main_cycle == 0) {
         if (gpio_get(&ACIN_N)) {
             // Discharging (no AC adapter)
