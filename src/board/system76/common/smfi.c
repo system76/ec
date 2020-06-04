@@ -144,11 +144,16 @@ static enum Result cmd_reset(void) {
 
 #ifndef __SCRATCH__
 static enum Result cmd_fan_get(void) {
-    // If setting fan 0
-    if (smfi_cmd[2] == 0) {
-        // Get duty of fan 0
-        smfi_cmd[3] = DCR2;
-        return RES_OK;
+    switch (smfi_cmd[2]) {
+        case 0:
+            // Get duty of fan 0
+            smfi_cmd[3] = DCR2;
+            return RES_OK;
+        case 1:
+            // Get duty of fan 1
+            //TODO: only allow on platforms like addw2
+            smfi_cmd[3] = DCR4;
+            return RES_OK;
     }
 
     // Failed if fan not found
@@ -156,11 +161,16 @@ static enum Result cmd_fan_get(void) {
 }
 
 static enum Result cmd_fan_set(void) {
-    // If setting fan 0
-    if (smfi_cmd[2] == 0) {
-        // Set duty cycle of fan 0
-        DCR2 = smfi_cmd[3];
-        return RES_OK;
+    switch (smfi_cmd[2]) {
+        case 0:
+            // Set duty cycle of fan 0
+            DCR2 = smfi_cmd[3];
+            return RES_OK;
+        case 1:
+            // Set duty cycle of fan 1
+            //TODO: only allow on platforms like addw2
+            DCR4 = smfi_cmd[3];
+            return RES_OK;
     }
 
     // Failed if fan not found

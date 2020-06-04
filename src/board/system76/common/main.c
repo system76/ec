@@ -24,6 +24,7 @@
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <ec/ec.h>
 
 #ifdef PARPORT_DEBUG
     #include <ec/parallel.h>
@@ -42,7 +43,7 @@ uint8_t main_cycle = 0;
 void init(void) {
     // Must happen first
     arch_init();
-    board_init();
+    ec_init();
     gctrl_init();
     gpio_init();
 
@@ -62,6 +63,9 @@ void init(void) {
     smfi_init();
 
     //TODO: INTC
+
+    // Must happen last
+    board_init();
 }
 
 void main(void) {
@@ -72,23 +76,6 @@ void main(void) {
 #if GPIO_DEBUG
     gpio_debug();
 #endif
-
-    // Allow CPU to boot
-    gpio_set(&SB_KBCRST_N, true);
-    // Allow backlight to be turned on
-    gpio_set(&BKL_EN, true);
-    // Enable camera
-    gpio_set(&CCD_EN, true);
-    // Enable wireless
-    gpio_set(&BT_EN, true);
-    gpio_set(&WLAN_EN, true);
-    gpio_set(&WLAN_PWR_EN, true);
-    // Enable right USB port
-    gpio_set(&USB_PWR_EN_N, false);
-    // Assert SMI#, SCI#, and SWI#
-    gpio_set(&SCI_N, true);
-    gpio_set(&SMI_N, true);
-    gpio_set(&SWI_N, true);
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 

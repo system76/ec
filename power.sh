@@ -10,6 +10,12 @@ then
     header=0
 fi
 
+has_dgpu=0
+if nvidia-smi &> /dev/null
+then
+    has_dgpu=1
+fi
+
 while true
 do
     if [ "${header}" == "1" ]
@@ -20,7 +26,13 @@ do
         F="${F}\tCPU PL1"
         F="${F}\tCPU PL2"
         F="${F}\tCPU C"
-        F="${F}\tFAN %"
+        F="${F}\tCPU FAN"
+        if [ "${has_dgpu}" == "1" ]
+        then
+            F="${F}\tGPU W"
+            F="${F}\tGPU C"
+            F="${F}\tGPU FAN"
+        fi
     else
         F="$(date "+%T")"
 
@@ -53,6 +65,19 @@ do
         D="$(sudo tool/target/release/system76_ectool fan 0)"
         P="$(echo "(${D} * 100)/255" | bc -lq)"
         F="${F}\t$(printf "%.0f" "${P}")"
+
+        if [ "${has_dgpu}" == "1" ]
+        then
+            DGPU_W="$(nvidia-smi --query-gpu=power.draw --format=csv,noheader | cut -d' ' -f1)"
+            F="${F}\t$(printf "%.1f" "${DGPU_W}")"
+
+            DGPU_T="$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader)"
+            F="${F}\t${DGPU_T}"
+
+            D="$(sudo tool/target/release/system76_ectool fan 1)"
+            P="$(echo "(${D} * 100)/255" | bc -lq)"
+            F="${F}\t$(printf "%.0f" "${P}")"
+        fi
     fi
 
     for file in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq

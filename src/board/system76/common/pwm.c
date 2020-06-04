@@ -10,6 +10,10 @@ void pwm_init(void) {
     // Set prescalar clock frequency to EC clock
     PCFSR = 0b01;
 
+    // Use C0CPRS and CTR0 for all channels
+    PCSSGL = 0;
+    PCSSGH = 0;
+
     // Set clock prescaler to 0 + 1
     C0CPRS = 0;
 

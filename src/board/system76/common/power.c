@@ -12,6 +12,26 @@
 // Platform does not currently support Deep Sx
 #define DEEP_SX 0
 
+#ifndef HAVE_PCH_DPWROK_EC
+    #define HAVE_PCH_DPWROK_EC 1
+#endif
+
+#ifndef HAVE_PCH_PWROK_EC
+    #define HAVE_PCH_PWROK_EC 1
+#endif
+
+#ifndef HAVE_SLP_SUS_N
+    #define HAVE_SLP_SUS_N 1
+#endif
+
+#ifndef HAVE_SUSWARN_N
+    #define HAVE_SUSWARN_N 1
+#endif
+
+#ifndef HAVE_SUS_PWR_ACK
+    #define HAVE_SUS_PWR_ACK 1
+#endif
+
 extern uint8_t main_cycle;
 
 // VccRTC stable (55%) to RTCRST# high
@@ -128,8 +148,10 @@ void power_on_ds5(void) {
     tPCH01;
     tPCH02;
 
+#if HAVE_PCH_DPWROK_EC
     // Deep sleep well is a-ok
     gpio_set(&PCH_DPWROK_EC, true);
+#endif // HAVE_PCH_DPWROK_EC
     // Wait for deep sleep well to propogate
     tPCH32;
 #else // DEEP_SX
@@ -193,12 +215,16 @@ void power_on_s5(void) {
     // Enable VDD5
     gpio_set(&DD_ON, true);
 
+#if HAVE_SUS_PWR_ACK
     // De-assert SUS_ACK# - TODO is this needed on non-dsx?
     gpio_set(&SUS_PWR_ACK, true);
+#endif // HAVE_SUS_PWR_ACK
     tPCH03;
 
+#if HAVE_PCH_DPWROK_EC
     // Assert DSW_PWROK
     gpio_set(&PCH_DPWROK_EC, true);
+#endif // HAVE_PCH_DPWROK_EC
 
     // De-assert RSMRST#
     gpio_set(&EC_RSMRST_N, true);
@@ -225,8 +251,10 @@ void power_off_s5(void) {
 #if DEEP_SX
     // TODO
 #else // DEEP_SX
+#if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
     gpio_set(&PCH_PWROK_EC, false);
+#endif // HAVE_PCH_PWROK_EC
 
     // De-assert PCH_PWROK
     gpio_set(&PM_PWROK, false);
@@ -244,8 +272,10 @@ void power_off_s5(void) {
     // Disable VCCPRIM_* planes
     gpio_set(&VA_EC_EN, false);
 
+#if HAVE_PCH_DPWROK_EC
     // De-assert DSW_PWROK
     gpio_set(&PCH_DPWROK_EC, false);
+#endif // HAVE_PCH_DPWROK_EC
     tPCH14;
 #endif // DEEP_SX
 
@@ -348,13 +378,17 @@ void power_event(void) {
         // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
         delay_ms(10);
 
+#if HAVE_PCH_PWROK_EC
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
         gpio_set(&PCH_PWROK_EC, true);
+#endif // HAVE_PCH_PWROK_EC
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
+#if HAVE_PCH_PWROK_EC
         // De-assert SYS_PWROK
         gpio_set(&PCH_PWROK_EC, false);
+#endif // HAVE_PCH_PWROK_EC
 
         // De-assert PCH_PWROK
         gpio_set(&PM_PWROK, false);
@@ -374,6 +408,7 @@ void power_event(void) {
     }
     rst_last = rst_new;
 
+#if HAVE_SLP_SUS_N
     #if LEVEL >= LEVEL_DEBUG
         static bool sus_last = true;
         bool sus_new = gpio_get(&SLP_SUS_N);
@@ -384,7 +419,9 @@ void power_event(void) {
         }
         sus_last = sus_new;
     #endif
+#endif // HAVE_SLP_SUS_N
 
+#if HAVE_SUSWARN_N
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
     static bool ack_last = false;
@@ -398,7 +435,9 @@ void power_event(void) {
     #endif
     ack_last = ack_new;
 
-    if (ack_new) {
+    if (ack_new)
+#endif // HAVE_SUSWARN_N
+    {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
             power_off_s5();
