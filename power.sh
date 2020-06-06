@@ -3,6 +3,7 @@
 set -e
 
 ./ectool.sh info
+sudo modprobe msr
 
 header=1
 if [ -e power.csv ]
