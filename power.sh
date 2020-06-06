@@ -26,6 +26,8 @@ do
         F="${F}\tCPU PL1"
         F="${F}\tCPU PL2"
         F="${F}\tCPU C"
+        F="${F}\tCPU TCC"
+        F="${F}\tCPU TJM"
         F="${F}\tCPU FAN"
         if [ "${has_dgpu}" == "1" ]
         then
@@ -61,6 +63,12 @@ do
         T="$(cat /sys/devices/platform/coretemp.0/hwmon/hwmon*/temp1_input)"
         C="$(echo "${T}/1000" | bc -lq)"
         F="${F}\t$(printf "%.1f" "${C}")"
+
+        TJMAX="$(sudo rdmsr -c 0x1A2 --bitfield 23:16)"
+        TCC_OFF="$(sudo rdmsr -c 0x1A2 --bitfield 31:24)"
+        TCC="$(python3 -c "print(hex(${TJMAX}-${TCC_OFF}))")"
+        F="${F}\t$(printf "%d" "${TCC}")"
+        F="${F}\t$(printf "%d" "${TJMAX}")"
 
         D="$(sudo tool/target/release/system76_ectool fan 0)"
         P="$(echo "(${D} * 100)/255" | bc -lq)"
