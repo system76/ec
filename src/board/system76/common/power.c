@@ -9,8 +9,14 @@
 #include <board/pnp.h>
 #include <common/debug.h>
 
-// Platform does not currently support Deep Sx
-#define DEEP_SX 0
+#ifndef DEEP_SX
+    // Platform does not currently support Deep Sx
+    #define DEEP_SX 0
+#endif
+
+#ifndef HAVE_EC_EN
+    #define HAVE_EC_EN 1
+#endif
 
 #ifndef HAVE_PCH_DPWROK_EC
     #define HAVE_PCH_DPWROK_EC 1
@@ -30,6 +36,10 @@
 
 #ifndef HAVE_SUS_PWR_ACK
     #define HAVE_SUS_PWR_ACK 1
+#endif
+
+#ifndef HAVE_VA_EC_EN
+    #define HAVE_VA_EC_EN 1
 #endif
 
 extern uint8_t main_cycle;
@@ -91,15 +101,13 @@ enum PowerState calculate_power_state(void) {
         return POWER_STATE_S5;
     }
 
-#if DEEP_SX
-    if (gpio_get(&PCH_DPWROK_EC)) {
-        return POWER_STATE_DS5;
+#if HAVE_PCH_DPWROK_EC && DEEP_SX
+    if (!gpio_get(&PCH_DPWROK_EC)) {
+        return POWER_STATE_DEFAULT;
     }
+#endif // HAVE_PCH_DPWROK_EC && DEEP_SX
 
-    return POWER_STATE_DEFAULT;
-#else
     return POWER_STATE_DS5;
-#endif
 }
 
 void update_power_state(void) {
@@ -179,9 +187,11 @@ void power_on_s5(void) {
 
     // TODO: Must have SL_SUS# set high by PCH
 
+#if HAVE_VA_EC_EN
     // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
     // avoid leakage
     gpio_set(&VA_EC_EN, true);
+#endif // HAVE_VA_EC_EN
     tPCH06;
 
     // Enable VDD5
@@ -196,8 +206,10 @@ void power_on_s5(void) {
     // Wait for PCH stability
     tPCH18;
 
+#if HAVE_EC_EN
     // Allow processor to control SUSB# and SUSC#
     gpio_set(&EC_EN, true);
+#endif // HAVE_EC_EN
 
     // Extra wait - TODO remove
     delay_ms(200);
@@ -207,9 +219,11 @@ void power_on_s5(void) {
     // See Figure 12-25 in Whiskey Lake Platform Design Guide
     // TODO - rail timing graph
 
+#if HAVE_VA_EC_EN
     // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
     // avoid leakage
     gpio_set(&VA_EC_EN, true);
+#endif // HAVE_VA_EC_EN
     tPCH06;
 
     // Enable VDD5
@@ -232,8 +246,10 @@ void power_on_s5(void) {
     // Wait for PCH stability
     tPCH18;
 
+#if HAVE_EC_EN
     // Allow processor to control SUSB# and SUSC#
     gpio_set(&EC_EN, true);
+#endif // HAVE_EC_EN
 
     // Wait for SUSPWRDNACK validity
     tPLT01;
@@ -259,8 +275,10 @@ void power_off_s5(void) {
     // De-assert PCH_PWROK
     gpio_set(&PM_PWROK, false);
 
+#if HAVE_EC_EN
     // Block processor from controlling SUSB# and SUSC#
     gpio_set(&EC_EN, false);
+#endif // HAVE_EC_EN
 
     // De-assert RSMRST#
     gpio_set(&EC_RSMRST_N, false);
@@ -269,8 +287,10 @@ void power_off_s5(void) {
     gpio_set(&DD_ON, false);
     tPCH12;
 
+#if HAVE_VA_EC_EN
     // Disable VCCPRIM_* planes
     gpio_set(&VA_EC_EN, false);
+#endif // HAVE_VA_EC_EN
 
 #if HAVE_PCH_DPWROK_EC
     // De-assert DSW_PWROK
@@ -361,9 +381,6 @@ void power_event(void) {
     // Update power state before determining actions
     update_power_state();
 
-#if DEEP_SX
-    //TODO
-#else // DEEP_SX
     // If system power is good
     static bool pg_last = false;
     bool pg_new = gpio_get(&ALL_SYS_PWRGD);
@@ -477,5 +494,4 @@ void power_event(void) {
             last_time = time;
         }
     }
-#endif // DEEP_SX
 }
