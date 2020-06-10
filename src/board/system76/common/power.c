@@ -9,6 +9,11 @@
 #include <board/pnp.h>
 #include <common/debug.h>
 
+#define GPIO_SET_DEBUG(G, V) { \
+    DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
+    gpio_set(&G, V); \
+}
+
 #ifndef DEEP_SX
     // Platform does not currently support Deep Sx
     #define DEEP_SX 0
@@ -158,7 +163,7 @@ void power_on_ds5(void) {
 
 #if HAVE_PCH_DPWROK_EC
     // Deep sleep well is a-ok
-    gpio_set(&PCH_DPWROK_EC, true);
+    GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
 #endif // HAVE_PCH_DPWROK_EC
     // Wait for deep sleep well to propogate
     tPCH32;
@@ -190,25 +195,25 @@ void power_on_s5(void) {
 #if HAVE_VA_EC_EN
     // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
     // avoid leakage
-    gpio_set(&VA_EC_EN, true);
+    GPIO_SET_DEBUG(VA_EC_EN, true);
 #endif // HAVE_VA_EC_EN
     tPCH06;
 
     // Enable VDD5
-    gpio_set(&DD_ON, true);
+    GPIO_SET_DEBUG(DD_ON, true);
 
     //TODO: Should SUS_ACK# be de-asserted here?
     tPCH03;
 
     // De-assert RSMRST#
-    gpio_set(&EC_RSMRST_N, true);
+    GPIO_SET_DEBUG(EC_RSMRST_N, true);
 
     // Wait for PCH stability
     tPCH18;
 
 #if HAVE_EC_EN
     // Allow processor to control SUSB# and SUSC#
-    gpio_set(&EC_EN, true);
+    GPIO_SET_DEBUG(EC_EN, true);
 #endif // HAVE_EC_EN
 
     // Extra wait - TODO remove
@@ -222,33 +227,33 @@ void power_on_s5(void) {
 #if HAVE_VA_EC_EN
     // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
     // avoid leakage
-    gpio_set(&VA_EC_EN, true);
+    GPIO_SET_DEBUG(VA_EC_EN, true);
 #endif // HAVE_VA_EC_EN
     tPCH06;
 
     // Enable VDD5
-    gpio_set(&DD_ON, true);
+    GPIO_SET_DEBUG(DD_ON, true);
 
 #if HAVE_SUS_PWR_ACK
     // De-assert SUS_ACK# - TODO is this needed on non-dsx?
-    gpio_set(&SUS_PWR_ACK, true);
+    GPIO_SET_DEBUG(SUS_PWR_ACK, true);
 #endif // HAVE_SUS_PWR_ACK
     tPCH03;
 
 #if HAVE_PCH_DPWROK_EC
     // Assert DSW_PWROK
-    gpio_set(&PCH_DPWROK_EC, true);
+    GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
 #endif // HAVE_PCH_DPWROK_EC
 
     // De-assert RSMRST#
-    gpio_set(&EC_RSMRST_N, true);
+    GPIO_SET_DEBUG(EC_RSMRST_N, true);
 
     // Wait for PCH stability
     tPCH18;
 
 #if HAVE_EC_EN
     // Allow processor to control SUSB# and SUSC#
-    gpio_set(&EC_EN, true);
+    GPIO_SET_DEBUG(EC_EN, true);
 #endif // HAVE_EC_EN
 
     // Wait for SUSPWRDNACK validity
@@ -269,32 +274,32 @@ void power_off_s5(void) {
 #else // DEEP_SX
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
-    gpio_set(&PCH_PWROK_EC, false);
+    GPIO_SET_DEBUG(PCH_PWROK_EC, false);
 #endif // HAVE_PCH_PWROK_EC
 
     // De-assert PCH_PWROK
-    gpio_set(&PM_PWROK, false);
+    GPIO_SET_DEBUG(PM_PWROK, false);
 
 #if HAVE_EC_EN
     // Block processor from controlling SUSB# and SUSC#
-    gpio_set(&EC_EN, false);
+    GPIO_SET_DEBUG(EC_EN, false);
 #endif // HAVE_EC_EN
 
     // De-assert RSMRST#
-    gpio_set(&EC_RSMRST_N, false);
+    GPIO_SET_DEBUG(EC_RSMRST_N, false);
 
     // Disable VDD5
-    gpio_set(&DD_ON, false);
+    GPIO_SET_DEBUG(DD_ON, false);
     tPCH12;
 
 #if HAVE_VA_EC_EN
     // Disable VCCPRIM_* planes
-    gpio_set(&VA_EC_EN, false);
+    GPIO_SET_DEBUG(VA_EC_EN, false);
 #endif // HAVE_VA_EC_EN
 
 #if HAVE_PCH_DPWROK_EC
     // De-assert DSW_PWROK
-    gpio_set(&PCH_DPWROK_EC, false);
+    GPIO_SET_DEBUG(PCH_DPWROK_EC, false);
 #endif // HAVE_PCH_DPWROK_EC
     tPCH14;
 #endif // DEEP_SX
@@ -390,25 +395,25 @@ void power_event(void) {
         //TODO: tPLT04;
 
         // Allow H_VR_READY to set PCH_PWROK
-        gpio_set(&PM_PWROK, true);
+        GPIO_SET_DEBUG(PM_PWROK, true);
 
         // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
         delay_ms(10);
 
 #if HAVE_PCH_PWROK_EC
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
-        gpio_set(&PCH_PWROK_EC, true);
+        GPIO_SET_DEBUG(PCH_PWROK_EC, true);
 #endif // HAVE_PCH_PWROK_EC
     } else if(!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
 #if HAVE_PCH_PWROK_EC
         // De-assert SYS_PWROK
-        gpio_set(&PCH_PWROK_EC, false);
+        GPIO_SET_DEBUG(PCH_PWROK_EC, false);
 #endif // HAVE_PCH_PWROK_EC
 
         // De-assert PCH_PWROK
-        gpio_set(&PM_PWROK, false);
+        GPIO_SET_DEBUG(PM_PWROK, false);
     }
     pg_last = pg_new;
 
