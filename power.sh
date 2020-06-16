@@ -12,7 +12,7 @@ then
 fi
 
 has_dgpu=0
-if nvidia-smi &> /dev/null
+if nvidia-smi --query-gpu=power.draw,temperature.gpu --format=csv,noheader &> /dev/null
 then
     has_dgpu=1
 fi
