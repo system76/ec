@@ -49,7 +49,7 @@ void gpio_init() {
     GPDRF = 0x40;
     GPDRG = 0x40;
     GPDRH = 0x00;
-    GPDRI = 0x00;
+    GPDRI = 0x20;
     GPDRJ = 0x00;
 
     // Set GPIO control
@@ -191,7 +191,7 @@ void gpio_init() {
     GPCRI3 = GPIO_ALT;
     // TOTAL_CUR
     GPCRI4 = GPIO_ALT;
-    //TODO EC_AMP_EN
+    // EC_AMP_EN
     GPCRI5 = GPIO_OUT;
     // SLP_S0#
     GPCRI6 = GPIO_IN;
