@@ -123,6 +123,57 @@ void peci_init(void) {
     PADCTLR = 0x02;
 }
 
+// Returns positive completion code on success, negative completion code or
+// negative (0x1000 | status register) on PECI hardware error
+int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
+    // Wait for completion
+    while (HOSTAR & 1) {}
+    // Clear status
+    HOSTAR = HOSTAR;
+
+    // Enable PECI, clearing data fifo's, enable AW_FCS
+    HOCTLR = (1 << 5) | (1 << 3) | (1 << 1);
+    // Set address to default
+    HOTRADDR = 0x30;
+    // Set write length
+    HOWRLR = 10;
+    // Set read length
+    HORDLR = 1;
+    // Set command
+    HOCMDR = 0xA5;
+
+    // Write host ID
+    HOWRDR = 0;
+    // Write index
+    HOWRDR = index;
+    // Write param
+    HOWRDR = (uint8_t)param;
+    HOWRDR = (uint8_t)(param >> 8);
+    // Write data
+    HOWRDR = (uint8_t)data;
+    HOWRDR = (uint8_t)(data >> 8);
+    HOWRDR = (uint8_t)(data >> 16);
+    HOWRDR = (uint8_t)(data >> 24);
+
+    // Start transaction
+    HOCTLR |= 1;
+
+    // Wait for completion
+    while (HOSTAR & 1) {}
+
+    int status = (int)HOSTAR;
+    if (status & (1 << 1)) {
+        int cc = (int)HORDDR;
+        if (cc & 0x80) {
+            return -cc;
+        } else {
+            return cc;
+        }
+    } else {
+        return -(0x1000 | status);
+    }
+}
+
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 void peci_event(void) {
     if (power_state == POWER_STATE_S0) {
