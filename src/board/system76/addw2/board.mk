@@ -31,6 +31,11 @@ CFLAGS+=\
 	-DCHARGER_CHARGE_VOLTAGE=12600 \
 	-DCHARGER_INPUT_CURRENT=11800
 
+# Set CPU power limits in watts
+CFLAGS+=\
+	-DPOWER_LIMIT_AC=180 \
+	-DPOWER_LIMIT_DC=28
+
 # Enable debug logging over keyboard parallel port
 #CFLAGS+=-DPARPORT_DEBUG
 

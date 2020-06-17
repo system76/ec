@@ -23,6 +23,7 @@ extern struct Gpio __code DD_ON;
 extern struct Gpio __code DGPU_PWR_EN;
 #define HAVE_EC_EN 0
 extern struct Gpio __code EC_RSMRST_N;
+extern struct Gpio __code GC6_FB_EN;
 extern struct Gpio __code LED_ACIN;
 extern struct Gpio __code LED_AIRPLANE_N;
 extern struct Gpio __code LED_BAT_CHG;

@@ -2,19 +2,24 @@
 
 set -e
 
-./ectool.sh info
-sudo modprobe msr
-
-header=1
-if [ -e power.csv ]
+has_ec=0
+if ./ectool.sh info 2> /dev/null
 then
-    header=0
+    has_ec=1
 fi
 
 has_dgpu=0
 if nvidia-smi --query-gpu=power.draw,temperature.gpu --format=csv,noheader &> /dev/null
 then
     has_dgpu=1
+fi
+
+sudo modprobe msr
+
+header=1
+if [ -e power.csv ]
+then
+    header=0
 fi
 
 while true
@@ -29,12 +34,18 @@ do
         F="${F}\tCPU C"
         F="${F}\tCPU TCC"
         F="${F}\tCPU TJM"
-        F="${F}\tCPU FAN"
+        if [ "${has_ec}" == "1" ]
+        then
+            F="${F}\tCPU FAN"
+        fi
         if [ "${has_dgpu}" == "1" ]
         then
             F="${F}\tGPU W"
             F="${F}\tGPU C"
-            F="${F}\tGPU FAN"
+            if [ "${has_ec}" == "1" ]
+            then
+                F="${F}\tGPU FAN"
+            fi
         fi
     else
         F="$(date "+%T")"
@@ -71,9 +82,12 @@ do
         F="${F}\t$(printf "%d" "${TCC}")"
         F="${F}\t$(printf "%d" "${TJMAX}")"
 
-        D="$(sudo tool/target/release/system76_ectool fan 0)"
-        P="$(echo "(${D} * 100)/255" | bc -lq)"
-        F="${F}\t$(printf "%.0f" "${P}")"
+        if [ "${has_ec}" == "1" ]
+        then
+            D="$(sudo tool/target/release/system76_ectool fan 0)"
+            P="$(echo "(${D} * 100)/255" | bc -lq)"
+            F="${F}\t$(printf "%.0f" "${P}")"
+        fi
 
         if [ "${has_dgpu}" == "1" ]
         then
@@ -83,9 +97,12 @@ do
             DGPU_T="$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader)"
             F="${F}\t${DGPU_T}"
 
-            D="$(sudo tool/target/release/system76_ectool fan 1)"
-            P="$(echo "(${D} * 100)/255" | bc -lq)"
-            F="${F}\t$(printf "%.0f" "${P}")"
+            if [ "${has_ec}" == "1" ]
+            then
+                D="$(sudo tool/target/release/system76_ectool fan 1)"
+                P="$(echo "(${D} * 100)/255" | bc -lq)"
+                F="${F}\t$(printf "%.0f" "${P}")"
+            fi
         fi
     fi
 

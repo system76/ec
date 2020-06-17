@@ -116,7 +116,7 @@ void dgpu_init(void) {
 }
 
 void dgpu_event(void) {
-    if (power_state == POWER_STATE_S0 && gpio_get(&DGPU_PWR_EN)) {
+    if (power_state == POWER_STATE_S0 && gpio_get(&DGPU_PWR_EN) && !gpio_get(&GC6_FB_EN)) {
         // Use I2CS if in S0 state
         int8_t rlts;
         int res = i2c_get(&I2C_DGPU, 0x4F, 0x00, &rlts, 1);
