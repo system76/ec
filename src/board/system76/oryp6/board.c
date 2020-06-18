@@ -21,6 +21,8 @@ void board_init(void) {
     gpio_set(&BT_EN, true);
     gpio_set(&WLAN_EN, true);
     gpio_set(&WLAN_PWR_EN, true);
+    // Enable USB port power?
+    gpio_set(&USB_PWR_EN_N, false);
     // Assert SMI#, SCI#, and SWI#
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);

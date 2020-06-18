@@ -27,6 +27,7 @@ struct Gpio __code SMI_N =          GPIO(D, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code SWI_N =          GPIO(B, 5);
+struct Gpio __code USB_PWR_EN_N =   GPIO(E, 3);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4); // renamed to EC_SLP_SUS#
 struct Gpio __code WLAN_EN =        GPIO(G, 1);
 struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
@@ -50,7 +51,7 @@ void gpio_init() {
     GPDRG = 0x40;
     GPDRH = 0x00;
     GPDRI = 0x20;
-    GPDRJ = 0x00;
+    GPDRJ = 0x02;
 
     // Set GPIO control
     // EC_PWM_PIN_24
@@ -200,7 +201,7 @@ void gpio_init() {
     // LED_BAT_FULL
     GPCRJ0 = GPIO_OUT | GPIO_UP;
     // KBC_MUTE#
-    GPCRJ1 = GPIO_IN;
+    GPCRJ1 = GPIO_OUT;
     // NC
     GPCRJ2 = GPIO_IN | GPIO_UP;
     // RGBKB-DET#
