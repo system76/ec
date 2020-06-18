@@ -8,6 +8,7 @@ Board              | Embedded Controller | Architecture
 ------------------ | ------------------- | --------------
 System76 ecsim     | Simulated ITE EC    | 8051
 System76 Laptops   | ITE IT8587E         | 8051
+System76 Laptops   | ITE IT5570E         | 8051
 System76 Thelio Io | Atmel ATMEGA32U4    | AVR
 Arduino Mega 2560  | Atmel ATMEGA2560    | AVR
 
