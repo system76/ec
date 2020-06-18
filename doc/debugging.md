@@ -46,24 +46,20 @@ make BOARD=arduino/mega2560 flash
     - May require removing keyboard depending on port location
 5. Connect Mega 2560 to host
     - This will create an ACM device at `/dev/ttyACM*`
-6. Connect to ACM device from host
-```
-sudo tio -b 1000000 -m INLCRNL /dev/ttyACM0
-```
-7. Set Mega to peripheral mode
-```
-echo 'C' > /dev/ttyACM0
-```
-8. Ground target to host
+6. Ground target to host
     - Connect USB cable from USB-C port on target to host
-9. Connect Mega 2560 to target
+7. Connect Mega 2560 to target
+8. Start the console
+```
+make BOARD=system76/<model> console_external
+```
 
 EC logs should now print to the console on the host. This can be tested
 by removing or inserting the AC adapter to trigger a power event.
 
 To return the Mega to host mode, reset the device.
 
-If logs are corrupted, try power cycling the Mega.
+If logs are corrupted, try power cycling the Mega or reseating the cable.
 
 ## I2C connection
 
