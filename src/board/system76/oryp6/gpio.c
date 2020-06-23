@@ -15,7 +15,7 @@ struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code GC6_FB_EN =      GPIO(J, 7);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_BAT_CHG_N =  GPIO(H, 5);
-struct Gpio __code LED_BAT_FULL_N = GPIO(J, 0);
+struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
@@ -51,7 +51,7 @@ void gpio_init() {
     GPDRG = 0x40;
     GPDRH = 0x20;
     GPDRI = 0x20;
-    GPDRJ = 0x03;
+    GPDRJ = 0x02;
 
     // Set GPIO control
     // EC_PWM_PIN_24
