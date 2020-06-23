@@ -26,8 +26,8 @@ extern struct Gpio __code EC_RSMRST_N;
 extern struct Gpio __code GC6_FB_EN;
 extern struct Gpio __code LED_ACIN;
 extern struct Gpio __code LED_AIRPLANE_N;
-extern struct Gpio __code LED_BAT_CHG;
-extern struct Gpio __code LED_BAT_FULL;
+extern struct Gpio __code LED_BAT_CHG_N;
+extern struct Gpio __code LED_BAT_FULL_N;
 extern struct Gpio __code LED_PWR;
 extern struct Gpio __code LID_SW_N;
 #define HAVE_PCH_DPWROK_EC 0

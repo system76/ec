@@ -61,20 +61,21 @@ void board_event(void) {
     }
 
     if (main_cycle == 0) {
+        // Battery LED's are inverted on the oryp6
         if (acin) {
             // Discharging (no AC adapter)
-            gpio_set(&LED_BAT_CHG, false);
-            gpio_set(&LED_BAT_FULL, false);
+            gpio_set(&LED_BAT_CHG_N, true);
+            gpio_set(&LED_BAT_FULL_N, true);
         } else if (battery_status & 0x0020) {
             // Fully charged
             // TODO: turn off charger
-            gpio_set(&LED_BAT_CHG, false);
-            gpio_set(&LED_BAT_FULL, true);
+            gpio_set(&LED_BAT_CHG_N, true);
+            gpio_set(&LED_BAT_FULL_N, false);
         } else {
             // Charging
             // TODO: detect no battery connected
-            gpio_set(&LED_BAT_CHG, true);
-            gpio_set(&LED_BAT_FULL, false);
+            gpio_set(&LED_BAT_CHG_N, false);
+            gpio_set(&LED_BAT_FULL_N, true);
         }
 
         if (power_state == POWER_STATE_S0 || power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
