@@ -1,6 +1,7 @@
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/battery.h>
+#include <board/board.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
@@ -23,6 +24,14 @@
     #define HAVE_EC_EN 1
 #endif
 
+#ifndef HAVE_LED_BAT_CHG
+    #define HAVE_LED_BAT_CHG 1
+#endif
+
+#ifndef HAVE_LED_BAT_FULL
+    #define HAVE_LED_BAT_FULL 1
+#endif
+
 #ifndef HAVE_PCH_DPWROK_EC
     #define HAVE_PCH_DPWROK_EC 1
 #endif
@@ -35,6 +44,9 @@
     #define HAVE_SLP_SUS_N 1
 #endif
 
+#ifndef HAVE_XLP_OUT
+    #define HAVE_XLP_OUT 1
+#endif
 #ifndef HAVE_SUSWARN_N
     #define HAVE_SUSWARN_N 1
 #endif
@@ -45,6 +57,10 @@
 
 #ifndef HAVE_VA_EC_EN
     #define HAVE_VA_EC_EN 1
+#endif
+
+#ifndef HAVE_XLP_OUT
+    #define HAVE_XLP_OUT 1
 #endif
 
 extern uint8_t main_cycle;
@@ -326,6 +342,8 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
+        board_on_ac(!ac_new);
+
         DEBUG("Power adapter ");
         if (ac_new) {
             DEBUG("unplugged\n");
@@ -349,6 +367,8 @@ void power_event(void) {
         }
     }
     ac_last = ac_new;
+
+    gpio_set(&AC_PRESENT, !ac_new);
 
     // Read power switch state
     static bool ps_last = true;
@@ -498,5 +518,29 @@ void power_event(void) {
             gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
             last_time = time;
         }
+
+#if HAVE_XLP_OUT
+        // Power off VDD3 if system should be off
+        gpio_set(&XLP_OUT, 0);
+#endif // HAVE_XLP_OUT
     }
+
+//TODO: do not require both LEDs
+#if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
+    if (ac_new) {
+        // Discharging (no AC adapter)
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, false);
+    } else if (battery_status & 0x0020) {
+        // Fully charged
+        // TODO: turn off charger
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, true);
+    } else {
+        // Charging
+        // TODO: detect no battery connected
+        gpio_set(&LED_BAT_CHG, true);
+        gpio_set(&LED_BAT_FULL, false);
+    }
+#endif // HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
 }

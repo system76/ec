@@ -42,21 +42,21 @@ struct FanPoint {
 #define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
 
 // Fan curve with temperature in degrees C, duty cycle in percent
-struct FanPoint __code FAN_POINTS[] = {
+static struct FanPoint __code FAN_POINTS[] = {
 #ifdef BOARD_FAN_POINTS
     BOARD_FAN_POINTS
 #else
-    FAN_POINT(65, 40),
-    FAN_POINT(70, 60),
-    FAN_POINT(75, 75),
-    FAN_POINT(80, 90),
-    FAN_POINT(85, 100)
+    FAN_POINT(70, 40),
+    FAN_POINT(75, 50),
+    FAN_POINT(80, 60),
+    FAN_POINT(85, 65),
+    FAN_POINT(90, 65)
 #endif
 };
 
 // Get duty cycle based on temperature, adapted from
 // https://github.com/pop-os/system76-power/blob/master/src/fan.rs
-uint8_t fan_duty(int16_t temp) {
+static uint8_t fan_duty(int16_t temp) {
     for (int i = 0; i < ARRAY_SIZE(FAN_POINTS); i++) {
         const struct FanPoint * cur = &FAN_POINTS[i];
 
@@ -91,7 +91,7 @@ uint8_t fan_duty(int16_t temp) {
     return PWM_DUTY(100);
 }
 
-uint8_t fan_heatup(uint8_t duty) {
+static uint8_t fan_heatup(uint8_t duty) {
     static uint8_t history[HEATUP] = { 0 };
     uint8_t lowest = duty;
 
@@ -108,7 +108,7 @@ uint8_t fan_heatup(uint8_t duty) {
     return lowest;
 }
 
-uint8_t fan_cooldown(uint8_t duty) {
+static uint8_t fan_cooldown(uint8_t duty) {
     static uint8_t history[COOLDOWN] = { 0 };
     uint8_t highest = duty;
 

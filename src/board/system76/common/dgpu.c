@@ -1,3 +1,7 @@
+#include <board/dgpu.h>
+
+#if HAVE_DGPU
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -9,10 +13,18 @@
 #include <ec/pwm.h>
 
 // Fan speed is the lowest requested over HEATUP seconds
-#define HEATUP 5
+#ifdef BOARD_DGPU_HEATUP
+    #define HEATUP BOARD_DGPU_HEATUP
+#else
+    #define HEATUP 10
+#endif
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#define COOLDOWN 20
+#ifdef BOARD_DGPU_COOLDOWN
+    #define COOLDOWN BOARD_DGPU_COOLDOWN
+#else
+    #define COOLDOWN 10
+#endif
 
 // Interpolate duty cycle
 #define INTERPOLATE 0
@@ -32,11 +44,15 @@ struct FanPoint {
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static struct FanPoint __code FAN_POINTS[] = {
-    FAN_POINT(65, 40),
-    FAN_POINT(70, 60),
-    FAN_POINT(75, 75),
-    FAN_POINT(80, 90),
-    FAN_POINT(85, 100)
+#ifdef BOARD_DGPU_FAN_POINTS
+    BOARD_DGPU_FAN_POINTS
+#else
+    FAN_POINT(70, 40),
+    FAN_POINT(75, 50),
+    FAN_POINT(80, 60),
+    FAN_POINT(85, 65),
+    FAN_POINT(90, 65)
+#endif
 };
 
 // Get duty cycle based on temperature, adapted from
@@ -142,3 +158,11 @@ void dgpu_event(void) {
         DEBUG("DGPU temp=%d = %d\n", dgpu_temp, cooldown_duty);
     }
 }
+
+#else
+
+void dgpu_init(void) {}
+
+void dgpu_event(void) {}
+
+#endif // HAVE_DGPU
