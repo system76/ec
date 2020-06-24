@@ -27,8 +27,6 @@ void board_init(void) {
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
-
-    dgpu_init();
 }
 
 // Set PL4 using PECI
@@ -40,62 +38,31 @@ static int set_power_limit(uint8_t watts) {
     );
 }
 
-void board_event(void) {
-    bool acin = !gpio_get(&ACIN_N);
-    gpio_set(&AC_PRESENT, acin);
+void board_on_ac(bool ac) {
+    uint8_t power_limit = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
+    // Retry, timeout errors happen occasionally
+    for (int i = 0; i < 16; i++) {
+        int res = set_power_limit(power_limit);
+        DEBUG("set_power_limit %d = %d\n", power_limit, res);
+        if (res >= 0) {
+            break;
+        } else {
+            ERROR("set_power_limit failed: %X\n", -res);
+        }
+    }
+}
 
-    static uint8_t last_power_limit = 0;
-    if (power_state == POWER_STATE_S0) {
-        uint8_t power_limit = acin ? POWER_LIMIT_AC : POWER_LIMIT_DC;
-        if (power_limit != last_power_limit) {
-            // Retry, timeout errors happen occasionally
-            for (int i = 0; i < 16; i++) {
-                int res = set_power_limit(power_limit);
-                DEBUG("set_power_limit %d = %d\n", power_limit, res);
-                if (res >= 0) {
-                    last_power_limit = power_limit;
-                    break;
-                } else {
-                    ERROR("set_power_limit failed: %X\n", -res);
-                }
-            }
+void board_event(void) {
+    bool ac = !gpio_get(&ACIN_N);
+
+    static bool last_power_limit_ac = true;
+    // We don't use power_state because the latency needs to be low
+    if (gpio_get(&SUSB_N_PCH)) {
+        if (last_power_limit_ac != ac) {
+            board_on_ac(ac);
+            last_power_limit_ac = ac;
         }
     } else {
-        last_power_limit = 0;
-    }
-
-    if (main_cycle == 0) {
-        if (!acin) {
-            // Discharging (no AC adapter)
-            gpio_set(&LED_BAT_CHG, false);
-            gpio_set(&LED_BAT_FULL, false);
-        } else if (battery_current == 0) {
-            // Fully charged
-            // TODO: turn off charger
-            gpio_set(&LED_BAT_CHG, false);
-            gpio_set(&LED_BAT_FULL, true);
-        } else {
-            // Charging
-            // TODO: detect no battery connected
-            gpio_set(&LED_BAT_CHG, true);
-            gpio_set(&LED_BAT_FULL, false);
-        }
-
-        if (power_state == POWER_STATE_S0 || power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
-            // System is on
-        } else if (!acin) {
-            // Power off VDD3 if system should be off
-            gpio_set(&XLP_OUT, 0);
-        }
-
-        static uint32_t last_time = 0;
-        uint32_t time = time_get();
-        // Only run the following once a second
-        if (last_time > time || (time - last_time) >= 1000) {
-            last_time = time;
-
-            // Updates discrete GPU fan status and temps
-            dgpu_event();
-        }
+        last_power_limit_ac = true;
     }
 }

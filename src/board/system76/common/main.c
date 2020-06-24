@@ -6,6 +6,7 @@
 #include <arch/time.h>
 #include <board/battery.h>
 #include <board/board.h>
+#include <board/dgpu.h>
 #include <board/ecpm.h>
 #include <board/gpio.h>
 #include <board/gctrl.h>
@@ -48,6 +49,9 @@ void init(void) {
     gpio_init();
 
     // Can happen in any order
+#if HAVE_DGPU
+    dgpu_init();
+#endif
     ecpm_init();
     kbc_init();
     kbled_init();
@@ -114,6 +118,11 @@ void main(void) {
 
                 // Updates fan status and temps
                 peci_event();
+
+#if HAVE_DGPU
+                // Updates discrete GPU fan status and temps
+                dgpu_event();
+#endif
 
                 // Updates battery status
                 battery_event();

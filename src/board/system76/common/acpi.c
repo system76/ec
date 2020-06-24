@@ -6,6 +6,10 @@
 #include <board/peci.h>
 #include <common/debug.h>
 
+#ifndef HAVE_LED_AIRPLANE_N
+#define HAVE_LED_AIRPLANE_N 1
+#endif // HAVE_LED_AIRPLANE_N
+
 extern uint8_t sci_extra;
 
 uint8_t ecos = 0;
@@ -19,6 +23,14 @@ void fcommand(void) {
         // Keyboard backlight
         case 0xCA:
             switch (fdat) {
+                // Set white LED brightness
+                case 0x00:
+                    kbled_set(fbuf[0]);
+                    break;
+                // Get white LED brightness
+                case 0x01:
+                    fbuf[0] = kbled_get();
+                    break;
                 // Set LED color
                 case 0x03:
                     kbled_set_color(
@@ -97,12 +109,14 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_8(0xCC, sci_extra);
 
+#if HAVE_LED_AIRPLANE_N
         // Airplane mode LED
         case 0xD9:
             if (!gpio_get(&LED_AIRPLANE_N)) {
                 data |= (1 << 6);
             }
             break;
+#endif // HAVE_LED_AIRPLANE_N
 
         // Set size of flash (from old firmware)
         ACPI_8 (0xE5, 0x80);
@@ -133,10 +147,12 @@ void acpi_write(uint8_t addr, uint8_t data) {
             ecos = data;
             break;
 
+#if HAVE_LED_AIRPLANE_N
         // Airplane mode LED
         case 0xD9:
             gpio_set(&LED_AIRPLANE_N, !(bool)(data & (1 << 6)));
             break;
+#endif
 
         case 0xF8:
             fcmd = data;

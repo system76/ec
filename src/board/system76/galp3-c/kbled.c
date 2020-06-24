@@ -42,3 +42,5 @@ void kbled_set(uint8_t level) {
     }
     KBLED_DACDAT = raw;
 }
+
+void kbled_set_color(uint32_t color) { /*Fix unused variable*/ color = color; }
