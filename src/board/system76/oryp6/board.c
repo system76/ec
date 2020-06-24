@@ -48,12 +48,16 @@ void board_event(void) {
     if (power_state == POWER_STATE_S0) {
         uint8_t power_limit = acin ? POWER_LIMIT_AC : POWER_LIMIT_DC;
         if (power_limit != last_power_limit) {
-            int res = set_power_limit(power_limit);
-            DEBUG("set_power_limit %d = %d\n", power_limit, res);
-            if (res >= 0) {
-                last_power_limit = power_limit;
-            } else {
-                ERROR("set_power_limit failed: %X\n", -res);
+            // Retry, timeout errors happen occasionally
+            for (int i = 0; i < 16; i++) {
+                int res = set_power_limit(power_limit);
+                DEBUG("set_power_limit %d = %d\n", power_limit, res);
+                if (res >= 0) {
+                    last_power_limit = power_limit;
+                    break;
+                } else {
+                    ERROR("set_power_limit failed: %X\n", -res);
+                }
             }
         }
     } else {
