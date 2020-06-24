@@ -9,10 +9,10 @@
 #include <ec/pwm.h>
 
 // Fan speed is the lowest requested over HEATUP seconds
-#define HEATUP 10
+#define HEATUP 5
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#define COOLDOWN 10
+#define COOLDOWN 20
 
 // Interpolate duty cycle
 #define INTERPOLATE 0
