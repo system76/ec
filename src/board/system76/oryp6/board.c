@@ -66,7 +66,7 @@ void board_event(void) {
             // Discharging (no AC adapter)
             gpio_set(&LED_BAT_CHG_N, true);
             gpio_set(&LED_BAT_FULL, false);
-        } else if (battery_status & 0x0020) {
+        } else if (battery_current == 0) {
             // Fully charged
             // TODO: turn off charger
             gpio_set(&LED_BAT_CHG_N, true);
