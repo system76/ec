@@ -54,6 +54,9 @@ uint16_t keymap_translate(uint16_t key);
 #define K_MUTE (K_E0 | 0x23)
 #define K_VOLUME_DOWN (K_E0 | 0x21)
 #define K_VOLUME_UP (K_E0 | 0x32)
+// More media keys
+#define K_MEDIA_NEXT (K_E0 | 0x4D)
+#define K_MEDIA_PREV (K_E0 | 0x15)
 // Custom scancode
 #define K_TOUCHPAD (K_E0 | 0x63)
 
