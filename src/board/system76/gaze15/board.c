@@ -40,10 +40,12 @@ void board_on_ac(bool ac) {
     for (int i = 0; i < 16; i++) {
         int res = set_power_limit(power_limit);
         DEBUG("set_power_limit %d = %d\n", power_limit, res);
-        if (res >= 0) {
+        if (res == 0x40) {
             break;
+        } else if (res < 0) {
+            ERROR("set_power_limit failed: 0x%02X\n", -res);
         } else {
-            ERROR("set_power_limit failed: %X\n", -res);
+            ERROR("set_power_limit unknown response: 0x%02X\n", res);
         }
     }
 }
