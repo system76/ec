@@ -11,10 +11,10 @@
 * In `src/board/system76/{your-model}/keymap/`, copy `default.c` and rename it. There are two examples to reference in the `lemp9` directory: `jeremy.c` and `levi.c`.
 * In `src/common/include/common/keymap.h` you will find a list of the key definitions.h
 * You will notice two sets of keys in these layout files. The top one is the standard mapping. The bottom one is the Fn layer, meaning it is active when the Fn key is being held. If you look at the Fn layer in the `levi.c` layout, you will see that there are arrow keys at WASD, media and volume keys on the bottom row, etc. 
-* I find it easiest to change one key at a time, referencing the key code I am deleting for keeping myself positioned correctly in the list of keycodes.
+* Hint: To avoid losing your place change one key at a time, referencing the key code you are deleting to keep yourself positioned correctly in the list of keycodes.
 
 ## Configure your EC to build with your layout
-* Create a file it the project's root directory called `config.mk` and add your board and keyboard layout to it. For example, if I want to build lemp9 firmware with Jeremy's layout (which is at ec/src/board/system76/lemp9/keymap/jeremy.c):
+* Create a file in the project's root directory called `config.mk` and add your board and keyboard layout to it. For example, if you want to build lemp9 firmware with Jeremy's layout (which is at `ec/src/board/system76/lemp9/keymap/jeremy.c`):
 ```
 BOARD?=system76/lemp9
 KEYMAP?=jeremy
