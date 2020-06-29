@@ -14,7 +14,7 @@ console_internal:
 	sudo tool/target/release/system76_ectool console
 
 console_external:
-	test -c "$(PROGRAMMER)"
+	sudo test -c "$(PROGRAMMER)"
 	sleep 1 && echo C | sudo tee "$(PROGRAMMER)" &
 	sudo tio -b 1000000 -m INLCRNL -t "$(PROGRAMMER)"
 
