@@ -2,6 +2,7 @@
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/dgpu.h>
+#include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
 #include <board/peci.h>
@@ -22,6 +23,9 @@ void board_init(void) {
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
+
+    // Enable POST codes
+    SPCTRL1 |= 0xC8;
 }
 
 // Set PL4 using PECI
@@ -63,6 +67,15 @@ void board_event(void) {
         last_power_limit_ac = true;
     }
 
+    // Read POST codes
+    while (P80H81HS & 1) {
+        uint8_t p80h = P80HD;
+        uint8_t p81h = P81HD;
+        P80H81HS |= 1;
+
+        DEBUG("POST %02X%02X\n", p81h, p80h);
+    }
+
     if (main_cycle == 0) {
         // Set keyboard LEDs
         static uint8_t last_kbc_leds = 0;
@@ -72,6 +85,5 @@ void board_event(void) {
             gpio_set(&LED_CAP_N, (kbc_leds & 4) == 0);
             last_kbc_leds = kbc_leds;
         }
-
     }
 }
