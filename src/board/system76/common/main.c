@@ -27,9 +27,9 @@
 #include <common/version.h>
 #include <ec/ec.h>
 
-#ifdef PARPORT_DEBUG
-    #include <ec/parallel.h>
-#endif
+#ifdef PARALLEL_DEBUG
+    #include <board/parallel.h>
+#endif // PARALLEL_DEBUG
 
 void external_0(void) __interrupt(0) {}
 // timer_0 is in time.c
@@ -55,11 +55,15 @@ void init(void) {
     ecpm_init();
     kbc_init();
     kbled_init();
-#ifdef PARPORT_DEBUG
-    parport_init();
-#else
-    kbscan_init();
-#endif
+#ifdef PARALLEL_DEBUG
+    parallel_debug = false;
+    if (parallel_init()) {
+        parallel_debug = true;
+    } else
+#endif // PARALLEL_DEBUG
+    {
+        kbscan_init();
+    }
     peci_init();
     pmc_init();
     pwm_init();
@@ -91,10 +95,13 @@ void main(void) {
                 power_event();
                 break;
             case 1:
-#ifndef PARPORT_DEBUG
-                // Scans keyboard and sends keyboard packets
-                kbscan_event();
-#endif
+#if PARALLEL_DEBUG
+                if (!parallel_debug)
+#endif // PARALLEL_DEBUG
+                {
+                    // Scans keyboard and sends keyboard packets
+                    kbscan_event();
+                }
                 break;
             case 2:
                 // Passes through touchpad packets

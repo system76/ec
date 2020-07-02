@@ -1,7 +1,7 @@
 #include <arch/delay.h>
 #include <arch/time.h>
+#include <board/parallel.h>
 #include <ec/kbscan.h>
-#include <ec/parallel.h>
 
 #include <stdbool.h>
 
@@ -24,9 +24,23 @@
 #define STS_WAIT    (1 << 1)
 
 // Maximum peripheral response time in ms
-#define PARPORT_TIMEOUT 35
+#define PARALLEL_TIMEOUT 10
 
-void parport_init(void) {
+bool parallel_debug = false;
+
+static bool parallel_wait_peripheral(uint8_t mask, uint8_t value) {
+    uint32_t start = time_get();
+
+    while (time_get() < start + PARALLEL_TIMEOUT) {
+        if ((KSOHGDMRR & mask) == value) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool parallel_init(void) {
     // XXX: Needed? Pull-ups, open-drain are always disabled in GPIO mode
     KSOCTRL = 0;
     // XXX: Needed? OVRPPK is for KBS mode, pull-ups are always disabled in GPIO mode
@@ -52,7 +66,7 @@ void parport_init(void) {
     // Deassert nWRITE, nDATASTB, nADDRSTB
     KSIGDAT |= CTL_WRITE | CTL_DATA | CTL_ADDR;
 
-    // Set nWAIT high
+    // PUll up nWAIT
     KSOH1 |= STS_WAIT;
 
     // Pull up data lines
@@ -60,21 +74,12 @@ void parport_init(void) {
 
     // Deassert nRESET
     KSIGDAT |= CTL_RESET;
+
+    // Check if there is a peripheral waiting
+    return parallel_wait_peripheral(STS_WAIT, 0);
 }
 
-bool parport_wait_peripheral(uint8_t mask, uint8_t value) {
-    uint32_t start = time_get();
-
-    while (time_get() < start + PARPORT_TIMEOUT) {
-        if ((KSOHGDMRR & mask) == value) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-int parport_write(uint8_t * data, int length) {
+int parallel_write(uint8_t * data, int length) {
     // Assert nWRITE
     KSIGDAT &= ~CTL_WRITE;
 
@@ -84,7 +89,7 @@ int parport_write(uint8_t * data, int length) {
     int i;
     for (i = 0; i < length; i++) {
         // Wait for peripheral to indicate it's ready for next cycle
-        if (!parport_wait_peripheral(STS_WAIT, 0)) {
+        if (!parallel_wait_peripheral(STS_WAIT, 0)) {
             break;
         }
 
@@ -95,7 +100,7 @@ int parport_write(uint8_t * data, int length) {
         KSIGDAT &= ~CTL_DATA;
 
         // Wait for peripheral to indicate it's processing
-        if (!parport_wait_peripheral(STS_WAIT, STS_WAIT)) {
+        if (!parallel_wait_peripheral(STS_WAIT, STS_WAIT)) {
             KSIGDAT |= CTL_DATA;
             break;
         }
@@ -104,7 +109,7 @@ int parport_write(uint8_t * data, int length) {
         KSIGDAT |= CTL_DATA;
 
         // Wait for peripheral to indicate it's ready for next cycle
-        if (!parport_wait_peripheral(STS_WAIT, 0)) {
+        if (!parallel_wait_peripheral(STS_WAIT, 0)) {
             break;
         }
 

@@ -27,6 +27,11 @@ void kbscan_init(void) {
     KSOHGCTRL = 0xFF;
     KSOHGOEN = 0;
     KSOH2 = 0;
+
+    // Set all inputs to KBS mode, low, and inputs
+    KSIGCTRL = 0;
+    KSIGOEN = 0;
+    KSIGDAT = 0;
 }
 
 // Debounce time in milliseconds
