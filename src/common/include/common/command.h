@@ -29,6 +29,8 @@ enum Command {
     CMD_GET_CONFIG_VALUE = 34,
     // Set config value from index
     CMD_SET_CONFIG_VALUE = 35,
+    // Compact the configuration data in flash.
+    CMD_COMPACT_CONFIG = 36,
 
     //TODO
 };

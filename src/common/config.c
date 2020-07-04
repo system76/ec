@@ -105,15 +105,21 @@ bool config_save_entry(config_t *entry) {
     }
 }
 
-void config_save_entries() __reentrant {
+bool config_save_entries() __reentrant {
+    bool status = true;
+
     flash_erase(CONFIG_ADDRESS);
 
     config_t *entry = g_config_entries;
 
     while (entry) {
-        (void)config_save_entry(entry);
+        if (!config_save_entry(entry)) {
+            status = false;
+        }
         entry = entry->next;
     }
+
+    return status;
 }
 
 bool config_flash_valid(uint32_t addr) {
@@ -286,7 +292,9 @@ bool config_set_value(config_t *config, int32_t value) __reentrant {
             // Not enough space exists. clear out flash and re-write.
             flash_erase(CONFIG_ADDRESS);
 
-            config_save_entries();
+            if (!config_save_entries()) {
+                valid = false;
+            }
 
         }
     }

@@ -378,12 +378,23 @@ unsafe fn config_set_value(name: String, value: i32) -> Result<(), Error> {
     }
 }
 
+unsafe fn config_compact() -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    ec.config_compact()
+}
+
 fn usage() {
     eprintln!("  console");
     eprintln!("  flash [file]");
     eprintln!("  flash_backup [file]");
     eprintln!("  fan [index] <duty>");
     eprintln!("  config <name> <value>");
+    eprintln!("  config_compact");
     eprintln!("  info");
     eprintln!("  print [message]");
 }
@@ -506,6 +517,15 @@ fn main() {
                             process::exit(1);
                         }
                     };
+                }
+            },
+            "config_compact" => {
+                match unsafe { config_compact() } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to compact configuration: {:X?}", err);
+                        process::exit(1);
+                    },
                 }
             },
 

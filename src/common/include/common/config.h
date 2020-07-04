@@ -61,4 +61,12 @@ bool config_set_value(config_t *config, int32_t value) __reentrant;
  */
 int32_t config_get_value(config_t *config) __reentrant;
 
+/**
+ * Rewrite all configuration values into flash.
+ *
+ * Note: This will compact flash by erasing and then writing
+ * all known configuration values.
+ */
+bool config_save_entries() __reentrant;
+
 #endif // _COMMON_CONFIG_H

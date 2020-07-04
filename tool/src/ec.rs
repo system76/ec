@@ -29,6 +29,7 @@ pub enum Cmd {
     ConfigGetDesc = 33,
     ConfigGetValue = 34,
     ConfigSetValue = 35,
+    ConfigCompact = 36,
 }
 
 pub const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -326,6 +327,13 @@ impl<T: Timeout> Ec<T> {
 
         Ok(())
     }
+
+    pub unsafe fn config_compact(&mut self) -> Result<(), Error> {
+        self.command(Cmd::ConfigCompact)?;
+
+        Ok(())
+    }
+
 }
 
 pub struct EcSpi<'a, T: Timeout> {
