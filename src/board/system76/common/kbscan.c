@@ -215,6 +215,22 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
     return true;
 }
 
+static inline bool key_should_repeat(uint16_t key) {
+    switch (key) {
+    case K_TOUCHPAD:
+    case (KT_SCI | SCI_AIRPLANE_MODE):
+    case (KT_SCI | SCI_CAMERA_TOGGLE):
+    case (KT_SCI | SCI_DISPLAY_TOGGLE):
+    case (KT_SCI | SCI_SUSPEND):
+    case (KT_SCI_EXTRA | SCI_EXTRA_KBD_BKL):
+    case (KT_SCI_EXTRA | SCI_EXTRA_KBD_COLOR):
+    case (KT_SCI_EXTRA | SCI_EXTRA_KBD_TOGGLE):
+        return false;
+    }
+
+    return true;
+}
+
 void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
     uint8_t layer = kbscan_layer;
@@ -311,7 +327,7 @@ void kbscan_event(void) {
             }
 
             kbscan_last[i] = new;
-        } else if (new && repeat_key != 0) {
+        } else if (new && repeat_key != 0 && key_should_repeat(repeat_key)) {
             // A key is being pressed
             uint32_t time = time_get();
             static uint32_t repeat_start = 0;
