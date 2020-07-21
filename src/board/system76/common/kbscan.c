@@ -125,11 +125,18 @@ static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
 }
 
 bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
+    static bool dual_use_send = false;
+
     if (pressed &&
         (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3)) {
         gpio_set(&SWI_N, false);
         delay_ticks(10); //TODO: find correct delay
         gpio_set(&SWI_N, true);
+    }
+
+    // Do not send dual use key
+    if (pressed) {
+        dual_use_send = false;
     }
 
     switch (key & KT_MASK) {
@@ -142,6 +149,19 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
             if (layer != NULL) {
                 if (pressed) *layer = 1;
                 else *layer = 0;
+
+                if (kbscan_enabled) {
+                    // Dual use key can be modifier or standard
+                    uint16_t dual_use_key = key & (~KT_MASK);
+                    if (dual_use_key) {
+                        if (pressed) {
+                            dual_use_send = true;
+                        } else if (dual_use_send) {
+                            kbc_scancode(&KBC, dual_use_key, true);
+                            kbc_scancode(&KBC, dual_use_key, false);
+                        }
+                    }
+                }
             } else {
                 // In the case no layer can be set, reset bit
                 return false;
