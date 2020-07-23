@@ -38,7 +38,7 @@ make BOARD=arduino/mega2560 flash
 ### Setup
 
 1. Enable parallel port debugging in the EC firmware
-    - Uncomment `PARPORT_DEBUG` in `board.mk`
+    - Uncomment `PARALLEL_DEBUG` in `src/board/system76/common/common.mk`
     - Build and flash the firmware for the target
 2. Power off target
 3. Remove bottom panel
@@ -107,7 +107,7 @@ Requirements:
 - USB-C cable
 
 1. Enable I2C debugging in the EC firmware for the target
-    - Uncomment `I2C_DEBUGGER` in `board.mk`
+    - Uncomment `I2C_DEBUGGER` in `src/board/system76/common/common.mk`
     - Build and flash firmware
 2. Connect Trinket M0 to host
     - This will create an ACM device at `/dev/ttyACM*`
