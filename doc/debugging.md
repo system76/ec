@@ -68,18 +68,31 @@ unsupported board, may result in damaged board components.**
 
 ### Wiring the target
 
-These steps apply to the following models:
-- darp5
-- darp6
-- galp3-c
-- galp4
+The I2C connection is made through the battery pins. Find the pins marked
+`SMC_BAT` (clock) and `SMD_BAT` (data) in the service manual.
+
+Board       | `SMC_BAT` | `SMD_BAT`
+------------|-----------|-----------
+addw1       | 4         | 5
+addw2       | 4         | 5
+darp5       | 4         | 5
+darp6       | 4         | 5
+galp3       | 4         | 5
+galp3-b     | 4         | 5
+galp3-c     | 4         | 5
+galp4       | 4         | 5
+gaze14      | 4         | 3
+gaze15      | 4         | 3
+lemp9       | 6         | 5
+oryp5       | 4         | 5
+oryp6       | 6         | 5
 
 1. Power off system
 2. Unplug AC adapter
 3. Remove bottom panel
 4. Disconnect battery
-5. Attach one wire to battery pin 4 (`CLK`)
-6. Attach one wire to battery pin 5 (`DATA`)
+5. Attach one wire to `SMC_BAT`
+6. Attach one wire to `SMD_BAT`
 7. Route wires through the Kensington lock slot
     - Secure wires to board with tape
 8. Attach female connector and housing to wires
@@ -105,8 +118,8 @@ sudo tio -b 115200 -m INLCRNL /dev/ttyACM0
 4. Ground target to host
     - Connect USB cable from USB-C port on target to host
 5. Connect target to host
-    - Connect `CLK` wire to `SCL` on Trinket M0
-    - Connect `DATA` wire to `SDA` on Trinket M0
+    - Connect `SMC_BAT` wire to `SCL` on Trinket M0
+    - Connect `SMD_BAT` wire to `SDA` on Trinket M0
 
 EC logs should now print to the console on the host. This can be tested
 by removing or inserting the AC adapter to trigger a power event.
