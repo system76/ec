@@ -12,9 +12,10 @@
 void gpio_init(void);
 void gpio_debug(void);
 
-//TODO
 extern struct Gpio __code ACIN_N;
 extern struct Gpio __code AC_PRESENT;
+extern struct Gpio __code AC_V1_EC;
+extern struct Gpio __code AC_V2_EC;
 extern struct Gpio __code ALL_SYS_PWRGD;
 extern struct Gpio __code BKL_EN;
 extern struct Gpio __code BT_EN;

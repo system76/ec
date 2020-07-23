@@ -3,6 +3,8 @@
 
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
+struct Gpio __code AC_V1_EC =       GPIO(J, 7);
+struct Gpio __code AC_V2_EC =       GPIO(F, 1);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
 struct Gpio __code BKL_EN =         GPIO(H, 2);
 struct Gpio __code BT_EN =          GPIO(H, 7);
