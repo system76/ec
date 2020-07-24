@@ -7,6 +7,12 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
+// Replace PECI with alternative if using AMD CPU
+//TODO: replace with better abstraction
+#ifndef HAVE_AMD_CPU
+    #define HAVE_AMD_CPU 0
+#endif
+
 // Fan speed is the lowest requested over HEATUP seconds
 #ifdef BOARD_HEATUP
     #define HEATUP BOARD_HEATUP
@@ -125,6 +131,45 @@ static uint8_t fan_cooldown(uint8_t duty) {
     return highest;
 }
 
+#if HAVE_AMD_CPU
+#include <ec/i2c.h>
+
+void peci_init(void) {}
+
+// This uses SB-TSI, in AMD document 40821
+void peci_event(void) {
+    if (power_state == POWER_STATE_S0) {
+        // Use SB-TSI if in S0 state
+        // We only read the CPU temp high value, since a resolution of 1C is
+        // good enough
+        int8_t cpu_temp_high;
+        int res = i2c_get(&I2C_SMBUS, 0x4C, 0x01, &cpu_temp_high, 1);
+        if (res == 1) {
+            // Convert from AMD format
+            peci_temp = PECI_TEMP(cpu_temp_high);
+            peci_duty = fan_duty(peci_temp);
+        } else {
+            DEBUG("SB-TSI temp error: %d\n", res);
+            // Default to 50% if there is an error
+            peci_temp = 0;
+            peci_duty = PWM_DUTY(50);
+        }
+    } else {
+        // Turn fan off if not in S0 state
+        peci_offset = 0;
+        peci_temp = 0;
+        peci_duty = PWM_DUTY(0);
+    }
+
+    uint8_t heatup_duty = fan_heatup(peci_duty);
+    uint8_t cooldown_duty = fan_cooldown(heatup_duty);
+    if (cooldown_duty != DCR2) {
+        DCR2 = cooldown_duty;
+        DEBUG("SB-TSI offset=%d, temp=%d = %d\n", peci_offset, peci_temp, cooldown_duty);
+    }
+}
+#else // HAVE_AMD_CPU
+
 void peci_init(void) {
     // Allow PECI pin to be used
     GCR2 |= (1 << 4);
@@ -240,3 +285,5 @@ void peci_event(void) {
         DEBUG("PECI offset=%d, temp=%d = %d\n", peci_offset, peci_temp, cooldown_duty);
     }
 }
+
+#endif // HAVE_AMD_CPU
