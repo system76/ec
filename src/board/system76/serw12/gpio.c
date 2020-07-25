@@ -130,7 +130,7 @@ void gpio_init() {
     // EC_RSMRST#
     GPCRE5 = GPIO_OUT;
     // SB_KBCRST#
-    GPCRE6 = GPIO_OUT | GPIO_UP;
+    GPCRE6 = GPIO_IN;
     // SMD_BAT
     GPCRE7 = GPIO_ALT;
     // 80CLK
