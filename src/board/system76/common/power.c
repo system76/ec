@@ -401,6 +401,8 @@ static void power_cpu_reset(void) {
     pnp_enable();
     //TODO: reset KBC and touchpad states
     kbled_reset();
+    // Any board-specific CPU reset hooks
+    board_on_cpu_reset();
 }
 
 void power_event(void) {
