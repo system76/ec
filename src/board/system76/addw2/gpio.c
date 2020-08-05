@@ -86,7 +86,7 @@ void gpio_init() {
     GPCRB5 = GPIO_OUT | GPIO_UP;
     // SUSBC_EN
     GPCRB6 = GPIO_OUT | GPIO_UP;
-    // 
+    //
     GPCRB7 = GPIO_IN;
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
@@ -145,9 +145,9 @@ void gpio_init() {
     // MUX_CTRL_BIOS
     GPCRF3 = GPIO_OUT | GPIO_UP;
     // TP_CLK
-    GPCRF4 = GPIO_IN;
+    GPCRF4 = GPIO_ALT;
     // TP_DATA
-    GPCRF5 = GPIO_IN;
+    GPCRF5 = GPIO_ALT;
     // EC_PECI
     GPCRF6 = GPIO_ALT;
     // SLP_S0#
