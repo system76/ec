@@ -13,27 +13,12 @@ external USB keyboard or SSH session.
 
 Requirements:
 - Arduino Mega 2560 compatible board
-- 24 pin flexible printed circuit
+- 24 pin FPC breakout board and cables
     - 0.5mm or 1.0mm pitch, depending on target connector
-- 24 pin FPC breakout board with connectors
 - USB-C cable
 
-### Configuring the Mega 2560
-
-If the breakout board did not come preassembled, assemble it before
-starting. This will require soldering.
-
-1. Connect the breakout board to the Mega 2560
-    - Orientation will affect the mapping of GPIO pins
-2. Connect the Mega 2560 to the host
-3. Configure GPIO pin mapping in `parallel.c` based on how it will
-    connect to the target parallel port
-    - Trace pin 1 on motherboard connector to Mega's GPIO pins
-4. Build and flash the firmware for the Mega 2560
-```
-make BOARD=arduino/mega2560
-make BOARD=arduino/mega2560 flash
-```
+For details on configuring the Mega 2560 and breakout board, see
+[mega2560](./mega2560.md).
 
 ### Setup
 
@@ -44,10 +29,10 @@ make BOARD=arduino/mega2560 flash
 3. Remove bottom panel
 4. Unplug keyboard cable
     - May require removing keyboard depending on port location
-5. Connect Mega 2560 to host
-    - This will create an ACM device at `/dev/ttyACM*`
-6. Ground target to host
+5. Ground target to host
     - Connect USB cable from USB-C port on target to host
+6. Connect Mega 2560 to host
+    - This will create an ACM device at `/dev/ttyACM*`
 7. Connect Mega 2560 to target
 8. Start the console
 ```
@@ -57,7 +42,7 @@ make BOARD=system76/<model> console_external
 EC logs should now print to the console on the host. This can be tested
 by removing or inserting the AC adapter to trigger a power event.
 
-To return the Mega to host mode, reset the device.
+To return the Mega 2560 to host mode, reset the device.
 
 If logs are corrupted, try power cycling the Mega or reseating the cable.
 
