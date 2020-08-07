@@ -39,36 +39,23 @@ Acronym | Feature                      | Description
 ------- | ---------------------------- | -----------
 USB     | Universal serial bus         | Can be used to provide access to EC functions either to the host or to a remote machine
 
-## Flashing
+## Dependencies
 
-Requirements:
+The complete set of dependencies can be installed using the `deps.sh` script
+from the [Open Firmware](https://github.com/system76/firmware-open) repo.
 
-- [sdcc](http://sdcc.sourceforge.net/)
-- [Rust](https://www.rust-lang.org/)
-
-### Internal programmer
-
-Use this method for flashing a system already running System76 EC.
+Dependencies specific to EC development can be installed with:
 
 ```
-make BOARD=<vendor>/<model> flash_internal
+sudo apt install \
+  avr-libc \
+  avrdude \
+  gcc-avr \
+  sdcc
 ```
 
-### External programmer
+## Documentation
 
-Use this method for first-time flashing or flashing a bricked controller.
-
-**The system must not have any power!**
-
-1. Turn off the computer
-2. Unplug the AC adapter
-3. Remove the bottom panel
-4. Disconnect the battery
-5. Ground the laptop to the programmer
-6. Disconnect the keyboard from its port
-7. Attach the programmer to the keyboard port
-8. Flash the firmware
-
-```
-make BOARD=<vendor>/<model> flash_external
-```
+- [flashing](./doc/flashing.md)
+- [debugging](./doc/debugging.md)
+- [custom keyboard layout](./doc/keyboard-layout-customization.md)
