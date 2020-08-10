@@ -9,6 +9,11 @@
 #include <board/power.h>
 #include <common/debug.h>
 
+// Default to not n-key rollover
+#ifndef KM_NKEY
+#define KM_NKEY 0
+#endif // KM_NKEY
+
 bool kbscan_enabled = false;
 uint16_t kbscan_repeat_period = 91;
 uint16_t kbscan_repeat_delay = 500;
@@ -89,6 +94,14 @@ static uint8_t kbscan_get_row(int i) {
     return ~KSI;
 }
 
+#if KM_NKEY
+static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
+    // Use arguments
+    row = row;
+    rowdata = rowdata;
+    return false;
+}
+#else // KM_NKEY
 static inline bool popcount_more_than_one(uint8_t rowdata) {
     return rowdata & (rowdata - 1);
 }
@@ -123,6 +136,7 @@ static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
 
     return false;
 }
+#endif // KM_NKEY
 
 bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
     if (pressed &&
