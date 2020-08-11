@@ -42,8 +42,10 @@
 
 // Keymap
 extern uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN];
+extern uint16_t __code KEYMAP_FN_LOCK[KM_LAY][KM_OUT][KM_IN];
 
 // Get a keycode from the keymap
 uint16_t keymap(int output, int input, int layer);
+uint16_t keymap_fnlock(int output, int input, int layer);
 
 #endif // _BOARD_KEYMAP_H

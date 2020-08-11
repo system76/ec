@@ -45,7 +45,7 @@ void i2c_reset(struct I2C * i2c, bool kill) {
     *(i2c->hoctl2) = 0;
 }
 
-int i2c_start(struct I2C * i2c, uint8_t addr, bool read) {
+int i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
     // If we are already in a transaction
     if (*(i2c->hosta) & HOSTA_BYTE_DONE) {
         // If we are switching direction
@@ -141,10 +141,10 @@ static int i2c_transaction(struct I2C * i2c, uint8_t * data, int length, bool re
     return i;
 }
 
-int i2c_read(struct I2C * i2c, uint8_t * data, int length) {
+int i2c_read(struct I2C * i2c, uint8_t * data, int length) __reentrant {
     return i2c_transaction(i2c, data, length, true);
 }
 
-int i2c_write(struct I2C * i2c, uint8_t * data, int length) {
+int i2c_write(struct I2C * i2c, uint8_t * data, int length) __reentrant {
     return i2c_transaction(i2c, data, length, false);
 }
