@@ -1,5 +1,7 @@
+#include <board/battery.h>
 #include <board/smbus.h>
 #include <common/debug.h>
+#include <stdbool.h>
 
 #define BATTERY_ADDRESS 0x0B
 #define CHARGER_ADDRESS 0x09
@@ -14,8 +16,13 @@
 // IDCHG Amplifier Gain
 #define SBC_IDCHC_GAIN      ((uint16_t)(1 << 3))
 
+// XXX: Assumption: ac_last is initialized high.
+static bool charger_enabled = false;
+
 int battery_charger_disable(void) {
     int res = 0;
+
+    if (!charger_enabled) return 0;
 
     // Set charge option 0 with 175s watchdog
     res = smbus_write(
@@ -39,11 +46,15 @@ int battery_charger_disable(void) {
     res = smbus_write(CHARGER_ADDRESS, 0x3F, 0);
     if (res < 0) return res;
 
+    DEBUG("Charged disabled\n");
+    charger_enabled = false;
     return 0;
 }
 
 int battery_charger_enable(void) {
     int res = 0;
+
+    if (charger_enabled) return 0;
 
     res = battery_charger_disable();
     if (res < 0) return res;
@@ -69,6 +80,8 @@ int battery_charger_enable(void) {
         SBC_IDCHC_GAIN
     );
 
+    DEBUG("Charged enabled\n");
+    charger_enabled = true;
     return 0;
 }
 
