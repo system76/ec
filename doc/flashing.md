@@ -4,6 +4,9 @@
 
 Use this method for flashing a system already running System76 EC.
 
+This will trigger a watchdog reset causing the system to immediately power off.
+Save and close all applications before flashing.
+
 ```
 make BOARD=<vendor>/<model> flash_internal
 ```
