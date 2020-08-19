@@ -124,8 +124,8 @@ void gpio_init() {
     GPCRE1 = GPIO_OUT | GPIO_UP;
     // RGBKB-DET#
     GPCRE2 = GPIO_IN | GPIO_UP;
-    // NC
-    GPCRE3 = GPIO_IN;
+    // USB_PWR_EN# (on 1650/1650Ti), NC (on 1660Ti)
+    GPCRE3 = GPIO_OUT;
     // DD_ON
     GPCRE4 = GPIO_OUT | GPIO_DOWN;
     // EC_RSMRST#
