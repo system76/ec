@@ -1,7 +1,6 @@
 #include <board/battery.h>
 #include <board/smbus.h>
 #include <common/debug.h>
-#include <stdbool.h>
 
 #define BATTERY_ADDRESS 0x0B
 #define CHARGER_ADDRESS 0x09
@@ -15,6 +14,52 @@
 #define SBC_PWM_FREQ_800KHZ ((uint16_t)(0b01 << 8))
 // IDCHG Amplifier Gain
 #define SBC_IDCHC_GAIN      ((uint16_t)(1 << 3))
+
+// TODO: Make thresholds configurable
+#define BATTERY_START_THRESHOLD 0
+#define BATTERY_END_THRESHOLD   100
+
+// Default values to disable battery charging thresholds
+#define BATTERY_START_DEFAULT   0
+#define BATTERY_END_DEFAULT     100
+
+// Represents a battery percentage level, below which charging will begin.
+// Valid values are [0, 100]
+// A value of 0 turns off the start threshold control.
+static uint8_t battery_start_threshold = BATTERY_START_DEFAULT;
+
+// Represents a battery percentage level, above which charging will stop.
+// Valid values are [0, 100]
+// A value of 100 turns off the stop threshold control.
+static uint8_t battery_end_threshold = BATTERY_END_DEFAULT;
+
+uint8_t battery_get_start_threshold(void) {
+    if (battery_start_threshold > 100)
+        return BATTERY_START_DEFAULT;
+    return battery_start_threshold;
+}
+
+bool battery_set_start_threshold(uint8_t value) {
+    if (value > 100 || value >= battery_end_threshold)
+        return false;
+
+    battery_start_threshold = value;
+    return true;
+}
+
+uint8_t battery_get_end_threshold(void) {
+    if (battery_end_threshold > 100)
+        return BATTERY_END_DEFAULT;
+    return battery_end_threshold;
+}
+
+bool battery_set_end_threshold(uint8_t value) {
+    if (value > 100 || value <= battery_start_threshold)
+        return false;
+
+    battery_end_threshold = value;
+    return true;
+}
 
 // XXX: Assumption: ac_last is initialized high.
 static bool charger_enabled = false;
@@ -85,6 +130,34 @@ int battery_charger_enable(void) {
     return 0;
 }
 
+/**
+ * Configure the charger based on charging threshold values.
+ */
+int battery_charger_configure(void) {
+    static bool should_charge = true;
+
+    if (battery_get_end_threshold() == BATTERY_END_DEFAULT) {
+        // Stop threshold not configured: Always charge on AC.
+        should_charge = true;
+    }
+    else if (battery_charge >= battery_get_end_threshold()) {
+        // Stop threshold configured: Stop charging at threshold.
+        should_charge = false;
+    }
+    else if (battery_get_start_threshold() == BATTERY_START_DEFAULT) {
+        // Start threshold not configured: Always charge up to stop threshold.
+        should_charge = true;
+    }
+    else if (battery_charge <= battery_get_start_threshold()) {
+        // Start threshold configured: Start charging at threshold.
+        should_charge = true;
+    }
+
+    if (should_charge)
+        return battery_charger_enable();
+    return battery_charger_disable();
+}
+
 uint16_t battery_temp = 0;
 uint16_t battery_voltage = 0;
 uint16_t battery_current = 0;
@@ -123,7 +196,7 @@ void battery_debug(void) {
     int res = 0;
 
     #define command(N, A, V) { \
-        DEBUG(#N ": "); \
+        DEBUG("  " #N ": "); \
         res = smbus_read(A, V, &data); \
         if (res < 0) { \
             DEBUG("ERROR %04X\n", -res); \

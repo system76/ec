@@ -357,7 +357,7 @@ void power_event(void) {
             battery_charger_disable();
         } else {
             DEBUG("plugged in\n");
-            battery_charger_enable();
+            battery_charger_configure();
         }
         battery_debug();
 
@@ -376,6 +376,11 @@ void power_event(void) {
     ac_last = ac_new;
 
     gpio_set(&AC_PRESENT, !ac_new);
+
+    // Configure charger based on charging thresholds when plugged in
+    if (!ac_new) {
+        battery_charger_configure();
+    }
 
     // Read power switch state
     static bool ps_last = true;
