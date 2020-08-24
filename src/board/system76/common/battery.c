@@ -15,10 +15,6 @@
 // IDCHG Amplifier Gain
 #define SBC_IDCHC_GAIN      ((uint16_t)(1 << 3))
 
-// TODO: Make thresholds configurable
-#define BATTERY_START_THRESHOLD 0
-#define BATTERY_END_THRESHOLD   100
-
 // Default values to disable battery charging thresholds
 #define BATTERY_START_DEFAULT   0
 #define BATTERY_END_DEFAULT     100
@@ -26,12 +22,12 @@
 // Represents a battery percentage level, below which charging will begin.
 // Valid values are [0, 100]
 // A value of 0 turns off the start threshold control.
-static uint8_t battery_start_threshold = BATTERY_START_DEFAULT;
+static uint8_t battery_start_threshold = BATTERY_START_THRESHOLD;
 
 // Represents a battery percentage level, above which charging will stop.
 // Valid values are [0, 100]
 // A value of 100 turns off the stop threshold control.
-static uint8_t battery_end_threshold = BATTERY_END_DEFAULT;
+static uint8_t battery_end_threshold = BATTERY_END_THRESHOLD;
 
 uint8_t battery_get_start_threshold(void) {
     if (battery_start_threshold > 100)
