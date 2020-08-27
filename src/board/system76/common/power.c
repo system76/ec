@@ -24,6 +24,10 @@
     #define HAVE_EC_EN 1
 #endif
 
+#ifndef HAVE_LAN_WAKEUP_N
+    #define HAVE_LAN_WAKEUP_N 1
+#endif
+
 #ifndef HAVE_LED_BAT_CHG
     #define HAVE_LED_BAT_CHG 1
 #endif
@@ -485,6 +489,24 @@ void power_event(void) {
             power_off_s5();
         }
     }
+
+#if HAVE_LAN_WAKEUP_N
+    static bool wake_last = true;
+    bool wake_new = gpio_get(&LAN_WAKEUP_N);
+    if (!wake_new && wake_last) {
+        update_power_state();
+        DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
+        if (power_state == POWER_STATE_DS5) {
+            power_on_s5();
+        }
+    }
+    #if LEVEL >= LEVEL_DEBUG
+        else if (wake_new && !wake_last) {
+            DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
+        }
+    #endif
+    wake_last = wake_new;
+#endif // HAVE_LAN_WAKEUP_N
 
     static uint32_t last_time = 0;
     uint32_t time = time_get();
