@@ -191,6 +191,11 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
             if (pressed) {
                 uint8_t sci = (uint8_t)(key & 0xFF);
 
+                if (!pmc_sci(&PMC_1, sci)) {
+                    // In the case of ignored SCI, reset bit
+                    return false;
+                }
+
                 // HACK FOR HARDWARE HOTKEYS
                 switch (sci) {
                     case SCI_DISPLAY_TOGGLE:
@@ -200,11 +205,6 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
                         gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
                         break;
                 }
-
-                if (!pmc_sci(&PMC_1, sci)) {
-                    // In the case of ignored SCI, reset bit
-                    return false;
-                }
             }
             break;
         case (KT_SCI_EXTRA):
@@ -212,16 +212,16 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
                 uint8_t sci = SCI_EXTRA;
                 sci_extra = (uint8_t)(key & 0xFF);
 
+                if (!pmc_sci(&PMC_1, sci)) {
+                    // In the case of ignored SCI, reset bit
+                    return false;
+                }
+
                 // HACK FOR HARDWARE HOTKEYS
                 switch (sci_extra) {
                     case SCI_EXTRA_KBD_BKL:
                         kbled_set(kbled_get() + 1);
                         break;
-                }
-
-                if (!pmc_sci(&PMC_1, sci)) {
-                    // In the case of ignored SCI, reset bit
-                    return false;
                 }
             }
             break;
