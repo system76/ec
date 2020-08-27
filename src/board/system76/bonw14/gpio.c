@@ -15,6 +15,7 @@ struct Gpio __code DGPU_PWR_EN =    GPIO(A, 0);
 struct Gpio __code EC_EN =          GPIO(B, 6);
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code GC6_FB_EN =      GPIO(H, 3);
+struct Gpio __code LAN_WAKEUP_N =   GPIO(B, 2); // renamed to LAN_WAKE#
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_BAT_CHG =    GPIO(H, 5);
 struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);

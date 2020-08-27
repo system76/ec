@@ -23,6 +23,7 @@ extern struct Gpio __code DD_ON;
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;
 extern struct Gpio __code EC_SMD_EN_N;
+#define HAVE_LAN_WAKEUP_N 0
 extern struct Gpio __code LED_ACIN;
 #define HAVE_LED_AIRPLANE_N 0
 #define HAVE_LED_BAT_CHG 0

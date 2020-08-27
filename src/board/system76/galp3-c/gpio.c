@@ -11,6 +11,7 @@ struct Gpio __code CCD_EN =         GPIO(G, 0);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code EC_EN =          GPIO(E, 1);
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
+struct Gpio __code LAN_WAKEUP_N =   GPIO(B, 2);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_AIRPLANE_N = GPIO(G, 6);
 struct Gpio __code LED_BAT_CHG =    GPIO(A, 5);
