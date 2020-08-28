@@ -12,7 +12,7 @@
 
 extern uint8_t sci_extra;
 
-uint8_t ecos = 0;
+uint8_t acpi_ecos = 0;
 
 static uint8_t fcmd = 0;
 static uint8_t fdat = 0;
@@ -46,6 +46,19 @@ void fcommand(void) {
             }
             break;
     }
+}
+
+void acpi_reset(void) {
+    // Disable lid wake
+    lid_wake = false;
+
+    // ECOS: No ACPI
+    acpi_ecos = 0;
+
+#if HAVE_LED_AIRPLANE_N
+    // Clear airplane mode LED
+    gpio_set(&LED_AIRPLANE_N, true);
+#endif
 }
 
 uint8_t acpi_read(uint8_t addr) {
@@ -105,7 +118,7 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x2E, battery_remaining_capacity);
         ACPI_16(0x32, battery_voltage);
 
-        ACPI_8(0x68, ecos);
+        ACPI_8(0x68, acpi_ecos);
 
         ACPI_8(0xCC, sci_extra);
 
@@ -133,7 +146,6 @@ uint8_t acpi_read(uint8_t addr) {
     return data;
 }
 
-
 void acpi_write(uint8_t addr, uint8_t data) {
     DEBUG("acpi_write %02X = %02X\n", addr, data);
 
@@ -144,7 +156,7 @@ void acpi_write(uint8_t addr, uint8_t data) {
             break;
 
         case 0x68:
-            ecos = data;
+            acpi_ecos = data;
             break;
 
 #if HAVE_LED_AIRPLANE_N
