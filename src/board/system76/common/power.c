@@ -1,5 +1,6 @@
 #include <arch/delay.h>
 #include <arch/time.h>
+#include <board/acpi.h>
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/gpio.h>
@@ -331,6 +332,8 @@ void power_off_s5(void) {
 static void power_cpu_reset(void) {
     // LPC was just reset, enable PNP devices
     pnp_enable();
+    // Reset ACPI registers
+    acpi_reset();
     //TODO: reset KBC and touchpad states
     kbled_reset();
 }
