@@ -121,7 +121,7 @@ void gpio_init() {
     // PWR_BTN#
     GPCRD5 = GPIO_OUT;
     // CPU_FANSEN
-    GPCRD6 = GPIO_IN;
+    GPCRD6 = GPIO_ALT;
     // SUSWARN#
     GPCRD7 = GPIO_IN;
     // SWI#

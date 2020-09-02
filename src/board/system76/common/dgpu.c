@@ -3,7 +3,6 @@
 #if HAVE_DGPU
 
 #include <stdbool.h>
-#include <stdint.h>
 
 #include <board/gpio.h>
 #include <board/power.h>
