@@ -1,10 +1,12 @@
 #include <board/acpi.h>
 #include <board/battery.h>
+#include <board/dgpu.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
 #include <board/peci.h>
 #include <common/debug.h>
+#include <ec/pwm.h>
 
 #ifndef HAVE_LED_AIRPLANE_N
 #define HAVE_LED_AIRPLANE_N 1
@@ -89,6 +91,8 @@ uint8_t acpi_read(uint8_t addr) {
             }
             break;
 
+        ACPI_8(0x07, peci_temp >> 6);
+
         // Handle AC adapter and battery present
         case 0x10:
             if (!gpio_get(&ACIN_N)) {
@@ -121,6 +125,16 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8(0x68, acpi_ecos);
 
         ACPI_8(0xCC, sci_extra);
+
+        ACPI_8(0xCE, DCR2);
+        ACPI_8(0xD0, F1TMRR);
+        ACPI_8(0xD1, F1TLRR);
+#if HAVE_DGPU
+        ACPI_8(0xCD, dgpu_temp);
+        ACPI_8(0xCF, DCR4);
+        ACPI_8(0xD2, F2TMRR);
+        ACPI_8(0xD3, F2TLRR);
+#endif // HAVE_DGPU
 
 #if HAVE_LED_AIRPLANE_N
         // Airplane mode LED
