@@ -552,7 +552,11 @@ void power_event(void) {
 
 //TODO: do not require both LEDs
 #if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
-    if (ac_new) {
+    if (!(battery_status & BATTERY_INITIALIZED)) {
+        // No battery connected
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, false);
+    } else if (ac_new) {
         // Discharging (no AC adapter)
         gpio_set(&LED_BAT_CHG, false);
         gpio_set(&LED_BAT_FULL, false);
@@ -563,7 +567,6 @@ void power_event(void) {
         gpio_set(&LED_BAT_FULL, true);
     } else {
         // Charging
-        // TODO: detect no battery connected
         gpio_set(&LED_BAT_CHG, true);
         gpio_set(&LED_BAT_FULL, false);
     }

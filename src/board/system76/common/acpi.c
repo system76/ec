@@ -99,8 +99,10 @@ uint8_t acpi_read(uint8_t addr) {
                 // AC adapter connected
                 data |= 1 << 0;
             }
-            // BAT0 always connected - TODO
-            data |= 1 << 2;
+            if (battery_status & BATTERY_INITIALIZED) {
+                // BAT0 connected
+                data |= 1 << 2;
+            }
             break;
 
         ACPI_16(0x16, battery_design_capacity);

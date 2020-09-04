@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#define BATTERY_INITIALIZED (1U << 7)
+
 extern uint16_t battery_temp;
 extern uint16_t battery_voltage;
 extern uint16_t battery_current;
