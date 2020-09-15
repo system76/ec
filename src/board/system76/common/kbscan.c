@@ -308,7 +308,10 @@ void kbscan_event(void) {
                             kbscan_last_layer[i][j] = kbscan_layer;
                         }
                         uint8_t key_layer = kbscan_last_layer[i][j];
-                        uint16_t key = keymap(i, j, key_layer);
+                        uint16_t key = 0;
+                        if (key_layer < KM_LAY) {;
+                            key = KEYMAP[key_layer][i][j];
+                        }
                         if (key) {
                             DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
                             if(!kbscan_press(key, new_b, &layer)){

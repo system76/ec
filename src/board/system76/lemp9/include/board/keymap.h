@@ -45,7 +45,4 @@
 // Keymap
 extern uint16_t __xdata KEYMAP[KM_LAY][KM_OUT][KM_IN];
 
-// Get a keycode from the keymap
-uint16_t keymap(int output, int input, int layer);
-
 #endif // _BOARD_KEYMAP_H
