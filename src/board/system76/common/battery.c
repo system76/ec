@@ -89,7 +89,7 @@ int battery_charger_disable(void) {
     res = smbus_write(CHARGER_ADDRESS, 0x3F, 0);
     if (res < 0) return res;
 
-    DEBUG("Charged disabled\n");
+    DEBUG("Charger disabled\n");
     charger_enabled = false;
     return 0;
 }
@@ -123,7 +123,7 @@ int battery_charger_enable(void) {
         SBC_IDCHC_GAIN
     );
 
-    DEBUG("Charged enabled\n");
+    DEBUG("Charger enabled\n");
     charger_enabled = true;
     return 0;
 }
