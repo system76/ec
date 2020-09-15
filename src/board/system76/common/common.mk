@@ -25,6 +25,9 @@ CFLAGS+=-I$(SYSTEM76_COMMON_DIR)/include
 # Add scratch ROM
 include $(SYSTEM76_COMMON_DIR)/scratch/scratch.mk
 
+# Add scratch ROM for flash access
+include $(SYSTEM76_COMMON_DIR)/flash/flash.mk
+
 console_internal:
 	cargo build --manifest-path tool/Cargo.toml --release
 	sudo tool/target/release/system76_ectool console
