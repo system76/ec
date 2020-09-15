@@ -22,6 +22,10 @@ enum Command {
     CMD_FAN_GET = 7,
     // Set fan speeds
     CMD_FAN_SET = 8,
+    // Get keyboard map index
+    CMD_KEYMAP_GET = 9,
+    // Set keyboard map index
+    CMD_KEYMAP_SET = 10,
     //TODO
 };
 
