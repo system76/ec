@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-CC=sdcc -mmcs51 --model-large --Werror
+CC=sdcc -mmcs51 --model-large --xram-size $(SRAM_SIZE) --Werror
 OBJ=$(patsubst src/%.c,$(BUILD)/%.rel,$(SRC))
 
 # Run EC rom in simulator
