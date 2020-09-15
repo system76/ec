@@ -21,6 +21,8 @@ pub enum Cmd {
     Reset = 6,
     FanGet = 7,
     FanSet = 8,
+    KeymapGet = 9,
+    KeymapSet = 10,
 }
 
 pub const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -194,6 +196,26 @@ impl<T: Timeout> Ec<T> {
         self.write(2, index);
         self.write(3, duty);
         self.command(Cmd::FanSet)
+    }
+
+    pub unsafe fn keymap_get(&mut self, layer: u8, output: u8, input: u8) -> Result<u16, Error> {
+        self.write(2, layer);
+        self.write(3, output);
+        self.write(4, input);
+        self.command(Cmd::KeymapGet)?;
+        Ok(
+            (self.read(5) as u16) |
+            ((self.read(6) as u16) << 8)
+        )
+    }
+
+    pub unsafe fn keymap_set(&mut self, layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
+        self.write(2, layer);
+        self.write(3, output);
+        self.write(4, input);
+        self.write(5, value as u8);
+        self.write(6, (value >> 8) as u8);
+        self.command(Cmd::KeymapSet)
     }
 }
 

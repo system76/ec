@@ -12,7 +12,7 @@ use std::{
     fs,
     io,
     process,
-    str,
+    str::{self, FromStr},
     time::{Duration, Instant},
     thread,
 };
@@ -296,18 +296,64 @@ unsafe fn fan_set(index: u8, duty: u8) -> Result<(), Error> {
     ec.fan_set(index, duty)
 }
 
+unsafe fn keymap_get(layer: u8, output: u8, input: u8) -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    let value = ec.keymap_get(layer, output, input)?;
+    println!("{:04X}", value);
+
+    Ok(())
+}
+
+unsafe fn keymap_set(layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
+    iopl();
+
+    let mut ec = Ec::new(
+        StdTimeout::new(Duration::new(1, 0)),
+    )?;
+
+    ec.keymap_set(layer, output, input, value)
+}
+
 fn usage() {
     eprintln!("  console");
     eprintln!("  flash [file]");
     eprintln!("  flash_backup [file]");
     eprintln!("  fan [index] <duty>");
     eprintln!("  info");
+    eprintln!("  keymap [layer] [output] [input] <value>");
     eprintln!("  print [message]");
+}
+
+fn parse_arg_opt<I: Iterator<Item=String>, F: FromStr>(args: &mut I, name: &str) -> Option<F> {
+    match args.next() {
+        Some(arg) => match arg.parse::<F>() {
+            Ok(ok) => Some(ok),
+            Err(_err) => {
+                eprintln!("failed to parse {}: '{}'", name, arg);
+                process::exit(1);
+            },
+        },
+        None  => None,
+    }
+}
+
+fn parse_arg<I: Iterator<Item=String>, F: FromStr>(args: &mut I, name: &str) -> F {
+    match parse_arg_opt(args, name) {
+        Some(some) => some,
+        None => {
+            eprintln!("no {} provided", name);
+            process::exit(1);
+        }
+    }
 }
 
 fn main() {
     let mut args = env::args().skip(1);
-
     match args.next() {
         Some(arg) => match arg.as_str() {
             "console" => match unsafe { console() } {
@@ -317,39 +363,25 @@ fn main() {
                     process::exit(1);
                 },
             },
-            "fan" => match args.next() {
-                Some(index_str) => match index_str.parse::<u8>() {
-                    Ok(index) => match args.next() {
-                        Some(duty_str) => match duty_str.parse::<u8>() {
-                            Ok(duty) => match unsafe { fan_set(index, duty) } {
-                                Ok(()) => (),
-                                Err(err) => {
-                                    eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
-                                    process::exit(1);
-                                },
-                            },
-                            Err(err) => {
-                                eprintln!("failed to parse '{}': {:X?}", duty_str, err);
-                                process::exit(1);
-                            },
-                        },
-                        None => match unsafe { fan_get(index) } {
-                            Ok(()) => (),
-                            Err(err) => {
-                                eprintln!("failed to get fan {}: {:X?}", index, err);
-                                process::exit(1);
-                            },
+            "fan" => {
+                let index = parse_arg(&mut args, "index");
+                let duty_opt = parse_arg_opt(&mut args, "duty");
+                match duty_opt {
+                    Some(duty) => match unsafe { fan_set(index, duty) } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
+                            process::exit(1);
                         },
                     },
-                    Err(err) => {
-                        eprintln!("failed to parse '{}': {:X?}", index_str, err);
-                        process::exit(1);
+                    None => match unsafe { fan_get(index) } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to get fan {}: {:X?}", index, err);
+                            process::exit(1);
+                        },
                     },
-                },
-                None => {
-                    eprintln!("no index provided");
-                    process::exit(1);
-                },
+                }
             },
             "flash" => match args.next() {
                 Some(path) => match unsafe { flash(&path, SpiTarget::Main) } {
@@ -383,6 +415,33 @@ fn main() {
                     eprintln!("failed to read info: {:X?}", err);
                     process::exit(1);
                 },
+            },
+            "keymap" => {
+                let layer = parse_arg(&mut args, "layer");
+                let output = parse_arg(&mut args, "output");
+                let input = parse_arg(&mut args, "input");
+                match args.next() {
+                    Some(value_str) => match u16::from_str_radix(&value_str, 16) {
+                        Ok(value) => match unsafe { keymap_set(layer, output, input, value) } {
+                            Ok(()) => (),
+                            Err(err) => {
+                                eprintln!("failed to set keymap {}, {}, {} to {}: {:X?}", layer, output, input, value, err);
+                                process::exit(1);
+                            },
+                        },
+                        Err(err) => {
+                            eprintln!("failed to parse value: '{}': {}", arg, err);
+                            process::exit(1);
+                        }
+                    },
+                    None => match unsafe { keymap_get(layer, output, input) } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to get keymap {}, {}, {}: {:X?}", layer, output, input, err);
+                            process::exit(1);
+                        },
+                    },
+                }
             },
             "print" => for mut arg in args {
                 arg.push('\n');
