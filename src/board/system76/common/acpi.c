@@ -128,6 +128,14 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_8(0x68, acpi_ecos);
 
+        case 0xBC:
+            data = battery_get_start_threshold();
+            break;
+
+        case 0xBD:
+            data = battery_get_end_threshold();
+            break;
+
         ACPI_8(0xCC, sci_extra);
 
         ACPI_8(0xCE, DCR2);
@@ -175,6 +183,14 @@ void acpi_write(uint8_t addr, uint8_t data) {
 
         case 0x68:
             acpi_ecos = data;
+            break;
+
+        case 0xBC:
+            battery_set_start_threshold(data);
+            break;
+
+        case 0xBD:
+            battery_set_end_threshold(data);
             break;
 
 #if HAVE_LED_AIRPLANE_N
