@@ -12,7 +12,7 @@ header="src/common/include/common/keymap.h"
 echo "#include <stdio.h>" > "$source"
 echo "#include \"$header\"" >> "$source"
 echo "int main(int argc, char **argv) {" >> "$source"
-grep '^#define K_' "$header" \
+grep '^#define \(K_\|KT_FN\)' "$header" \
 | cut -d ' ' -f2 \
 | while read keycode
 do
