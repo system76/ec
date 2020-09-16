@@ -14,5 +14,6 @@ name = "ectool"
 redox_hwio = "0.1.1"
 
 [features]
-default = []
+default = ["std"]
 stable = ["redox_hwio/stable"]
+std = []

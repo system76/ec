@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 pub use self::ec::Ec;
 mod ec;
@@ -22,4 +22,6 @@ pub use self::super_io::SuperIo;
 mod super_io;
 
 pub use self::timeout::Timeout;
+#[cfg(feature = "std")]
+pub use self::timeout::StdTimeout;
 mod timeout;
