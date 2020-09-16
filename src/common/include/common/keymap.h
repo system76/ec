@@ -29,21 +29,32 @@ uint16_t keymap_translate(uint16_t key);
 #define KT_SCI (0x4000)
 
 #define SCI_DISPLAY_TOGGLE (0x0B)
+#define K_DISPLAY_TOGGLE (KT_SCI | SCI_DISPLAY_TOGGLE)
 #define SCI_BRIGHTNESS_DOWN (0x11)
+#define K_BRIGHTNESS_DOWN (KT_SCI | SCI_BRIGHTNESS_DOWN)
 #define SCI_BRIGHTNESS_UP (0x12)
+#define K_BRIGHTNESS_UP (KT_SCI | SCI_BRIGHTNESS_UP)
 #define SCI_CAMERA_TOGGLE (0x13)
+#define K_CAMERA_TOGGLE (KT_SCI | SCI_CAMERA_TOGGLE)
 #define SCI_AIRPLANE_MODE (0x14)
+#define K_AIRPLANE_MODE (KT_SCI | SCI_AIRPLANE_MODE)
 #define SCI_SUSPEND (0x15)
+#define K_SUSPEND (KT_SCI | SCI_SUSPEND)
 #define SCI_EXTRA (0x50)
 
 // Extra SCI layer for keyboard backlight control
 #define KT_SCI_EXTRA (0x8000)
 
 #define SCI_EXTRA_KBD_COLOR (0x80)
+#define K_KBD_COLOR (KT_SCI_EXTRA | SCI_EXTRA_KBD_COLOR)
 #define SCI_EXTRA_KBD_DOWN (0x81)
+#define K_KBD_DOWN (KT_SCI_EXTRA | SCI_EXTRA_KBD_DOWN)
 #define SCI_EXTRA_KBD_UP (0x82)
+#define K_KBD_UP (KT_SCI_EXTRA | SCI_EXTRA_KBD_UP)
 #define SCI_EXTRA_KBD_BKL (0x8A)
+#define K_KBD_BKL (KT_SCI_EXTRA | SCI_EXTRA_KBD_BKL)
 #define SCI_EXTRA_KBD_TOGGLE (0x9F)
+#define K_KBD_TOGGLE (KT_SCI_EXTRA | SCI_EXTRA_KBD_TOGGLE)
 
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
