@@ -69,7 +69,7 @@ bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed) {
     }
     if (!key) return true;
     switch (key & 0xFF00) {
-        case K_E0:
+        case KF_E0:
             TRACE("  E0\n");
             if (!kbc_keyboard(kbc, 0xE0, KBC_TIMEOUT)) return false;
             key &= 0xFF;

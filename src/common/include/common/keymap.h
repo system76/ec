@@ -48,19 +48,19 @@ uint16_t keymap_translate(uint16_t key);
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
 // Should send 0xE0 before scancode bytes
-#define K_E0 (0x0100)
+#define KF_E0 (0x0100)
 
 // Hotkeys
 
-#define K_PLAY_PAUSE (K_E0 | 0x34)
-#define K_MUTE (K_E0 | 0x23)
-#define K_VOLUME_DOWN (K_E0 | 0x21)
-#define K_VOLUME_UP (K_E0 | 0x32)
+#define K_PLAY_PAUSE (KF_E0 | 0x34)
+#define K_MUTE (KF_E0 | 0x23)
+#define K_VOLUME_DOWN (KF_E0 | 0x21)
+#define K_VOLUME_UP (KF_E0 | 0x32)
 // More media keys
-#define K_MEDIA_NEXT (K_E0 | 0x4D)
-#define K_MEDIA_PREV (K_E0 | 0x15)
+#define K_MEDIA_NEXT (KF_E0 | 0x4D)
+#define K_MEDIA_PREV (KF_E0 | 0x15)
 // Custom scancode
-#define K_TOUCHPAD (K_E0 | 0x63)
+#define K_TOUCHPAD (KF_E0 | 0x63)
 
 // Function keys
 
@@ -167,49 +167,49 @@ uint16_t keymap_translate(uint16_t key);
 // Left control key
 #define K_LEFT_CTRL (0x14)
 // Left super key
-#define K_LEFT_SUPER (K_E0 | 0x1F)
+#define K_LEFT_SUPER (KF_E0 | 0x1F)
 // Left alt key
 #define K_LEFT_ALT (0x11)
 // Space key
 #define K_SPACE (0x29)
 // Right alt key
-#define K_RIGHT_ALT (K_E0 | 0x11)
+#define K_RIGHT_ALT (KF_E0 | 0x11)
 // Right super key
-#define K_RIGHT_SUPER (K_E0 | 0x27)
+#define K_RIGHT_SUPER (KF_E0 | 0x27)
 // Application key
-#define K_APP (K_E0 | 0x2F)
+#define K_APP (KF_E0 | 0x2F)
 // Right control key
-#define K_RIGHT_CTRL (K_E0 | 0x14)
+#define K_RIGHT_CTRL (KF_E0 | 0x14)
 
 // Arrow keys and related
 
 // Insert key
-#define K_INSERT (K_E0 | 0x70)
+#define K_INSERT (KF_E0 | 0x70)
 // Delete key
-#define K_DEL (K_E0 | 0x71)
+#define K_DEL (KF_E0 | 0x71)
 // Home key
-#define K_HOME (K_E0 | 0x6C)
+#define K_HOME (KF_E0 | 0x6C)
 // End key
-#define K_END (K_E0 | 0x69)
+#define K_END (KF_E0 | 0x69)
 // Page up key
-#define K_PGUP (K_E0 | 0x7D)
+#define K_PGUP (KF_E0 | 0x7D)
 // Page down key
-#define K_PGDN (K_E0 | 0x7A)
+#define K_PGDN (KF_E0 | 0x7A)
 
-#define K_UP (K_E0 | 0x75)
-#define K_LEFT (K_E0 | 0x6B)
-#define K_DOWN (K_E0 | 0x72)
-#define K_RIGHT (K_E0 | 0x74)
+#define K_UP (KF_E0 | 0x75)
+#define K_LEFT (KF_E0 | 0x6B)
+#define K_DOWN (KF_E0 | 0x72)
+#define K_RIGHT (KF_E0 | 0x74)
 
 // Numpad
 
 #define K_NUM_LOCK (0x77)
-#define K_NUM_SLASH (K_E0 | 0x4A)
+#define K_NUM_SLASH (KF_E0 | 0x4A)
 #define K_NUM_ASTERISK (0x7C)
 #define K_NUM_MINUS (0x7B)
 #define K_NUM_PLUS (0x79)
 #define K_NUM_PERIOD (0x71)
-#define K_NUM_ENTER (K_E0 | 0x5A)
+#define K_NUM_ENTER (KF_E0 | 0x5A)
 #define K_NUM_0 (0x70)
 #define K_NUM_1 (0x69)
 #define K_NUM_2 (0x72)
