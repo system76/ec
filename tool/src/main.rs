@@ -2,10 +2,10 @@ use ectool::{
     Ec,
     Error,
     Firmware,
+    StdTimeout,
     Spi,
     SpiRom,
     SpiTarget,
-    Timeout,
 };
 use std::{
     env,
@@ -13,33 +13,9 @@ use std::{
     io,
     process,
     str::{self, FromStr},
-    time::{Duration, Instant},
+    time::Duration,
     thread,
 };
-
-pub struct StdTimeout {
-    instant: Instant,
-    duration: Duration,
-}
-
-impl StdTimeout {
-    pub fn new(duration: Duration) -> Self {
-        StdTimeout {
-            instant: Instant::now(),
-            duration
-        }
-    }
-}
-
-impl Timeout for StdTimeout {
-    fn reset(&mut self) {
-        self.instant = Instant::now();
-    }
-
-    fn running(&self) -> bool {
-        self.instant.elapsed() < self.duration
-    }
-}
 
 unsafe fn iopl() {
     extern {
