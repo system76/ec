@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <board/kbled.h>
 #include <common/macro.h>
 #include <ec/dac.h>

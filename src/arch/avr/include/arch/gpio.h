@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef _ARCH_GPIO_H
 #define _ARCH_GPIO_H
 

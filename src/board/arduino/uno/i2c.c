@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <avr/io.h>
 
 #include <board/cpu.h>

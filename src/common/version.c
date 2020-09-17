@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <common/macro.h>
 
 // Prevent failures to compile on AVR

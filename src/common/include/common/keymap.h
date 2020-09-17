@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef _COMMON_KEYMAP_H
 #define _COMMON_KEYMAP_H
 

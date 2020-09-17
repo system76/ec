@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 CC=avr-gcc -mmcu=$(EC)
 CFLAGS+=-Os -fstack-usage -Wall -Werror -Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
 OBJ=$(patsubst src/%.c,$(BUILD)/%.o,$(SRC))

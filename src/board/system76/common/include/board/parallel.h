@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef _BOARD_PARALLEL_H
 #define _BOARD_PARALLEL_H
 

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <arch/gpio.h>
 
 bool gpio_get_dir(struct Gpio * gpio) {

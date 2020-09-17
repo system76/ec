@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <board/smbus.h>
 #include <ec/i2c.h>
 

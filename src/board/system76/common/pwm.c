@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <board/pwm.h>
 
 void pwm_init(void) {

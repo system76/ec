@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 // Jeremy's layout
 
 #include <board/keymap.h>

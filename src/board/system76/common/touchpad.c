@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <board/kbc.h>
 #include <board/touchpad.h>
 #include <common/debug.h>

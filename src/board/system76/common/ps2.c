@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <board/ps2.h>
 
 void ps2_init(void) {

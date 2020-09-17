@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef _EC_ECPM_H
 #define _EC_ECPM_H
 

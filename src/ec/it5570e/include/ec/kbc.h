@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef _EC_KBC_H
 #define _EC_KBC_H
 

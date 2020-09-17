@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/acpi.h>

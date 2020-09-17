@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef _BOARD_GPIO_H
 #define _BOARD_GPIO_H
 

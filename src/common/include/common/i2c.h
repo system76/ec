@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #ifndef _COMMON_I2C_H
 #define _COMMON_I2C_H
 
