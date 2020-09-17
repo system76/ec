@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # Set scratch ROM parameters
 SCRATCH_OFFSET=1024
 SCRATCH_SIZE=1024

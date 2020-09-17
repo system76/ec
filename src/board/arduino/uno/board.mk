@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 EC=atmega328p
 
 PORT=$(wildcard /dev/ttyACM*)

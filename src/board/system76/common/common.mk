@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 # Set log level
 # 0 - NONE
 # 1 - ERROR

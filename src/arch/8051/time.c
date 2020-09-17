@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 // Uses timer 0 to keep track of global time
 
 #include <8051.h>

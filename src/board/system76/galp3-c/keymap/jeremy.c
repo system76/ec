@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 // Jeremy's layout - http://www.keyboard-layout-editor.com/#/gists/fe00274727fc01b78a79d79473cd547c
 
 #include <board/keymap.h>

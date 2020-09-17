@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <ec/kbc.h>
 
 struct Kbc __code KBC = {

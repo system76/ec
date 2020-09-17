@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 CC=sdcc -mmcs51 --model-large --Werror
 OBJ=$(patsubst src/%.c,$(BUILD)/%.rel,$(SRC))
 

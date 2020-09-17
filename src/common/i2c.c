@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <common/i2c.h>
 
 int i2c_recv(struct I2C * i2c, uint8_t addr, uint8_t* data, int length) {

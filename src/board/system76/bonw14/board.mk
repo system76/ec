@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
 EC=it5570e
 
 # Add keymap to src

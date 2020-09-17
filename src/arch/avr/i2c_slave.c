@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 // Based on https://github.com/thegouger/avr-i2c-slave
 
 #include <stdio.h>

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <board/gpio.h>
 #include <common/debug.h>
 

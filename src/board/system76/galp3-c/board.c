@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/gpio.h>
