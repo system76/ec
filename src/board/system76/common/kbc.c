@@ -228,6 +228,13 @@ void kbc_event(struct Kbc * kbc) {
                             kbscan_enabled = false;
                             kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
                             break;
+                        case 0xF6:
+                            TRACE("    set default parameters\n");
+                            kbc_leds = 0;
+                            kbscan_repeat_period = 91;
+                            kbscan_repeat_delay = 500;
+                            kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT);
+                            break;
                         case 0xFF:
                             TRACE("    self test\n");
                             if (kbc_keyboard(kbc, 0xFA, KBC_TIMEOUT)) {
