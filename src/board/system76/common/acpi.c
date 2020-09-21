@@ -16,7 +16,7 @@
 
 extern uint8_t sci_extra;
 
-uint8_t acpi_ecos = 0;
+enum EcOs acpi_ecos = EC_OS_NONE;
 
 static uint8_t fcmd = 0;
 static uint8_t fdat = 0;
@@ -56,8 +56,8 @@ void acpi_reset(void) {
     // Disable lid wake
     lid_wake = false;
 
-    // ECOS: No ACPI
-    acpi_ecos = 0;
+    // ECOS: No ACPI or driver
+    acpi_ecos = EC_OS_NONE;
 
 #if HAVE_LED_AIRPLANE_N
     // Clear airplane mode LED
@@ -182,7 +182,7 @@ void acpi_write(uint8_t addr, uint8_t data) {
             break;
 
         case 0x68:
-            acpi_ecos = data;
+            acpi_ecos = (enum EcOs)data;
             break;
 
         case 0xBC:
