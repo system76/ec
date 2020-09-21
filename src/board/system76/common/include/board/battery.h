@@ -29,5 +29,6 @@ int battery_charger_enable(void);
 int battery_charger_configure(void);
 void battery_event(void);
 void battery_debug(void);
+void battery_reset(void);
 
 #endif // _BOARD_BATTERY_H

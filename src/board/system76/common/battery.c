@@ -225,3 +225,8 @@ void battery_debug(void) {
 
     #undef command
 }
+
+void battery_reset(void) {
+    battery_start_threshold = BATTERY_START_THRESHOLD;
+    battery_end_threshold = BATTERY_END_THRESHOLD;
+}
