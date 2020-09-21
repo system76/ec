@@ -2,6 +2,7 @@
 
 #include <arch/delay.h>
 #include <arch/time.h>
+#include <board/acpi.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
 #include <board/kbled.h>
@@ -141,6 +142,20 @@ static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
 }
 #endif // KM_NKEY
 
+static void hardware_hotkey(uint16_t key) {
+    switch (key) {
+        case K_DISPLAY_TOGGLE:
+            gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
+            break;
+        case K_CAMERA_TOGGLE:
+            gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
+            break;
+        case K_KBD_BKL:
+            kbled_set(kbled_get() + 1);
+            break;
+    }
+}
+
 bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
     // Wake from sleep on keypress
     if (pressed &&
@@ -201,15 +216,7 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
                     return false;
                 }
 
-                // HACK FOR HARDWARE HOTKEYS
-                switch (sci) {
-                    case SCI_DISPLAY_TOGGLE:
-                        gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
-                        break;
-                    case SCI_CAMERA_TOGGLE:
-                        gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
-                        break;
-                }
+                hardware_hotkey(key);
             }
             break;
         case (KT_SCI_EXTRA):
@@ -222,12 +229,7 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
                     return false;
                 }
 
-                // HACK FOR HARDWARE HOTKEYS
-                switch (sci_extra) {
-                    case SCI_EXTRA_KBD_BKL:
-                        kbled_set(kbled_get() + 1);
-                        break;
-                }
+                hardware_hotkey(key);
             }
             break;
     }
