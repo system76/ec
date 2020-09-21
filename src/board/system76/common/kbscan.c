@@ -7,6 +7,7 @@
 #include <board/kbled.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
+#include <board/lid.h>
 #include <board/pmc.h>
 #include <board/power.h>
 #include <common/debug.h>
@@ -141,7 +142,9 @@ static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
 #endif // KM_NKEY
 
 bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
+    // Wake from sleep on keypress
     if (pressed &&
+        lid_state &&
         (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3)) {
         gpio_set(&SWI_N, false);
         delay_ticks(10); //TODO: find correct delay
