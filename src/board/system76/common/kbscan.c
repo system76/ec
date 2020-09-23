@@ -221,26 +221,32 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
             break;
         case (KT_SCI):
             if (pressed) {
-                uint8_t sci = (uint8_t)(key & 0xFF);
-
-                if (!pmc_sci(&PMC_1, sci)) {
-                    // In the case of ignored SCI, reset bit
-                    return false;
+                // Send SCI if ACPI OS is loaded
+                if (acpi_ecos != EC_OS_NONE) {
+                    uint8_t sci = (uint8_t)(key & 0xFF);
+                    if (!pmc_sci(&PMC_1, sci)) {
+                        // In the case of ignored SCI, reset bit
+                        return false;
+                    }
                 }
 
+                // Handle hardware hotkeys
                 hardware_hotkey(key);
             }
             break;
         case (KT_SCI_EXTRA):
             if (pressed) {
-                uint8_t sci = SCI_EXTRA;
-                sci_extra = (uint8_t)(key & 0xFF);
-
-                if (!pmc_sci(&PMC_1, sci)) {
-                    // In the case of ignored SCI, reset bit
-                    return false;
+                // Send SCI if ACPI OS is loaded
+                if (acpi_ecos != EC_OS_NONE) {
+                    uint8_t sci = SCI_EXTRA;
+                    sci_extra = (uint8_t)(key & 0xFF);
+                    if (!pmc_sci(&PMC_1, sci)) {
+                        // In the case of ignored SCI, reset bit
+                        return false;
+                    }
                 }
 
+                // Handle hardware hotkeys
                 hardware_hotkey(key);
             }
             break;

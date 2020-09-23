@@ -370,9 +370,11 @@ void power_event(void) {
         ac_send_sci = true;
     }
     if (ac_send_sci) {
-        // Send SCI 0x16 for AC detect event
-        if (pmc_sci(&PMC_1, 0x16)) {
-            ac_send_sci = false;
+        // Send SCI 0x16 for AC detect event if ACPI OS is loaded
+        if (acpi_ecos != EC_OS_NONE) {
+            if (pmc_sci(&PMC_1, 0x16)) {
+                ac_send_sci = false;
+            }
         }
     }
     ac_last = ac_new;
