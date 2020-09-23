@@ -397,7 +397,7 @@ fn main() {
                 let output = parse_arg(&mut args, "output");
                 let input = parse_arg(&mut args, "input");
                 match args.next() {
-                    Some(value_str) => match u16::from_str_radix(&value_str, 16) {
+                    Some(value_str) => match u16::from_str_radix(value_str.trim_start_matches("0x"), 16) {
                         Ok(value) => match unsafe { keymap_set(layer, output, input, value) } {
                             Ok(()) => (),
                             Err(err) => {

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-only
+# This script produces layout data for the System76 Keyboard Configurator
 
 set -e
 
