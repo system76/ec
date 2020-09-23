@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <arch/delay.h>
+#include <board/acpi.h>
 #include <board/gpio.h>
 #include <board/lid.h>
 #include <board/pmc.h>
@@ -33,15 +34,17 @@ void lid_event(void) {
             DEBUG("closed\n");
         }
 
-        // Send SCI
+        // Send SCI if ACPI OS is loaded
         send_sci = true;
     }
     lid_state = new;
 
     if (send_sci) {
-        // Send SCI 0x1B for lid event
-        if (pmc_sci(&PMC_1, 0x1B)) {
-            send_sci = false;
+        // Send SCI 0x1B for lid event if ACPI OS is loaded
+        if (acpi_ecos != EC_OS_NONE) {
+            if (pmc_sci(&PMC_1, 0x1B)) {
+                send_sci = false;
+            }
         }
     }
 }
