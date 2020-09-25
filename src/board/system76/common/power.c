@@ -5,6 +5,7 @@
 #include <board/acpi.h>
 #include <board/battery.h>
 #include <board/board.h>
+#include <board/config.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
@@ -405,6 +406,8 @@ void power_event(void) {
             // Enable S5 power if necessary, before sending PWR_BTN
             update_power_state();
             if (power_state == POWER_STATE_DS5) {
+                if (config_should_reset())
+                    config_reset();
                 power_on_s5();
             }
         }

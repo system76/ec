@@ -18,6 +18,9 @@
 #define KM_NKEY 0
 #endif // KM_NKEY
 
+bool kbscan_fn_held = false;
+bool kbscan_esc_held = false;
+
 bool kbscan_enabled = false;
 uint16_t kbscan_repeat_period = 91;
 uint16_t kbscan_repeat_delay = 500;
@@ -182,12 +185,16 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
         case (KT_NORMAL):
             if (kbscan_enabled) {
                 kbc_scancode(&KBC, key, pressed);
+                if ((key & 0xFF) == K_ESC)
+                    kbscan_esc_held = pressed;
             }
             break;
         case (KT_FN):
             if (layer != NULL) {
                 if (pressed) *layer = 1;
                 else *layer = 0;
+
+                kbscan_fn_held = pressed;
             } else {
                 // In the case no layer can be set, reset bit
                 return false;
