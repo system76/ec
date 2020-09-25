@@ -7,6 +7,10 @@
 
 #include <ec/kbscan.h>
 
+// EC config reset key combo: Fn+Esc
+extern bool kbscan_fn_held;
+extern bool kbscan_esc_held;
+
 extern bool kbscan_enabled;
 
 // ms between repeating key
