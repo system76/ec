@@ -10,10 +10,15 @@ repository = "https://github.com/system76/ec"
 [lib]
 name = "ectool"
 
+[[bin]]
+name = "system76_ectool"
+required-features = ["std"]
+
 [dependencies]
-redox_hwio = "0.1.1"
+libc = { version = "0.2", optional = true }
+redox_hwio = "0.1.3"
 
 [features]
 default = ["std"]
 stable = ["redox_hwio/stable"]
-std = []
+std = ["libc"]

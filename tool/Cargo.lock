@@ -6,8 +6,13 @@ version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "libc"
+version = "0.2.77"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "redox_hwio"
-version = "0.1.1"
+version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -17,9 +22,11 @@ dependencies = [
 name = "system76_ectool"
 version = "0.1.3"
 dependencies = [
- "redox_hwio 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.77 (registry+https://github.com/rust-lang/crates.io-index)",
+ "redox_hwio 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [metadata]
 "checksum lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
-"checksum redox_hwio 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "847d8b48be152acb4b75dbc37d873ac54899389691f5de3358603c889883b25d"
+"checksum libc 0.2.77 (registry+https://github.com/rust-lang/crates.io-index)" = "f2f96b10ec2560088a8e76961b00d47107b3a625fecb76dedb29ee7ccbf98235"
+"checksum redox_hwio 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "41aa2c4c67329a04106644cad336238aa5adecfd73d06fb10339d472ce6d8070"

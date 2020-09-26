@@ -1,4 +1,6 @@
 use ectool::{
+    Access,
+    AccessLpcLinux,
     Ec,
     Error,
     Firmware,
@@ -10,41 +12,32 @@ use ectool::{
 use std::{
     env,
     fs,
-    io,
     process,
     str::{self, FromStr},
     time::Duration,
     thread,
 };
 
-unsafe fn iopl() {
-    extern {
-        fn iopl(level: isize) -> isize;
-    }
-
-    if iopl(3) < 0 {
-        eprintln!("failed to get I/O permission: {}", io::Error::last_os_error());
-        process::exit(1);
-    }
+unsafe fn ec() -> Result<Ec<AccessLpcLinux>, Error> {
+    let access = AccessLpcLinux::new(Duration::new(1, 0))?;
+    Ec::new(access)
 }
 
 unsafe fn console() -> Result<(), Error> {
-    iopl();
+    //TODO: driver support for reading debug region?
+    let mut ec = ec()?;
+    let access = ec.access();
 
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
-
-    let mut head = ec.debug(0) as usize;
+    let mut head = access.read_debug(0)? as usize;
     loop {
-        let tail = ec.debug(0) as usize;
+        let tail = access.read_debug(0)? as usize;
         if tail == 0 || head == tail {
             thread::sleep(Duration::from_millis(1));
         } else {
             while head != tail {
                 head += 1;
                 if head >= 256 { head = 1; }
-                let c = ec.debug(head as u8);
+                let c = access.read_debug(head as u8)?;
                 print!("{}", c as char);
             }
         }
@@ -67,7 +60,7 @@ unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], se
     Ok(())
 }
 
-unsafe fn flash_inner(ec: &mut Ec<StdTimeout>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
+unsafe fn flash_inner(ec: &mut Ec<AccessLpcLinux>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
     let rom_size = 128 * 1024;
 
     let mut new_rom = firmware.data.to_vec();
@@ -153,14 +146,11 @@ unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
     println!("file board: {:?}", str::from_utf8(firmware.board));
     println!("file version: {:?}", str::from_utf8(firmware.version));
 
-    iopl();
-
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
+    let mut ec = ec()?;
+    let data_size = ec.access().data_size();
 
     {
-        let mut data = [0; 256];
+        let mut data = vec![0; data_size];
         let size = ec.board(&mut data)?;
 
         let ec_board = &data[..size];
@@ -172,7 +162,7 @@ unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
     }
 
     {
-        let mut data = [0; 256];
+        let mut data = vec![0; data_size];
         let size = ec.version(&mut data)?;
 
         let ec_version = &data[..size];
@@ -208,15 +198,12 @@ unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
 }
 
 unsafe fn info() -> Result<(), Error> {
-    iopl();
-
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
+    let mut ec = ec()?;
+    let data_size = ec.access().data_size();
 
     {
         print!("board: ");
-        let mut data = [0; 256];
+        let mut data = vec![0; data_size];
         let size = ec.board(&mut data)?;
         for &b in data[..size].iter() {
             print!("{}", b as char);
@@ -226,7 +213,7 @@ unsafe fn info() -> Result<(), Error> {
 
     {
         print!("version: ");
-        let mut data = [0; 256];
+        let mut data = vec![0; data_size];
         let size = ec.version(&mut data)?;
         for &b in data[..size].iter() {
             print!("{}", b as char);
@@ -238,11 +225,7 @@ unsafe fn info() -> Result<(), Error> {
 }
 
 unsafe fn print(message: &[u8]) -> Result<(), Error> {
-    iopl();
-
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
+    let mut ec = ec()?;
 
     ec.print(message)?;
 
@@ -250,11 +233,7 @@ unsafe fn print(message: &[u8]) -> Result<(), Error> {
 }
 
 unsafe fn fan_get(index: u8) -> Result<(), Error> {
-    iopl();
-
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
+    let mut ec = ec()?;
 
     let duty = ec.fan_get(index)?;
     println!("{}", duty);
@@ -263,21 +242,13 @@ unsafe fn fan_get(index: u8) -> Result<(), Error> {
 }
 
 unsafe fn fan_set(index: u8, duty: u8) -> Result<(), Error> {
-    iopl();
-
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
+    let mut ec = ec()?;
 
     ec.fan_set(index, duty)
 }
 
 unsafe fn keymap_get(layer: u8, output: u8, input: u8) -> Result<(), Error> {
-    iopl();
-
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
+    let mut ec = ec()?;
 
     let value = ec.keymap_get(layer, output, input)?;
     println!("{:04X}", value);
@@ -286,11 +257,7 @@ unsafe fn keymap_get(layer: u8, output: u8, input: u8) -> Result<(), Error> {
 }
 
 unsafe fn keymap_set(layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
-    iopl();
-
-    let mut ec = Ec::new(
-        StdTimeout::new(Duration::new(1, 0)),
-    )?;
+    let mut ec = ec()?;
 
     ec.keymap_set(layer, output, input, value)
 }

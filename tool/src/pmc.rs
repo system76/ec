@@ -6,6 +6,7 @@ use crate::{
     timeout
 };
 
+/// Standard ACPI EC interface
 pub struct Pmc<T: Timeout> {
     data: Pio<u8>,
     cmd: Pio<u8>,
@@ -13,9 +14,9 @@ pub struct Pmc<T: Timeout> {
 }
 
 impl<T: Timeout> Pmc<T> {
-    /// Create a new PMC instance. `base` identifies the data port. The command
-    /// port will be `base + 4`
-    pub fn new(base: u16, timeout: T) -> Self {
+    /// Create a new ACPI EC instance using direct hardware access. `base` identifies the data
+    /// port. The command port will be `base + 4`. Unsafe due to no mutual exclusion
+    pub unsafe fn new(base: u16, timeout: T) -> Self {
         Self {
             data: Pio::new(base),
             cmd: Pio::new(base + 4),
@@ -62,6 +63,7 @@ impl<T: Timeout> Pmc<T> {
         }
     }
 
+    /// Read from the ACPI region, at a specific address
     pub unsafe fn acpi_read(&mut self, addr: u8) -> Result<u8, Error> {
         self.timeout.reset();
 
