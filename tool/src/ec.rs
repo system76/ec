@@ -1,18 +1,14 @@
-use hwio::{Io, Pio};
-
 use crate::{
+    Access,
     Error,
     Spi,
     SpiTarget,
-    SuperIo,
-    Timeout,
-    timeout
 };
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
-pub enum Cmd {
-    None = 0,
+enum Cmd {
+    // None = 0,
     Probe = 1,
     Board = 2,
     Version = 3,
@@ -25,88 +21,45 @@ pub enum Cmd {
     KeymapSet = 10,
 }
 
-pub const CMD_SPI_FLAG_READ: u8 = 1 << 0;
-pub const CMD_SPI_FLAG_DISABLE: u8 = 1 << 1;
-pub const CMD_SPI_FLAG_SCRATCH: u8 = 1 << 2;
-pub const CMD_SPI_FLAG_BACKUP: u8 = 1 << 3;
+const CMD_SPI_FLAG_READ: u8 = 1 << 0;
+const CMD_SPI_FLAG_DISABLE: u8 = 1 << 1;
+const CMD_SPI_FLAG_SCRATCH: u8 = 1 << 2;
+const CMD_SPI_FLAG_BACKUP: u8 = 1 << 3;
 
-pub struct Ec<T: Timeout> {
-    cmd: u16,
-    dbg: u16,
-    timeout: T,
+/// Run EC commands using a provided access method
+pub struct Ec<A: Access> {
+    access: A,
+    version: u8,
 }
 
-impl<T: Timeout> Ec<T> {
+impl<A: Access> Ec<A> {
     /// Probes for a compatible EC
-    pub unsafe fn new(timeout: T) -> Result<Self, Error> {
-        let mut sio = SuperIo::new(0x2E);
-
-        let id =
-            (sio.read(0x20) as u16) << 8 |
-            (sio.read(0x21) as u16);
-
-        match id {
-            0x5570 | 0x8587 => (),
-            _ => return Err(Error::SuperIoId(id)),
-        }
-
+    pub unsafe fn new(access: A) -> Result<Self, Error> {
+        // Create EC struct with provided access method and timeout
         let mut ec = Ec {
-            cmd: 0xE00,
-            dbg: 0xF00,
-            timeout,
+            access,
+            version: 0,
         };
 
-        ec.probe()?;
+        // Read version of protocol
+        ec.version = ec.probe()?;
+
+        // Make sure protocol version is supported
+        match ec.version {
+            1 => (),
+            _ => return Err(Error::Version(ec.version)),
+        }
 
         Ok(ec)
     }
 
-    /// Read from the command space
-    pub unsafe fn read(&mut self, addr: u8) -> u8 {
-        Pio::<u8>::new(
-            self.cmd + (addr as u16)
-        ).read()
+    /// Unsafe access to access
+    pub unsafe fn access(&mut self) -> &mut A {
+        &mut self.access
     }
 
-    /// Write to the command space
-    pub unsafe fn write(&mut self, addr: u8, data: u8) {
-        Pio::<u8>::new(
-            self.cmd + (addr as u16)
-        ).write(data)
-    }
-
-    /// Read from the debug space
-    pub unsafe fn debug(&mut self, addr: u8) -> u8 {
-        Pio::<u8>::new(
-            self.dbg + (addr as u16)
-        ).read()
-    }
-
-    /// Returns Ok if a command can be sent
-    unsafe fn command_check(&mut self) -> Result<(), Error> {
-        if self.read(0) == Cmd::None as u8 {
-            Ok(())
-        } else {
-            Err(Error::WouldBlock)
-        }
-    }
-
-    /// Wait until a command can be sent
-    unsafe fn command_wait(&mut self) -> Result<(), Error> {
-        self.timeout.reset();
-        timeout!(self.timeout, self.command_check())
-    }
-
-    /// Run an EC command
-    pub unsafe fn command(&mut self, cmd: Cmd) -> Result<(), Error> {
-        // All previous commands should be finished
-        self.command_check()?;
-        // Write command byte
-        self.write(0, cmd as u8);
-        // Wait for command to finish
-        self.command_wait()?;
-        // Read response byte and test for error
-        match self.read(1) {
+    unsafe fn command(&mut self, cmd: Cmd, data: &mut [u8]) -> Result<(), Error> {
+        match self.access.command(cmd as u8, data)? {
             0 => Ok(()),
             err => Err(Error::Protocol(err)),
         }
@@ -114,13 +67,11 @@ impl<T: Timeout> Ec<T> {
 
     /// Probe for EC
     pub unsafe fn probe(&mut self) -> Result<u8, Error> {
-        self.command(Cmd::Probe)?;
-        let signature = (
-            self.read(2),
-            self.read(3)
-        );
+        let mut data = [0; 3];
+        self.command(Cmd::Probe, &mut data)?;
+        let signature = (data[0], data[1]);
         if signature == (0x76, 0xEC) {
-            let version = self.read(4);
+            let version = data[2];
             Ok(version)
         } else {
             Err(Error::Signature(signature))
@@ -129,10 +80,9 @@ impl<T: Timeout> Ec<T> {
 
     /// Read board from EC
     pub unsafe fn board(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        self.command(Cmd::Board)?;
+        self.command(Cmd::Board, data)?;
         let mut i = 0;
-        while i < data.len() && (i + 2) < 256 {
-            data[i] = self.read((i + 2) as u8);
+        while i < data.len() {
             if data[i] == 0 {
                 break;
             }
@@ -143,10 +93,9 @@ impl<T: Timeout> Ec<T> {
 
     /// Read version from EC
     pub unsafe fn version(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        self.command(Cmd::Version)?;
+        self.command(Cmd::Version, data)?;
         let mut i = 0;
-        while i < data.len() && (i + 2) < 256 {
-            data[i] = self.read((i + 2) as u8);
+        while i < data.len() {
             if data[i] == 0 {
                 break;
             }
@@ -155,24 +104,27 @@ impl<T: Timeout> Ec<T> {
         Ok(i)
     }
 
+    /// Print data to EC console
     pub unsafe fn print(&mut self, data: &[u8]) -> Result<usize, Error> {
+        //TODO: use self.access.data_size()
         let flags = 0;
         for chunk in data.chunks(256 - 4) {
+            let mut data = [0; 256 - 2];
+            data[0] = flags;
+            data[1] = chunk.len() as u8;
             for i in 0..chunk.len() {
-                self.write(i as u8 + 4, chunk[i]);
+                data[i + 2] = chunk[i];
             }
-
-            self.write(2, flags);
-            self.write(3, chunk.len() as u8);
-            self.command(Cmd::Print)?;
-            if self.read(3) != chunk.len() as u8 {
+            self.command(Cmd::Print, &mut data)?;
+            if data[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
         }
         Ok(data.len())
     }
 
-    pub unsafe fn spi(&mut self, target: SpiTarget, scratch: bool) -> Result<EcSpi<T>, Error> {
+    /// Access EC SPI bus
+    pub unsafe fn spi(&mut self, target: SpiTarget, scratch: bool) -> Result<EcSpi<A>, Error> {
         let mut spi = EcSpi {
             ec: self,
             target,
@@ -182,50 +134,66 @@ impl<T: Timeout> Ec<T> {
         Ok(spi)
     }
 
+    /// Reset EC. Will also power off computer.
     pub unsafe fn reset(&mut self) -> Result<(), Error> {
-        self.command(Cmd::Reset)
+        self.command(Cmd::Reset, &mut [])
     }
 
+    /// Read fan duty cycle by fan index
     pub unsafe fn fan_get(&mut self, index: u8) -> Result<u8, Error> {
-        self.write(2, index);
-        self.command(Cmd::FanGet)?;
-        Ok(self.read(3))
+        let mut data = [
+            index,
+            0
+        ];
+        self.command(Cmd::FanGet, &mut data)?;
+        Ok(data[1])
     }
 
+    /// Set fan duty cycle by fan index
     pub unsafe fn fan_set(&mut self, index: u8, duty: u8) -> Result<(), Error> {
-        self.write(2, index);
-        self.write(3, duty);
-        self.command(Cmd::FanSet)
+        let mut data = [
+            index,
+            duty
+        ];
+        self.command(Cmd::FanSet, &mut data)
     }
 
+    /// Read keymap data by layout, output pin, and input pin
     pub unsafe fn keymap_get(&mut self, layer: u8, output: u8, input: u8) -> Result<u16, Error> {
-        self.write(2, layer);
-        self.write(3, output);
-        self.write(4, input);
-        self.command(Cmd::KeymapGet)?;
+        let mut data = [
+            layer,
+            output,
+            input,
+            0,
+            0
+        ];
+        self.command(Cmd::KeymapGet, &mut data)?;
         Ok(
-            (self.read(5) as u16) |
-            ((self.read(6) as u16) << 8)
+            (data[3] as u16) |
+            ((data[4] as u16) << 8)
         )
     }
 
+    /// Set keymap data by layout, output pin, and input pin
     pub unsafe fn keymap_set(&mut self, layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
-        self.write(2, layer);
-        self.write(3, output);
-        self.write(4, input);
-        self.write(5, value as u8);
-        self.write(6, (value >> 8) as u8);
-        self.command(Cmd::KeymapSet)
+        let mut data = [
+            layer,
+            output,
+            input,
+            value as u8,
+            (value >> 8) as u8
+        ];
+        self.command(Cmd::KeymapSet, &mut data)
     }
 }
 
-pub struct EcSpi<'a, T: Timeout> {
-    ec: &'a mut Ec<T>,
+pub struct EcSpi<'a, A: Access> {
+    ec: &'a mut Ec<A>,
     target: SpiTarget,
     scratch: bool,
 }
 
-impl<'a, T: Timeout> EcSpi<'a, T> {
+impl<'a, A: Access> EcSpi<'a, A> {
     fn flags(&self, read: bool, disable: bool) -> u8 {
         let mut flags = 0;
 
@@ -252,7 +220,7 @@ impl<'a, T: Timeout> EcSpi<'a, T> {
     }
 }
 
-impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
+impl<'a, A: Access> Spi for EcSpi<'a, A> {
     fn target(&self) -> SpiTarget {
         self.target
     }
@@ -260,10 +228,12 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
     /// Disable SPI chip, must be done before and after a transaction
     unsafe fn reset(&mut self) -> Result<(), Error> {
         let flags = self.flags(false, true);
-        self.ec.write(2, flags);
-        self.ec.write(3, 0);
-        self.ec.command(Cmd::Spi)?;
-        if self.ec.read(3) != 0 {
+        let mut data = [
+            flags,
+            0,
+        ];
+        self.ec.command(Cmd::Spi, &mut data)?;
+        if data[1] != 0 {
             return Err(Error::Verify);
         }
         Ok(())
@@ -271,17 +241,18 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
 
     /// SPI read
     unsafe fn read(&mut self, data: &mut [u8]) -> Result<usize, Error> {
+        //TODO: use self.access.data_size()
         let flags = self.flags(true, false);
         for chunk in data.chunks_mut(256 - 4) {
-            self.ec.write(2, flags);
-            self.ec.write(3, chunk.len() as u8);
-            self.ec.command(Cmd::Spi)?;
-            if self.ec.read(3) != chunk.len() as u8 {
+            let mut data = [0; 256 - 2];
+            data[0] = flags;
+            data[1] = chunk.len() as u8;
+            self.ec.command(Cmd::Spi, &mut data)?;
+            if data[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
-
             for i in 0..chunk.len() {
-                chunk[i] = self.ec.read(i as u8 + 4);
+                chunk[i] = data[i + 2];
             }
         }
         Ok(data.len())
@@ -289,16 +260,17 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
 
     /// SPI write
     unsafe fn write(&mut self, data: &[u8]) -> Result<usize, Error> {
+        //TODO: use self.access.data_size()
         let flags = self.flags(false, false);
         for chunk in data.chunks(256 - 4) {
+            let mut data = [0; 256 - 2];
+            data[0] = flags;
+            data[1] = chunk.len() as u8;
             for i in 0..chunk.len() {
-                self.ec.write(i as u8 + 4, chunk[i]);
+                data[i + 2] = chunk[i];
             }
-
-            self.ec.write(2, flags);
-            self.ec.write(3, chunk.len() as u8);
-            self.ec.command(Cmd::Spi)?;
-            if self.ec.read(3) != chunk.len() as u8 {
+            self.ec.command(Cmd::Spi, &mut data)?;
+            if data[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
         }
@@ -306,7 +278,7 @@ impl<'a, T: Timeout> Spi for EcSpi<'a, T> {
     }
 }
 
-impl<'a, T: Timeout> Drop for EcSpi<'a, T> {
+impl<'a, A: Access> Drop for EcSpi<'a, A> {
     fn drop(&mut self) {
         unsafe {
             let _ = self.reset();

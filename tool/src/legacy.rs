@@ -5,12 +5,13 @@ use crate::{
     Timeout,
 };
 
+/// Run some EC commands on previous proprietary firmware
 pub struct EcLegacy<T: Timeout> {
     pub pmc: Pmc<T>,
 }
 
 impl<T: Timeout> EcLegacy<T> {
-    /// Probes for a compatible EC
+    /// Probes for EC using direct hardware access. Unsafe due to no mutual exclusion
     pub unsafe fn new(primary: bool, timeout: T) -> Result<Self, Error> {
         let mut sio = SuperIo::new(if primary { 0x2E } else { 0x4E });
 
@@ -30,6 +31,7 @@ impl<T: Timeout> EcLegacy<T> {
         })
     }
 
+    /// Read the EC firmware project, which uniquely identifies the board
     pub unsafe fn project(&mut self, data: &mut [u8]) -> Result<usize, Error> {
         let mut i = 0;
         self.pmc.command(0x92)?;
@@ -43,6 +45,7 @@ impl<T: Timeout> EcLegacy<T> {
         Ok(i)
     }
 
+    /// Read the EC firmware version
     pub unsafe fn version(&mut self, data: &mut [u8]) -> Result<usize, Error> {
         // Prepend `1.` to version string
         let mut i = 0;

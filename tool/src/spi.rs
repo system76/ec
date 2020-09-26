@@ -3,25 +3,38 @@ use crate::{
     Timeout,
 };
 
+/// SPI bus transactions
 pub trait Spi {
+    /// Return the target of the SPI bus
     fn target(&self) -> SpiTarget;
+
+    /// Reset the SPI bus
     unsafe fn reset(&mut self) -> Result<(), Error>;
+
+    /// Read data from the SPI bus
     unsafe fn read(&mut self, data: &mut [u8]) -> Result<usize, Error>;
+
+    /// Write data to the SPI bus
     unsafe fn write(&mut self, data: &[u8]) -> Result<usize, Error>;
 }
 
+/// Target which will receive SPI commands
 #[derive(Clone, Copy)]
 pub enum SpiTarget {
+    /// The ROM normally used by the EC
     Main,
+    /// The ROM used by the EC should the main ROM be invalid
     Backup,
 }
 
+/// SPI ROM transactions
 pub struct SpiRom<'a, S: Spi, T: Timeout> {
     spi: &'a mut S,
     timeout: T,
 }
 
 impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
+    /// Create a SPI ROM using the specified SPI bus and timeout
     pub fn new(spi: &'a mut S, timeout: T) -> Self {
         Self {
             spi,
@@ -29,13 +42,16 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         }
     }
 
+    /// Get sector size in bytes
     pub fn sector_size(&self) -> usize {
+        //TODO: can this be determined automatically?
         match self.spi.target() {
             SpiTarget::Main => 1024,
             SpiTarget::Backup => 4096,
         }
     }
 
+    /// Read the status register
     pub unsafe fn status(&mut self) -> Result<u8, Error> {
         let mut status = [0];
 
@@ -46,6 +62,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         Ok(status[0])
     }
 
+    /// Wait for the status register to have `mask` bits set to `value`
     pub unsafe fn status_wait(&mut self, mask: u8, value: u8) -> Result<(), Error> {
         self.timeout.reset();
         while self.timeout.running() {
@@ -56,6 +73,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         Err(Error::Timeout)
     }
 
+    /// Disable writes
     pub unsafe fn write_disable(&mut self) -> Result<(), Error> {
         self.spi.reset()?;
         self.spi.write(&[0x04])?;
@@ -66,6 +84,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         Ok(())
     }
 
+    /// Enable writes
     pub unsafe fn write_enable(&mut self) -> Result<(), Error> {
         self.spi.reset()?;
         self.spi.write(&[0x06])?;
@@ -76,6 +95,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         Ok(())
     }
 
+    /// Erase a sector with the specified address
     pub unsafe fn erase_sector(&mut self, address: u32) -> Result<(), Error> {
         if (address & 0xFF00_0000) > 0 {
             return Err(Error::Parameter);
@@ -104,6 +124,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         Ok(())
     }
 
+    /// Read at a specific address
     pub unsafe fn read_at(&mut self, address: u32, data: &mut [u8]) -> Result<usize, Error> {
         if (address & 0xFF00_0000) > 0 {
             return Err(Error::Parameter);
@@ -120,6 +141,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         self.spi.read(data)
     }
 
+    /// Write at a specific address
     pub unsafe fn write_at(&mut self, address: u32, data: &[u8]) -> Result<usize, Error> {
         if (address & 0xFF00_0000) > 0 {
             return Err(Error::Parameter);
@@ -127,6 +149,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
 
         self.write_enable()?;
 
+        //TODO: automatically detect write command
         match self.spi.target() {
             SpiTarget::Main => for (i, word) in data.chunks(2).enumerate() {
                 let low = *word.get(0).unwrap_or(&0xFF);

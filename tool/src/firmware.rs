@@ -1,3 +1,4 @@
+/// Parses firmware information from a firmware ROM
 pub struct Firmware<'a> {
     pub board: &'a [u8],
     pub version: &'a [u8],
@@ -36,6 +37,7 @@ fn firmware_str<'a>(data: &'a [u8], key: &[u8]) -> Option<&'a [u8]> {
 }
 
 impl<'a> Firmware<'a> {
+    /// Parses firmware board and version, and then returns firmware object
     pub fn new(data: &'a [u8]) -> Option<Self> {
         let board = firmware_str(data, b"76EC_BOARD=")?;
         let version = firmware_str(data, b"76EC_VERSION=")?;

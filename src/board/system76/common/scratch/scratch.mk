@@ -17,7 +17,6 @@ SCRATCH_CFLAGS+=-I$(SCRATCH_DIR)/include -D__SCRATCH__
 
 # Add minimal source from other directories
 SCRATCH_SRC+=\
-	$(COMMON_DIR)/version.c \
 	$(SYSTEM76_COMMON_DIR)/smfi.c
 
 SCRATCH_BUILD=$(BUILD)/scratch
