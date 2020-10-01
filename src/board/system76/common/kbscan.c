@@ -27,6 +27,14 @@ uint16_t kbscan_repeat_delay = 500;
 
 uint8_t sci_extra = 0;
 
+static inline bool matrix_position_is_esc(int row, int col) {
+    return (row == MATRIX_ESC_OUTPUT) && (col == MATRIX_ESC_INPUT);
+}
+
+static inline bool matrix_position_is_fn(int row, int col) {
+    return (row == MATRIX_FN_OUTPUT) && (col == MATRIX_FN_INPUT);
+}
+
 void kbscan_init(void) {
     KSOCTRL = 0x05;
     KSICTRLR = 0x04;
@@ -185,16 +193,12 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
         case (KT_NORMAL):
             if (kbscan_enabled) {
                 kbc_scancode(&KBC, key, pressed);
-                if ((key & 0xFF) == K_ESC)
-                    kbscan_esc_held = pressed;
             }
             break;
         case (KT_FN):
             if (layer != NULL) {
                 if (pressed) *layer = 1;
                 else *layer = 0;
-
-                kbscan_fn_held = pressed;
             } else {
                 // In the case no layer can be set, reset bit
                 return false;
@@ -331,6 +335,12 @@ void kbscan_event(void) {
                         // Begin debounce
                         debounce = true;
                         debounce_time = time_get();
+
+                        // Check keys used for config reset
+                        if (matrix_position_is_esc(i, j))
+                            kbscan_esc_held = new_b;
+                        if (matrix_position_is_fn(i, j))
+                            kbscan_fn_held = new_b;
 
                         // Handle key press/release
                         if (new_b) {
