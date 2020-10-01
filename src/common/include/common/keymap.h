@@ -5,8 +5,15 @@
 
 #include <stdint.h>
 
+#if defined(KM_LAY) && defined(KM_OUT) && defined(KM_IN)
+extern uint16_t __xdata KEYMAP[KM_LAY][KM_OUT][KM_IN];
+#endif
+
 // Translate a keycode from PS/2 set 2 to PS/2 set 1
 uint16_t keymap_translate(uint16_t key);
+
+// Helper definition for empty key
+#define ___ 0
 
 // Key types
 #define KT_MASK (0xF000)
