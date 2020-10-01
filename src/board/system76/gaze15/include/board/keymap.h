@@ -46,4 +46,12 @@
 // Keymap
 extern uint16_t __xdata KEYMAP[KM_LAY][KM_OUT][KM_IN];
 
+// Position of physical Esc key in the matrix
+#define MATRIX_ESC_INPUT    7
+#define MATRIX_ESC_OUTPUT   7
+
+// Position of physical Fn key in the matrix
+#define MATRIX_FN_INPUT     3
+#define MATRIX_FN_OUTPUT    17
+
 #endif // _BOARD_KEYMAP_H
