@@ -15,6 +15,7 @@
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
+#include <board/keymap.h>
 #include <board/lid.h>
 #include <board/peci.h>
 #include <board/pmc.h>
@@ -66,6 +67,7 @@ void init(void) {
     {
         kbscan_init();
     }
+    keymap_init();
     peci_init();
     pmc_init();
     pwm_init();
