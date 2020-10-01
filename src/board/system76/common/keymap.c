@@ -37,7 +37,7 @@ bool keymap_load_config(void) {
     if (flash_read_u16(CONFIG_ADDR) != CONFIG_SIGNATURE) return false;
 
     // Read the keymap if signature is valid
-    flash_read(CONFIG_ADDR + 2, (uint8_t *)DYNAMIC_KEYMAP, sizeof(DYNAMIC_KEYMAP));
+    flash_read(CONFIG_ADDR + sizeof(CONFIG_SIGNATURE), (uint8_t *)DYNAMIC_KEYMAP, sizeof(DYNAMIC_KEYMAP));
     return true;
 }
 
@@ -46,7 +46,7 @@ bool keymap_save_config(void) {
     if (!keymap_erase_config()) return false;
 
     // Write the keymap
-    flash_write(CONFIG_ADDR + 2, (uint8_t *)DYNAMIC_KEYMAP, sizeof(DYNAMIC_KEYMAP));
+    flash_write(CONFIG_ADDR + sizeof(CONFIG_SIGNATURE), (uint8_t *)DYNAMIC_KEYMAP, sizeof(DYNAMIC_KEYMAP));
 
     // Write the length of the keymap, as a signature
     flash_write_u16(CONFIG_ADDR, CONFIG_SIGNATURE);
