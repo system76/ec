@@ -1,11 +1,12 @@
 [package]
 name = "system76_ectool"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2018"
 description = "System76 EC tool"
 license = "MIT"
 authors = ["Jeremy Soller <jeremy@system76.com>"]
 repository = "https://github.com/system76/ec"
+documentation = "https://docs.rs/system76_ectool"
 
 [lib]
 name = "ectool"
@@ -16,9 +17,12 @@ required-features = ["std"]
 
 [dependencies]
 libc = { version = "0.2", optional = true }
-redox_hwio = "0.1.3"
+hidapi = { version = "1.2", optional = true }
+redox_hwio = { version = "0.1.3", optional = true }
 
 [features]
 default = ["std"]
-stable = ["redox_hwio/stable"]
 std = ["libc"]
+
+[package.metadata.docs.rs]
+all-features = true
