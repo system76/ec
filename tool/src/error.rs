@@ -21,5 +21,8 @@ pub enum Error {
     WouldBlock,
     /// Encountered a std::io::Error
     #[cfg(feature = "std")]
-    Io(std::io::Error)
+    Io(std::io::Error),
+    /// Encountered a hidapi::Error
+    #[cfg(feature = "hidapi")]
+    Hid(hidapi::HidError),
 }
