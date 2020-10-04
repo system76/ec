@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-// Fabian ISO layout
-// Swapped FN and LEFT_CTRL
-// Key right of left shift also is shift (wider shift like on ANSI keyboards)
-// Caps is control
+// # Fabian ISO layout
+// Swapped FN and LEFT_CTRL (like on Thinkpads and Macbooks)
+// Key right of left shift is shift (ANSI like, less strain)
+// CapsLock is control
+// FN + LEFT_SHIFT is keyboard backlight (in the dark, you don't want to search F4)
 
 #include <board/keymap.h>
+
 
 uint16_t __xdata KEYMAP[KM_LAY][KM_OUT][KM_IN] = {
 // TODO: K0E=K_PAUSE (once defined in src/common/include/common/keymap.h)
@@ -24,8 +26,8 @@ LAYOUT_ISO(
     K_PLAY_PAUSE, K_1, K_2, K_3, K_4, K_5, K_6, K_NUM_7, K_NUM_8, K_NUM_9, K_NUM_ASTERISK, K_MINUS, K_EQUALS, K_BKSP,
     K_TAB, K_Q, K_W, K_E, K_R, K_T, K_Y, K_NUM_4, K_NUM_5, K_NUM_6, K_NUM_SLASH, K_BRACE_OPEN, K_BRACE_CLOSE, K_ENTER,
     K_LEFT_CTRL, K_A, K_S, K_D, K_F, K_G, K_H, K_NUM_1, K_NUM_2, K_NUM_3, K_NUM_MINUS, K_QUOTE, K_BACKSLASH,
-    K_LEFT_SHIFT, K_LEFT_SHIFT, K_Z, K_X, K_C, K_V, K_B, K_N, K_NUM_0, K_COMMA, K_NUM_PERIOD, K_NUM_PLUS, K_RIGHT_SHIFT,
-    KT_FN, K_LEFT_CTRL, K_LEFT_SUPER, K_LEFT_ALT, K_SPACE, K_RIGHT_ALT, K_APP, K_PGUP, K_UP, K_PGDN,
+    K_KBD_BKL, K_LEFT_SHIFT, K_Z, K_X, K_C, K_V, K_B, K_N, K_NUM_0, K_COMMA, K_NUM_PERIOD, K_NUM_PLUS, K_RIGHT_SHIFT,
+    KT_FN, K_LEFT_CTRL, K_LEFT_SUPER, K_LEFT_ALT, K_SPACE, K_RIGHT_ALT, K_APP, K_HOME, K_UP, K_END,
     K_LEFT, K_DOWN, K_RIGHT
 )
 };
