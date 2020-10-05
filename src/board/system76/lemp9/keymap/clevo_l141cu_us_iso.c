@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-// Default US ISO layout on a Clevo L141CU by @fabiant7t
+// Clevo L141CU US ISO layout by @fabiant7t
 // Picture: https://drive.google.com/file/d/1vTJvdfl9tf2Iwb6hkmsUwGBCVZ9lmouv/view?usp=sharing
 
 #include <board/keymap.h>
@@ -23,7 +23,7 @@ LAYOUT_ISO(
     K_TAB, K_Q, K_W, K_E, K_R, K_T, K_Y, K_NUM_4, K_NUM_5, K_NUM_6, K_NUM_SLASH, K_BRACE_OPEN, K_BRACE_CLOSE, K_ENTER,
     K_CAPS, K_A, K_S, K_D, K_F, K_G, K_H, K_NUM_1, K_NUM_2, K_NUM_3, K_NUM_MINUS, K_QUOTE, K_BACKSLASH,
     K_LEFT_SHIFT, K_BACKSLASH, K_Z, K_X, K_C, K_V, K_B, K_N, K_NUM_0, K_COMMA, K_NUM_PERIOD, K_NUM_PLUS, K_RIGHT_SHIFT,
-    K_LEFT_CTRL, KT_FN, K_LEFT_SUPER, K_LEFT_ALT, K_SPACE, K_RIGHT_ALT, K_APP, K_PGUP, K_UP, K_PGDN,
+    K_LEFT_CTRL, KT_FN, K_LEFT_SUPER, K_LEFT_ALT, K_SPACE, K_RIGHT_ALT, K_APP, K_HOME, K_UP, K_END,
     K_LEFT, K_DOWN, K_RIGHT
 )
 };
