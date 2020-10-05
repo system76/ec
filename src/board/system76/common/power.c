@@ -6,6 +6,7 @@
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/config.h>
+#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
@@ -337,6 +338,8 @@ static void power_cpu_reset(void) {
     pnp_enable();
     // Reset ACPI registers
     acpi_reset();
+    // Reset fans
+    fan_reset();
     //TODO: reset KBC and touchpad states
     kbled_reset();
 }
