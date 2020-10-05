@@ -58,8 +58,8 @@ void gpio_init() {
     GPDRG = (1 << 6);
     GPDRH = 0x00;
     GPDRI = 0x00;
-    // LED_CAP#, LED_NUM#, LED_SCROLL#
-    GPDRJ = (1 << 5) | (1 << 4) | (1 << 3);
+    // LED_CAP#, LED_NUM#, LED_SCROLL#, KBC_MUTE#
+    GPDRJ = (1 << 5) | (1 << 4) | (1 << 3) | (1 << 1);
 
     // Set GPIO control
     // EC_PWM_LEDKB_P
@@ -209,7 +209,7 @@ void gpio_init() {
     // SLP_SUS_EC#
     GPCRJ0 = GPIO_OUT;
     // KBC_MUTE#
-    GPCRJ1 = GPIO_IN;
+    GPCRJ1 = GPIO_OUT;
     // WLAN_EN
     GPCRJ2 = GPIO_OUT | GPIO_UP;
     // LED_SCROLL#
