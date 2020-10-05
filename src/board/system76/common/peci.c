@@ -9,28 +9,23 @@
 #include <ec/pwm.h>
 
 // Fan speed is the lowest requested over HEATUP seconds
-#ifdef BOARD_HEATUP
-    #define HEATUP BOARD_HEATUP
-#else
-    #define HEATUP 10
+#ifndef BOARD_HEATUP
+    #define BOARD_HEATUP 10
 #endif
+
+static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifdef BOARD_COOLDOWN
-    #define COOLDOWN BOARD_COOLDOWN
-#else
-    #define COOLDOWN 10
+#ifndef BOARD_COOLDOWN
+    #define BOARD_COOLDOWN 10
 #endif
 
-// Interpolate duty cycle
-#define INTERPOLATE 0
+static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
 #define T_JUNCTION 100
 
-int16_t peci_offset = 0;
 int16_t peci_temp = 0;
-uint8_t peci_duty = 0;
 
 #define PECI_TEMP(X) (((int16_t)(X)) << 6)
 
@@ -49,76 +44,15 @@ static struct FanPoint __code FAN_POINTS[] = {
 #endif
 };
 
-// Get duty cycle based on temperature, adapted from
-// https://github.com/pop-os/system76-power/blob/master/src/fan.rs
-static uint8_t fan_duty(int16_t temp) {
-    for (int i = 0; i < ARRAY_SIZE(FAN_POINTS); i++) {
-        const struct FanPoint * cur = &FAN_POINTS[i];
-
-        // If exactly the current temp, return the current duty
-        if (temp == cur->temp) {
-            return cur->duty;
-        } else if (temp < cur->temp) {
-            // If lower than first temp, return 0%
-            if (i == 0) {
-                return PWM_DUTY(0);
-            } else {
-                const struct FanPoint * prev = &FAN_POINTS[i - 1];
-
-#if INTERPOLATE
-                // If in between current temp and previous temp, interpolate
-                if (temp > prev->temp) {
-                    int16_t dtemp = (cur->temp - prev->temp);
-                    int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
-                    return (uint8_t)(
-                        ((int16_t)prev->duty) +
-                        ((temp - prev->temp) * dduty) / dtemp
-                    );
-                }
-#else // INTERPOLATE
-                return prev->duty;
-#endif // INTERPOLATE
-            }
-        }
-    }
-
-    // If no point is found, return 100%
-    return PWM_DUTY(100);
-}
-
-static uint8_t fan_heatup(uint8_t duty) {
-    static uint8_t history[HEATUP] = { 0 };
-    uint8_t lowest = duty;
-
-    int i;
-    for (i = 0; (i + 1) < ARRAY_SIZE(history); i++) {
-        uint8_t value = history[i + 1];
-        if (value < lowest) {
-            lowest = value;
-        }
-        history[i] = value;
-    }
-    history[i] = duty;
-
-    return lowest;
-}
-
-static uint8_t fan_cooldown(uint8_t duty) {
-    static uint8_t history[COOLDOWN] = { 0 };
-    uint8_t highest = duty;
-
-    int i;
-    for (i = 0; (i + 1) < ARRAY_SIZE(history); i++) {
-        uint8_t value = history[i + 1];
-        if (value > highest) {
-            highest = value;
-        }
-        history[i] = value;
-    }
-    history[i] = duty;
-
-    return highest;
-}
+static struct Fan __code FAN = {
+    .points = FAN_POINTS,
+    .points_size = ARRAY_SIZE(FAN_POINTS),
+    .heatup = FAN_HEATUP,
+    .heatup_size = ARRAY_SIZE(FAN_HEATUP),
+    .cooldown = FAN_COOLDOWN,
+    .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
+    .interpolate = false,
+};
 
 void peci_init(void) {
     // Allow PECI pin to be used
@@ -183,6 +117,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 void peci_event(void) {
+    uint8_t duty;
     if (power_state == POWER_STATE_S0) {
         // Use PECI if in S0 state
 
@@ -211,31 +146,32 @@ void peci_event(void) {
             // Use result if finished successfully
             uint8_t low = HORDDR;
             uint8_t high = HORDDR;
-            peci_offset = ((int16_t)high << 8) | (int16_t)low;
+            uint16_t peci_offset = ((int16_t)high << 8) | (int16_t)low;
 
             peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
-            peci_duty = fan_duty(peci_temp);
+            duty = fan_duty(&FAN, peci_temp);
         } else {
             // Default to 50% if there is an error
-            peci_offset = 0;
             peci_temp = 0;
-            peci_duty = PWM_DUTY(50);
+            duty = PWM_DUTY(50);
         }
     } else {
         // Turn fan off if not in S0 state
-        peci_offset = 0;
         peci_temp = 0;
-        peci_duty = PWM_DUTY(0);
+        duty = PWM_DUTY(0);
     }
 
-    uint8_t heatup_duty = fan_heatup(peci_duty);
-    uint8_t cooldown_duty = fan_cooldown(heatup_duty);
     if (fan_max) {
         // Override duty if fans are manually set to maximum
-        cooldown_duty = 0xFF;
+        duty = PWM_DUTY(100);
+    } else {
+        // Apply heatup and cooldown filters to duty
+        duty = fan_heatup(&FAN, duty);
+        duty = fan_cooldown(&FAN, duty);
     }
-    if (cooldown_duty != DCR2) {
-        DCR2 = cooldown_duty;
-        DEBUG("PECI offset=%d, temp=%d = %d\n", peci_offset, peci_temp, cooldown_duty);
+
+    if (duty != DCR2) {
+        DCR2 = duty;
+        DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
     }
 }
