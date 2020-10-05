@@ -153,33 +153,35 @@ static enum Result cmd_keymap_get(void) {
     int layer = smfi_cmd[SMFI_CMD_DATA];
     int output = smfi_cmd[SMFI_CMD_DATA + 1];
     int input = smfi_cmd[SMFI_CMD_DATA + 2];
-
-    if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
-        uint16_t key = KEYMAP[layer][output][input];
+    uint16_t key = 0;
+    if (keymap_get(layer, output, input, &key)) {
         smfi_cmd[SMFI_CMD_DATA + 3] = (uint8_t)key;
         smfi_cmd[SMFI_CMD_DATA + 4] = (uint8_t)(key >> 8);
         return RES_OK;
+    } else {
+        return RES_ERR;
     }
-
-    // Failed if keyboard mapping not found
-    return RES_ERR;
 }
 
 static enum Result cmd_keymap_set(void) {
     int layer = smfi_cmd[SMFI_CMD_DATA];
     int output = smfi_cmd[SMFI_CMD_DATA + 1];
     int input = smfi_cmd[SMFI_CMD_DATA + 2];
-
-    if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
-        uint16_t key =
-            ((uint16_t)smfi_cmd[SMFI_CMD_DATA + 3]) |
-            (((uint16_t)smfi_cmd[SMFI_CMD_DATA + 4]) << 8);
-        KEYMAP[layer][output][input] = key;
-        return RES_OK;
+    uint16_t key =
+        ((uint16_t)smfi_cmd[SMFI_CMD_DATA + 3]) |
+        (((uint16_t)smfi_cmd[SMFI_CMD_DATA + 4]) << 8);
+    //TODO: consider only setting if the key has changed
+    if (keymap_set(layer, output, input, key)) {
+        //TODO: should we write config on every change?
+        if (keymap_save_config()) {
+            return RES_OK;
+        } else {
+            //TODO: need a different error code?
+            return RES_ERR;
+        }
+    } else {
+        return RES_ERR;
     }
-
-    // Failed if keyboard mapping not found
-    return RES_ERR;
 }
 #endif // !defined(__SCRATCH__)
 

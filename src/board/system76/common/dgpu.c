@@ -4,8 +4,7 @@
 
 #if HAVE_DGPU
 
-#include <stdbool.h>
-
+#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/power.h>
 #include <common/debug.h>
@@ -14,32 +13,22 @@
 #include <ec/pwm.h>
 
 // Fan speed is the lowest requested over HEATUP seconds
-#ifdef BOARD_DGPU_HEATUP
-    #define HEATUP BOARD_DGPU_HEATUP
-#else
-    #define HEATUP 10
+#ifndef BOARD_DGPU_HEATUP
+    #define BOARD_DGPU_HEATUP 10
 #endif
+
+static uint8_t FAN_HEATUP[BOARD_DGPU_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifdef BOARD_DGPU_COOLDOWN
-    #define COOLDOWN BOARD_DGPU_COOLDOWN
-#else
-    #define COOLDOWN 10
+#ifndef BOARD_DGPU_COOLDOWN
+    #define BOARD_DGPU_COOLDOWN 10
 #endif
 
-// Interpolate duty cycle
-#define INTERPOLATE 0
+static uint8_t FAN_COOLDOWN[BOARD_DGPU_COOLDOWN] = { 0 };
 
 int16_t dgpu_temp = 0;
-uint8_t dgpu_duty = 0;
 
 #define DGPU_TEMP(X) ((int16_t)(X))
-#define PWM_DUTY(X) ((uint8_t)(((((uint16_t)(X)) * 255) + 99) / 100))
-
-struct FanPoint {
-    int16_t temp;
-    uint8_t duty;
-};
 
 #define FAN_POINT(T, D) { .temp = DGPU_TEMP(T), .duty = PWM_DUTY(D) }
 
@@ -56,76 +45,15 @@ static struct FanPoint __code FAN_POINTS[] = {
 #endif
 };
 
-// Get duty cycle based on temperature, adapted from
-// https://github.com/pop-os/system76-power/blob/master/src/fan.rs
-static uint8_t fan_duty(int16_t temp) {
-    for (int i = 0; i < ARRAY_SIZE(FAN_POINTS); i++) {
-        const struct FanPoint * cur = &FAN_POINTS[i];
-
-        // If exactly the current temp, return the current duty
-        if (temp == cur->temp) {
-            return cur->duty;
-        } else if (temp < cur->temp) {
-            // If lower than first temp, return 0%
-            if (i == 0) {
-                return PWM_DUTY(0);
-            } else {
-                const struct FanPoint * prev = &FAN_POINTS[i - 1];
-
-#if INTERPOLATE
-                // If in between current temp and previous temp, interpolate
-                if (temp > prev->temp) {
-                    int16_t dtemp = (cur->temp - prev->temp);
-                    int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
-                    return (uint8_t)(
-                        ((int16_t)prev->duty) +
-                        ((temp - prev->temp) * dduty) / dtemp
-                    );
-                }
-#else // INTERPOLATE
-                return prev->duty;
-#endif // INTERPOLATE
-            }
-        }
-    }
-
-    // If no point is found, return 100%
-    return PWM_DUTY(100);
-}
-
-static uint8_t fan_heatup(uint8_t duty) {
-    static uint8_t history[HEATUP] = { 0 };
-    uint8_t lowest = duty;
-
-    int i;
-    for (i = 0; (i + 1) < ARRAY_SIZE(history); i++) {
-        uint8_t value = history[i + 1];
-        if (value < lowest) {
-            lowest = value;
-        }
-        history[i] = value;
-    }
-    history[i] = duty;
-
-    return lowest;
-}
-
-static uint8_t fan_cooldown(uint8_t duty) {
-    static uint8_t history[COOLDOWN] = { 0 };
-    uint8_t highest = duty;
-
-    int i;
-    for (i = 0; (i + 1) < ARRAY_SIZE(history); i++) {
-        uint8_t value = history[i + 1];
-        if (value > highest) {
-            highest = value;
-        }
-        history[i] = value;
-    }
-    history[i] = duty;
-
-    return highest;
-}
+static struct Fan __code FAN = {
+    .points = FAN_POINTS,
+    .points_size = ARRAY_SIZE(FAN_POINTS),
+    .heatup = FAN_HEATUP,
+    .heatup_size = ARRAY_SIZE(FAN_HEATUP),
+    .cooldown = FAN_COOLDOWN,
+    .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
+    .interpolate = false,
+};
 
 void dgpu_init(void) {
     // Set up for i2c usage
@@ -133,30 +61,38 @@ void dgpu_init(void) {
 }
 
 void dgpu_event(void) {
+    uint8_t duty;
     if (power_state == POWER_STATE_S0 && gpio_get(&DGPU_PWR_EN) && !gpio_get(&GC6_FB_EN)) {
         // Use I2CS if in S0 state
         int8_t rlts;
         int res = i2c_get(&I2C_DGPU, 0x4F, 0x00, &rlts, 1);
         if (res == 1) {
             dgpu_temp = (int16_t)rlts;
-            dgpu_duty = fan_duty(dgpu_temp);
+            duty = fan_duty(&FAN, dgpu_temp);
         } else {
             DEBUG("DGPU temp error: %d\n", res);
             // Default to 50% if there is an error
             dgpu_temp = 0;
-            dgpu_duty = PWM_DUTY(50);
+            duty = PWM_DUTY(50);
         }
     } else {
         // Turn fan off if not in S0 state or GPU power not on
         dgpu_temp = 0;
-        dgpu_duty = PWM_DUTY(0);
+        duty = PWM_DUTY(0);
     }
 
-    uint8_t heatup_duty = fan_heatup(dgpu_duty);
-    uint8_t cooldown_duty = fan_cooldown(heatup_duty);
-    if (cooldown_duty != DCR4) {
-        DCR4 = cooldown_duty;
-        DEBUG("DGPU temp=%d = %d\n", dgpu_temp, cooldown_duty);
+    if (fan_max) {
+        // Override duty if fans are manually set to maximum
+        duty = PWM_DUTY(100);
+    } else {
+        // Apply heatup and cooldown filters to duty
+        duty = fan_heatup(&FAN, duty);
+        duty = fan_cooldown(&FAN, duty);
+    }
+
+    if (duty != DCR4) {
+        DCR4 = duty;
+        DEBUG("DGPU temp=%d = %d\n", dgpu_temp, duty);
     }
 }
 

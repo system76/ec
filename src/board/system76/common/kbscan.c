@@ -3,6 +3,7 @@
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/acpi.h>
+#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
 #include <board/kbled.h>
@@ -125,6 +126,8 @@ static uint8_t kbscan_get_real_keys(int row, uint8_t rowdata) {
     // Remove any "active" blanks from the matrix.
     uint8_t realdata = 0;
     for (uint8_t col = 0; col < KM_IN; col++) {
+        // This tests the default keymap intentionally, to avoid blanks in the
+        // dynamic keymap
         if (KEYMAP[0][row][col] && (rowdata & (1 << col))) {
             realdata |=  1 << col;
         }
@@ -160,6 +163,9 @@ static void hardware_hotkey(uint16_t key) {
             break;
         case K_CAMERA_TOGGLE:
             gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
+            break;
+        case K_FAN_TOGGLE:
+            fan_max = !fan_max;
             break;
         case K_KBD_BKL:
             kbled_set(kbled_get() + 1);
@@ -349,9 +355,7 @@ void kbscan_event(void) {
                         }
                         uint8_t key_layer = kbscan_last_layer[i][j];
                         uint16_t key = 0;
-                        if (key_layer < KM_LAY) {;
-                            key = KEYMAP[key_layer][i][j];
-                        }
+                        keymap_get(key_layer, i, j, &key);
                         if (key) {
                             DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
                             if(!kbscan_press(key, new_b, &layer)){

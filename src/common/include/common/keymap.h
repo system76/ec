@@ -3,10 +3,40 @@
 #ifndef _COMMON_KEYMAP_H
 #define _COMMON_KEYMAP_H
 
+#include <stdbool.h>
 #include <stdint.h>
+
+// Keymap defined by board
+#if defined(KM_LAY) && defined(KM_OUT) && defined(KM_IN)
+    extern uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN];
+    extern uint16_t __xdata DYNAMIC_KEYMAP[KM_LAY][KM_OUT][KM_IN];
+    #define HAVE_KEYMAP 1
+#else
+    #define HAVE_KEYMAP 0
+#endif
+
+#if HAVE_KEYMAP
+    // Initialize the dynamic keymap
+    void keymap_init(void);
+    // Set the dynamic keymap to the default keymap
+    void keymap_load_default(void);
+    // Erase dynamic keymap in flash
+    bool keymap_erase_config(void);
+    // Load dynamic keymap from flash
+    bool keymap_load_config(void);
+    // Save dynamic keymap to flash
+    bool keymap_save_config(void);
+    // Get a keycode from the dynamic keymap
+    bool keymap_get(int layer, int output, int input, uint16_t * value);
+    // Set a keycode in the dynamic keymap
+    bool keymap_set(int layer, int output, int input, uint16_t value);
+#endif
 
 // Translate a keycode from PS/2 set 2 to PS/2 set 1
 uint16_t keymap_translate(uint16_t key);
+
+// Helper definition for empty key
+#define ___ 0
 
 // Key types
 #define KT_MASK (0xF000)
@@ -55,6 +85,8 @@ uint16_t keymap_translate(uint16_t key);
 #define K_KBD_BKL (KT_SCI_EXTRA | SCI_EXTRA_KBD_BKL)
 #define SCI_EXTRA_KBD_TOGGLE (0x9F)
 #define K_KBD_TOGGLE (KT_SCI_EXTRA | SCI_EXTRA_KBD_TOGGLE)
+#define SCI_EXTRA_FAN_TOGGLE (0xF2)
+#define K_FAN_TOGGLE (KT_SCI_EXTRA | SCI_EXTRA_FAN_TOGGLE)
 
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
