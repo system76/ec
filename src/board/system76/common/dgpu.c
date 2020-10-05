@@ -4,8 +4,7 @@
 
 #if HAVE_DGPU
 
-#include <stdbool.h>
-
+#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/power.h>
 #include <common/debug.h>
@@ -34,12 +33,6 @@ int16_t dgpu_temp = 0;
 uint8_t dgpu_duty = 0;
 
 #define DGPU_TEMP(X) ((int16_t)(X))
-#define PWM_DUTY(X) ((uint8_t)(((((uint16_t)(X)) * 255) + 99) / 100))
-
-struct FanPoint {
-    int16_t temp;
-    uint8_t duty;
-};
 
 #define FAN_POINT(T, D) { .temp = DGPU_TEMP(T), .duty = PWM_DUTY(D) }
 
@@ -154,6 +147,10 @@ void dgpu_event(void) {
 
     uint8_t heatup_duty = fan_heatup(dgpu_duty);
     uint8_t cooldown_duty = fan_cooldown(heatup_duty);
+    if (fan_max) {
+        // Override duty if fans are manually set to maximum
+        cooldown_duty = 0xFF;
+    }
     if (cooldown_duty != DCR4) {
         DCR4 = cooldown_duty;
         DEBUG("DGPU temp=%d = %d\n", dgpu_temp, cooldown_duty);
