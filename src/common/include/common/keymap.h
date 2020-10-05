@@ -167,7 +167,7 @@ uint16_t keymap_translate(uint16_t key);
 // Escape key
 #define K_ESC (0x76)
 
-//TODO: Print screen, scroll lock, pause
+//TODO: Print screen, scroll lock, pause, sys request, break
 
 // Tick/tilde key
 #define K_TICK (0x0E)
