@@ -55,6 +55,8 @@ uint16_t keymap_translate(uint16_t key);
 #define K_KBD_BKL (KT_SCI_EXTRA | SCI_EXTRA_KBD_BKL)
 #define SCI_EXTRA_KBD_TOGGLE (0x9F)
 #define K_KBD_TOGGLE (KT_SCI_EXTRA | SCI_EXTRA_KBD_TOGGLE)
+#define SCI_EXTRA_FAN_TOGGLE (0xF2)
+#define K_FAN_TOGGLE (KT_SCI_EXTRA | SCI_EXTRA_FAN_TOGGLE)
 
 // See http://www.techtoys.com.hk/Downloads/Download/Microchip/PS2_driver/ScanCode.pdf
 
