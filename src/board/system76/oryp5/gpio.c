@@ -45,14 +45,16 @@ void gpio_init(void) {
     GPDRB = 0x00;
     GPDRC = 0x00;
     // PWR_BTN#, SCI#, SMI#
-    GPDRD = 0x38; // (1 << 5) | (1 << 4) | (1 << 3)
-    GPDRE = 0x00;
+    GPDRD = (1U << 5) | (1U << 4) | (1U << 3);
+    // AMP_EN
+    GPDRE = (1U << 1);
     // USB_PWR_EN#, H_PECI
-    GPDRF = 0xC0; // (1 << 7) | (1 << 6)
+    GPDRF = (1U << 7) | (1U << 6);
     // AIRPLAN_LED#
-    GPDRG = (1 << 6);
+    GPDRG = (1U << 6);
     GPDRH = 0x00;
-    GPDRI = 0x00;
+    // EC_AMP_EN
+    GPDRI = (1U << 5);
     GPDRJ = 0x00;
 
     // EC_SSD_LED#
