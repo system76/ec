@@ -264,4 +264,9 @@ uint16_t keymap_translate(uint16_t key);
 #define K_NUM_8 (0x75)
 #define K_NUM_9 (0x7D)
 
+// International keys
+
+#define K_INT_1 (0x61)
+#define K_INT_2 (0x5D)
+
 #endif // _COMMON_KEYMAP_H

@@ -13,6 +13,14 @@
 // common/keymap.h requires KM_LAY, KM_OUT, and KM_IN definitions
 #include <common/keymap.h>
 
+// International keys
+#ifndef KI1
+    #define KI1 K_INT_1
+#endif
+#ifndef KI2
+    #define KI2 K_INT_2
+#endif
+
 // Conversion of physical layout to keyboard matrix
 #define LAYOUT( \
     K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, K0E, K0F, K0G, K0H, K0I, K0J, \
@@ -34,7 +42,7 @@
     { K5C, K34, K36, K02, ___, K4G, K3B, K45 }, \
     { K1F, K48, ___, K2B, K32, K08, K06, K12 }, \
     { K1G, K49, K17, K33, ___, ___, K11, K2A }, \
-    { K2D, ___, K31, K4A, ___, K03, K28, K16 }, \
+    { K2D, KI1, K31, K4A, KI2, K03, K28, K16 }, \
     { ___, K44, K0D, K09, K46, K29, K15, K05 }, \
     { K21, K0A, K2E, K04, K3E, K0E, K0F, K14 }, \
     { K56, K42, K3C, K2H, K27, K2G, K13, K1D }, \
