@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+// Default layout
+
 #include <board/keymap.h>
 
 uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN] = {
