@@ -1,3 +1,9 @@
+#[cfg(not(feature = "std"))]
+use alloc::{
+    boxed::Box,
+    vec,
+};
+
 use crate::{
     Access,
     Error,
@@ -125,10 +131,12 @@ impl<A: Access> Ec<A> {
 
     /// Access EC SPI bus
     pub unsafe fn spi(&mut self, target: SpiTarget, scratch: bool) -> Result<EcSpi<A>, Error> {
+        let data_size = self.access.data_size();
         let mut spi = EcSpi {
             ec: self,
             target,
             scratch,
+            buffer: vec![0; data_size].into_boxed_slice(),
         };
         spi.reset()?;
         Ok(spi)
@@ -191,6 +199,7 @@ pub struct EcSpi<'a, A: Access> {
     ec: &'a mut Ec<A>,
     target: SpiTarget,
     scratch: bool,
+    buffer: Box<[u8]>,
 }
 
 impl<'a, A: Access> EcSpi<'a, A> {
@@ -228,12 +237,10 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
     /// Disable SPI chip, must be done before and after a transaction
     unsafe fn reset(&mut self) -> Result<(), Error> {
         let flags = self.flags(false, true);
-        let mut data = [
-            flags,
-            0,
-        ];
-        self.ec.command(Cmd::Spi, &mut data)?;
-        if data[1] != 0 {
+        self.buffer[0] = flags;
+        self.buffer[1] = 0;
+        self.ec.command(Cmd::Spi, &mut self.buffer[..2])?;
+        if self.buffer[1] != 0 {
             return Err(Error::Verify);
         }
         Ok(())
@@ -241,18 +248,16 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
 
     /// SPI read
     unsafe fn read(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        //TODO: use self.access.data_size()
         let flags = self.flags(true, false);
-        for chunk in data.chunks_mut(256 - 4) {
-            let mut data = [0; 256 - 2];
-            data[0] = flags;
-            data[1] = chunk.len() as u8;
-            self.ec.command(Cmd::Spi, &mut data)?;
-            if data[1] != chunk.len() as u8 {
+        for chunk in data.chunks_mut(self.buffer.len() - 2) {
+            self.buffer[0] = flags;
+            self.buffer[1] = chunk.len() as u8;
+            self.ec.command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
             for i in 0..chunk.len() {
-                chunk[i] = data[i + 2];
+                chunk[i] = self.buffer[i + 2];
             }
         }
         Ok(data.len())
@@ -260,17 +265,15 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
 
     /// SPI write
     unsafe fn write(&mut self, data: &[u8]) -> Result<usize, Error> {
-        //TODO: use self.access.data_size()
         let flags = self.flags(false, false);
-        for chunk in data.chunks(256 - 4) {
-            let mut data = [0; 256 - 2];
-            data[0] = flags;
-            data[1] = chunk.len() as u8;
+        for chunk in data.chunks(self.buffer.len() - 2) {
+            self.buffer[0] = flags;
+            self.buffer[1] = chunk.len() as u8;
             for i in 0..chunk.len() {
-                data[i + 2] = chunk[i];
+                self.buffer[i + 2] = chunk[i];
             }
-            self.ec.command(Cmd::Spi, &mut data)?;
-            if data[1] != chunk.len() as u8 {
+            self.ec.command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
         }
