@@ -6,6 +6,10 @@
 #include <board/pmc.h>
 #include <common/debug.h>
 
+#ifndef HAVE_SCI_N
+#define HAVE_SCI_N 1
+#endif // HAVE_SCI_N
+
 void pmc_init(void) {
     *(PMC_1.control) = 0x41;
     *(PMC_2.control) = 0x41;
@@ -22,6 +26,8 @@ enum PmcState {
 static uint8_t pmc_sci_queue = 0;
 
 void pmc_sci_interrupt(void) {
+//TODO: eSPI SCI
+#if HAVE_SCI_N
     // Start SCI interrupt
     gpio_set(&SCI_N, false);
     *(SCI_N.control) = GPIO_OUT;
@@ -35,6 +41,7 @@ void pmc_sci_interrupt(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
+#endif // HAVE_SCI_N
 }
 
 bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
