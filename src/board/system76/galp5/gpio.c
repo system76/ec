@@ -48,19 +48,24 @@ void gpio_init() {
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
     // Enable SMBus channel 4
-    GCR15 = (1 << 4);
+    GCR15 = (1U << 4);
     // Set GPD2 to 1.8V
-    GCR19 = (1 << 0);
+    GCR19 = (1U << 0);
     // Set GPH0 to 1.8V
-    GCR21 = (1 << 2);
+    GCR21 = (1U << 2);
 
     // Set GPIO data
     GPDRA = 0x00;
-    GPDRB = 0x18;
-    GPDRC = 0x20;
-    GPDRD = 0x10;
-    GPDRE = 0x08;
-    GPDRF = 0x40;
+    // XLP_OUT, PWR_SW#
+    GPDRB = (1U << 4) | (1U << 3);
+    // PCH_DPWROK_EC
+    GPDRC = (1U << 5);
+    // SMI#
+    GPDRD = (1U << 4);
+    // USB_PWR_EN#
+    GPDRE = (1U << 3);
+    // H_PECI
+    GPDRF = (1U << 6);
     GPDRG = 0x00;
     GPDRH = 0x00;
     GPDRI = 0x00;
