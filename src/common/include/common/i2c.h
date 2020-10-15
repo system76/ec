@@ -6,6 +6,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// Prevent failures to compile on AVR
+#ifndef __SDCC
+    #define __reentrant
+#endif
+
 // I2C bus, should be defined elsewhere
 struct I2C;
 
