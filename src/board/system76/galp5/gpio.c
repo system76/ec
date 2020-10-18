@@ -58,23 +58,21 @@ void gpio_init() {
     GCR23 = BIT(0);
 
     // Set GPIO data
-    GPDRA = 0x00;
-    // XLP_OUT, PWR_SW#
-    GPDRB = BIT(4) | BIT(3);
-    // PCH_DPWROK_EC
-    GPDRC = BIT(5);
-    // SMI#
-    GPDRD = BIT(4);
-    // USB_PWR_EN#
-    GPDRE = BIT(3);
+    GPDRA = 0;
+    // XLP_OUT
+    GPDRB = BIT(4);
+    GPDRC = 0;
+    // PWR_BTN#, SMI#
+    GPDRD = BIT(5) | BIT(4);
+    GPDRE = 0;
     // H_PECI
     GPDRF = BIT(6);
-    GPDRG = 0x00;
-    GPDRH = 0x00;
-    GPDRI = 0x00;
+    GPDRG = 0;
+    GPDRH = 0;
+    GPDRI = 0;
     // KBC_MUTE#
     GPDRJ = BIT(1);
-    GPDRM = 0x00;
+    GPDRM = 0;
 
     // Set GPIO control
     // ME_WE
