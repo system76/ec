@@ -28,6 +28,34 @@ enum VirtualWireState vw_get(struct VirtualWire * vw) __critical;
 
 void vw_set(struct VirtualWire * vw, enum VirtualWireState state) __critical;
 
+// Not all wires are defined or implemented
+// Index 2 - AP to EC
+extern struct VirtualWire __code VW_SLP_S3_N;
+extern struct VirtualWire __code VW_SLP_S4_N;
+extern struct VirtualWire __code VW_SLP_S5_N;
+// Index 3 - AP to EC
+extern struct VirtualWire __code VW_SUS_STAT_N;
+extern struct VirtualWire __code VW_PLTRST_N;
+extern struct VirtualWire __code VW_OOB_RST_WARN;
+// Index 4 - EC to AP
+extern struct VirtualWire __code VW_OOB_RST_ACK;
+// Index 5 - EC to AP
+extern struct VirtualWire __code VW_BOOT_LOAD_DONE;
+extern struct VirtualWire __code VW_ERROR_FATAL;
+extern struct VirtualWire __code VW_ERROR_NONFATAL;
+extern struct VirtualWire __code VW_BOOT_LOAD_STATUS;
+// Index 6 - EC to AP
+extern struct VirtualWire __code VW_SCI_N;
+extern struct VirtualWire __code VW_SMI_N;
+extern struct VirtualWire __code VW_RCIN_N;
+extern struct VirtualWire __code VW_HOST_RST_ACK;
+// Index 7 - AP to EC
+// Index 40 - EC to AP (platform specific)
+extern struct VirtualWire __code VW_SUS_ACK_N;
+// Index 41 - AP to EC (platform specific)
+extern struct VirtualWire __code VW_SUS_WARN_N;
+extern struct VirtualWire __code VW_SUS_PWRDN_ACK;
+
 // General capabilities and configurations
 volatile uint8_t __xdata __at(0x3107) ESGCAC0;
 volatile uint8_t __xdata __at(0x3106) ESGCAC1;
@@ -74,6 +102,7 @@ volatile uint8_t __xdata __at(0x3203) VWIDX3;
 volatile uint8_t __xdata __at(0x3204) VWIDX4;
 volatile uint8_t __xdata __at(0x3205) VWIDX5;
 volatile uint8_t __xdata __at(0x3206) VWIDX6;
+volatile uint8_t __xdata __at(0x3207) VWIDX7;
 
 // Virtual wires at 0x40
 volatile uint8_t __xdata __at(0x3240) VWIDX40;
