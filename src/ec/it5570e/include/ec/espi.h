@@ -8,6 +8,26 @@
 #define EC_ESPI 0
 #endif // EC_ESPI
 
+struct VirtualWire {
+    volatile uint8_t __xdata * index;
+    uint8_t shift;
+};
+
+#define VIRTUAL_WIRE(INDEX, SHIFT) { \
+    .index = &VWIDX ## INDEX, \
+    .shift = SHIFT, \
+}
+
+enum VirtualWireState {
+    VWS_INVALID = 0x00,
+    VWS_LOW = 0x10,
+    VWS_HIGH = 0x11,
+};
+
+enum VirtualWireState vw_get(struct VirtualWire * vw) __critical;
+
+void vw_set(struct VirtualWire * vw, enum VirtualWireState state) __critical;
+
 // General capabilities and configurations
 volatile uint8_t __xdata __at(0x3107) ESGCAC0;
 volatile uint8_t __xdata __at(0x3106) ESGCAC1;
@@ -65,15 +85,5 @@ volatile uint8_t __xdata __at(0x3291) VWCTRL1;
 volatile uint8_t __xdata __at(0x3292) VWCTRL2;
 volatile uint8_t __xdata __at(0x3295) VWCTRL5;
 volatile uint8_t __xdata __at(0x3296) VWCTRL6;
-
-struct VirtualWire {
-    volatile uint8_t * index;
-    uint8_t shift;
-};
-
-#define VIRTUAL_WIRE(INDEX, SHIFT) { \
-    .index = &VWIDX ## INDEX, \
-    .shift = SHIFT, \
-}
 
 #endif // _EC_ESPI_H

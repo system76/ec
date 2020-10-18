@@ -37,42 +37,10 @@ struct VirtualWire __code VW_SUS_ACK_N = VIRTUAL_WIRE(40, 1);
 struct VirtualWire __code VW_SUS_WARN_N = VIRTUAL_WIRE(41, 1);
 struct VirtualWire __code VW_SUS_PWRDN_ACK = VIRTUAL_WIRE(41, 2);
 
-enum VirtualWireState {
-    VWS_INVALID = 0x00,
-    VWS_LOW = 0x10,
-    VWS_HIGH = 0x11,
-};
-
-enum VirtualWireState vw_get(struct VirtualWire * vw) __critical {
-    switch (((*vw->index) >> vw->shift) & VWS_HIGH) {
-        case VWS_LOW:
-            return VWS_LOW;
-        case VWS_HIGH:
-            return VWS_HIGH;
-        default:
-            return VWS_INVALID;
-    }
-}
-
-void vw_set(struct VirtualWire * vw, enum VirtualWireState state) __critical {
-    switch (state) {
-        case VWS_LOW:
-            *vw->index &= ~(1 << vw->shift);
-            *vw->index |= (VWS_LOW << vw->shift);
-            return;
-        case VWS_HIGH:
-            *vw->index |= (VWS_HIGH << vw->shift);
-            return;
-        default:
-            *vw->index &= ~(VWS_HIGH << vw->shift);
-            return;
-    }
-}
-
 void espi_init(void) {
     DEBUG("SPCTRL3 is 0x%02X\n", SPCTRL3);
 
-    // Port 80h debug
+    // eSPI port 80h debug
     SPCTRL3 |= BIT(5);
 
     DEBUG("SPCTRL3 is now 0x%02X\n", SPCTRL3);
@@ -168,8 +136,8 @@ void espi_event(void) {
         DEBUG("ESC3CAC0 %X\n", value);
         if ((value & BIT(0)) && !(last_esc3cac0 & BIT(0))) {
             DEBUG("eSPI enable flash channel\n");
-            vw_set(&VW_BOOT_LOAD_STATUS, VWS_HIGH);
-            vw_set(&VW_BOOT_LOAD_DONE, VWS_HIGH);
+            // Custom code to set VW_BOOT_LOAD* simultaneously
+            VWIDX5 = 0x99;
         }
         last_esc3cac0 = value;
     }
