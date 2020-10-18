@@ -8,4 +8,6 @@
 
 #define ARRAY_SIZE(X) (sizeof(X) / sizeof((X)[0]))
 
+#define BIT(X) (1UL << (X))
+
 #endif // _COMMON_MACRO_H

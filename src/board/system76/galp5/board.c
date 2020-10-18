@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
-//TODO: verify gpios in board_init
 
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/dgpu.h>
+#include <board/espi.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/peci.h>
@@ -13,6 +13,8 @@
 extern uint8_t main_cycle;
 
 void board_init(void) {
+    espi_init();
+
     // Allow CPU to boot
     gpio_set(&SB_KBCRST_N, true);
     // Allow backlight to be turned on
@@ -71,6 +73,8 @@ void board_event(void) {
     } else {
         last_power_limit_ac = true;
     }
+
+    espi_event();
 
     // Read POST codes
     while (P80H81HS & 1) {

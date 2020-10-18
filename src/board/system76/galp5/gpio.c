@@ -2,6 +2,7 @@
 
 #include <board/gpio.h>
 #include <common/debug.h>
+#include <common/macro.h>
 
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
@@ -45,31 +46,34 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;
+    // Enable SMBus channel 4
+    GCR15 = BIT(4);
+    // Set GPD2 to 1.8V
+    GCR19 = BIT(0);
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
-    // Enable SMBus channel 4
-    GCR15 = (1U << 4);
-    // Set GPD2 to 1.8V
-    GCR19 = (1U << 0);
     // Set GPH0 to 1.8V
-    GCR21 = (1U << 2);
+    GCR21 = BIT(2);
+    // GPM6 powered by VCC
+    GCR23 = BIT(0);
 
     // Set GPIO data
     GPDRA = 0x00;
     // XLP_OUT, PWR_SW#
-    GPDRB = (1U << 4) | (1U << 3);
+    GPDRB = BIT(4) | BIT(3);
     // PCH_DPWROK_EC
-    GPDRC = (1U << 5);
+    GPDRC = BIT(5);
     // SMI#
-    GPDRD = (1U << 4);
+    GPDRD = BIT(4);
     // USB_PWR_EN#
-    GPDRE = (1U << 3);
+    GPDRE = BIT(3);
     // H_PECI
-    GPDRF = (1U << 6);
+    GPDRF = BIT(6);
     GPDRG = 0x00;
     GPDRH = 0x00;
     GPDRI = 0x00;
-    GPDRJ = 0x00;
+    // KBC_MUTE#
+    GPDRJ = BIT(1);
     GPDRM = 0x00;
 
     // Set GPIO control
@@ -130,7 +134,7 @@ void gpio_init() {
     // CPU_C10_GATE#
     GPCRD3 = GPIO_IN | GPIO_DOWN;
     // SMI#
-    GPCRD4 = GPIO_IN;
+    GPCRD4 = GPIO_OUT;
     // PWR_BTN#
     GPCRD5 = GPIO_OUT | GPIO_UP;
     // CPU_FANSEN
@@ -138,7 +142,7 @@ void gpio_init() {
     // VGA_FANSEN
     GPCRD7 = GPIO_ALT;
     // SMC_BAT
-    GPCRE0 = GPIO_ALT;
+    GPCRE0 = GPIO_ALT | GPIO_UP;
     // AC_PRESENT
     GPCRE1 = GPIO_OUT | GPIO_UP;
     // KB-DET
@@ -152,19 +156,19 @@ void gpio_init() {
     // SB_KBCRST#
     GPCRE6 = GPIO_IN;
     // SMD_BAT
-    GPCRE7 = GPIO_ALT;
+    GPCRE7 = GPIO_ALT | GPIO_UP;
     // 80CLK
-    GPCRF0 = GPIO_IN;
+    GPCRF0 = GPIO_OUT | GPIO_UP;
     // USB_CHARGE_EN
     GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
-    GPCRF2 = GPIO_IN | GPIO_UP;
+    GPCRF2 = GPIO_OUT | GPIO_UP;
     // BT_EN
     GPCRF3 = 0x06;
     // TP_CLK
-    GPCRF4 = GPIO_ALT;
+    GPCRF4 = GPIO_ALT | GPIO_UP;
     // TP_DATA
-    GPCRF5 = GPIO_ALT;
+    GPCRF5 = GPIO_ALT | GPIO_UP;
     // H_PECI
     GPCRF6 = GPIO_ALT;
     // CC_EN
@@ -220,7 +224,7 @@ void gpio_init() {
     // LED_BAT_FULL
     GPCRJ0 = GPIO_OUT | GPIO_UP;
     // KBC_MUTE#
-    GPCRJ1 = GPIO_IN;
+    GPCRJ1 = GPIO_OUT;
     // KBLIGHT_ADJ
     GPCRJ2 = GPIO_ALT;
     // GC6_FB_EN
@@ -234,17 +238,17 @@ void gpio_init() {
     // SLP_SUS#
     GPCRJ7 = GPIO_IN;
     // ESPI_IO0_EC
-    GPCRM0 = 0x06;
+    GPCRM0 = GPIO_ALT | GPIO_UP;
     // ESPI_IO1_EC
-    GPCRM1 = 0x06;
+    GPCRM1 = GPIO_ALT | GPIO_UP;
     // ESPI_IO2_EC
-    GPCRM2 = 0x06;
+    GPCRM2 = GPIO_ALT | GPIO_UP;
     // ESPI_IO3_EC
-    GPCRM3 = 0x06;
+    GPCRM3 = GPIO_ALT | GPIO_UP;
     // ESPI_CLK_EC
-    GPCRM4 = 0x06;
+    GPCRM4 = GPIO_ALT | GPIO_UP;
     // ESPI_CS_EC#
-    GPCRM5 = GPIO_ALT;
+    GPCRM5 = GPIO_ALT | GPIO_UP;
     // ALERT#
     GPCRM6 = 0x86;
     //GPCRM7 = 0x86;
@@ -260,7 +264,7 @@ void gpio_debug_bank(
 ) {
     for(char i = 0; i < 8; i++) {
         DEBUG(
-            "%s%d:\n\tdata %d\n\tmirror %d\n\tpot %d\n\tcontrol %02X\n",
+            "%s%d: data %d mirror %d pot %d control %02X\n",
             bank,
             i,
             (data >> i) & 1,
@@ -283,6 +287,9 @@ void gpio_debug(void) {
     bank(H);
     bank(I);
     bank(J);
+    #define GPOTM 0
+    bank(M);
+    #undef GPOTM
     #undef bank
 }
 #endif

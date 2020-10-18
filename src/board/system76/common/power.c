@@ -6,6 +6,8 @@
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/config.h>
+//TODO
+#include <board/espi.h>
 #include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
@@ -170,11 +172,21 @@ void update_power_state(void) {
     }
 }
 
+//TODO
+#define TGL 1
+
 // Enable deep sleep well power
 void power_on_ds5(void) {
     DEBUG("%02X: power_on_ds5\n", main_cycle);
 
-#if DEEP_SX
+#if TGL
+#if HAVE_PCH_DPWROK_EC
+    // Timings from lemp10 schematics
+    delay_ms(84);
+    // Deep sleep well is a-ok
+    GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
+#endif // HAVE_PCH_DPWROK_EC
+#elif DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
     // | VCCRTC | RTCRST# | VCCDSW_3P3 | DSW_PWROK |
     // | tPCH01---------- |            |           |
@@ -209,7 +221,16 @@ void power_on_ds5(void) {
 void power_on_s5(void) {
     DEBUG("%02X: power_on_s5\n", main_cycle);
 
-#if DEEP_SX
+#if TGL
+    // Timings from lemp10 schematics
+    GPIO_SET_DEBUG(VA_EC_EN, true);
+    delay_us(200);
+    GPIO_SET_DEBUG(DD_ON, true);
+    delay_ms(143);
+    GPIO_SET_DEBUG(EC_RSMRST_N, true);
+    delay_ms(95);
+    GPIO_SET_DEBUG(EC_EN, true);
+#elif DEEP_SX
     // See Figure 12-18 in Whiskey Lake Platform Design Guide
     // TODO - signal timing graph
     // See Figure 12-24 in Whiskey Lake Platform Design Guide
@@ -334,6 +355,8 @@ void power_off_s5(void) {
 
 // This function is run when the CPU is reset
 static void power_cpu_reset(void) {
+    //TODO
+    espi_reset();
     // LPC was just reset, enable PNP devices
     pnp_enable();
     // Reset ACPI registers
@@ -502,9 +525,12 @@ void power_event(void) {
     if (ack_new)
 #endif // HAVE_SUSWARN_N
     {
-        // Disable S5 power plane if not needed
-        if (power_state == POWER_STATE_S5) {
-            power_off_s5();
+        // TODO: hack for eSPI
+        if (!rst_new) {
+            // Disable S5 power plane if not needed
+            if (power_state == POWER_STATE_S5) {
+                power_off_s5();
+            }
         }
     }
 
