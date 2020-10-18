@@ -57,27 +57,6 @@ void espi_reset(void) {
         ESGCAC2 = (value & ~0b111) | 0b011;
         DEBUG(" = %X\n", ESGCAC2);
     }
-
-    value = ESGCTRL1;
-    if (value != BIT(7)) {
-        DEBUG("ESGCTRL1 %X", value);
-        ESGCTRL1 = BIT(7);
-        DEBUG(" = %X\n", ESGCTRL1);
-    }
-
-    value = ESGCTRL2;
-    if (value != BIT(4)) {
-        DEBUG("ESGCTRL2 %X", value);
-        ESGCTRL2 = BIT(4);
-        DEBUG(" = %X\n", ESGCTRL2);
-    }
-
-    value = VWCTRL0;
-    if (value != BIT(7)) {
-        DEBUG("VWCTRL0 %X", value);
-        VWCTRL0 = BIT(7);
-        DEBUG(" = %X\n", VWCTRL0);
-    }
 }
 
 void espi_event(void) {
