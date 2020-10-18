@@ -238,20 +238,19 @@ void gpio_init() {
     // SLP_SUS#
     GPCRJ7 = GPIO_IN;
     // ESPI_IO0_EC
-    GPCRM0 = GPIO_ALT | GPIO_UP;
+    GPCRM0 = GPIO_ALT;
     // ESPI_IO1_EC
-    GPCRM1 = GPIO_ALT | GPIO_UP;
+    GPCRM1 = GPIO_ALT;
     // ESPI_IO2_EC
-    GPCRM2 = GPIO_ALT | GPIO_UP;
+    GPCRM2 = GPIO_ALT;
     // ESPI_IO3_EC
-    GPCRM3 = GPIO_ALT | GPIO_UP;
+    GPCRM3 = GPIO_ALT;
     // ESPI_CLK_EC
-    GPCRM4 = GPIO_ALT | GPIO_UP;
+    GPCRM4 = GPIO_ALT;
     // ESPI_CS_EC#
-    GPCRM5 = GPIO_ALT | GPIO_UP;
+    GPCRM5 = GPIO_ALT;
     // ALERT#
-    GPCRM6 = 0x86;
-    //GPCRM7 = 0x86;
+    GPCRM6 = GPIO_ALT;
 }
 
 #if GPIO_DEBUG

@@ -2,6 +2,7 @@
 
 #ifndef _EC_ESPI_H
 #define _EC_ESPI_H
+#include <stdint.h>
 
 #ifndef EC_ESPI
 #define EC_ESPI 0
