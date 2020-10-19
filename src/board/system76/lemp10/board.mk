@@ -2,6 +2,9 @@
 
 EC=it5570e
 
+# Enable eSPI
+CFLAGS+=-DEC_ESPI=1
+
 # Add keymap to src
 KEYMAP?=default
 SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
