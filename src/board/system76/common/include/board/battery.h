@@ -6,6 +6,14 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifndef BATTERY_ADDRESS
+    #define BATTERY_ADDRESS 0x0B
+#endif
+
+#ifndef CHARGER_ADDRESS
+    #define CHARGER_ADDRESS 0x09
+#endif
+
 #define BATTERY_INITIALIZED (1U << 7)
 
 extern uint16_t battery_temp;
@@ -24,11 +32,13 @@ bool battery_set_start_threshold(uint8_t value);
 uint8_t battery_get_end_threshold(void);
 bool battery_set_end_threshold(uint8_t value);
 
-int battery_charger_disable(void);
-int battery_charger_enable(void);
 int battery_charger_configure(void);
 void battery_event(void);
-void battery_debug(void);
 void battery_reset(void);
+
+// Defined by charger/*.c
+int battery_charger_disable(void);
+int battery_charger_enable(void);
+void battery_debug(void);
 
 #endif // _BOARD_BATTERY_H
