@@ -2,6 +2,7 @@
 
 #include <board/gpio.h>
 #include <common/debug.h>
+#include <common/macro.h>
 
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
