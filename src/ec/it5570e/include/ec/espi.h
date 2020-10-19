@@ -112,6 +112,7 @@ volatile uint8_t __xdata __at(0x3241) VWIDX41;
 volatile uint8_t __xdata __at(0x3290) VWCTRL0;
 volatile uint8_t __xdata __at(0x3291) VWCTRL1;
 volatile uint8_t __xdata __at(0x3292) VWCTRL2;
+volatile uint8_t __xdata __at(0x3293) VWCTRL3;
 volatile uint8_t __xdata __at(0x3295) VWCTRL5;
 volatile uint8_t __xdata __at(0x3296) VWCTRL6;
 

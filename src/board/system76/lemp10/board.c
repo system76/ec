@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/board.h>
+#include <board/espi.h>
 #include <board/gpio.h>
 #include <board/power.h>
 
 extern uint8_t main_cycle;
 
 void board_init(void) {
+    espi_init();
+
     // Allow CPU to boot
     gpio_set(&SB_KBCRST_N, true);
     // Allow backlight to be turned on
@@ -28,6 +31,8 @@ void board_init(void) {
 void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
 
 void board_event(void) {
+    espi_event();
+
     if (main_cycle == 0) {
         if (power_state == POWER_STATE_S0 || power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
             // System is on
