@@ -256,7 +256,7 @@ void gpio_debug_bank(
 ) {
     for(char i = 0; i < 8; i++) {
         DEBUG(
-            "%s%d:\n\tdata %d\n\tmirror %d\n\tpot %d\n\tcontrol %02X\n",
+            "%s%d: data %d mirror %d pot %d control %02X\n",
             bank,
             i,
             (data >> i) & 1,
@@ -279,6 +279,9 @@ void gpio_debug(void) {
     bank(H);
     bank(I);
     bank(J);
+    #define GPOTM 0
+    bank(M);
+    #undef GPOTM
     #undef bank
 }
 #endif

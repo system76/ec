@@ -152,14 +152,6 @@ void espi_event(void) {
         }
     }
 
-    // Detect when boot load virtual wires were sent
-    value = VWCTRL6;
-    if (value) {
-        VWCTRL6 = value;
-
-        DEBUG("VWCTRL6 %X\n", value);
-    }
-
     // Detect when frequency changes
     DEBUG_CHANGED(ESGCTRL2);
 

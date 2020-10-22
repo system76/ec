@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: GPL-3.0-only
-//TODO: verify layout
 
 // Default layout
 

@@ -2,6 +2,7 @@
 
 #include <board/board.h>
 #include <board/espi.h>
+#include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/power.h>
 #include <common/debug.h>
@@ -27,38 +28,22 @@ void board_init(void) {
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
+
+    // Enable POST codes
+    SPCTRL1 |= 0xC8;
 }
 
 void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
 
-struct Gpio __code CPU_C10_GATE_N = GPIO(F, 7);
-struct Gpio __code SLP_S0 = GPIO(J, 0);
-struct Gpio __code VCCIN_AUX_PG = GPIO(G, 0);
-
-#define GPIO_DEBUG_CHANGED(G) { \
-    static int last_ ## G = -1; \
-    int new_ ## G = (int)gpio_get(&G); \
-    if (new_ ## G != last_ ## G) { \
-        DEBUG( \
-            "%S: %d changed to %d\n", \
-            #G, \
-            last_ ## G, \
-            new_ ## G \
-        ); \
-        last_ ## G = new_ ## G; \
-    } \
-}
-
 void board_event(void) {
     espi_event();
 
-    GPIO_DEBUG_CHANGED(ALL_SYS_PWRGD);
-    GPIO_DEBUG_CHANGED(BUF_PLT_RST_N);
-    GPIO_DEBUG_CHANGED(CPU_C10_GATE_N);
-    GPIO_DEBUG_CHANGED(SLP_S0);
-    GPIO_DEBUG_CHANGED(SLP_SUS_N);
-    GPIO_DEBUG_CHANGED(SUSB_N_PCH);
-    GPIO_DEBUG_CHANGED(SUSC_N_PCH);
-    GPIO_DEBUG_CHANGED(VCCIN_AUX_PG);
-    GPIO_DEBUG_CHANGED(VR_ON);
+    // Read POST codes
+    while (P80H81HS & 1) {
+        uint8_t p80h = P80HD;
+        uint8_t p81h = P81HD;
+        P80H81HS |= 1;
+
+        DEBUG("POST %02X%02X\n", p81h, p80h);
+    }
 }

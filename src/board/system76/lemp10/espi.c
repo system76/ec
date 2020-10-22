@@ -84,6 +84,9 @@ void espi_init(void) {
     }
 */
 
+    // EC must own all double-mapped modules (TODO)
+    RSTDMMC = BIT(3) | BIT(2) | BIT(1) | BIT(0);
+
     // Enable port 80 debug
     DEBUG_ON(SPCTRL3, BIT(5));
 
