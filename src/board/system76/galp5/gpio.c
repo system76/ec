@@ -54,14 +54,13 @@ void gpio_init() {
     GCR20 = 0;
     // Set GPH0 to 1.8V
     GCR21 = BIT(2);
-    // GPM6 powered by VCC
-    GCR23 = BIT(0);
 
     // Set GPIO data
     GPDRA = 0;
-    // XLP_OUT
-    GPDRB = BIT(4);
-    GPDRC = 0;
+    // XLP_OUT, PWR_SW#
+    GPDRB = BIT(4) | BIT(3);
+    // PCH_DPWROK_EC
+    GPDRC = BIT(5);
     // PWR_BTN#, SMI#
     GPDRD = BIT(5) | BIT(4);
     GPDRE = 0;

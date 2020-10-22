@@ -84,21 +84,17 @@ void espi_init(void) {
     }
 */
 
+    // Enable port 80 debug
+    DEBUG_ON(SPCTRL3, BIT(5));
+
+    // Set maximum eSPI frequency to 50MHz
+    DEBUG_SET(ESGCAC2, 0b111, 0b011);
+
     espi_reset();
 }
 
 void espi_reset(void) {
-    // Enable port 80 debug
-    DEBUG_ON(SPCTRL3, BIT(5));
-
-    // Enable host global reset from GPD2 (TODO)
-    //DEBUG_ON(RSTS, BIT(3));
-
-    // Set maximum eSPI frequency to 20MHz (for debugging)
-    DEBUG_SET(ESGCAC2, 0b111, 0b000);
-
-    // Auto send boot load virtual wires (TODO)
-    DEBUG_ON(VWCTRL5, BIT(0));
+    //TODO
 }
 
 void espi_event(void) {
@@ -130,6 +126,8 @@ void espi_event(void) {
         }
         if (value & BIT(3)) {
             DEBUG("  Flash enabled\n");
+            vw_set(&VW_BOOT_LOAD_STATUS, VWS_HIGH);
+            vw_set(&VW_BOOT_LOAD_DONE, VWS_HIGH);
         }
     }
 

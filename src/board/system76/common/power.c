@@ -22,6 +22,11 @@
     gpio_set(&G, V); \
 }
 
+#ifndef CUSTOM_POWER
+    // Board has custom power functions
+    #define CUSTOM_POWER 0
+#endif
+
 #ifndef DEEP_SX
     // Platform does not currently support Deep Sx
     #define DEEP_SX 0
@@ -172,6 +177,9 @@ void update_power_state(void) {
     }
 }
 
+#if CUSTOM_POWER
+// power functions defined by board
+#else // CUSTOM_POWER
 // Enable deep sleep well power
 void power_on_ds5(void) {
     DEBUG("%02X: power_on_ds5\n", main_cycle);
@@ -333,6 +341,7 @@ void power_off_s5(void) {
 
     update_power_state();
 }
+#endif // CUSTOM_POWER
 
 // This function is run when the CPU is reset
 static void power_cpu_reset(void) {
@@ -396,9 +405,11 @@ void power_event(void) {
     static bool ps_last = true;
     bool ps_new = gpio_get(&PWR_SW_N);
     // Disable power button if lid is closed and AC is disconnected
+    /* TODO
     if (!lid_state && ac_last) {
         ps_new = true;
     }
+    */
     if (!ps_new && ps_last) {
         // Ensure press is not spurious
         delay_ms(10);

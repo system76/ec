@@ -14,6 +14,10 @@ enum PowerState {
 
 extern enum PowerState power_state;
 
+void power_on_ds5(void);
+void power_on_s5(void);
+void power_off_s5(void);
+
 void power_event(void);
 
 #endif // _BOARD_POWER_H

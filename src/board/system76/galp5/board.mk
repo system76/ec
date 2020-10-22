@@ -2,6 +2,9 @@
 
 EC=it5570e
 
+# Custom power sequence
+CFLAGS+=-DCUSTOM_POWER=1
+
 # Enable eSPI
 CFLAGS+=-DEC_ESPI=1
 

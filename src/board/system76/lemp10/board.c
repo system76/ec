@@ -4,6 +4,7 @@
 #include <board/espi.h>
 #include <board/gpio.h>
 #include <board/power.h>
+#include <common/debug.h>
 
 extern uint8_t main_cycle;
 
@@ -30,15 +31,34 @@ void board_init(void) {
 
 void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
 
+struct Gpio __code CPU_C10_GATE_N = GPIO(F, 7);
+struct Gpio __code SLP_S0 = GPIO(J, 0);
+struct Gpio __code VCCIN_AUX_PG = GPIO(G, 0);
+
+#define GPIO_DEBUG_CHANGED(G) { \
+    static int last_ ## G = -1; \
+    int new_ ## G = (int)gpio_get(&G); \
+    if (new_ ## G != last_ ## G) { \
+        DEBUG( \
+            "%S: %d changed to %d\n", \
+            #G, \
+            last_ ## G, \
+            new_ ## G \
+        ); \
+        last_ ## G = new_ ## G; \
+    } \
+}
+
 void board_event(void) {
     espi_event();
 
-    if (main_cycle == 0) {
-        if (power_state == POWER_STATE_S0 || power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
-            // System is on
-        } else if (gpio_get(&ACIN_N)) {
-            // Power off VDD3 if system should be off
-            gpio_set(&XLP_OUT, 0);
-        }
-    }
+    GPIO_DEBUG_CHANGED(ALL_SYS_PWRGD);
+    GPIO_DEBUG_CHANGED(BUF_PLT_RST_N);
+    GPIO_DEBUG_CHANGED(CPU_C10_GATE_N);
+    GPIO_DEBUG_CHANGED(SLP_S0);
+    GPIO_DEBUG_CHANGED(SLP_SUS_N);
+    GPIO_DEBUG_CHANGED(SUSB_N_PCH);
+    GPIO_DEBUG_CHANGED(SUSC_N_PCH);
+    GPIO_DEBUG_CHANGED(VCCIN_AUX_PG);
+    GPIO_DEBUG_CHANGED(VR_ON);
 }
