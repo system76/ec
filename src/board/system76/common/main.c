@@ -10,6 +10,7 @@
 #include <board/board.h>
 #include <board/dgpu.h>
 #include <board/ecpm.h>
+#include <board/espi.h>
 #include <board/gpio.h>
 #include <board/gctrl.h>
 #include <board/kbc.h>
@@ -29,6 +30,7 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/ec.h>
+#include <ec/intc.h>
 
 #ifdef PARALLEL_DEBUG
     #include <board/parallel.h>
@@ -37,7 +39,23 @@
 void external_0(void) __interrupt(0) {}
 // timer_0 is in time.c
 void timer_0(void) __interrupt(1);
-void external_1(void) __interrupt(2) {}
+void external_1(void) __interrupt(2) {
+    // For some reason, 0x10 is always added to ivect
+    uint8_t ivect = IVECT - 0x10;
+    DEBUG("IVECT %d\n", ivect);
+    switch (ivect) {
+        case 153:
+            espi_interrupt();
+            break;
+        case 154:
+            espi_vw_interrupt();
+            break;
+        case 159:
+            // PLL change
+            ISR19 |= BIT(7);
+            break;
+    }
+}
 void timer_1(void) __interrupt(3) {}
 void serial(void) __interrupt(4) {}
 void timer_2(void) __interrupt(5) {}

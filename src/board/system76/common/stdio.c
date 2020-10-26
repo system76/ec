@@ -16,7 +16,8 @@
     #include <board/parallel.h>
 #endif // PARALLEL_DEBUG
 
-int putchar(int c) {
+// Disables interrupts so it can be called from interrupt handler
+int putchar(int c) __critical {
     unsigned char byte = (unsigned char)c;
 
     smfi_debug(byte);

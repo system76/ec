@@ -8,6 +8,7 @@
 #include <common/macro.h>
 #include <ec/ecpm.h>
 #include <ec/gctrl.h>
+#include <ec/intc.h>
 
 #define DEBUG_SET(REG, MASK, BITS) { \
     DEBUG("%s @ %p: %X", #REG, &REG, REG); \
@@ -37,13 +38,16 @@
 }
 
 void espi_init(void) {
-/*
+    // Enable external interrupt 1
+    EX1 = 1;
+
+#if 0
     // Workarounds to allow changing PLL
     {
         // ESPI_CS# set to input
         GPCRM5 = GPIO_IN;
         // Disable eSPI pads
-        ESGCTRL2 |= BIT(6);
+        DEBUG_ON(ESGCTRL2, BIT(6));
     }
 
     DEBUG("PLLFREQ is 0x%02X\n", PLLFREQ);
@@ -78,38 +82,45 @@ void espi_init(void) {
     // Workarounds to allow changing PLL
     {
         // Enable eSPI pads
-        ESGCTRL2 &= ~BIT(6);
+        DEBUG_OFF(ESGCTRL2, BIT(6));
         // ESPI_CS# set to alternate mode
         GPCRM5 = GPIO_ALT;
     }
-*/
-
-    // EC must own all double-mapped modules (TODO)
-    RSTDMMC = BIT(3) | BIT(2) | BIT(1) | BIT(0);
-
-    // Enable port 80 debug
-    DEBUG_ON(SPCTRL3, BIT(5));
+#endif
 
     // Set maximum eSPI frequency to 50MHz
     DEBUG_SET(ESGCAC2, 0b111, 0b011);
+
+    // Enable ESPI interrupt (INT153 in group 19)
+    DEBUG_ON(IER19, BIT(1));
+    DEBUG_ON(ESGCTRL1, BIT(7));
+
+    // Enable VW interrupt (INT154 in group 19)
+    DEBUG_ON(IER19, BIT(2));
+    DEBUG_ON(VWCTRL0, BIT(7));
 
     espi_reset();
 }
 
 void espi_reset(void) {
     //TODO
+
+/*
+    vw_set(&VW_OOB_RST_ACK, VWS_LOW);
+    vw_set(&VW_BOOT_LOAD_STATUS, VWS_HIGH);
+    vw_set(&VW_BOOT_LOAD_DONE, VWS_HIGH);
+    vw_set(&VW_HOST_RST_ACK, VWS_LOW);
+    vw_set(&VW_SUS_ACK_N, VWS_LOW);
+*/
+
+    // Clear any pending VW interrupts
+    VWCTRL1 = 0xFF;
+
+    espi_event();
 }
 
-void espi_event(void) {
+void espi_interrupt(void) {
     uint8_t value;
-
-    // Detect PUT_PC
-    value = ESPCTRL0;
-    if (value & BIT(7)) {
-        ESPCTRL0 = BIT(7);
-
-        DEBUG("ESPCTRL0 %X\n", value);
-    }
 
     // Detect channel enabled
     value = ESGCTRL0;
@@ -129,15 +140,30 @@ void espi_event(void) {
         }
         if (value & BIT(3)) {
             DEBUG("  Flash enabled\n");
-            vw_set(&VW_BOOT_LOAD_STATUS, VWS_HIGH);
-            vw_set(&VW_BOOT_LOAD_DONE, VWS_HIGH);
+
+            // Set BOOT_LOADs to high atomically, when flash channel enabled
+            DEBUG("BOOT_LOAD\n");
+            VWIDX5 = 0x99;
         }
     }
+
+    // Detect PUT_PC
+    value = ESPCTRL0;
+    if (value & BIT(7)) {
+        ESPCTRL0 = BIT(7);
+
+        DEBUG("ESPCTRL0 %X\n", value);
+    }
+}
+
+void espi_vw_interrupt(void) {
+    uint8_t value;
 
     // Detect updated virtual wires
     value = VWCTRL1;
     if (value) {
-        VWCTRL1 = value;
+        // Must write 0xFF instead of value
+        VWCTRL1 = 0xFF;
 
         DEBUG("VWCTRL1 %X\n", value);
 
@@ -152,9 +178,14 @@ void espi_event(void) {
         }
         if (value & BIT(3)) {
             DEBUG("  VW 41 %X\n", VWIDX41);
+
+            // Set SUS_ACK# to SUS_WARN#
+            vw_set(&VW_SUS_ACK_N, vw_get(&VW_SUS_WARN_N));
         }
     }
+}
 
+void espi_event(void) {
     // Detect when frequency changes
     DEBUG_CHANGED(ESGCTRL2);
 
@@ -176,9 +207,18 @@ void espi_event(void) {
     // Detect when channel 3 changes
     DEBUG_CHANGED(ESC3CAC0);
 
+    // Detect when interrupt register changes
+    DEBUG_CHANGED(VWIDX0);
+
     // Detect when AP to EC virtual wires change
     DEBUG_CHANGED(VWIDX2);
     DEBUG_CHANGED(VWIDX3);
     DEBUG_CHANGED(VWIDX7);
     DEBUG_CHANGED(VWIDX41);
+
+    // Detect when EC to AP virtual wires change
+    DEBUG_CHANGED(VWIDX4);
+    DEBUG_CHANGED(VWIDX5);
+    DEBUG_CHANGED(VWIDX6);
+    DEBUG_CHANGED(VWIDX40);
 }
