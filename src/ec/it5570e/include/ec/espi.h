@@ -50,6 +50,7 @@ extern struct VirtualWire __code VW_SMI_N;
 extern struct VirtualWire __code VW_RCIN_N;
 extern struct VirtualWire __code VW_HOST_RST_ACK;
 // Index 7 - AP to EC
+extern struct VirtualWire __code VW_HOST_RST_WARN;
 // Index 40 - EC to AP (platform specific)
 extern struct VirtualWire __code VW_SUS_ACK_N;
 // Index 41 - AP to EC (platform specific)
@@ -107,6 +108,7 @@ volatile uint8_t __xdata __at(0x3207) VWIDX7;
 // Virtual wires at 0x40
 volatile uint8_t __xdata __at(0x3240) VWIDX40;
 volatile uint8_t __xdata __at(0x3241) VWIDX41;
+volatile uint8_t __xdata __at(0x3242) VWIDX42;
 
 // Virtual wire control
 volatile uint8_t __xdata __at(0x3290) VWCTRL0;

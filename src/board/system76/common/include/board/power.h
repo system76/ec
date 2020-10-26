@@ -17,6 +17,7 @@ extern enum PowerState power_state;
 void power_on_ds5(void);
 void power_on_s5(void);
 void power_off_s5(void);
+void power_cpu_reset(void);
 
 void power_event(void);
 

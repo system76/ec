@@ -22,11 +22,6 @@
     gpio_set(&G, V); \
 }
 
-#ifndef CUSTOM_POWER
-    // Board has custom power functions
-    #define CUSTOM_POWER 0
-#endif
-
 #ifndef DEEP_SX
     // Platform does not currently support Deep Sx
     #define DEEP_SX 0
@@ -177,9 +172,6 @@ void update_power_state(void) {
     }
 }
 
-#if CUSTOM_POWER
-// power functions defined by board
-#else // CUSTOM_POWER
 // Enable deep sleep well power
 void power_on_ds5(void) {
     DEBUG("%02X: power_on_ds5\n", main_cycle);
@@ -294,8 +286,10 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
+#if HAVE_SUSWARN_N
     // Extra wait - TODO remove
     delay_ms(200);
+#endif // HAVE_SUSWARN_N
 #endif // DEEP_SX
 
     update_power_state();
@@ -341,10 +335,9 @@ void power_off_s5(void) {
 
     update_power_state();
 }
-#endif // CUSTOM_POWER
 
 // This function is run when the CPU is reset
-static void power_cpu_reset(void) {
+void power_cpu_reset(void) {
     // LPC was just reset, enable PNP devices
     pnp_enable();
     // Reset ACPI registers
@@ -453,7 +446,7 @@ void power_event(void) {
         GPIO_SET_DEBUG(PM_PWROK, true);
 
         // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
-        delay_ms(10);
+        delay_ms(100);
 
 #if HAVE_PCH_PWROK_EC
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot

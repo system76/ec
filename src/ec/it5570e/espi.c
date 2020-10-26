@@ -44,7 +44,6 @@ enum VirtualWireState vw_get(struct VirtualWire * vw) __critical {
 
 void vw_set(struct VirtualWire * vw, enum VirtualWireState state) __critical {
     uint8_t index = *vw->index;
-    DEBUG("vw_set %p: %0X", vw->index, index);
     index &= ~(VWS_HIGH << vw->shift);
     switch (state) {
         case VWS_LOW:
@@ -56,6 +55,5 @@ void vw_set(struct VirtualWire * vw, enum VirtualWireState state) __critical {
         default:
             break;
     }
-    DEBUG(" = %0X\n", index);
     *vw->index = index;
 }

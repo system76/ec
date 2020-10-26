@@ -4,13 +4,14 @@
 #include <arch/delay.h>
 #include <board/espi.h>
 #include <board/gpio.h>
+#include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <ec/ecpm.h>
 #include <ec/gctrl.h>
 
 #define DEBUG_SET(REG, MASK, BITS) { \
-    DEBUG("%s @ %p: %X", #REG, &REG, REG); \
+    DEBUG("%s: %X", #REG, REG); \
     REG = ((REG) & ~(MASK)) | (BITS); \
     DEBUG(" set to %X\n", REG); \
 }
@@ -26,9 +27,8 @@
     uint8_t new_ ## REG = REG; \
     if (new_ ## REG != last_ ## REG) { \
         DEBUG( \
-            "%S @ %p: %X changed to %X\n", \
+            "%S: %X changed to %X\n", \
             #REG, \
-            &REG, \
             last_ ## REG, \
             new_ ## REG \
         ); \
@@ -36,14 +36,18 @@
     } \
 }
 
+#define VW_SET_DEBUG(W, V) { \
+    DEBUG("%s = %X\n", #W, V); \
+    vw_set(&W, V); \
+}
+
 void espi_init(void) {
-/*
     // Workarounds to allow changing PLL
     {
         // ESPI_CS# set to input
         GPCRM5 = GPIO_IN;
         // Disable eSPI pads
-        ESGCTRL2 |= BIT(6);
+        DEBUG_ON(ESGCTRL2, BIT(6));
     }
 
     DEBUG("PLLFREQ is 0x%02X\n", PLLFREQ);
@@ -78,77 +82,96 @@ void espi_init(void) {
     // Workarounds to allow changing PLL
     {
         // Enable eSPI pads
-        ESGCTRL2 &= ~BIT(6);
+        DEBUG_OFF(ESGCTRL2, BIT(6));
         // ESPI_CS# set to alternate mode
         GPCRM5 = GPIO_ALT;
     }
-*/
-
-    // Enable port 80 debug
-    DEBUG_ON(SPCTRL3, BIT(5));
 
     // Set maximum eSPI frequency to 50MHz
     DEBUG_SET(ESGCAC2, 0b111, 0b011);
 
-    espi_reset();
+    espi_event();
 }
 
 void espi_reset(void) {
-    //TODO
+    espi_event();
 }
 
 void espi_event(void) {
     uint8_t value;
 
-    // Detect PUT_PC
-    value = ESPCTRL0;
-    if (value & BIT(7)) {
-        ESPCTRL0 = BIT(7);
-
-        DEBUG("ESPCTRL0 %X\n", value);
-    }
-
     // Detect channel enabled
     value = ESGCTRL0;
     if (value) {
         ESGCTRL0 = value;
-
         DEBUG("ESGCTRL0 %X\n", value);
 
-        if (value & BIT(0)) {
-            DEBUG("  PC enabled\n");
-        }
         if (value & BIT(1)) {
-            DEBUG("  VW enabled\n");
+            DEBUG("VW EN\n");
+            // Set SUS_ACK# low
+            VW_SET_DEBUG(VW_SUS_ACK_N, VWS_LOW);
         }
         if (value & BIT(2)) {
-            DEBUG("  OOB enabled\n");
+            DEBUG("OOB EN\n");
+            VW_SET_DEBUG(VW_OOB_RST_ACK, VWS_LOW);
         }
         if (value & BIT(3)) {
-            DEBUG("  Flash enabled\n");
-            vw_set(&VW_BOOT_LOAD_STATUS, VWS_HIGH);
-            vw_set(&VW_BOOT_LOAD_DONE, VWS_HIGH);
+            DEBUG("FLASH EN\n");
+            // Set boot load status and boot load done high
+            VW_SET_DEBUG(VW_BOOT_LOAD_STATUS, VWS_HIGH);
+            VW_SET_DEBUG(VW_BOOT_LOAD_DONE, VWS_HIGH);
         }
+    }
+
+    // Detect PUT_PC
+    value = ESPCTRL0;
+    if (value & BIT(7)) {
+        ESPCTRL0 = BIT(7);
+        DEBUG("ESPCTRL0 %X\n", value);
     }
 
     // Detect updated virtual wires
     value = VWCTRL1;
     if (value) {
         VWCTRL1 = value;
-
         DEBUG("VWCTRL1 %X\n", value);
 
         if (value & BIT(0)) {
-            DEBUG("  VW 2 %X\n", VWIDX2);
+            DEBUG("VWIDX2 %X\n", VWIDX2);
         }
         if (value & BIT(1)) {
-            DEBUG("  VW 3 %X\n", VWIDX3);
+            DEBUG("VWIDX3 %X\n", VWIDX3);
+
+            // Set OOB_RST_ACK to OOB_RST_WARN
+            VW_SET_DEBUG(VW_OOB_RST_ACK, vw_get(&VW_OOB_RST_WARN));
+
+            static enum VirtualWireState last_pltrst_n = VWS_INVALID;
+            enum VirtualWireState pltrst_n = vw_get(&VW_PLTRST_N);
+            if (pltrst_n != last_pltrst_n) {
+                DEBUG("ESPI PLTRST# %X\n", pltrst_n);
+                if (pltrst_n == VWS_HIGH) {
+                    // Set SCI, SMI, RCIN, and HOST_RST_ACK to high
+                    VW_SET_DEBUG(VW_SCI_N, VWS_HIGH);
+                    VW_SET_DEBUG(VW_SMI_N, VWS_HIGH);
+                    VW_SET_DEBUG(VW_RCIN_N, VWS_HIGH);
+                    VW_SET_DEBUG(VW_HOST_RST_ACK, VWS_HIGH);
+
+                    power_cpu_reset();
+                }
+                last_pltrst_n = pltrst_n;
+            }
         }
         if (value & BIT(2)) {
-            DEBUG("  VW 7 %X\n", VWIDX7);
+            DEBUG("VWIDX7 %X\n", VWIDX7);
+
+            // Set HOST_RST_ACK to HOST_RST_WARN
+            VW_SET_DEBUG(VW_HOST_RST_ACK, vw_get(&VW_HOST_RST_WARN));
         }
         if (value & BIT(3)) {
-            DEBUG("  VW 41 %X\n", VWIDX41);
+            DEBUG("VWIDX41 %X\n", VWIDX41);
+
+            // Set SUS_ACK# to SUS_WARN#
+            VW_SET_DEBUG(VW_SUS_ACK_N, vw_get(&VW_SUS_WARN_N));
         }
     }
 
@@ -157,25 +180,4 @@ void espi_event(void) {
 
     // Detect when I/O mode changes
     DEBUG_CHANGED(ESGCTRL3);
-
-    // Detect when channel 0 changes
-    DEBUG_CHANGED(ESC0CAC0);
-
-    // Detect when channel 1 changes
-    DEBUG_CHANGED(ESC1CAC0);
-
-    // Detect when virtual wire count changes
-    DEBUG_CHANGED(ESC1CAC2);
-
-    // Detect when channel 2 changes
-    DEBUG_CHANGED(ESC2CAC0);
-
-    // Detect when channel 3 changes
-    DEBUG_CHANGED(ESC3CAC0);
-
-    // Detect when AP to EC virtual wires change
-    DEBUG_CHANGED(VWIDX2);
-    DEBUG_CHANGED(VWIDX3);
-    DEBUG_CHANGED(VWIDX7);
-    DEBUG_CHANGED(VWIDX41);
 }
