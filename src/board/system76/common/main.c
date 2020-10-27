@@ -24,7 +24,6 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
-#include <board/touchpad.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>

@@ -18,9 +18,9 @@ void kbc_init(void) {
 #define KBC_TIMEOUT 10000
 
 // Enable first port - TODO
-bool kbc_first = false;
+static bool kbc_first = false;
 // Enable second port - TODO
-bool kbc_second = false;
+static bool kbc_second = false;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
@@ -111,12 +111,12 @@ enum KbcState {
     KBC_STATE_SELF_TEST,
 };
 
-void kbc_event(struct Kbc * kbc) {
-    // TODO: state per KBC (we only have one KBC so low priority)
-    static enum KbcState state = KBC_STATE_NORMAL;
-    static uint8_t state_data = 0;
-    static enum KbcState state_next = KBC_STATE_NORMAL;
+// TODO: state per KBC (we only have one KBC so low priority)
+static enum KbcState state = KBC_STATE_NORMAL;
+static uint8_t state_data = 0;
+static enum KbcState state_next = KBC_STATE_NORMAL;
 
+void kbc_event(struct Kbc * kbc) {
     uint8_t sts = kbc_status(kbc);
 
     // Read command/data if available
@@ -341,7 +341,7 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_SECOND_PORT_INPUT:
                     TRACE("  write second port input\n");
                     state = KBC_STATE_NORMAL;
-                    ps2_write(&PS2_3, &data, 1);
+                    ps2_write(&PS2_TOUCHPAD, &data, 1);
                     break;
             }
         }
@@ -381,6 +381,23 @@ void kbc_event(struct Kbc * kbc) {
                 state = KBC_STATE_KEYBOARD;
                 state_data = 0xAA;
                 break;
+        }
+    }
+}
+
+void touchpad_event(void) {
+    if (kbc_second) {
+        *(PS2_TOUCHPAD.control) = 0x07;
+    } else {
+        ps2_reset(&PS2_TOUCHPAD);
+    }
+
+    if (state == KBC_STATE_NORMAL) {
+        uint8_t status = *(PS2_TOUCHPAD.status);
+        *(PS2_TOUCHPAD.status) = status;
+        if (status & (1 << 3)) {
+            state = KBC_STATE_MOUSE;
+            state_data = *(PS2_TOUCHPAD.data);
         }
     }
 }
