@@ -286,10 +286,14 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-#if HAVE_SUSWARN_N
-    // Extra wait - TODO remove
-    delay_ms(200);
-#endif // HAVE_SUSWARN_N
+    for (int i = 0; i < 200; i++) {
+        // Check for VW changes
+        #if EC_ESPI
+            espi_event();
+        #endif // EC_ESPI
+        // Extra wait until SUSPWRDNACK is valid
+        delay_ms(1);
+    }
 #endif // DEEP_SX
 
     update_power_state();
@@ -495,7 +499,9 @@ void power_event(void) {
     #endif
 #endif // HAVE_SLP_SUS_N
 
-#if HAVE_SUSWARN_N
+#if EC_ESPI
+    if (vw_get(&VW_SUS_PWRDN_ACK) == VWS_HIGH)
+#elif HAVE_SUSWARN_N
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
     static bool ack_last = false;
@@ -512,12 +518,9 @@ void power_event(void) {
     if (ack_new)
 #endif // HAVE_SUSWARN_N
     {
-        // TODO: hack for eSPI
-        if (!rst_new) {
-            // Disable S5 power plane if not needed
-            if (power_state == POWER_STATE_S5) {
-                power_off_s5();
-            }
+        // Disable S5 power plane if not needed
+        if (power_state == POWER_STATE_S5) {
+            power_off_s5();
         }
     }
 
