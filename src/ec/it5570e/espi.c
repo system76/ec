@@ -12,6 +12,8 @@ struct VirtualWire __code VW_PLTRST_N = VIRTUAL_WIRE(3, 1);
 struct VirtualWire __code VW_OOB_RST_WARN = VIRTUAL_WIRE(3, 2);
 // Index 4 - EC to AP
 struct VirtualWire __code VW_OOB_RST_ACK = VIRTUAL_WIRE(4, 0);
+struct VirtualWire __code VW_WAKE_N = VIRTUAL_WIRE(4, 2);
+struct VirtualWire __code VW_PME_N = VIRTUAL_WIRE(4, 3);
 // Index 5 - EC to AP
 struct VirtualWire __code VW_BOOT_LOAD_DONE = VIRTUAL_WIRE(5, 0);
 struct VirtualWire __code VW_ERROR_FATAL = VIRTUAL_WIRE(5, 1);

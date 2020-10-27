@@ -21,13 +21,7 @@ void lid_event(void) {
             DEBUG("open\n");
 
             if (lid_wake) {
-                gpio_set(&SWI_N, false);
-
-                //TODO: find correct delay
-                delay_ticks(10);
-
-                gpio_set(&SWI_N, true);
-
+                pmc_swi();
                 lid_wake = false;
             }
         } else {

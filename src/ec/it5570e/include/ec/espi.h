@@ -39,6 +39,8 @@ extern struct VirtualWire __code VW_PLTRST_N;
 extern struct VirtualWire __code VW_OOB_RST_WARN;
 // Index 4 - EC to AP
 extern struct VirtualWire __code VW_OOB_RST_ACK;
+extern struct VirtualWire __code VW_WAKE_N;
+extern struct VirtualWire __code VW_PME_N;
 // Index 5 - EC to AP
 extern struct VirtualWire __code VW_BOOT_LOAD_DONE;
 extern struct VirtualWire __code VW_ERROR_FATAL;
