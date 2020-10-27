@@ -10,12 +10,12 @@ void kbc_init(void) {
     // Disable interrupts
     *(KBC.irq) = 0;
     *(KBC.control) = 0;
+    // Set "key lock" to disabled
+    *(KBC.status) = (1 << 4);
 }
 
 #define KBC_TIMEOUT 10000
 
-// System flag
-static bool kbc_system = false;
 // Enable first port - TODO
 bool kbc_first = false;
 // Enable second port - TODO
@@ -116,8 +116,10 @@ void kbc_event(struct Kbc * kbc) {
             switch (data) {
             case 0x20:
                 TRACE("  read configuration byte\n");
+                // Interrupt enable flags
                 uint8_t config = *kbc->control & 0x03;
-                if (kbc_system) {
+                // System flag
+                if (*kbc->status & (1 << 2)) {
                     config |= (1 << 2);
                 }
                 if (!kbc_first) {
@@ -247,22 +249,27 @@ void kbc_event(struct Kbc * kbc) {
                 case KBC_STATE_WRITE_CONFIG:
                     TRACE("  write configuration byte\n");
                     state = KBC_STATE_NORMAL;
-                    uint8_t control = *kbc->control;
+                    // Enable keyboard interrupt
                     if (data & 1) {
-                        control |= 1;
+                        *kbc->control |= 1;
                     } else {
-                        control &= ~1;
+                        *kbc->control &= ~1;
                     }
+                    // Enable mouse interrupt
                     if (data & (1 << 1)) {
-                        control |= (1 << 1);
+                        *kbc->control |= (1 << 1);
                     } else {
-                        control &= ~(1 << 1);
+                        *kbc->control &= ~(1 << 1);
                     }
-                    kbc_system = (bool)(data & (1 << 2));
+                    // System flag
+                    if (data & (1 << 2)) {
+                        *kbc->status |= (1 << 2);
+                    } else {
+                        *kbc->status &= ~(1 << 2);
+                    }
                     kbc_first = (bool)(!(data & (1 << 4)));
                     kbc_second = (bool)(!(data & (1 << 5)));
                     kbc_translate = (bool)(data & (1 << 6));
-                    *kbc->control = control;
                     break;
                 case KBC_STATE_SET_LEDS:
                     TRACE("  set leds\n");
