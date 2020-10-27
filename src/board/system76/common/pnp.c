@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include <common/debug.h>
+#include <ec/espi.h>
 
 volatile uint8_t __xdata __at(0x1200) IHIOA;
 volatile uint8_t __xdata __at(0x1201) IHD;
@@ -33,10 +34,15 @@ void pnp_enable() {
 
     // Enable KBC keyboard
     pnp_write(0x07, 0x06);
+#if EC_ESPI
+    // When using eSPI, IRQ must be inverted and edge triggered
+    pnp_write(0x71, 0x02);
+#endif // EC_ESPI
     pnp_write(0x30, 0x01);
 
     // Enable KBC mouse
     pnp_write(0x07, 0x05);
+    //TODO: change interrupt type?
     pnp_write(0x30, 0x01);
 
     // Enable SMFI
