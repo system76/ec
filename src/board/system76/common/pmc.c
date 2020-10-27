@@ -5,6 +5,7 @@
 #include <board/gpio.h>
 #include <board/pmc.h>
 #include <common/debug.h>
+#include <ec/espi.h>
 
 #ifndef HAVE_SCI_N
 #define HAVE_SCI_N 1
@@ -27,7 +28,19 @@ static uint8_t pmc_sci_queue = 0;
 
 void pmc_sci_interrupt(void) {
 //TODO: eSPI SCI
-#if HAVE_SCI_N
+#if EC_ESPI
+    // Start SCI interrupt
+    vw_set(&VW_SCI_N, VWS_LOW);
+
+    // Delay T_HOLD (value assumed)
+    delay_us(65);
+
+    // Stop SCI interrupt
+    vw_set(&VW_SCI_N, VWS_HIGH);
+
+    // Delay T_HOLD (value assumed)
+    delay_us(65);
+#elif HAVE_SCI_N
     // Start SCI interrupt
     gpio_set(&SCI_N, false);
     *(SCI_N.control) = GPIO_OUT;
