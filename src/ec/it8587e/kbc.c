@@ -19,7 +19,6 @@ uint8_t kbc_read(struct Kbc * kbc) {
     return *(kbc->data_in);
 }
 
-
 static bool kbc_wait(struct Kbc * kbc, int timeout) {
     while (kbc_status(kbc) & KBC_STS_OBF) {
         if (timeout == 0) return false;
