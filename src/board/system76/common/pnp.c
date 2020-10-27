@@ -42,7 +42,10 @@ void pnp_enable() {
 
     // Enable KBC mouse
     pnp_write(0x07, 0x05);
-    //TODO: change interrupt type?
+#if EC_ESPI
+    // When using eSPI, IRQ must be inverted and edge triggered
+    pnp_write(0x71, 0x02);
+#endif // EC_ESPI
     pnp_write(0x30, 0x01);
 
     // Enable SMFI
