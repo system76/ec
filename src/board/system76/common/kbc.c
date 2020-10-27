@@ -4,6 +4,7 @@
 #include <board/kbscan.h>
 #include <board/keymap.h>
 #include <common/debug.h>
+#include <common/macro.h>
 #include <ec/ps2.h>
 
 void kbc_init(void) {
@@ -11,7 +12,7 @@ void kbc_init(void) {
     *(KBC.irq) = 0;
     *(KBC.control) = 0;
     // Set "key lock" to disabled
-    *(KBC.status) = (1 << 4);
+    *(KBC.status) = BIT(4);
 }
 
 #define KBC_TIMEOUT 10000
@@ -119,17 +120,17 @@ void kbc_event(struct Kbc * kbc) {
                 // Interrupt enable flags
                 uint8_t config = *kbc->control & 0x03;
                 // System flag
-                if (*kbc->status & (1 << 2)) {
-                    config |= (1 << 2);
+                if (*kbc->status & BIT(2)) {
+                    config |= BIT(2);
                 }
                 if (!kbc_first) {
-                    config |= (1 << 4);
+                    config |= BIT(4);
                 }
                 if (!kbc_second) {
-                    config |= (1 << 5);
+                    config |= BIT(5);
                 }
                 if (kbc_translate) {
-                    config |= (1 << 6);
+                    config |= BIT(6);
                 }
                 kbc_keyboard(kbc, config, KBC_TIMEOUT);
                 break;
@@ -250,26 +251,26 @@ void kbc_event(struct Kbc * kbc) {
                     TRACE("  write configuration byte\n");
                     state = KBC_STATE_NORMAL;
                     // Enable keyboard interrupt
-                    if (data & 1) {
-                        *kbc->control |= 1;
+                    if (data & BIT(0)) {
+                        *kbc->control |= BIT(0);
                     } else {
-                        *kbc->control &= ~1;
+                        *kbc->control &= ~BIT(0);
                     }
                     // Enable mouse interrupt
-                    if (data & (1 << 1)) {
-                        *kbc->control |= (1 << 1);
+                    if (data & BIT(1)) {
+                        *kbc->control |= BIT(1);
                     } else {
-                        *kbc->control &= ~(1 << 1);
+                        *kbc->control &= ~BIT(1);
                     }
                     // System flag
-                    if (data & (1 << 2)) {
-                        *kbc->status |= (1 << 2);
+                    if (data & BIT(2)) {
+                        *kbc->status |= BIT(2);
                     } else {
-                        *kbc->status &= ~(1 << 2);
+                        *kbc->status &= ~BIT(2);
                     }
-                    kbc_first = (bool)(!(data & (1 << 4)));
-                    kbc_second = (bool)(!(data & (1 << 5)));
-                    kbc_translate = (bool)(data & (1 << 6));
+                    kbc_first = (bool)(!(data & BIT(4)));
+                    kbc_second = (bool)(!(data & BIT(5)));
+                    kbc_translate = (bool)(data & BIT(6));
                     break;
                 case KBC_STATE_SET_LEDS:
                     TRACE("  set leds\n");
