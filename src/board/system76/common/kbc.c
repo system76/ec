@@ -410,14 +410,7 @@ void kbc_event(struct Kbc * kbc) {
         }
     }
 
-    // Write data if possible
-    sts = kbc_status(kbc);
-    if (!(sts & KBC_STS_OBF)) {
-        kbc_on_output_empty(kbc);
-    }
-}
-
-void touchpad_event(void) {
+    // Read from touchpad when possible
     if (kbc_second) {
         *(PS2_TOUCHPAD.control) = 0x07;
         if (state == KBC_STATE_NORMAL) {
@@ -429,5 +422,11 @@ void touchpad_event(void) {
         }
     } else {
         ps2_reset(&PS2_TOUCHPAD);
+    }
+
+    // Write data if possible
+    sts = kbc_status(kbc);
+    if (!(sts & KBC_STS_OBF)) {
+        kbc_on_output_empty(kbc);
     }
 }

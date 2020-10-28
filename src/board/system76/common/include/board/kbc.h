@@ -12,6 +12,5 @@ extern uint8_t kbc_leds;
 void kbc_init(void);
 bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed);
 void kbc_event(struct Kbc * kbc);
-void touchpad_event(void);
 
 #endif // _BOARD_KBC_H
