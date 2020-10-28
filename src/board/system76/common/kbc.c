@@ -117,10 +117,19 @@ static enum KbcState state = KBC_STATE_NORMAL;
 static uint8_t state_data = 0;
 static enum KbcState state_next = KBC_STATE_NORMAL;
 
+// Clear output buffer
+static void kbc_clear_output(struct Kbc * kbc) {
+    *(kbc->control) |= BIT(5);
+    *(kbc->control) |= BIT(6);
+    *(kbc->control) &= ~BIT(5);
+}
+
 static void kbc_on_input_command(struct Kbc * kbc, uint8_t data) {
     TRACE("kbc cmd: %02X\n", data);
-    // Commands always reset the state
+    // Controller commands always reset the state
     state = KBC_STATE_NORMAL;
+    // Controller commands clear the output buffer
+    kbc_clear_output(kbc);
     switch (data) {
         case 0x20:
             TRACE("  read configuration byte\n");
@@ -201,8 +210,14 @@ static void kbc_on_input_command(struct Kbc * kbc, uint8_t data) {
 static void kbc_on_input_data(struct Kbc * kbc, uint8_t data) {
     TRACE("kbc data: %02X\n", data);
     switch (state) {
+        case KBC_STATE_TOUCHPAD:
+            // Interrupt touchpad command
+            state = KBC_STATE_NORMAL;
+            // Fall through
         case KBC_STATE_NORMAL:
             TRACE("  keyboard command\n");
+            // Keyboard commands clear output buffer
+            kbc_clear_output(kbc);
             switch (data) {
                 case 0xED:
                     TRACE("    set leds\n");
