@@ -399,17 +399,6 @@ static void kbc_on_output_empty(struct Kbc * kbc) {
 void kbc_event(struct Kbc * kbc) {
     uint8_t sts;
 
-    // Read command/data while available
-    sts = kbc_status(kbc);
-    if (sts & KBC_STS_IBF) {
-        uint8_t data = kbc_read(kbc);
-        if (sts & KBC_STS_CMD) {
-            kbc_on_input_command(kbc, data);
-        } else {
-            kbc_on_input_data(kbc, data);
-        }
-    }
-
     // Read from touchpad when possible
     if (kbc_second) {
         *(PS2_TOUCHPAD.control) = 0x07;
@@ -422,6 +411,17 @@ void kbc_event(struct Kbc * kbc) {
         }
     } else {
         ps2_reset(&PS2_TOUCHPAD);
+    }
+
+    // Read command/data while available
+    sts = kbc_status(kbc);
+    if (sts & KBC_STS_IBF) {
+        uint8_t data = kbc_read(kbc);
+        if (sts & KBC_STS_CMD) {
+            kbc_on_input_command(kbc, data);
+        } else {
+            kbc_on_input_data(kbc, data);
+        }
     }
 
     // Write data if possible
