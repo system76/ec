@@ -9,8 +9,9 @@
 
 void kbc_init(void) {
     // Disable interrupts
-    *(KBC.irq) = 0;
     *(KBC.control) = 0;
+    // Set IRQ mode to edge-triggered, 1-cycle pulse width
+    *(KBC.irq) = BIT(3);
     // Set "key lock" to disabled
     *(KBC.status) = BIT(4);
 }
