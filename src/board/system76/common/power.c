@@ -286,11 +286,18 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    for (int i = 0; i < 200; i++) {
+    for (int i = 0; i < 1000; i++) {
+        // If we reached S0, exit this loop
+        update_power_state();
+        if (power_state == POWER_STATE_S0) {
+            break;
+        }
+
         // Check for VW changes
         #if EC_ESPI
             espi_event();
         #endif // EC_ESPI
+
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
     }
