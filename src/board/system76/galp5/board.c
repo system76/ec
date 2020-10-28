@@ -48,8 +48,6 @@ static int set_power_limit(uint8_t watts) {
 }
 
 void board_on_ac(bool ac) {
-    ac = ac;
-/* TODO
     uint8_t power_limit = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
     // Retry, timeout errors happen occasionally
     for (int i = 0; i < 16; i++) {
@@ -63,15 +61,13 @@ void board_on_ac(bool ac) {
             ERROR("set_power_limit unknown response: 0x%02X\n", res);
         }
     }
-*/
 }
 
 void board_event(void) {
-/* TODO
     bool ac = !gpio_get(&ACIN_N);
     static bool last_power_limit_ac = true;
     // We don't use power_state because the latency needs to be low
-    if (gpio_get(&BUF_PLT_RST_N)) {
+    if (vw_get(&VW_PLTRST_N) == VWS_HIGH) {
         if (last_power_limit_ac != ac) {
             board_on_ac(ac);
             last_power_limit_ac = ac;
@@ -79,7 +75,6 @@ void board_event(void) {
     } else {
         last_power_limit_ac = true;
     }
-*/
 
     espi_event();
 
