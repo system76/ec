@@ -5,13 +5,19 @@
 #include <board/keymap.h>
 #include <common/debug.h>
 #include <common/macro.h>
+#include <ec/espi.h>
 #include <ec/ps2.h>
 
 void kbc_init(void) {
     // Disable interrupts
     *(KBC.control) = 0;
+#if EC_ESPI
     // Set IRQ mode to edge-triggered, 1-cycle pulse width
     *(KBC.irq) = BIT(3);
+#else
+    // Set IRQ mode to level-triggered
+    *(KBC.irq) = 0;
+#endif
     // Set "key lock" to disabled
     *(KBC.status) = BIT(4);
 }
