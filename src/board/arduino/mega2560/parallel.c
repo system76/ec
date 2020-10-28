@@ -255,7 +255,7 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
             // Set data strobe high
             gpio_set(port->data_n, true);
         }
-        
+
         // Wait for peripheral to indicate it's ready for next cycle
         while (gpio_get(port->wait_n)) {}
 
@@ -290,7 +290,11 @@ bool parallel_peripheral_cycle(struct Parallel * port, uint8_t * data, bool * re
         return false;
     }
 
-    while (gpio_get(port->data_n) && gpio_get(port->addr_n)) {}
+    // Check for data or address cycle
+    if (gpio_get(port->data_n) && gpio_get(port->addr_n)) {
+        // No cycle ready
+        return false;
+    }
 
     *read = gpio_get(port->write_n);
     *addr = !gpio_get(port->addr_n);
@@ -301,10 +305,11 @@ bool parallel_peripheral_cycle(struct Parallel * port, uint8_t * data, bool * re
         parallel_write_data(port, *data);
     }
 
+    // Tell host we are ready for cycle
     gpio_set(port->wait_n, true);
 
     // Wait for host to finish strobe
-    while (!gpio_get(port->addr_n) || !gpio_get(port->data_n)) {}
+    while (!gpio_get(port->data_n) || !gpio_get(port->addr_n)) {}
 
     if (*read) {
         // Set data lines back to inputs
@@ -314,7 +319,7 @@ bool parallel_peripheral_cycle(struct Parallel * port, uint8_t * data, bool * re
         *data = parallel_read_data(port);
     }
 
-    // Tell host we're ready for next cycle
+    // Tell host we are ready for next cycle
     gpio_set(port->wait_n, false);
 
     return true;
@@ -490,18 +495,19 @@ int parallel_main(void) {
 
             // Debug console
             case 'C':
+                // Set parallel lines to peripheral mode
                 parallel_state(port, PARALLEL_STATE_PERIPHERAL);
 
+                // Tell the user the console is ready
                 serial_write(console_msg, sizeof(console_msg));
-
                 for (;;) {
                     bool read = false;
                     bool addr = false;
-                    bool ret = parallel_peripheral_cycle(port, data, &read, &addr);
-
-                    if (ret && !read && !addr) {
-                        res = serial_write(data, 1);
-                        if (res < 0) goto err;
+                    if (parallel_peripheral_cycle(port, data, &read, &addr)) {
+                        if (!read && !addr) {
+                            res = serial_write(data, 1);
+                            if (res < 0) goto err;
+                        }
                     }
                 }
 
