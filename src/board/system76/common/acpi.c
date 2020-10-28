@@ -168,12 +168,12 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8 (0xFD, fbuf[3]);
     }
 
-    DEBUG("acpi_read %02X = %02X\n", addr, data);
+    TRACE("acpi_read %02X = %02X\n", addr, data);
     return data;
 }
 
 void acpi_write(uint8_t addr, uint8_t data) {
-    DEBUG("acpi_write %02X = %02X\n", addr, data);
+    TRACE("acpi_write %02X = %02X\n", addr, data);
 
     switch (addr) {
         // Lid state and other flags
