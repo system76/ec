@@ -14,7 +14,6 @@ struct Gpio __code CCD_EN =         GPIO(D, 1);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code EC_EN =          GPIO(J, 6);
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
-struct Gpio __code EC_SMD_EN_N =    GPIO(I, 6);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
@@ -63,7 +62,8 @@ void gpio_init() {
     // H_PECI
     GPDRF = BIT(6);
     GPDRG = 0;
-    GPDRH = 0;
+    // ACE_I2C_IRQ2Z
+    GPDRH = BIT(7);
     GPDRI = 0;
     // KBC_MUTE#
     GPDRJ = BIT(1);
@@ -239,11 +239,11 @@ void gpio_init() {
     // ESPI_IO_3
     GPCRM3 = GPIO_ALT;
     // ESPI_CLK
-    GPCRM4 = 0x06;
+    GPCRM4 = GPIO_ALT;
     // ESPI_CS_N
     GPCRM5 = GPIO_ALT;
     // SERIRQ
-    GPCRM6 = 0x86;
+    GPCRM6 = GPIO_ALT;
 }
 
 #if GPIO_DEBUG
