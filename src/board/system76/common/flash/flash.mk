@@ -17,7 +17,7 @@ FLASH_INCLUDE+=$(wildcard $(FLASH_DIR)/include/flash/*.h) $(FLASH_DIR)/flash.mk
 FLASH_CFLAGS+=-I$(FLASH_DIR)/include -D__FLASH__
 
 FLASH_BUILD=$(BUILD)/flash
-FLASH_OBJ=$(patsubst src/%.c,$(FLASH_BUILD)/%.rel,$(FLASH_SRC))
+FLASH_OBJ=$(sort $(patsubst src/%.c,$(FLASH_BUILD)/%.rel,$(FLASH_SRC)))
 FLASH_CC=\
 	sdcc \
 	-mmcs51 \

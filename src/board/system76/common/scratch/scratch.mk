@@ -20,7 +20,7 @@ SCRATCH_SRC+=\
 	$(SYSTEM76_COMMON_DIR)/smfi.c
 
 SCRATCH_BUILD=$(BUILD)/scratch
-SCRATCH_OBJ=$(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC))
+SCRATCH_OBJ=$(sort $(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC)))
 SCRATCH_CC=\
 	sdcc \
 	-mmcs51 \
