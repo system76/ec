@@ -247,7 +247,7 @@ void gpio_init() {
     // ESPI_CS_EC#
     GPCRM5 = GPIO_ALT;
     // ALERT#
-    GPCRM6 = GPIO_ALT;
+    GPCRM6 = GPIO_IN | GPIO_UP;
 }
 
 #if GPIO_DEBUG

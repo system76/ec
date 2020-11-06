@@ -104,9 +104,9 @@ void gpio_init() {
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // SMB_CLK_EC
-    GPCRC1 = GPIO_ALT;
+    GPCRC1 = GPIO_ALT | GPIO_UP;
     // SMB_DATA_EC
-    GPCRC2 = GPIO_ALT;
+    GPCRC2 = GPIO_ALT | GPIO_UP;
     // PCIE_WAKE#
     GPCRC3 = GPIO_IN;
     // CNVI_DET#
@@ -242,7 +242,7 @@ void gpio_init() {
     // ESPI_CS_N
     GPCRM5 = GPIO_ALT;
     // SERIRQ
-    GPCRM6 = GPIO_ALT;
+    GPCRM6 = GPIO_IN | GPIO_UP;
 }
 
 #if GPIO_DEBUG
