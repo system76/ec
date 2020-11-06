@@ -55,15 +55,14 @@ void gpio_init() {
     // XLP_OUT, PWR_SW#
     GPDRB = BIT(4) | BIT(3);
     GPDRC = 0;
-    // PWR_BTN#
-    GPDRD = BIT(5);
+    // PWR_BTN#, SMI#
+    GPDRD = BIT(5) | BIT(4);
     // USB_PWR_EN#
     GPDRE = BIT(3);
     // H_PECI
     GPDRF = BIT(6);
     GPDRG = 0;
-    // ACE_I2C_IRQ2Z
-    GPDRH = BIT(7);
+    GPDRH = 0;
     GPDRI = 0;
     // KBC_MUTE#
     GPDRJ = BIT(1);
@@ -197,7 +196,7 @@ void gpio_init() {
     // SUSB#_PCH
     GPCRH6 = GPIO_IN;
     // ACE_I2C_IRQ2Z
-    GPCRH7 = GPIO_OUT;
+    GPCRH7 = GPIO_IN;
     // BAT_DET
     GPCRI0 = GPIO_ALT;
     // BAT_VOLT
