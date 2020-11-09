@@ -238,11 +238,11 @@ void gpio_init() {
     // ESPI_IO_3
     GPCRM3 = GPIO_ALT;
     // ESPI_CLK
-    GPCRM4 = GPIO_ALT;
+    GPCRM4 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
     // ESPI_CS_N
     GPCRM5 = GPIO_ALT;
     // SERIRQ
-    GPCRM6 = GPIO_IN | GPIO_UP;
+    GPCRM6 = GPIO_IN | GPIO_UP | GPIO_DOWN;
 }
 
 #if GPIO_DEBUG
