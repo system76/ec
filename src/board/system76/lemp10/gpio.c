@@ -40,12 +40,12 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;
-    // Set GPF2 and GPF3 to 3.3V
-    GCR20 = 0;
     // Enable SMBus channel 4
     GCR15 = BIT(4);
     // Set GPD2 to 1.8V
     GCR19 = BIT(0);
+    // Set GPF2 and GPF3 to 3.3V
+    GCR20 = 0;
     // Set GPH0 to 1.8V
     GCR21 = BIT(2);
 
@@ -76,7 +76,7 @@ void gpio_init() {
     // CPU_FAN
     GPCRA2 = GPIO_ALT;
     // WLAN_PWR_EN
-    GPCRA3 = GPIO_OUT;
+    GPCRA3 = GPIO_OUT | GPIO_UP;
     // NC
     GPCRA4 = GPIO_IN;
     // NC
@@ -126,11 +126,11 @@ void gpio_init() {
     // SCI#
     GPCRD3 = GPIO_IN;
     // SMI#
-    GPCRD4 = GPIO_IN;
+    GPCRD4 = GPIO_IN | GPIO_UP;
     // PWR_BTN#
     GPCRD5 = GPIO_OUT | GPIO_UP;
     // CPU_FANSEN
-    GPCRD6 = GPIO_ALT;
+    GPCRD6 = GPIO_ALT | GPIO_DOWN;
     // NC
     GPCRD7 = GPIO_IN;
     // SMC_BAT
@@ -150,7 +150,7 @@ void gpio_init() {
     // SMD_BAT
     GPCRE7 = GPIO_ALT;
     // 80CLK
-    GPCRF0 = GPIO_IN;
+    GPCRF0 = GPIO_IN | GPIO_UP;
     // USB_CHARGE_EN
     GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
@@ -158,9 +158,9 @@ void gpio_init() {
     // EC_BT_EN
     GPCRF3 = GPIO_OUT | GPIO_UP;
     // TP_CLK
-    GPCRF4 = GPIO_ALT;
+    GPCRF4 = GPIO_ALT | GPIO_UP;
     // TP_DATA
-    GPCRF5 = GPIO_ALT;
+    GPCRF5 = GPIO_ALT | GPIO_UP;
     // H_PECI
     GPCRF6 = GPIO_ALT;
     // CPU_C10_GATE#
