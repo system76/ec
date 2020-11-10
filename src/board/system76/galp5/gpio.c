@@ -66,7 +66,8 @@ void gpio_init() {
     GPDRE = 0;
     // H_PECI
     GPDRF = BIT(6);
-    GPDRG = 0;
+    // H_PROCHOT_EC
+    GPDRG = BIT(6);
     GPDRH = 0;
     GPDRI = 0;
     // KBC_MUTE#
