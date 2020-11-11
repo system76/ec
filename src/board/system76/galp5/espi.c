@@ -42,49 +42,51 @@
 }
 
 void espi_init(void) {
-    // Workarounds to allow changing PLL
-    {
-        // ESPI_CS# set to input
-        GPCRM5 = GPIO_IN;
-        // Disable eSPI pads
-        DEBUG_ON(ESGCTRL2, BIT(6));
-    }
+    if (PLLFREQ != 0b0111) {
+        // Workarounds to allow changing PLL
+        {
+            // ESPI_CS# set to input
+            GPCRM5 = GPIO_IN;
+            // Disable eSPI pads
+            DEBUG_ON(ESGCTRL2, BIT(6));
+        }
 
-    DEBUG("PLLFREQ is 0x%02X\n", PLLFREQ);
+        DEBUG("PLLFREQ is 0x%02X\n", PLLFREQ);
 
-    // Set PLL frequency to 64.5 MHz for eSPI
-    PLLFREQ = 0b0111;
+        // Set PLL frequency to 64.5 MHz for eSPI
+        PLLFREQ = 0b0111;
 
-    // Prepare to sleep
-    PLLCTRL = 0x01;
+        // Prepare to sleep
+        PLLCTRL = 0x01;
 
-    // No idea why
-    __asm__("nop");
+        // No idea why
+        __asm__("nop");
 
-    // Set power down bit
-    PCON |= BIT(1);
+        // Set power down bit
+        PCON |= BIT(1);
 
-    // Wait for "internal bus turn-around"
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
-    __asm__("nop");
+        // Wait for "internal bus turn-around"
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
+        __asm__("nop");
 
-    DEBUG("PLLFREQ is now 0x%02X\n", PLLFREQ);
+        DEBUG("PLLFREQ is now 0x%02X\n", PLLFREQ);
 
-    // Wait for PLL to stabilize
-    delay_ms(5);
+        // Wait for PLL to stabilize
+        delay_ms(5);
 
-    // Workarounds to allow changing PLL
-    {
-        // Enable eSPI pads
-        DEBUG_OFF(ESGCTRL2, BIT(6));
-        // ESPI_CS# set to alternate mode
-        GPCRM5 = GPIO_ALT;
+        // Workarounds to allow changing PLL
+        {
+            // Enable eSPI pads
+            DEBUG_OFF(ESGCTRL2, BIT(6));
+            // ESPI_CS# set to alternate mode
+            GPCRM5 = GPIO_ALT;
+        }
     }
 
     // Set maximum eSPI frequency to 50MHz
