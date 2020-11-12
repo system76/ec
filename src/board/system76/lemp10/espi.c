@@ -152,11 +152,10 @@ void espi_event(void) {
             if (pltrst_n != last_pltrst_n) {
                 DEBUG("ESPI PLTRST# %X\n", pltrst_n);
                 if (pltrst_n == VWS_HIGH) {
-                    // Set SCI, SMI, RCIN, and HOST_RST_ACK to high
+                    // Set SCI, SMI, and RCIN to high
                     VW_SET_DEBUG(VW_SCI_N, VWS_HIGH);
                     VW_SET_DEBUG(VW_SMI_N, VWS_HIGH);
                     VW_SET_DEBUG(VW_RCIN_N, VWS_HIGH);
-                    VW_SET_DEBUG(VW_HOST_RST_ACK, VWS_HIGH);
 
                     power_cpu_reset();
                 }
