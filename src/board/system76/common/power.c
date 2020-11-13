@@ -409,11 +409,9 @@ void power_event(void) {
     static bool ps_last = true;
     bool ps_new = gpio_get(&PWR_SW_N);
     // Disable power button if lid is closed and AC is disconnected
-    /* TODO
     if (!lid_state && ac_last) {
         ps_new = true;
     }
-    */
     if (!ps_new && ps_last) {
         // Ensure press is not spurious
         delay_ms(10);
@@ -457,7 +455,7 @@ void power_event(void) {
         GPIO_SET_DEBUG(PM_PWROK, true);
 
         // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
-        delay_ms(100);
+        delay_ms(10);
 
 #if HAVE_PCH_PWROK_EC
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
