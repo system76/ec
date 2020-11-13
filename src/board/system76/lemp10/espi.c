@@ -101,6 +101,7 @@ void espi_reset(void) {
 
 void espi_event(void) {
     uint8_t value;
+    enum VirtualWireState wire;
 
     // Detect channel enabled
     value = ESGCTRL0;
@@ -145,13 +146,16 @@ void espi_event(void) {
             DEBUG("VWIDX3 %X\n", VWIDX3);
 
             // Set OOB_RST_ACK to OOB_RST_WARN
-            VW_SET_DEBUG(VW_OOB_RST_ACK, vw_get(&VW_OOB_RST_WARN));
+            wire = vw_get(&VW_OOB_RST_WARN);
+            if (wire != vw_get(&VW_OOB_RST_ACK)) {
+                VW_SET_DEBUG(VW_OOB_RST_ACK, wire);
+            }
 
             static enum VirtualWireState last_pltrst_n = VWS_INVALID;
-            enum VirtualWireState pltrst_n = vw_get(&VW_PLTRST_N);
-            if (pltrst_n != last_pltrst_n) {
-                DEBUG("ESPI PLTRST# %X\n", pltrst_n);
-                if (pltrst_n == VWS_HIGH) {
+            wire = vw_get(&VW_PLTRST_N);
+            if (wire != last_pltrst_n) {
+                DEBUG("ESPI PLTRST# %X\n", wire);
+                if (wire == VWS_HIGH) {
                     // Set SCI, SMI, and RCIN to high
                     VW_SET_DEBUG(VW_SCI_N, VWS_HIGH);
                     VW_SET_DEBUG(VW_SMI_N, VWS_HIGH);
@@ -159,20 +163,26 @@ void espi_event(void) {
 
                     power_cpu_reset();
                 }
-                last_pltrst_n = pltrst_n;
+                last_pltrst_n = wire;
             }
         }
         if (value & BIT(2)) {
             DEBUG("VWIDX7 %X\n", VWIDX7);
 
             // Set HOST_RST_ACK to HOST_RST_WARN
-            VW_SET_DEBUG(VW_HOST_RST_ACK, vw_get(&VW_HOST_RST_WARN));
+            wire = vw_get(&VW_HOST_RST_WARN);
+            if (wire != vw_get(&VW_HOST_RST_ACK)) {
+                VW_SET_DEBUG(VW_HOST_RST_ACK, wire);
+            }
         }
         if (value & BIT(3)) {
             DEBUG("VWIDX41 %X\n", VWIDX41);
 
             // Set SUS_ACK# to SUS_WARN#
-            VW_SET_DEBUG(VW_SUS_ACK_N, vw_get(&VW_SUS_WARN_N));
+            wire = vw_get(&VW_SUS_WARN_N);
+            if (wire != vw_get(&VW_SUS_ACK_N)) {
+                VW_SET_DEBUG(VW_SUS_ACK_N, wire);
+            }
         }
     }
 
