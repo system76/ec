@@ -39,6 +39,7 @@ extern struct Gpio __code PWR_BTN_N;
 extern struct Gpio __code PWR_SW_N;
 extern struct Gpio __code SB_KBCRST_N;
 extern struct Gpio __code SCI_N;
+extern struct Gpio __code SLP_S0_N;
 extern struct Gpio __code SLP_SUS_N;
 extern struct Gpio __code SMI_N;
 extern struct Gpio __code SUSB_N_PCH;
