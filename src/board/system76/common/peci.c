@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/fan.h>
+#include <board/gpio.h>
 #include <board/peci.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
+#include <ec/espi.h>
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
@@ -118,9 +120,14 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 void peci_event(void) {
     uint8_t duty;
-    if (power_state == POWER_STATE_S0) {
-        // Use PECI if in S0 state
 
+    // Use PECI if in S0 state
+#if EC_ESPI
+    if (vw_get(&VW_PLTRST_N) == VWS_HIGH && gpio_get(&SLP_S0_N))
+#else // EC_ESPI
+    if (power_state == POWER_STATE_S0)
+#endif // EC_ESPI
+    {
         // Wait for completion
         while (HOSTAR & 1) {}
         // Clear status
