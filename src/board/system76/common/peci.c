@@ -121,10 +121,11 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 void peci_event(void) {
     uint8_t duty;
 
-    // Use PECI if in S0 state
 #if EC_ESPI
-    if (vw_get(&VW_PLTRST_N) == VWS_HIGH && gpio_get(&SLP_S0_N))
+    // Use PECI if CPU is not in C10 state
+    if (gpio_get(&CPU_C10_GATE_N))
 #else // EC_ESPI
+    // Use PECI if in S0 state
     if (power_state == POWER_STATE_S0)
 #endif // EC_ESPI
     {
