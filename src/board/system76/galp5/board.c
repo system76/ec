@@ -66,7 +66,7 @@ void board_on_ac(bool ac) {
 void board_event(void) {
     static bool last_power_limit_ac = true;
     // We don't use power_state because the latency needs to be low
-    if (vw_get(&VW_PLTRST_N) == VWS_HIGH && gpio_get(&SLP_S0_N)) {
+    if (gpio_get(&CPU_C10_GATE_N)) {
         bool ac = !gpio_get(&ACIN_N);
         if (last_power_limit_ac != ac) {
             board_on_ac(ac);

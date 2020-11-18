@@ -11,6 +11,7 @@ struct Gpio __code BKL_EN =         GPIO(H, 2);
 struct Gpio __code BT_EN =          GPIO(F, 3);
 struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2); // renamed to EC_ERST#
 struct Gpio __code CCD_EN =         GPIO(D, 1);
+struct Gpio __code CPU_C10_GATE_N = GPIO(D, 3);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code DGPU_PWR_EN =    GPIO(H, 4);
 struct Gpio __code EC_EN =          GPIO(B, 6); // renamed to SUSBC_EN
