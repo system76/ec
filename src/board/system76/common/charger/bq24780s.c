@@ -86,6 +86,10 @@ int battery_charger_enable(void) {
     return 0;
 }
 
+void battery_charger_event(void) {
+    //TODO: watchdog
+}
+
 void battery_debug(void) {
     uint16_t data = 0;
     int res = 0;

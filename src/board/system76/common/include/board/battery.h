@@ -39,6 +39,7 @@ void battery_reset(void);
 // Defined by charger/*.c
 int battery_charger_disable(void);
 int battery_charger_enable(void);
+void battery_charger_event(void);
 void battery_debug(void);
 
 #endif // _BOARD_BATTERY_H
