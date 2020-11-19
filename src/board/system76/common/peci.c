@@ -180,6 +180,6 @@ void peci_event(void) {
 
     if (duty != DCR2) {
         DCR2 = duty;
-        DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
     }
+    DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
 }

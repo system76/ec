@@ -105,6 +105,8 @@ void battery_event(void) {
     command(battery_design_voltage, 0x19);
 
     #undef command
+
+    DEBUG("BAT %d mV %d mA\n", battery_voltage, battery_current);
 }
 
 void battery_reset(void) {

@@ -171,7 +171,7 @@ void gpio_init() {
     GPCRF5 = GPIO_ALT | GPIO_UP;
     // H_PECI
     GPCRF6 = GPIO_ALT;
-    // CC_EN
+    // CC_EN: TODO!
     GPCRF7 = GPIO_IN | GPIO_UP;
     // dGPU_GPIO8_OVERT
     GPCRG0 = GPIO_IN;
