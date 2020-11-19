@@ -105,9 +105,6 @@ int battery_charger_enable(void) {
 void battery_charger_event(void) {
     // Avoid watchdog timeout
     if (charger_enabled) {
-        // Set charge current in mA
-        smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, CHARGER_CHARGE_CURRENT);
-
         // Set charge voltage in mV
         smbus_write(CHARGER_ADDRESS, REG_CHARGE_VOLTAGE, CHARGER_CHARGE_VOLTAGE);
     }
