@@ -38,6 +38,7 @@ void board_init(void) {
     SPCTRL1 |= 0xC8;
 }
 
+#if HAVE_DGPU
 // Set PL4 using PECI
 static int set_power_limit(uint8_t watts) {
     return peci_wr_pkg_config(
@@ -62,8 +63,12 @@ void board_on_ac(bool ac) {
         }
     }
 }
+#else // HAVE_DGPU
+void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
+#endif // HAVE_DGPU
 
 void board_event(void) {
+#if HAVE_DGPU
     static bool last_power_limit_ac = true;
     // We don't use power_state because the latency needs to be low
     if (gpio_get(&CPU_C10_GATE_N)) {
@@ -74,6 +79,25 @@ void board_event(void) {
         }
     } else {
         last_power_limit_ac = true;
+    }
+#endif // HAVE_DGPU
+
+    {
+        static bool last = false;
+        bool new = gpio_get(&SLP_S0_N);
+        if (new != last) {
+            DEBUG("SLP_S0_N %d\n", new);
+            last = new;
+        }
+    }
+
+    {
+        static bool last = false;
+        bool new = gpio_get(&CPU_C10_GATE_N);
+        if (new != last) {
+            DEBUG("CPU_C10_GATE_N %d\n", new);
+            last = new;
+        }
     }
 
     espi_event();
