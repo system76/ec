@@ -88,7 +88,7 @@ void gpio_init() {
     // VGA_FAN
     GPCRA4 = GPIO_ALT;
     // SLP_S0#
-    GPCRA5 = GPIO_IN;
+    GPCRA5 = GPIO_IN | GPIO_DOWN;
     // PCH_PWROK_EC
     GPCRA6 = GPIO_OUT | GPIO_UP;
     // PCH_SLP_WLAN#_R

@@ -216,7 +216,7 @@ void gpio_init() {
     // MODEL_ID
     GPCRI7 = GPIO_IN;
     // SLP_S0#
-    GPCRJ0 = GPIO_IN;
+    GPCRJ0 = GPIO_IN | GPIO_DOWN;
     // KBC_MUTE#
     GPCRJ1 = GPIO_OUT;
     // KBLIGHT_ADJ
