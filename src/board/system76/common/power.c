@@ -6,8 +6,6 @@
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/config.h>
-//TODO
-#include <board/espi.h>
 #include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
@@ -16,6 +14,11 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <common/debug.h>
+
+#include <ec/espi.h>
+#if EC_ESPI
+    #include <board/espi.h>
+#endif
 
 #define GPIO_SET_DEBUG(G, V) { \
     DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
@@ -550,9 +553,25 @@ void power_event(void) {
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
-        // CPU on, green light
-        gpio_set(&LED_PWR, true);
-        gpio_set(&LED_ACIN, false);
+#if EC_ESPI
+        if (!gpio_get(&CPU_C10_GATE_N)) {
+            // Modern suspend, flashing green light
+            if (
+                (time < last_time) // overflow
+                ||
+                (time >= (last_time + 1000)) // timeout
+            ) {
+                gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+                last_time = time;
+            }
+            gpio_set(&LED_ACIN, false);
+        } else
+#endif
+        {
+            // CPU on, green light
+            gpio_set(&LED_PWR, true);
+            gpio_set(&LED_ACIN, false);
+        }
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
         if (
