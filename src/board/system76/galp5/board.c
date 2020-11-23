@@ -82,24 +82,6 @@ void board_event(void) {
     }
 #endif // HAVE_DGPU
 
-    {
-        static bool last = false;
-        bool new = gpio_get(&SLP_S0_N);
-        if (new != last) {
-            DEBUG("SLP_S0_N %d\n", new);
-            last = new;
-        }
-    }
-
-    {
-        static bool last = false;
-        bool new = gpio_get(&CPU_C10_GATE_N);
-        if (new != last) {
-            DEBUG("CPU_C10_GATE_N %d\n", new);
-            last = new;
-        }
-    }
-
     espi_event();
 
     // Read POST codes
