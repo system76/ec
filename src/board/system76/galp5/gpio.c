@@ -30,7 +30,6 @@ struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code SB_KBCRST_N =    GPIO(E, 6);
-//TODO eSPI: struct Gpio __code SCI_N =          GPIO();
 struct Gpio __code SLP_S0_N =       GPIO(A, 5);
 struct Gpio __code SLP_SUS_N =      GPIO(J, 7);
 struct Gpio __code SMI_N =          GPIO(D, 4);
@@ -134,7 +133,7 @@ void gpio_init() {
     // CPU_C10_GATE#
     GPCRD3 = GPIO_IN | GPIO_DOWN;
     // SMI#
-    GPCRD4 = GPIO_OUT;
+    GPCRD4 = GPIO_IN;
     // PWR_BTN#
     GPCRD5 = GPIO_OUT | GPIO_UP;
     // CPU_FANSEN
@@ -158,13 +157,13 @@ void gpio_init() {
     // SMD_BAT
     GPCRE7 = GPIO_ALT | GPIO_UP;
     // 80CLK
-    GPCRF0 = GPIO_OUT | GPIO_UP;
+    GPCRF0 = GPIO_IN | GPIO_UP;
     // USB_CHARGE_EN
     GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
-    GPCRF2 = GPIO_OUT | GPIO_UP;
+    GPCRF2 = GPIO_IN | GPIO_UP;
     // BT_EN
-    GPCRF3 = 0x06;
+    GPCRF3 = GPIO_OUT | GPIO_UP;
     // TP_CLK
     GPCRF4 = GPIO_ALT | GPIO_UP;
     // TP_DATA
@@ -232,7 +231,7 @@ void gpio_init() {
     // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
-    GPCRJ5 = GPIO_OUT;
+    GPCRJ5 = GPIO_IN;
     // EC_GPIO
     GPCRJ6 = GPIO_OUT | GPIO_UP;
     // SLP_SUS#
