@@ -7,7 +7,8 @@
 #include <board/pmc.h>
 #include <common/debug.h>
 
-bool lid_state = true;
+// Default closed to prevent spurious power on
+bool lid_state = false;
 bool lid_wake = false;
 
 void lid_event(void) {
