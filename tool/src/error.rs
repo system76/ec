@@ -26,3 +26,17 @@ pub enum Error {
     #[cfg(feature = "hidapi")]
     Hid(hidapi::HidError),
 }
+
+#[cfg(feature = "std")]
+impl From<std::io::Error> for Error {
+    fn from(error: std::io::Error) -> Self {
+        Self::Io(error)
+    }
+}
+
+#[cfg(feature = "hidapi")]
+impl From<hidapi::HidError> for Error {
+    fn from(error: hidapi::HidError) -> Self {
+        Self::Hid(error)
+    }
+}
