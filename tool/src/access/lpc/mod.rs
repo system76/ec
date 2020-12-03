@@ -17,3 +17,8 @@ mod direct;
 pub use self::linux::AccessLpcLinux;
 #[cfg(all(feature = "std", target_os = "linux"))]
 mod linux;
+
+#[cfg(feature = "std")]
+mod sim;
+#[cfg(feature = "std")]
+pub use self::sim::AccessLpcSim;
