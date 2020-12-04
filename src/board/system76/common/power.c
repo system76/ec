@@ -362,6 +362,11 @@ void power_cpu_reset(void) {
     kbled_reset();
 }
 
+static bool power_button_disabled(void) {
+    // Disable power button if lid is closed and AC is disconnected
+    return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
+}
+
 void power_event(void) {
     // Always switch to ds5 if EC is running
     if (power_state == POWER_STATE_DEFAULT) {
@@ -413,14 +418,20 @@ void power_event(void) {
     bool ps_new = gpio_get(&PWR_SW_N);
     if (!ps_new && ps_last) {
         // Ensure press is not spurious
-        delay_ms(10);
-        if (gpio_get(&PWR_SW_N) != ps_new) {
-            DEBUG("%02X: Spurious press\n", main_cycle);
-            ps_new = ps_last;
-        } else if (!gpio_get(&LID_SW_N) && gpio_get(&ACIN_N)) {
-            // Disable power button if lid is closed and AC is disconnected
-            ps_new = ps_last;
-        } else {
+        for (int i = 0; i < 100; i++) {
+            delay_ms(1);
+            if (gpio_get(&PWR_SW_N) != ps_new) {
+                DEBUG("%02X: Spurious press\n", main_cycle);
+                ps_new = ps_last;
+                break;
+            } else if (power_button_disabled()) {
+                // Ignore press when power button disabled
+                ps_new = ps_last;
+                break;
+            }
+        }
+
+        if (ps_new != ps_last) {
             DEBUG("%02X: Power switch press\n", main_cycle);
 
             // Enable S5 power if necessary, before sending PWR_BTN
