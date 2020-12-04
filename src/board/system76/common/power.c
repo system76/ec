@@ -411,15 +411,14 @@ void power_event(void) {
     // Read power switch state
     static bool ps_last = true;
     bool ps_new = gpio_get(&PWR_SW_N);
-    // Disable power button if lid is closed and AC is disconnected
-    if (!lid_state && ac_last) {
-        ps_new = true;
-    }
     if (!ps_new && ps_last) {
         // Ensure press is not spurious
         delay_ms(10);
         if (gpio_get(&PWR_SW_N) != ps_new) {
             DEBUG("%02X: Spurious press\n", main_cycle);
+            ps_new = ps_last;
+        } else if (!gpio_get(&LID_SW_N) && gpio_get(&ACIN_N)) {
+            // Disable power button if lid is closed and AC is disconnected
             ps_new = ps_last;
         } else {
             DEBUG("%02X: Power switch press\n", main_cycle);
