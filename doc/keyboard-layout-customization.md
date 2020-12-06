@@ -3,6 +3,18 @@
 ## Dependencies
 * Dependencies are listed in the README file for the EC project.
 
+## Select firmware version
+
+To ensure compatibility with other system components (e.g. your current BIOS
+version), it's recommended to flash the same firmware version as you're
+currently using.
+* Go to Settings -> Firmware and check the current version. It will look
+  something like "2020-09-17_f10af76".
+* Clone the [system76/firmware-open](https://github.com/system76/firmware-open)
+  repository.
+* Checkout the version that matches your firmware, e.g.: `git checkout f10af76`.
+* Run `git submodule init && git submodule update && cd ec`.
+
 ## Adding your layout
 * In `src/board/system76/{your-model}/keymap/`, copy `default.c` and rename it.
   There are two examples to reference in the `lemp9` directory: `jeremy.c` and 
