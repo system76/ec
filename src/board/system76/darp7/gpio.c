@@ -166,7 +166,7 @@ void gpio_init() {
     // H_PECI
     GPCRF6 = GPIO_ALT;
     //TODO: CC_EN
-    GPCRF7 = GPIO_OUT | GPIO_UP;
+    GPCRF7 = GPIO_IN | GPIO_UP;
     // VCCIN_AUX_PG
     GPCRG0 = GPIO_IN;
     // WLAN_EN
