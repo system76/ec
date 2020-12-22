@@ -245,8 +245,6 @@ void gpio_init() {
     GPCRM5 = GPIO_ALT;
     // ALERT#
     GPCRM6 = 0x86;
-    // Does not exist
-    GPCRM7 = 0x86;
 }
 
 #if GPIO_DEBUG
