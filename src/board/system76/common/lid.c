@@ -7,7 +7,8 @@
 #include <board/pmc.h>
 #include <common/debug.h>
 
-bool lid_state = true;
+// Default closed to prevent spurious power on
+bool lid_state = false;
 bool lid_wake = false;
 
 void lid_event(void) {
@@ -21,13 +22,7 @@ void lid_event(void) {
             DEBUG("open\n");
 
             if (lid_wake) {
-                gpio_set(&SWI_N, false);
-
-                //TODO: find correct delay
-                delay_ticks(10);
-
-                gpio_set(&SWI_N, true);
-
+                pmc_swi();
                 lid_wake = false;
             }
         } else {
