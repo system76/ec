@@ -190,9 +190,7 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
     if (pressed &&
         lid_state &&
         (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3)) {
-        gpio_set(&SWI_N, false);
-        delay_ticks(10); //TODO: find correct delay
-        gpio_set(&SWI_N, true);
+        pmc_swi();
     }
 
     switch (key & KT_MASK) {
