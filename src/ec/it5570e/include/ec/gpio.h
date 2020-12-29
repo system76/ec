@@ -44,6 +44,7 @@ volatile uint8_t __xdata __at(0x16E1) GCR17;
 volatile uint8_t __xdata __at(0x16E2) GCR18;
 volatile uint8_t __xdata __at(0x16E4) GCR19;
 volatile uint8_t __xdata __at(0x16E5) GCR20;
+volatile uint8_t __xdata __at(0x16E6) GCR21;
 
 volatile uint8_t __xdata __at(0x1601) GPDRA;
 volatile uint8_t __xdata __at(0x1602) GPDRB;
