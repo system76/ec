@@ -24,7 +24,6 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
-#include <board/touchpad.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
@@ -93,7 +92,7 @@ void main(void) {
 
     uint32_t last_time = 0;
     for(main_cycle = 0; ; main_cycle++) {
-        switch (main_cycle % 5) {
+        switch (main_cycle % 3) {
             case 0:
                 // Handle power states
                 power_event();
@@ -108,14 +107,6 @@ void main(void) {
                 }
                 break;
             case 2:
-                // Passes through touchpad packets
-                touchpad_event();
-                break;
-            case 3:
-                // Checks for keyboard/mouse packets from host
-                kbc_event(&KBC);
-                break;
-            case 4:
                 // Handle lid close/open
                 lid_event();
                 break;
@@ -143,6 +134,8 @@ void main(void) {
         // Board-specific events
         board_event();
 
+        // Checks for keyboard/mouse packets from host
+        kbc_event(&KBC);
         // Handles ACPI communication
         pmc_event(&PMC_1);
         // AP/EC communication over SMFI
