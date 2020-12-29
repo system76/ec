@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <arch/delay.h>
 #include <ec/kbc.h>
 
 struct Kbc __code KBC = {
@@ -19,11 +20,11 @@ uint8_t kbc_read(struct Kbc * kbc) {
     return *(kbc->data_in);
 }
 
-
 static bool kbc_wait(struct Kbc * kbc, int timeout) {
-    while (kbc_status(kbc) & KBC_STS_OBF) {
+    while (*(kbc->status) & KBC_STS_OBF) {
         if (timeout == 0) return false;
         timeout -= 1;
+        delay_us(1);
     }
     return true;
 }
