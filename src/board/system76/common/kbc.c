@@ -25,9 +25,9 @@ void kbc_init(void) {
 #define KBC_TIMEOUT 10000
 
 // Enable first port - TODO
-bool kbc_first = false;
+static bool kbc_first = false;
 // Enable second port - TODO
-bool kbc_second = false;
+static bool kbc_second = false;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
@@ -405,6 +405,20 @@ static void kbc_on_output_empty(struct Kbc * kbc) {
 
 void kbc_event(struct Kbc * kbc) {
     uint8_t sts;
+
+    // Read from touchpad when possible
+    if (kbc_second) {
+        *(PS2_TOUCHPAD.control) = 0x07;
+        if (state == KBC_STATE_NORMAL) {
+            uint8_t sts = *(PS2_TOUCHPAD.status);
+            *(PS2_TOUCHPAD.status) = sts;
+            if (sts & BIT(3)) {
+                state = KBC_STATE_TOUCHPAD;
+            }
+        }
+    } else {
+        ps2_reset(&PS2_TOUCHPAD);
+    }
 
     // Read command/data while available
     sts = kbc_status(kbc);

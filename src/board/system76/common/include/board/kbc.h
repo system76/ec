@@ -7,8 +7,6 @@
 
 #include <ec/kbc.h>
 
-extern bool kbc_first;
-extern bool kbc_second;
 extern uint8_t kbc_leds;
 
 void kbc_init(void);
