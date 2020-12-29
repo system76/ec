@@ -15,6 +15,11 @@
 #include <board/pnp.h>
 #include <common/debug.h>
 
+#include <ec/espi.h>
+#if EC_ESPI
+    #include <board/espi.h>
+#endif
+
 #define GPIO_SET_DEBUG(G, V) { \
     DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
     gpio_set(&G, V); \
@@ -284,8 +289,21 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    // Extra wait - TODO remove
-    delay_ms(200);
+    for (int i = 0; i < 1000; i++) {
+        // If we reached S0, exit this loop
+        update_power_state();
+        if (power_state == POWER_STATE_S0) {
+            break;
+        }
+
+        // Check for VW changes
+        #if EC_ESPI
+            espi_event();
+        #endif // EC_ESPI
+
+        // Extra wait until SUSPWRDNACK is valid
+        delay_ms(1);
+    }
 #endif // DEEP_SX
 
     update_power_state();
@@ -333,7 +351,7 @@ void power_off_s5(void) {
 }
 
 // This function is run when the CPU is reset
-static void power_cpu_reset(void) {
+void power_cpu_reset(void) {
     // LPC was just reset, enable PNP devices
     pnp_enable();
     // Reset ACPI registers
@@ -468,7 +486,11 @@ void power_event(void) {
     #endif
     if(rst_new && !rst_last) {
         DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
+#if EC_ESPI
+        espi_reset();
+#else // EC_ESPI
         power_cpu_reset();
+#endif // EC_ESPI
     }
     rst_last = rst_new;
 
@@ -485,7 +507,9 @@ void power_event(void) {
     #endif
 #endif // HAVE_SLP_SUS_N
 
-#if HAVE_SUSWARN_N
+#if EC_ESPI
+    if (vw_get(&VW_SUS_PWRDN_ACK) == VWS_HIGH)
+#elif HAVE_SUSWARN_N
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
     static bool ack_last = false;
@@ -529,9 +553,25 @@ void power_event(void) {
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
-        // CPU on, green light
-        gpio_set(&LED_PWR, true);
-        gpio_set(&LED_ACIN, false);
+#if EC_ESPI
+        if (!gpio_get(&CPU_C10_GATE_N)) {
+            // Modern suspend, flashing green light
+            if (
+                (time < last_time) // overflow
+                ||
+                (time >= (last_time + 1000)) // timeout
+            ) {
+                gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+                last_time = time;
+            }
+            gpio_set(&LED_ACIN, false);
+        } else
+#endif
+        {
+            // CPU on, green light
+            gpio_set(&LED_PWR, true);
+            gpio_set(&LED_ACIN, false);
+        }
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
         if (
