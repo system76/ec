@@ -2,6 +2,12 @@
 
 set -e
 
+has_bat=0
+if [ -d /sys/class/power_supply/BAT0/ ]
+then
+    has_bat=1
+fi
+
 has_ec=0
 if ./ectool.sh info 2> /dev/null
 then
@@ -27,7 +33,10 @@ do
     if [ "${header}" == "1" ]
     then
         F="Time    "
-        F="${F}\tBAT W"
+        if [ "${has_bat}" == "1" ]
+        then
+            F="${F}\tBAT W"
+        fi
         F="${F}\tCPU W"
         F="${F}\tCPU PL1"
         F="${F}\tCPU PL2"
@@ -53,12 +62,15 @@ do
         last_E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
         sleep 1
 
-        uV="$(cat /sys/class/power_supply/BAT0/voltage_now)"
-        V="$(echo "${uV}/1000000" | bc -lq)"
-        uA="$(cat /sys/class/power_supply/BAT0/current_now)"
-        A="$(echo "${uA}/1000000" | bc -lq)"
-        bat_W="$(echo "${V} * ${A}" | bc -lq)"
-        F="${F}\t$(printf "%.2f" "${bat_W}")"
+        if [ "${has_bat}" == "1" ]
+        then
+            uV="$(cat /sys/class/power_supply/BAT0/voltage_now)"
+            V="$(echo "${uV}/1000000" | bc -lq)"
+            uA="$(cat /sys/class/power_supply/BAT0/current_now)"
+            A="$(echo "${uA}/1000000" | bc -lq)"
+            bat_W="$(echo "${V} * ${A}" | bc -lq)"
+            F="${F}\t$(printf "%.2f" "${bat_W}")"
+        fi
 
         E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
         W="$(echo "(${E} - ${last_E})/1000000" | bc -lq)"
