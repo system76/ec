@@ -23,20 +23,10 @@ void kbled_reset(void) {
     //DEBUG("kbled_reset 0x66: %d\n", res);
 
     // Set brightness and color
-    kbled_set_color(0xFFFFFF);
-    kbled_set(0x00);
+    uint8_t level = 0xFFFFFF;
+    uint32_t color = 0x00;
 }
 
 uint8_t kbled_get(void) {
     return 0;
-}
-
-void kbled_set(uint8_t level) {
-    // Keep function for compatibility - this is set via USB HID
-    level = level;
-}
-
-void kbled_set_color(uint32_t color) {
-    // Keep function for compatibility - this is set via USB HID
-    color = color;
 }
