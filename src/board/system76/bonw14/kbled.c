@@ -26,7 +26,3 @@ void kbled_reset(void) {
     uint8_t level = 0xFFFFFF;
     uint32_t color = 0x00;
 }
-
-uint8_t kbled_get(void) {
-    return 0;
-}
