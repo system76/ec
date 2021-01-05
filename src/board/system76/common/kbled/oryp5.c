@@ -39,8 +39,29 @@ uint8_t kbled_get(void) {
     return level;
 }
 
+uint8_t kbled_max(void) {
+    return 255;
+}
+
 void kbled_set(uint8_t level) {
     kbled_i2c_set(0x12, &level, 1);
+}
+
+uint32_t kbled_get_color(void) {
+    // Get blue component
+    uint8_t value;
+    kbled_i2c_get(0x02, &value, 1);
+    uint32_t color = (uint32_t)value;
+
+    // Get green component
+    kbled_i2c_get(0x03, &value, 1);
+    color |= ((uint32_t)value) << 8;
+
+    // Get red component
+    kbled_i2c_get(0x04, &value, 1);
+    color |= ((uint32_t)value) << 16;
+
+    return color;
 }
 
 void kbled_set_color(uint32_t color) {
@@ -50,13 +71,13 @@ void kbled_set_color(uint32_t color) {
     kbled_i2c_set(0x05, &value, 1);
     kbled_i2c_set(0x08, &value, 1);
 
-    // Set red component
+    // Set green component
     value = (uint8_t)(color >> 8);
     kbled_i2c_set(0x03, &value, 1);
     kbled_i2c_set(0x06, &value, 1);
     kbled_i2c_set(0x09, &value, 1);
 
-    // Set green component
+    // Set red component
     value = (uint8_t)(color >> 16);
     kbled_i2c_set(0x04, &value, 1);
     kbled_i2c_set(0x07, &value, 1);

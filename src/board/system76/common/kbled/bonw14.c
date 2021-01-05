@@ -27,16 +27,13 @@ void kbled_reset(void) {
     kbled_set(0x00);
 }
 
-uint8_t kbled_get(void) {
-    return 0;
-}
+// Keep the following functions for compatibility - they are set via USB HID
+uint8_t kbled_get(void) { /*Always off*/ return 0; }
 
-void kbled_set(uint8_t level) {
-    // Keep function for compatibility - this is set via USB HID
-    level = level;
-}
+uint8_t kbled_max(void) { /*Always off*/ return 0; }
 
-void kbled_set_color(uint32_t color) {
-    // Keep function for compatibility - this is set via USB HID
-    color = color;
-}
+void kbled_set(uint8_t level) { /*Fix unused variable*/ level = level; }
+
+uint32_t kbled_get_color(void) { /*Always black*/ return 0; }
+
+void kbled_set_color(uint32_t color) { /*Fix unused variable*/ color = color; }

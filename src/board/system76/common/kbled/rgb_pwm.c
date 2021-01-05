@@ -19,9 +19,26 @@ uint8_t kbled_get(void) {
     return DCR0;
 }
 
+uint8_t kbled_max(void) {
+    return 255;
+}
+
 void kbled_set(uint8_t level) {
     // Set PWM for power
     DCR0 = level;
+}
+
+uint32_t kbled_get_color(void) {
+    // Get PWM of blue component
+    uint32_t color = (uint32_t)DCR7;
+
+    // Get PWM of green component
+    color |= ((uint32_t)DCR6) << 8;
+
+    // Get PWM of red component
+    color |= ((uint32_t)DCR5) << 16;
+
+    return color;
 }
 
 void kbled_set_color(uint32_t color) {
