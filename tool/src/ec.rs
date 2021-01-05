@@ -25,6 +25,10 @@ enum Cmd {
     FanSet = 8,
     KeymapGet = 9,
     KeymapSet = 10,
+    LedGetValue = 11,
+    LedSetValue = 12,
+    LedGetColor = 13,
+    LedSetColor = 14,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -192,6 +196,53 @@ impl<A: Access> Ec<A> {
             (value >> 8) as u8
         ];
         self.command(Cmd::KeymapSet, &mut data)
+    }
+
+    // Get LED value by index
+    pub unsafe fn led_get_value(&mut self, index: u8) -> Result<(u8, u8), Error> {
+        let mut data = [
+            index,
+            0,
+            0,
+        ];
+        self.command(Cmd::LedGetValue, &mut data)?;
+        Ok((data[1], data[2]))
+    }
+
+    // Set LED value by index
+    pub unsafe fn led_set_value(&mut self, index: u8, value: u8) -> Result<(), Error> {
+        let mut data = [
+            index,
+            value,
+        ];
+        self.command(Cmd::LedSetValue, &mut data)
+    }
+
+    // Get LED color by index
+    pub unsafe fn led_get_color(&mut self, index: u8) -> Result<(u8, u8, u8), Error> {
+        let mut data = [
+            index,
+            0,
+            0,
+            0,
+        ];
+        self.command(Cmd::LedGetColor, &mut data)?;
+        Ok((
+            data[1],
+            data[2],
+            data[3],
+        ))
+    }
+
+    // Set LED color by index
+    pub unsafe fn led_set_color(&mut self, index: u8, red: u8, green: u8, blue: u8) -> Result<(), Error> {
+        let mut data = [
+            index,
+            red,
+            green,
+            blue,
+        ];
+        self.command(Cmd::LedSetColor, &mut data)
     }
 }
 
