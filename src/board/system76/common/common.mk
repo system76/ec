@@ -28,6 +28,10 @@ CFLAGS+=-I$(SYSTEM76_COMMON_DIR)/include
 CHARGER?=bq24780s
 SRC+=$(SYSTEM76_COMMON_DIR)/charger/$(CHARGER).c
 
+# Add kbled
+KBLED?=none
+SRC+=$(SYSTEM76_COMMON_DIR)/kbled/$(KBLED).c
+
 # Add scratch ROM
 include $(SYSTEM76_COMMON_DIR)/scratch/scratch.mk
 

@@ -6,11 +6,12 @@ EC=it8587e
 KEYMAP?=default
 SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
 
+# Set keyboard LED mechanism
+KBLED=darp5
+CFLAGS+=-DI2C_KBLED=I2C_1
+
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_0
-
-# Set keyboard LED I2C bus
-CFLAGS+=-DI2C_KBLED=I2C_1
 
 # Set touchpad PS2 bus
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3

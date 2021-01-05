@@ -9,7 +9,9 @@
 void kbled_init(void);
 void kbled_reset(void);
 uint8_t kbled_get(void);
+uint8_t kbled_max(void);
 void kbled_set(uint8_t level);
+uint32_t kbled_get_color(void);
 void kbled_set_color(uint32_t color);
 
 // Provided by common code

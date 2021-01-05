@@ -6,6 +6,10 @@ EC=it5570e
 KEYMAP?=default
 SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
 
+# Set keyboard LED mechanism
+KBLED=white_dac
+CFLAGS+=-DKBLED_DAC=2
+
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_4
 

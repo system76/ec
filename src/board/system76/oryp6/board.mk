@@ -6,6 +6,9 @@ EC=it5570e
 KEYMAP?=default
 SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
 
+# Set keyboard LED mechanism
+KBLED=rgb_pwm
+
 # Set discrete GPU I2C bus
 CFLAGS+=-DI2C_DGPU=I2C_1
 

@@ -4,8 +4,11 @@
 #include <common/macro.h>
 #include <ec/dac.h>
 
-#define KBLED_DAC 2
-#define KBLED_DACDAT DACDAT2
+#if !defined(KBLED_DAC)
+    #error "KBLED_DAC must be defined"
+#endif
+
+#define KBLED_DACDAT xconcat(DACDAT, KBLED_DAC)
 
 static uint8_t __code levels[] = {
     0x00,
@@ -18,7 +21,7 @@ static uint8_t __code levels[] = {
 
 void kbled_init(void) {
     // Enable DAC used for KBLIGHT_ADJ
-    DACPDREG &= ~(1 << KBLED_DAC);
+    DACPDREG &= ~BIT(KBLED_DAC);
     kbled_reset();
 }
 
@@ -37,6 +40,10 @@ uint8_t kbled_get(void) {
     return 0;
 }
 
+uint8_t kbled_max(void) {
+    return ARRAY_SIZE(levels) - 1;
+}
+
 void kbled_set(uint8_t level) {
     uint8_t raw = 0;
     if (level < ARRAY_SIZE(levels)) {
@@ -44,5 +51,7 @@ void kbled_set(uint8_t level) {
     }
     KBLED_DACDAT = raw;
 }
+
+uint32_t kbled_get_color(void) { /* Always white */ return 0xFFFFFF; }
 
 void kbled_set_color(uint32_t color) { /*Fix unused variable*/ color = color; }
