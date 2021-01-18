@@ -40,6 +40,11 @@ CFLAGS+=\
 	-DPOWER_LIMIT_AC=65 \
 	-DPOWER_LIMIT_DC=28
 
+# sync GPU fan speed to CPU fan speed (great for galp5 w/o dGPU)
+CFLAGS+=-DSYNC_FANS=1
+# smooth the fan speed updates such that 0 to full speed happens over this period (divide by 4 for seconds)
+CFLAGS+=-DFAN_SMOOTHING=50
+
 # Custom fan curve
 CFLAGS+=-DBOARD_HEATUP=5
 CFLAGS+=-DBOARD_COOLDOWN=20

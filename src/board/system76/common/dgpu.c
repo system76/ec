@@ -27,6 +27,7 @@ static uint8_t FAN_HEATUP[BOARD_DGPU_HEATUP] = { 0 };
 static uint8_t FAN_COOLDOWN[BOARD_DGPU_COOLDOWN] = { 0 };
 
 int16_t dgpu_temp = 0;
+uint8_t last_duty_dgpu = 0;
 
 #define DGPU_TEMP(X) ((int16_t)(X))
 
@@ -52,7 +53,11 @@ static struct Fan __code FAN = {
     .heatup_size = ARRAY_SIZE(FAN_HEATUP),
     .cooldown = FAN_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    .interpolate = false,
+    #ifdef FAN_SMOOTHING
+      .interpolate = true,
+    #else
+      .interpolate = false,
+    #endif
 };
 
 void dgpu_init(void) {
@@ -88,6 +93,10 @@ void dgpu_event(void) {
         // Apply heatup and cooldown filters to duty
         duty = fan_heatup(&FAN, duty);
         duty = fan_cooldown(&FAN, duty);
+        #ifdef FAN_SMOOTHING
+          duty = fan_smooth(last_duty_dgpu, duty);
+          last_duty_dgpu = duty;
+        #endif
     }
 
     if (duty != DCR4) {

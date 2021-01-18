@@ -28,6 +28,7 @@ static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 #define T_JUNCTION 100
 
 int16_t peci_temp = 0;
+uint8_t last_duty_cpu = 0;
 
 #define PECI_TEMP(X) (((int16_t)(X)) << 6)
 
@@ -53,7 +54,11 @@ static struct Fan __code FAN = {
     .heatup_size = ARRAY_SIZE(FAN_HEATUP),
     .cooldown = FAN_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    .interpolate = false,
+    #ifdef FAN_SMOOTHING
+      .interpolate = true,
+    #else
+      .interpolate = false,
+    #endif
 };
 
 void peci_init(void) {
@@ -176,10 +181,20 @@ void peci_event(void) {
         // Apply heatup and cooldown filters to duty
         duty = fan_heatup(&FAN, duty);
         duty = fan_cooldown(&FAN, duty);
+        #ifdef FAN_SMOOTHING
+          duty = fan_smooth(last_duty_cpu, duty);
+          last_duty_cpu = duty;
+        #endif
     }
 
     if (duty != DCR2) {
         DCR2 = duty;
-        DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
     }
+    #ifdef SYNC_FANS
+      // sync GPU fan to CPU fan
+      if (duty != DCR4) {
+          DCR4 = duty;
+      }
+    #endif
+    DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
 }

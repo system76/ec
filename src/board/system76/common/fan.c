@@ -3,6 +3,12 @@
 #include <board/fan.h>
 
 bool fan_max = false;
+#define max_speed PWM_DUTY(100)
+#define min_speed PWM_DUTY(0)
+
+#ifdef FAN_SMOOTHING
+  const uint8_t max_jump = (max_speed - min_speed) / (uint8_t) FAN_SMOOTHING;
+#endif
 
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
@@ -21,7 +27,7 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
         } else if (temp < cur->temp) {
             // If lower than first temp, return 0%
             if (i == 0) {
-                return PWM_DUTY(0);
+                return min_speed;
             } else {
                 const struct FanPoint * prev = &fan->points[i - 1];
 
@@ -43,7 +49,7 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
     }
 
     // If no point is found, return 100%
-    return PWM_DUTY(100);
+    return max_speed;
 }
 
 uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant {
@@ -77,3 +83,31 @@ uint8_t fan_cooldown(const struct Fan * fan, uint8_t duty) __reentrant {
 
     return highest;
 }
+
+#ifdef FAN_SMOOTHING
+  uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
+    uint8_t next_duty = duty;
+
+    if (last_duty > duty) {
+      uint8_t smoothed = last_duty < min_speed + max_jump
+        ? min_speed
+        : last_duty - max_jump;
+
+      if (smoothed > duty) {
+        next_duty = smoothed;
+      }
+    }
+
+    if (last_duty < duty) {
+      uint8_t smoothed = last_duty > max_speed - max_jump
+        ? max_speed
+        : last_duty + max_jump;
+
+      if (smoothed < duty) {
+        next_duty = smoothed;
+      }
+    }
+
+    return next_duty;
+  }
+#endif
