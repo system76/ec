@@ -14,6 +14,6 @@
 #endif // HAVE_DGPU
 
 void dgpu_init(void);
-void dgpu_event(void);
+uint8_t dgpu_get_fan_duty(void);
 
 #endif // _BOARD_DGPU_H
