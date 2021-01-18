@@ -119,7 +119,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 }
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
-void peci_event(void) {
+uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
 
 #if EC_ESPI
@@ -180,8 +180,6 @@ void peci_event(void) {
         duty = fan_cooldown(&FAN, duty);
     }
 
-    if (duty != DCR2) {
-        DCR2 = duty;
-        DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
-    }
+    DEBUG("PECI temp=%d\n", peci_temp);
+    return duty;
 }

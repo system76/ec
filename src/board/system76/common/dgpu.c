@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/dgpu.h>
+#include <board/fan.h>
 
 #if HAVE_DGPU
 
@@ -61,7 +62,7 @@ void dgpu_init(void) {
     i2c_reset(&I2C_DGPU, true);
 }
 
-void dgpu_event(void) {
+uint8_t dgpu_get_fan_duty(void) {
     uint8_t duty;
     if (power_state == POWER_STATE_S0 && gpio_get(&DGPU_PWR_EN) && !gpio_get(&GC6_FB_EN)) {
         // Use I2CS if in S0 state
@@ -91,16 +92,16 @@ void dgpu_event(void) {
         duty = fan_cooldown(&FAN, duty);
     }
 
-    if (duty != DCR4) {
-        DCR4 = duty;
-        DEBUG("DGPU temp=%d = %d\n", dgpu_temp, duty);
-    }
+    DEBUG("DGPU temp=%d\n", dgpu_temp);
+    return duty;
 }
 
 #else
 
 void dgpu_init(void) {}
 
-void dgpu_event(void) {}
+uint8_t dgpu_get_fan_duty(void) {
+  return PWM_DUTY(0);
+}
 
 #endif // HAVE_DGPU

@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/fan.h>
+#include <common/debug.h>
+#include <ec/pwm.h>
 
 bool fan_max = false;
+
+#define max_speed PWM_DUTY(100)
+#define min_speed PWM_DUTY(0)
 
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
@@ -21,7 +26,7 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
         } else if (temp < cur->temp) {
             // If lower than first temp, return 0%
             if (i == 0) {
-                return PWM_DUTY(0);
+                return min_speed;
             } else {
                 const struct FanPoint * prev = &fan->points[i - 1];
 
@@ -43,7 +48,26 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
     }
 
     // If no point is found, return 100%
-    return PWM_DUTY(100);
+    return max_speed;
+}
+
+void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
+  #ifdef SYNC_FANS
+    peci_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
+    dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
+  #endif
+
+  // set PECI fan duty
+  if (peci_fan_duty != DCR2) {
+      DCR2 = peci_fan_duty;
+      DEBUG("PECI fan_duty=%d\n", peci_fan_duty);
+  }
+
+  // set dGPU fan duty
+  if (dgpu_fan_duty != DCR4) {
+      DCR4 = dgpu_fan_duty;
+      DEBUG("DGPU fan_duty=%d\n", dgpu_fan_duty);
+  }
 }
 
 uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant {

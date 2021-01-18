@@ -22,7 +22,7 @@ void pwm_init(void) {
     // Set cycle time to 255 + 1
     CTR0 = 255;
 
-    // Turn off CPU fan (temperature control in peci_event)
+    // Turn off CPU fan (temperature control in peci_get_fan_duty)
     DCR2 = 0;
 
     // Enable PWM
