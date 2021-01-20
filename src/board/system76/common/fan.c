@@ -6,8 +6,20 @@ bool fan_max = false;
 #define max_speed PWM_DUTY(100)
 #define min_speed PWM_DUTY(0)
 
+#if !defined(FAN_SMOOTHING) && (defined(FAN_SMOOTHING_UP) || defined(FAN_SMOOTHING_DOWN))
+  #define FAN_SMOOTHING 40
+#endif
+
 #ifdef FAN_SMOOTHING
-  const uint8_t max_jump = (max_speed - min_speed) / (uint8_t) FAN_SMOOTHING;
+  #ifndef FAN_SMOOTHING_UP
+    #define FAN_SMOOTHING_UP FAN_SMOOTHING
+  #endif
+  #ifndef FAN_SMOOTHING_DOWN
+    #define FAN_SMOOTHING_DOWN FAN_SMOOTHING
+  #endif
+
+  const uint8_t max_jump_up = (max_speed - min_speed) / (uint8_t) FAN_SMOOTHING_UP;
+  const uint8_t max_jump_down = (max_speed - min_speed) / (uint8_t) FAN_SMOOTHING_DOWN;
 #endif
 
 void fan_reset(void) {
@@ -88,20 +100,24 @@ uint8_t fan_cooldown(const struct Fan * fan, uint8_t duty) __reentrant {
   uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
     uint8_t next_duty = duty;
 
-    if (last_duty > duty) {
-      uint8_t smoothed = last_duty < min_speed + max_jump
+    // ramping down
+    if (duty < last_duty) {
+      // out of bounds (lower) safeguard
+      uint8_t smoothed = last_duty < min_speed + max_jump_down
         ? min_speed
-        : last_duty - max_jump;
+        : last_duty - max_jump_down;
 
       if (smoothed > duty) {
         next_duty = smoothed;
       }
     }
 
-    if (last_duty < duty) {
-      uint8_t smoothed = last_duty > max_speed - max_jump
+    // ramping up
+    if (duty > last_duty) {
+      // out of bounds (higher) safeguard
+      uint8_t smoothed = last_duty > max_speed - max_jump_up
         ? max_speed
-        : last_duty + max_jump;
+        : last_duty + max_jump_up;
 
       if (smoothed < duty) {
         next_duty = smoothed;

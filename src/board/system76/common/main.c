@@ -43,7 +43,7 @@ void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
 const uint16_t battery_interval = 1000;
-#ifdef FAN_SMOOTHING
+#if defined(FAN_SMOOTHING) || defined(FAN_SMOOTHING_UP) || defined(FAN_SMOOTHING_DOWN)
   const uint16_t fan_interval = 250; // event loop is longer than 100ms and maybe even longer than 250
 #else
   const uint16_t fan_interval = 1000;

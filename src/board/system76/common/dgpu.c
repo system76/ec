@@ -53,7 +53,7 @@ static struct Fan __code FAN = {
     .heatup_size = ARRAY_SIZE(FAN_HEATUP),
     .cooldown = FAN_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    #ifdef FAN_SMOOTHING
+    #if defined(FAN_SMOOTHING) || defined(FAN_SMOOTHING_UP) || defined(FAN_SMOOTHING_DOWN)
       .interpolate = true,
     #else
       .interpolate = false,
@@ -93,7 +93,7 @@ void dgpu_event(void) {
         // Apply heatup and cooldown filters to duty
         duty = fan_heatup(&FAN, duty);
         duty = fan_cooldown(&FAN, duty);
-        #ifdef FAN_SMOOTHING
+        #if defined(FAN_SMOOTHING) || defined(FAN_SMOOTHING_UP) || defined(FAN_SMOOTHING_DOWN)
           duty = fan_smooth(last_duty_dgpu, duty);
           last_duty_dgpu = duty;
         #endif
