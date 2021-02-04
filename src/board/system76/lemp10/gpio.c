@@ -52,8 +52,7 @@ void gpio_init() {
     GCR21 = BIT(2);
 
     // Set GPIO data
-    // PCH_DPWROK_EC, NC
-    GPDRA = BIT(7) | BIT(5);
+    GPDRA = 0;
     // XLP_OUT, PWR_SW#
     GPDRB = BIT(4) | BIT(3);
     GPDRC = 0;
