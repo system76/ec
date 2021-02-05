@@ -105,7 +105,7 @@ static uint8_t kbscan_get_row(int i) {
 #endif
 
     // TODO: figure out optimal delay
-    delay_ticks(10);
+    delay_ticks(20);
 
     return ~KSI;
 }
