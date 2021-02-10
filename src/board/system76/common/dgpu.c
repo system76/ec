@@ -27,7 +27,6 @@ static uint8_t FAN_HEATUP[BOARD_DGPU_HEATUP] = { 0 };
 static uint8_t FAN_COOLDOWN[BOARD_DGPU_COOLDOWN] = { 0 };
 
 int16_t dgpu_temp = 0;
-uint8_t last_duty_dgpu = 0;
 
 #define DGPU_TEMP(X) ((int16_t)(X))
 
@@ -65,7 +64,7 @@ void dgpu_init(void) {
     i2c_reset(&I2C_DGPU, true);
 }
 
-void dgpu_event(void) {
+uint8_t dgpu_get_fan_duty(void) {
     uint8_t duty;
     if (power_state == POWER_STATE_S0 && gpio_get(&DGPU_PWR_EN) && !gpio_get(&GC6_FB_EN)) {
         // Use I2CS if in S0 state
@@ -93,22 +92,18 @@ void dgpu_event(void) {
         // Apply heatup and cooldown filters to duty
         duty = fan_heatup(&FAN, duty);
         duty = fan_cooldown(&FAN, duty);
-        #if defined(FAN_SMOOTHING) || defined(FAN_SMOOTHING_UP) || defined(FAN_SMOOTHING_DOWN)
-          duty = fan_smooth(last_duty_dgpu, duty);
-          last_duty_dgpu = duty;
-        #endif
     }
 
-    if (duty != DCR4) {
-        DCR4 = duty;
-        DEBUG("DGPU temp=%d = %d\n", dgpu_temp, duty);
-    }
+    DEBUG("DGPU temp=%d\n", dgpu_temp);
+    return duty;
 }
 
 #else
 
 void dgpu_init(void) {}
 
-void dgpu_event(void) {}
+uint8_t dgpu_get_fan_duty(void) {
+  return PWM_DUTY(0);
+}
 
 #endif // HAVE_DGPU

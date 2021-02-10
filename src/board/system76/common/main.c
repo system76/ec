@@ -10,6 +10,7 @@
 #include <board/board.h>
 #include <board/dgpu.h>
 #include <board/ecpm.h>
+#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/gctrl.h>
 #include <board/kbc.h>
@@ -126,13 +127,8 @@ void main(void) {
             if (last_time_fan > time || (time - last_time_fan) >= fan_interval) {
                 last_time_fan = time;
 
-                // Updates fan status and temps
-                peci_event();
-
-#if HAVE_DGPU && (!defined(SYNC_FANS) || !SYNC_FANS)
-                // Updates discrete GPU fan status and temps
-                dgpu_event();
-#endif
+                // Update fan speeds
+                fan_duty_set(peci_get_fan_duty(), dgpu_get_fan_duty());
             }
 
             // Only run the following once per interval

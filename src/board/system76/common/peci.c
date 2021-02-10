@@ -28,7 +28,6 @@ static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 #define T_JUNCTION 100
 
 int16_t peci_temp = 0;
-uint8_t last_duty_cpu = 0;
 
 #define PECI_TEMP(X) (((int16_t)(X)) << 6)
 
@@ -123,7 +122,7 @@ int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 }
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
-void peci_event(void) {
+uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
 
 #if EC_ESPI
@@ -181,20 +180,8 @@ void peci_event(void) {
         // Apply heatup and cooldown filters to duty
         duty = fan_heatup(&FAN, duty);
         duty = fan_cooldown(&FAN, duty);
-        #if defined(FAN_SMOOTHING) || defined(FAN_SMOOTHING_UP) || defined(FAN_SMOOTHING_DOWN)
-          duty = fan_smooth(last_duty_cpu, duty);
-          last_duty_cpu = duty;
-        #endif
     }
 
-    if (duty != DCR2) {
-        DCR2 = duty;
-    }
-    #ifdef SYNC_FANS
-      // sync GPU fan to CPU fan
-      if (duty != DCR4) {
-          DCR4 = duty;
-      }
-    #endif
-    DEBUG("PECI temp=%d = %d\n", peci_temp, duty);
+    DEBUG("PECI temp=%d = %d\n", peci_temp);
+    return duty;
 }

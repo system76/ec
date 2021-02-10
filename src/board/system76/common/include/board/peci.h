@@ -9,6 +9,6 @@ extern int16_t peci_temp;
 
 void peci_init(void);
 int peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data);
-void peci_event(void);
+uint8_t peci_get_fan_duty(void);
 
 #endif // _BOARD_PECI_H
