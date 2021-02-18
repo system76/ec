@@ -1,3 +1,4 @@
+use clap::{Arg, App, AppSettings, SubCommand};
 use ectool::{
     Access,
     AccessLpcLinux,
@@ -10,7 +11,7 @@ use ectool::{
     SpiTarget,
 };
 use std::{
-    env,
+    fmt::Display,
     fs,
     process,
     str::{self, FromStr},
@@ -262,151 +263,153 @@ unsafe fn keymap_set(layer: u8, output: u8, input: u8, value: u16) -> Result<(),
     ec.keymap_set(layer, output, input, value)
 }
 
-fn usage() {
-    eprintln!("  console");
-    eprintln!("  flash [file]");
-    eprintln!("  flash_backup [file]");
-    eprintln!("  fan [index] <duty>");
-    eprintln!("  info");
-    eprintln!("  keymap [layer] [output] [input] <value>");
-    eprintln!("  print [message]");
-}
-
-fn parse_arg_opt<I: Iterator<Item=String>, F: FromStr>(args: &mut I, name: &str) -> Option<F> {
-    match args.next() {
-        Some(arg) => match arg.parse::<F>() {
-            Ok(ok) => Some(ok),
-            Err(_err) => {
-                eprintln!("failed to parse {}: '{}'", name, arg);
-                process::exit(1);
-            },
-        },
-        None  => None,
-    }
-}
-
-fn parse_arg<I: Iterator<Item=String>, F: FromStr>(args: &mut I, name: &str) -> F {
-    match parse_arg_opt(args, name) {
-        Some(some) => some,
-        None => {
-            eprintln!("no {} provided", name);
-            process::exit(1);
-        }
-    }
+fn validate_from_str<T: FromStr>(s: String) -> Result<(), String>
+    where T::Err: Display {
+    s.parse::<T>()
+        .and(Ok(()))
+        .map_err(|err| format!("{}", err))
 }
 
 fn main() {
-    let mut args = env::args().skip(1);
-    match args.next() {
-        Some(arg) => match arg.as_str() {
-            "console" => match unsafe { console() } {
-                Ok(()) => (),
-                Err(err) => {
-                    eprintln!("failed to read console: {:X?}", err);
-                    process::exit(1);
-                },
-            },
-            "fan" => {
-                let index = parse_arg(&mut args, "index");
-                let duty_opt = parse_arg_opt(&mut args, "duty");
-                match duty_opt {
-                    Some(duty) => match unsafe { fan_set(index, duty) } {
-                        Ok(()) => (),
-                        Err(err) => {
-                            eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
-                            process::exit(1);
-                        },
-                    },
-                    None => match unsafe { fan_get(index) } {
-                        Ok(()) => (),
-                        Err(err) => {
-                            eprintln!("failed to get fan {}: {:X?}", index, err);
-                            process::exit(1);
-                        },
-                    },
-                }
-            },
-            "flash" => match args.next() {
-                Some(path) => match unsafe { flash(&path, SpiTarget::Main) } {
-                    Ok(()) => (),
-                    Err(err) => {
-                        eprintln!("failed to flash '{}': {:X?}", path, err);
-                        process::exit(1);
-                    },
-                },
-                None => {
-                    eprintln!("no file provided");
-                    process::exit(1);
-                }
-            },
-            "flash_backup" => match args.next() {
-                Some(path) => match unsafe { flash(&path, SpiTarget::Backup) } {
-                    Ok(()) => (),
-                    Err(err) => {
-                        eprintln!("failed to flash '{}': {:X?}", path, err);
-                        process::exit(1);
-                    },
-                },
-                None => {
-                    eprintln!("no file provided");
-                    process::exit(1);
-                }
-            },
-            "info" => match unsafe { info() } {
-                Ok(()) => (),
-                Err(err) => {
-                    eprintln!("failed to read info: {:X?}", err);
-                    process::exit(1);
-                },
-            },
-            "keymap" => {
-                let layer = parse_arg(&mut args, "layer");
-                let output = parse_arg(&mut args, "output");
-                let input = parse_arg(&mut args, "input");
-                match args.next() {
-                    Some(value_str) => match u16::from_str_radix(value_str.trim_start_matches("0x"), 16) {
-                        Ok(value) => match unsafe { keymap_set(layer, output, input, value) } {
-                            Ok(()) => (),
-                            Err(err) => {
-                                eprintln!("failed to set keymap {}, {}, {} to {}: {:X?}", layer, output, input, value, err);
-                                process::exit(1);
-                            },
-                        },
-                        Err(err) => {
-                            eprintln!("failed to parse value: '{}': {}", arg, err);
-                            process::exit(1);
-                        }
-                    },
-                    None => match unsafe { keymap_get(layer, output, input) } {
-                        Ok(()) => (),
-                        Err(err) => {
-                            eprintln!("failed to get keymap {}, {}, {}: {:X?}", layer, output, input, err);
-                            process::exit(1);
-                        },
-                    },
-                }
-            },
-            "print" => for mut arg in args {
-                arg.push('\n');
-                match unsafe { print(&arg.as_bytes()) } {
-                    Ok(()) => (),
-                    Err(err) => {
-                        eprintln!("failed to print '{}': {:X?}", arg, err);
-                        process::exit(1);
-                    },
-                }
-            },
-            _ => {
-                eprintln!("unknown subcommand '{}'", arg);
-                usage();
+    let matches = App::new("system76_ectool")
+        .setting(AppSettings::SubcommandRequired)
+        .subcommand(SubCommand::with_name("console"))
+        .subcommand(SubCommand::with_name("fan")
+            .arg(Arg::with_name("index")
+                .validator(validate_from_str::<u8>)
+                .required(true)
+            )
+            .arg(Arg::with_name("duty")
+                .validator(validate_from_str::<u8>)
+            )
+        )
+        .subcommand(SubCommand::with_name("flash")
+            .arg(Arg::with_name("path")
+                .required(true)
+            )
+        )
+        .subcommand(SubCommand::with_name("flash_backup")
+            .arg(Arg::with_name("path")
+                .required(true)
+            )
+        )
+        .subcommand(SubCommand::with_name("info"))
+        .subcommand(SubCommand::with_name("keymap")
+            .arg(Arg::with_name("layer")
+                .validator(validate_from_str::<u8>)
+                .required(true)
+            )
+            .arg(Arg::with_name("output")
+                .validator(validate_from_str::<u8>)
+                .required(true)
+            )
+            .arg(Arg::with_name("input")
+                .validator(validate_from_str::<u8>)
+                .required(true)
+            )
+            .arg(Arg::with_name("value"))
+        )
+        .subcommand(SubCommand::with_name("print")
+            .arg(Arg::with_name("message")
+                .required(true)
+                .multiple(true)
+            )
+        )
+        .get_matches();
+
+    match matches.subcommand() {
+        ("console", Some(_sub_m)) => match unsafe { console() } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to read console: {:X?}", err);
                 process::exit(1);
             },
         },
-        None => {
-            eprintln!("no subcommand provided");
-            usage();
-            process::exit(1);
+        ("fan", Some(sub_m)) => {
+            let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
+            let duty_opt = sub_m.value_of("duty").map(|x| x.parse::<u8>().unwrap());
+            match duty_opt {
+                Some(duty) => match unsafe { fan_set(index, duty) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
+                        process::exit(1);
+                    },
+                },
+                None => match unsafe { fan_get(index) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to get fan {}: {:X?}", index, err);
+                        process::exit(1);
+                    },
+                },
+            }
         },
+        ("flash", Some(sub_m)) => {
+            let path = sub_m.value_of("path").unwrap();
+            match unsafe { flash(&path, SpiTarget::Main) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to flash '{}': {:X?}", path, err);
+                    process::exit(1);
+                },
+            }
+        },
+        ("flash_backup", Some(sub_m)) => {
+            let path = sub_m.value_of("path").unwrap();
+            match unsafe { flash(&path, SpiTarget::Backup) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to flash '{}': {:X?}", path, err);
+                    process::exit(1);
+                },
+            }
+        },
+        ("info", Some(_sub_m)) => match unsafe { info() } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to read info: {:X?}", err);
+                process::exit(1);
+            },
+        },
+        ("keymap", Some(sub_m)) => {
+            let layer = sub_m.value_of("layer").unwrap().parse::<u8>().unwrap();
+            let output = sub_m.value_of("output").unwrap().parse::<u8>().unwrap();
+            let input = sub_m.value_of("input").unwrap().parse::<u8>().unwrap();
+            match sub_m.value_of("value") {
+                Some(value_str) => match u16::from_str_radix(value_str.trim_start_matches("0x"), 16) {
+                    Ok(value) => match unsafe { keymap_set(layer, output, input, value) } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to set keymap {}, {}, {} to {}: {:X?}", layer, output, input, value, err);
+                            process::exit(1);
+                        },
+                    },
+                    Err(err) => {
+                        eprintln!("failed to parse value: '{}': {}", value_str, err);
+                        process::exit(1);
+                    }
+                },
+                None => match unsafe { keymap_get(layer, output, input) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to get keymap {}, {}, {}: {:X?}", layer, output, input, err);
+                        process::exit(1);
+                    },
+                },
+            }
+        },
+        ("print", Some(sub_m)) => for arg in sub_m.values_of("message").unwrap() {
+            let mut arg = arg.to_owned();
+            arg.push('\n');
+            match unsafe { print(&arg.as_bytes()) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to print '{}': {:X?}", arg, err);
+                    process::exit(1);
+                },
+            }
+        },
+        _ => unreachable!()
     }
-
 }

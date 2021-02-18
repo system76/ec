@@ -16,6 +16,7 @@ name = "system76_ectool"
 required-features = ["std"]
 
 [dependencies]
+clap = "2"
 libc = { version = "0.2", optional = true }
 hidapi = { version = "1.2", default-features = false, features = ["linux-static-hidraw"], optional = true }
 redox_hwio = { version = "0.1.3", optional = true }
