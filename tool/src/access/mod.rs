@@ -23,6 +23,12 @@ pub trait Access {
 
     /// The maximum size that can be provided for the data argument
     fn data_size(&self) -> usize;
+
+    /// Read from the debug space
+    //TODO: better public interface
+    unsafe fn read_debug(&mut self, _addr: u8) -> Result<u8, Error> {
+        Err(Error::NotSupported)
+    }
 }
 
 impl Access for &mut dyn Access {

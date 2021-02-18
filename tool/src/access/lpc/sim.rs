@@ -71,12 +71,6 @@ impl AccessLpcSim {
         self.outb(SMFI_CMD_BASE + u16::from(addr), data)
     }
 
-    /// Read from the debug space
-    //TODO: better public interface
-    pub unsafe fn read_debug(&mut self, addr: u8) -> Result<u8, Error> {
-        self.inb(SMFI_DBG_BASE + u16::from(addr))
-    }
-
     /// Returns Ok if a command can be sent
     unsafe fn command_check(&mut self) -> Result<(), Error> {
         if self.read_cmd(SMFI_CMD_CMD)? == 0 {
@@ -120,5 +114,9 @@ impl Access for AccessLpcSim {
 
     fn data_size(&self) -> usize {
         SMFI_CMD_SIZE - SMFI_CMD_DATA as usize
+    }
+
+    unsafe fn read_debug(&mut self, addr: u8) -> Result<u8, Error> {
+        self.inb(SMFI_DBG_BASE + u16::from(addr))
     }
 }

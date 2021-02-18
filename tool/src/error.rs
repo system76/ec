@@ -3,6 +3,8 @@
 pub enum Error {
     /// Data length is too large
     DataLength(usize),
+    /// Operation not supported
+    NotSupported,
     /// A parameter was invalid
     Parameter,
     /// EC protocol returned an error result
