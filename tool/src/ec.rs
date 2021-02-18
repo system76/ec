@@ -244,6 +244,23 @@ impl<A: Access> Ec<A> {
         ];
         self.command(Cmd::LedSetColor, &mut data)
     }
+
+    pub fn as_dyn(&mut self) -> Ec<&mut dyn Access> {
+        Ec {
+            access: &mut self.access,
+            version: self.version,
+
+        }
+    }
+
+    pub fn into_dyn(self) -> Ec<Box<dyn Access>>
+    where A: 'static {
+        Ec {
+            access: Box::new(self.access),
+            version: self.version,
+
+        }
+    }
 }
 
 pub struct EcSpi<'a, A: Access> {

@@ -24,3 +24,23 @@ pub trait Access {
     /// The maximum size that can be provided for the data argument
     fn data_size(&self) -> usize;
 }
+
+impl Access for &mut dyn Access {
+    unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error> {
+        (**self).command(cmd, data)
+    }
+
+    fn data_size(&self) -> usize {
+        (**self).data_size()
+    }
+}
+
+impl Access for Box<dyn Access> {
+    unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error> {
+        (**self).command(cmd, data)
+    }
+
+    fn data_size(&self) -> usize {
+        (**self).data_size()
+    }
+}
