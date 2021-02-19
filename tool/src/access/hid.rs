@@ -23,6 +23,10 @@ impl AccessHid {
         })
     }
 
+    pub fn device(&mut self) -> &mut HidDevice {
+        &mut self.device
+    }
+
     unsafe fn command_try(&mut self, cmd: u8, data: &mut [u8]) -> Result<Option<u8>, Error> {
         const HID_CMD: usize = 1;
         const HID_RES: usize = 2;
