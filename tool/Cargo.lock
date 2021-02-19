@@ -43,6 +43,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "downcast-rs"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "hermit-abi"
 version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -85,6 +90,7 @@ name = "system76_ectool"
 version = "0.2.3"
 dependencies = [
  "clap 2.33.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "downcast-rs 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hidapi 1.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.81 (registry+https://github.com/rust-lang/crates.io-index)",
  "redox_hwio 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -133,6 +139,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 "checksum cc 1.0.66 (registry+https://github.com/rust-lang/crates.io-index)" = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
 "checksum clap 2.33.3 (registry+https://github.com/rust-lang/crates.io-index)" = "37e58ac78573c40708d45522f0d80fa2f01cc4f9b4e2bf749807255454312002"
+"checksum downcast-rs 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 "checksum hermit-abi 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)" = "322f4de77956e22ed0e5032c359a0f1273f1f7f0d79bfa3b8ffbc730d7fbcc5c"
 "checksum hidapi 1.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "76c352a18370f7e7e47bcbfcbdc5432b8c80c705b5d751a25232c659fcf5c775"
 "checksum libc 0.2.81 (registry+https://github.com/rust-lang/crates.io-index)" = "1482821306169ec4d07f6aca392a4681f66c75c9918aa49641a2595db64053cb"

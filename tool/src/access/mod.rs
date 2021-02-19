@@ -1,4 +1,5 @@
 use crate::Error;
+use downcast_rs::Downcast;
 
 #[cfg(feature = "hidapi")]
 pub use self::hid::AccessHid;
@@ -17,7 +18,7 @@ pub use self::lpc::*;
 mod lpc;
 
 /// Access method for running an EC command
-pub trait Access {
+pub trait Access: Downcast {
     /// Sends a command using the access method. Only internal use is recommended
     unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error>;
 
@@ -31,16 +32,6 @@ pub trait Access {
     }
 }
 
-impl Access for &mut dyn Access {
-    unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error> {
-        (**self).command(cmd, data)
-    }
-
-    fn data_size(&self) -> usize {
-        (**self).data_size()
-    }
-}
-
 impl Access for Box<dyn Access> {
     unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error> {
         (**self).command(cmd, data)
@@ -50,3 +41,5 @@ impl Access for Box<dyn Access> {
         (**self).data_size()
     }
 }
+
+downcast_rs::impl_downcast!(Access);
