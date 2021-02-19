@@ -1,7 +1,9 @@
 use clap::{Arg, App, AppSettings, SubCommand};
 use ectool::{
     Access,
+    AccessHid,
     AccessLpcLinux,
+    AccessLpcSim,
     Ec,
     Error,
     Firmware,
@@ -10,6 +12,7 @@ use ectool::{
     SpiRom,
     SpiTarget,
 };
+use hidapi::HidApi;
 use std::{
     fmt::Display,
     fs,
@@ -19,14 +22,8 @@ use std::{
     thread,
 };
 
-unsafe fn ec() -> Result<Ec<AccessLpcLinux>, Error> {
-    let access = AccessLpcLinux::new(Duration::new(1, 0))?;
-    Ec::new(access)
-}
-
-unsafe fn console() -> Result<(), Error> {
+unsafe fn console(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     //TODO: driver support for reading debug region?
-    let mut ec = ec()?;
     let access = ec.access();
 
     let mut head = access.read_debug(0)? as usize;
@@ -61,7 +58,7 @@ unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], se
     Ok(())
 }
 
-unsafe fn flash_inner(ec: &mut Ec<AccessLpcLinux>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
+unsafe fn flash_inner(ec: &mut Ec<Box<dyn Access>>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
     let rom_size = 128 * 1024;
 
     let mut new_rom = firmware.data.to_vec();
@@ -138,7 +135,7 @@ unsafe fn flash_inner(ec: &mut Ec<AccessLpcLinux>, firmware: &Firmware, target: 
     Ok(())
 }
 
-unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
+unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> Result<(), Error> {
     let scratch = true;
 
     //TODO: remove unwraps
@@ -147,7 +144,6 @@ unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
     println!("file board: {:?}", str::from_utf8(firmware.board));
     println!("file version: {:?}", str::from_utf8(firmware.version));
 
-    let mut ec = ec()?;
     let data_size = ec.access().data_size();
 
     {
@@ -179,7 +175,7 @@ unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
     eprintln!("Sync");
     let _ = process::Command::new("sync").status();
 
-    let res = flash_inner(&mut ec, &firmware, target, scratch);
+    let res = flash_inner(ec, &firmware, target, scratch);
     eprintln!("Result: {:X?}", res);
 
     eprintln!("Sync");
@@ -198,8 +194,7 @@ unsafe fn flash(path: &str, target: SpiTarget) -> Result<(), Error> {
     res
 }
 
-unsafe fn info() -> Result<(), Error> {
-    let mut ec = ec()?;
+unsafe fn info(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     let data_size = ec.access().data_size();
 
     {
@@ -225,41 +220,31 @@ unsafe fn info() -> Result<(), Error> {
     Ok(())
 }
 
-unsafe fn print(message: &[u8]) -> Result<(), Error> {
-    let mut ec = ec()?;
-
+unsafe fn print(ec: &mut Ec<Box<dyn Access>>, message: &[u8]) -> Result<(), Error> {
     ec.print(message)?;
 
     Ok(())
 }
 
-unsafe fn fan_get(index: u8) -> Result<(), Error> {
-    let mut ec = ec()?;
-
+unsafe fn fan_get(ec: &mut Ec<Box<dyn Access>>, index: u8) -> Result<(), Error> {
     let duty = ec.fan_get(index)?;
     println!("{}", duty);
 
     Ok(())
 }
 
-unsafe fn fan_set(index: u8, duty: u8) -> Result<(), Error> {
-    let mut ec = ec()?;
-
+unsafe fn fan_set(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Result<(), Error> {
     ec.fan_set(index, duty)
 }
 
-unsafe fn keymap_get(layer: u8, output: u8, input: u8) -> Result<(), Error> {
-    let mut ec = ec()?;
-
+unsafe fn keymap_get(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input: u8) -> Result<(), Error> {
     let value = ec.keymap_get(layer, output, input)?;
     println!("{:04X}", value);
 
     Ok(())
 }
 
-unsafe fn keymap_set(layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
-    let mut ec = ec()?;
-
+unsafe fn keymap_set(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
     ec.keymap_set(layer, output, input, value)
 }
 
@@ -273,6 +258,11 @@ fn validate_from_str<T: FromStr>(s: String) -> Result<(), String>
 fn main() {
     let matches = App::new("system76_ectool")
         .setting(AppSettings::SubcommandRequired)
+        .arg(Arg::with_name("access")
+            .long("access")
+            .possible_values(&["lpc-linux", "lpc-sim", "hid"])
+            .default_value("lpc-linux")
+        )
         .subcommand(SubCommand::with_name("console"))
         .subcommand(SubCommand::with_name("fan")
             .arg(Arg::with_name("index")
@@ -317,8 +307,46 @@ fn main() {
         )
         .get_matches();
 
+    let get_ec = || -> Result<_, Error> {
+        unsafe {
+            match matches.value_of("access").unwrap() {
+                "lpc-linux" => {
+                    let access = AccessLpcLinux::new(Duration::new(1, 0))?;
+                    Ok(Ec::new(access)?.into_dyn())
+                },
+                "lpc-sim" => {
+                    let access = AccessLpcSim::new(Duration::new(1, 0))?;
+                    Ok(Ec::new(access)?.into_dyn())
+                },
+                "hid" => {
+                    let api = HidApi::new()?;
+                    for info in api.device_list() {
+                        match (info.vendor_id(), info.product_id(), info.interface_number()) {
+                            // System76 launch_1
+                            (0x3384, 0x0001, 1) => {
+                                let device = info.open_device(&api)?;
+                                let access = AccessHid::new(device, 10, 100)?;
+                                return Ok(Ec::new(access)?.into_dyn());
+                            }
+                            _ => {},
+                        }
+                    }
+                    Err(hidapi::HidError::OpenHidDeviceError.into())
+                }
+                _ => unreachable!(),
+            }
+        }
+    };
+    let mut ec = match get_ec() {
+        Ok(ec) => ec,
+        Err(err) => {
+            eprintln!("failed to connect to EC: {:X?}", err);
+            process::exit(1);
+        }
+    };
+
     match matches.subcommand() {
-        ("console", Some(_sub_m)) => match unsafe { console() } {
+        ("console", Some(_sub_m)) => match unsafe { console(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read console: {:X?}", err);
@@ -329,14 +357,14 @@ fn main() {
             let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
             let duty_opt = sub_m.value_of("duty").map(|x| x.parse::<u8>().unwrap());
             match duty_opt {
-                Some(duty) => match unsafe { fan_set(index, duty) } {
+                Some(duty) => match unsafe { fan_set(&mut ec, index, duty) } {
                     Ok(()) => (),
                     Err(err) => {
                         eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
                         process::exit(1);
                     },
                 },
-                None => match unsafe { fan_get(index) } {
+                None => match unsafe { fan_get(&mut ec, index) } {
                     Ok(()) => (),
                     Err(err) => {
                         eprintln!("failed to get fan {}: {:X?}", index, err);
@@ -347,7 +375,7 @@ fn main() {
         },
         ("flash", Some(sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&path, SpiTarget::Main) } {
+            match unsafe { flash(&mut ec, &path, SpiTarget::Main) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
@@ -357,7 +385,7 @@ fn main() {
         },
         ("flash_backup", Some(sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&path, SpiTarget::Backup) } {
+            match unsafe { flash(&mut ec, &path, SpiTarget::Backup) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
@@ -365,7 +393,7 @@ fn main() {
                 },
             }
         },
-        ("info", Some(_sub_m)) => match unsafe { info() } {
+        ("info", Some(_sub_m)) => match unsafe { info(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read info: {:X?}", err);
@@ -378,7 +406,7 @@ fn main() {
             let input = sub_m.value_of("input").unwrap().parse::<u8>().unwrap();
             match sub_m.value_of("value") {
                 Some(value_str) => match u16::from_str_radix(value_str.trim_start_matches("0x"), 16) {
-                    Ok(value) => match unsafe { keymap_set(layer, output, input, value) } {
+                    Ok(value) => match unsafe { keymap_set(&mut ec, layer, output, input, value) } {
                         Ok(()) => (),
                         Err(err) => {
                             eprintln!("failed to set keymap {}, {}, {} to {}: {:X?}", layer, output, input, value, err);
@@ -390,7 +418,7 @@ fn main() {
                         process::exit(1);
                     }
                 },
-                None => match unsafe { keymap_get(layer, output, input) } {
+                None => match unsafe { keymap_get(&mut ec, layer, output, input) } {
                     Ok(()) => (),
                     Err(err) => {
                         eprintln!("failed to get keymap {}, {}, {}: {:X?}", layer, output, input, err);
@@ -402,7 +430,7 @@ fn main() {
         ("print", Some(sub_m)) => for arg in sub_m.values_of("message").unwrap() {
             let mut arg = arg.to_owned();
             arg.push('\n');
-            match unsafe { print(&arg.as_bytes()) } {
+            match unsafe { print(&mut ec, &arg.as_bytes()) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to print '{}': {:X?}", arg, err);
