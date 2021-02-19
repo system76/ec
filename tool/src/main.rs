@@ -255,6 +255,16 @@ fn validate_from_str<T: FromStr>(s: String) -> Result<(), String>
         .map_err(|err| format!("{}", err))
 }
 
+fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
+    let r = u8::from_str_radix(&s[0..2], 16);
+    let g = u8::from_str_radix(&s[2..4], 16);
+    let b = u8::from_str_radix(&s[4..6], 16);
+    match (r, g, b) {
+        (Ok(r), Ok(g), Ok(b)) if s.len() == 6 => Ok((r, g, b)),
+        _ => Err(format!("Invalid color '{}'", s)),
+    }
+}
+
 fn main() {
     let matches = App::new("system76_ectool")
         .setting(AppSettings::SubcommandRequired)
@@ -298,6 +308,24 @@ fn main() {
                 .required(true)
             )
             .arg(Arg::with_name("value"))
+        )
+        .subcommand(SubCommand::with_name("led_color")
+            .arg(Arg::with_name("index")
+                .validator(validate_from_str::<u8>)
+                .required(true)
+            )
+            .arg(Arg::with_name("value")
+                .validator(|x| parse_color(&x).and(Ok(())))
+            )
+        )
+        .subcommand(SubCommand::with_name("led_value")
+            .arg(Arg::with_name("index")
+                .validator(validate_from_str::<u8>)
+                .required(true)
+            )
+            .arg(Arg::with_name("value")
+                .validator(validate_from_str::<u8>)
+            )
         )
         .subcommand(SubCommand::with_name("print")
             .arg(Arg::with_name("message")
@@ -425,6 +453,52 @@ fn main() {
                         process::exit(1);
                     },
                 },
+            }
+        },
+        ("led_color", Some(sub_m)) => {
+            let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
+            let value = sub_m.value_of("value");
+            if let Some(value) = value {
+                let (r, g, b) = parse_color(value).unwrap();
+                match unsafe { ec.led_set_color(index, r, g, b) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to set color {}: {:X?}", value, err);
+                        process::exit(1);
+                    },
+                }
+            } else {
+                match unsafe { ec.led_get_color(index) } {
+                    Ok((r, g, b)) => println!("{:02x}{:02x}{:02x}", r, g, b),
+                    Err(err) => {
+                        eprintln!("failed to get color: {:X?}", err);
+                        process::exit(1);
+                    },
+                }
+            }
+        },
+        ("led_value", Some(sub_m)) => {
+            let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
+            let value = sub_m.value_of("value").map(|x| x.parse::<u8>().unwrap());
+            if let Some(value) = value {
+                match unsafe { ec.led_set_value(index, value) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to set value {}: {:X?}", value, err);
+                        process::exit(1);
+                    },
+                }
+            } else {
+                match unsafe { ec.led_get_value(index) } {
+                    Ok((value, max)) => {
+                        println!("value: {}", value);
+                        println!("max: {}", max);
+                    },
+                    Err(err) => {
+                        eprintln!("failed to get value: {:X?}", err);
+                        process::exit(1);
+                    },
+                }
             }
         },
         ("print", Some(sub_m)) => for arg in sub_m.values_of("message").unwrap() {
