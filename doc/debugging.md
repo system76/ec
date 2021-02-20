@@ -69,8 +69,10 @@ galp4       | 4         | 5
 gaze14      | 4         | 3
 gaze15      | 4         | 3
 lemp9       | 6         | 5
+lemp10      | 6         | 5
 oryp5       | 4         | 5
 oryp6       | 6         | 5
+oryp7       | 6         | 5
 
 1. Power off system
 2. Unplug AC adapter
