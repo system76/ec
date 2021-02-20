@@ -4,6 +4,7 @@ use ectool::{
     Ec,
     Error,
     Firmware,
+    SecurityState,
     StdTimeout,
     Spi,
     SpiRom,
@@ -262,6 +263,24 @@ unsafe fn keymap_set(layer: u8, output: u8, input: u8, value: u16) -> Result<(),
     ec.keymap_set(layer, output, input, value)
 }
 
+unsafe fn security_get() -> Result<(), Error> {
+    let mut ec = ec()?;
+
+    let state = ec.security_get()?;
+    println!("{:?}", state);
+
+    Ok(())
+}
+
+unsafe fn security_set(state: SecurityState) -> Result<(), Error> {
+    let mut ec = ec()?;
+
+    ec.security_set(state)?;
+    println!("Shut down the system for the security state to take effect");
+
+    Ok(())
+}
+
 fn usage() {
     eprintln!("  console");
     eprintln!("  flash [file]");
@@ -270,6 +289,7 @@ fn usage() {
     eprintln!("  info");
     eprintln!("  keymap [layer] [output] [input] <value>");
     eprintln!("  print [message]");
+    eprintln!("  security <lock|unlock>");
 }
 
 fn parse_arg_opt<I: Iterator<Item=String>, F: FromStr>(args: &mut I, name: &str) -> Option<F> {
@@ -395,6 +415,32 @@ fn main() {
                         process::exit(1);
                     },
                 }
+            },
+            "security" => match args.next() {
+                Some(value) => {
+                    let state = match value.as_str() {
+                        "unlock" => SecurityState::PrepareUnlock,
+                        "lock" => SecurityState::PrepareLock,
+                        _ => {
+                            eprintln!("invalid security state '{}': must be 'unlock' or 'lock'", value);
+                            process::exit(1);
+                        },
+                    };
+                    match unsafe { security_set(state) } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to set security state to '{}': {:X?}", value, err);
+                            process::exit(1);
+                        },
+                    }
+                },
+                None => match unsafe { security_get() } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to get security state: {:X?}", err);
+                        process::exit(1);
+                    },
+                },
             },
             _ => {
                 eprintln!("unknown subcommand '{}'", arg);
