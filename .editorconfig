@@ -13,8 +13,8 @@ trim_trailing_whitespace = true
 [*.md]
 trim_trailing_whitespace = false
 
-[*.mk]
+[{Makefile,*.mk}]
 indent_style = tab
 
-[Makefile]
-indent_style = tab
+[*.yml]
+indent_size = 2
