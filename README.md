@@ -13,15 +13,8 @@ laptops.
 
 ## Dependencies
 
-The complete set of dependencies can be installed using the `deps.sh` script
-from the [Open Firmware](https://github.com/system76/firmware-open) repo.
-
-Dependencies specific to EC development can be installed with:
+Install dependencies using the provided script:
 
 ```
-sudo apt install \
-  avr-libc \
-  avrdude \
-  gcc-avr \
-  sdcc
+./scripts/deps.sh
 ```
