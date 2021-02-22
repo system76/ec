@@ -40,12 +40,14 @@ fi
 msg "Initializing submodules"
 git submodule update --init --recursive
 
-msg "Installing Rust"
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-  | sh -s -- -y --default-toolchain nightly
+if ! which rustup &> /dev/null; then
+    msg "Installing Rust"
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+      | sh -s -- -y --default-toolchain none
 
-msg "Loading Rust environment"
-source "${HOME}/.cargo/env"
+    msg "Loading Rust environment"
+    source "${HOME}/.cargo/env"
+fi
 
 msg "Installing pinned Rust toolchain"
 rustup toolchain install "$(cat rust-toolchain)"
