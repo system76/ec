@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 //! Library for accessing System76 ECs
 //! First, construct an access method, using an object implementing the `Access` trait. Next, an Ec
 //! object can be contructed, which exposes the command interface.

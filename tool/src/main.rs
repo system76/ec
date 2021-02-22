@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 use clap::{Arg, App, AppSettings, SubCommand};
 use ectool::{
     Access,

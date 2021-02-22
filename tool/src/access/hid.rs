@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 use hidapi::HidDevice;
 
 use crate::{
