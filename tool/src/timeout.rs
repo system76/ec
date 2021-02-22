@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 #[cfg(feature = "std")]
 use std::time::{Duration, Instant};
 

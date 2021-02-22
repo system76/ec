@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 /// Parses firmware information from a firmware ROM
 pub struct Firmware<'a> {
     pub board: &'a [u8],

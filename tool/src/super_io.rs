@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 use hwio::{Io, Pio};
 
 /// Super I/O interface provided by LPC ECs

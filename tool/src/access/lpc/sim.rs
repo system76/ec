@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 use std::{
     io,
     net::UdpSocket,
@@ -40,7 +42,7 @@ impl AccessLpcSim {
                 "Socket request incorrect size"
             ));
         }
-    
+
         let mut response = [0];
         if self.socket.recv(&mut response)? != response.len() {
             return Err(io::Error::new(
@@ -48,14 +50,14 @@ impl AccessLpcSim {
                 "Socket response incorrect size"
             ));
         }
-    
+
         Ok(response[0])
     }
-    
+
     pub fn inb(&mut self, addr: u16) -> Result<u8, Error> {
         Ok(self.transaction(0x01, addr, 0)?)
     }
-    
+
     pub fn outb(&mut self, addr: u16, value: u8) -> Result<(), Error> {
         self.transaction(0x02, addr, value)?;
         Ok(())

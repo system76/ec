@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 /// Errors returned by operations
 #[derive(Debug)]
 pub enum Error {
