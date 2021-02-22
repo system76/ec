@@ -5,6 +5,13 @@ on:
   pull_request:
 
 jobs:
+  spdx:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check SPDX identifiers
+        run: ./scripts/spdx.sh
+
   build:
     runs-on: ubuntu-20.04
     strategy:
