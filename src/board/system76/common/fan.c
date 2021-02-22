@@ -25,6 +25,9 @@ uint8_t last_duty_peci = 0;
 
   const uint8_t max_jump_up = (max_speed - min_speed) / (uint8_t) FAN_SMOOTHING_UP;
   const uint8_t max_jump_down = (max_speed - min_speed) / (uint8_t) FAN_SMOOTHING_DOWN;
+#else
+  const uint8_t max_jump_up = max_speed - min_speed;
+  const uint8_t max_jump_down = max_speed - min_speed;
 #endif
 
 void fan_reset(void) {
@@ -122,34 +125,32 @@ uint8_t fan_cooldown(const struct Fan * fan, uint8_t duty) __reentrant {
     return highest;
 }
 
-#ifdef FAN_SMOOTHING
-  uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
-    uint8_t next_duty = duty;
+uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
+  uint8_t next_duty = duty;
 
-    // ramping down
-    if (duty < last_duty) {
-      // out of bounds (lower) safeguard
-      uint8_t smoothed = last_duty < min_speed + max_jump_down
-        ? min_speed
-        : last_duty - max_jump_down;
+  // ramping down
+  if (duty < last_duty) {
+    // out of bounds (lower) safeguard
+    uint8_t smoothed = last_duty < min_speed + max_jump_down
+      ? min_speed
+      : last_duty - max_jump_down;
 
-      if (smoothed > duty) {
-        next_duty = smoothed;
-      }
+    if (smoothed > duty) {
+      next_duty = smoothed;
     }
-
-    // ramping up
-    if (duty > last_duty) {
-      // out of bounds (higher) safeguard
-      uint8_t smoothed = last_duty > max_speed - max_jump_up
-        ? max_speed
-        : last_duty + max_jump_up;
-
-      if (smoothed < duty) {
-        next_duty = smoothed;
-      }
-    }
-
-    return next_duty;
   }
-#endif
+
+  // ramping up
+  if (duty > last_duty) {
+    // out of bounds (higher) safeguard
+    uint8_t smoothed = last_duty > max_speed - max_jump_up
+      ? max_speed
+      : last_duty + max_jump_up;
+
+    if (smoothed < duty) {
+      next_duty = smoothed;
+    }
+  }
+
+  return next_duty;
+}

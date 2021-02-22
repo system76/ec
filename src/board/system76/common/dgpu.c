@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/dgpu.h>
+#include <board/fan.h>
 
 #if HAVE_DGPU
-
-#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/power.h>
 #include <common/debug.h>
