@@ -12,7 +12,18 @@ jobs:
       - name: Check SPDX identifiers
         run: ./scripts/spdx.sh
 
-  build:
+  tool:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: ./scripts/deps.sh
+
+      - name: Build tool
+        run: cargo build --release --manifest-path tool/Cargo.toml
+
+  ec:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
