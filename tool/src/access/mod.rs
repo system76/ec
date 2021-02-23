@@ -42,6 +42,10 @@ impl Access for Box<dyn Access> {
     fn data_size(&self) -> usize {
         (**self).data_size()
     }
+
+    unsafe fn read_debug(&mut self, addr: u8) -> Result<u8, Error> {
+        (**self).read_debug(addr)
+    }
 }
 
 downcast_rs::impl_downcast!(Access);

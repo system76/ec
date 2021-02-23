@@ -14,7 +14,7 @@ version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "hermit-abi 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.81 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.86 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -25,7 +25,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "cc"
-version = "1.0.66"
+version = "1.0.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -52,7 +52,7 @@ name = "hermit-abi"
 version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "libc 0.2.81 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.86 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -60,14 +60,14 @@ name = "hidapi"
 version = "1.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
- "cc 1.0.66 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.81 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cc 1.0.67 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.86 (registry+https://github.com/rust-lang/crates.io-index)",
  "pkg-config 0.3.19 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "libc"
-version = "0.2.81"
+version = "0.2.86"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -87,12 +87,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "system76_ectool"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "clap 2.33.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "downcast-rs 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "hidapi 1.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "libc 0.2.81 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.86 (registry+https://github.com/rust-lang/crates.io-index)",
  "redox_hwio 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -137,12 +137,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum ansi_term 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ee49baf6cb617b853aa8d93bf420db2383fab46d314482ca2803b40d5fde979b"
 "checksum atty 0.2.14 (registry+https://github.com/rust-lang/crates.io-index)" = "d9b39be18770d11421cdb1b9947a45dd3f37e93092cbf377614828a319d5fee8"
 "checksum bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
-"checksum cc 1.0.66 (registry+https://github.com/rust-lang/crates.io-index)" = "4c0496836a84f8d0495758516b8621a622beb77c0fed418570e50764093ced48"
+"checksum cc 1.0.67 (registry+https://github.com/rust-lang/crates.io-index)" = "e3c69b077ad434294d3ce9f1f6143a2a4b89a8a2d54ef813d85003a4fd1137fd"
 "checksum clap 2.33.3 (registry+https://github.com/rust-lang/crates.io-index)" = "37e58ac78573c40708d45522f0d80fa2f01cc4f9b4e2bf749807255454312002"
 "checksum downcast-rs 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 "checksum hermit-abi 0.1.18 (registry+https://github.com/rust-lang/crates.io-index)" = "322f4de77956e22ed0e5032c359a0f1273f1f7f0d79bfa3b8ffbc730d7fbcc5c"
 "checksum hidapi 1.2.5 (registry+https://github.com/rust-lang/crates.io-index)" = "76c352a18370f7e7e47bcbfcbdc5432b8c80c705b5d751a25232c659fcf5c775"
-"checksum libc 0.2.81 (registry+https://github.com/rust-lang/crates.io-index)" = "1482821306169ec4d07f6aca392a4681f66c75c9918aa49641a2595db64053cb"
+"checksum libc 0.2.86 (registry+https://github.com/rust-lang/crates.io-index)" = "b7282d924be3275cec7f6756ff4121987bc6481325397dde6ba3e7802b1a8b1c"
 "checksum pkg-config 0.3.19 (registry+https://github.com/rust-lang/crates.io-index)" = "3831453b3449ceb48b6d9c7ad7c96d5ea673e9b470a1dc578c2ce6521230884c"
 "checksum redox_hwio 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)" = "41aa2c4c67329a04106644cad336238aa5adecfd73d06fb10339d472ce6d8070"
 "checksum strsim 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
