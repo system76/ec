@@ -20,6 +20,7 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         avrdude \
         curl \
         gcc-avr \
+        libudev-dev \
         make \
         sdcc
 elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
@@ -30,7 +31,8 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avrdude \
         curl \
         make \
-        sdcc
+        sdcc \
+        systemd-devel
 else
     msg "Please add support for your distribution to:"
     msg "scripts/deps.sh"
