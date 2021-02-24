@@ -10,6 +10,7 @@
 
 #define KBLED_DACDAT xconcat(DACDAT, KBLED_DAC)
 
+// clang-format off
 static uint8_t __code levels[] = {
     0x00,
     0x80,
@@ -18,6 +19,7 @@ static uint8_t __code levels[] = {
     0xC0,
     0xFF
 };
+// clang-format on
 
 void kbled_init(void) {
     // Enable DAC used for KBLIGHT_ADJ

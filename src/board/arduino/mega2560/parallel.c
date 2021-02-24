@@ -11,6 +11,7 @@
 #include <arch/gpio.h>
 #include <arch/uart.h>
 
+// clang-format off
 // Mapping of 24-pin ribbon cable to parallel pins. See schematic
 #define PINS \
     /* Data (KSO0 - KSO7) - bi-directional */ \
@@ -88,6 +89,7 @@ static struct Gpio GPIOS[24] = {
     GPIO(A, 0), GPIO(A, 1),
 };
 #endif // !defined(FLIP)
+// clang-format on
 
 enum ParallelState {
     PARALLEL_STATE_UNKNOWN,
