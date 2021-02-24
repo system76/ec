@@ -14,6 +14,10 @@ jobs:
       - name: Check indentation
         run: ./scripts/lint/indent.sh
 
+      - name: Check formatting
+        run: ./scripts/clang-format.sh
+        continue-on-error: true
+
   tool:
     strategy:
       matrix:
