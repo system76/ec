@@ -40,7 +40,7 @@ void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;
     // Enable SMBus channel 4
-    GCR15 = (1 << 4);
+    GCR15 = BIT(4);
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
 

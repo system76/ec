@@ -5,17 +5,18 @@
 
 #include <board/battery.h>
 #include <board/smbus.h>
+#include <common/macro.h>
 #include <common/debug.h>
 
 // ChargeOption0 flags
 // Low Power Mode Enable
-#define SBC_EN_LWPWR        ((uint16_t)(1 << 15))
+#define SBC_EN_LWPWR        ((uint16_t)(BIT(15)))
 // Watchdog Timer Adjust
 #define SBC_WDTMR_ADJ_175S  ((uint16_t)(0b11 << 13))
 // Switching Frequency
 #define SBC_PWM_FREQ_800KHZ ((uint16_t)(0b01 << 8))
 // IDCHG Amplifier Gain
-#define SBC_IDCHC_GAIN      ((uint16_t)(1 << 3))
+#define SBC_IDCHC_GAIN      ((uint16_t)(BIT(3)))
 
 // XXX: Assumption: ac_last is initialized high.
 static bool charger_enabled = false;

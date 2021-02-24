@@ -3,6 +3,8 @@
 #ifndef _EC_GPIO_H
 #define _EC_GPIO_H
 
+#include <common/macro.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -17,7 +19,7 @@ struct Gpio {
     .data = &GPDR ## BLOCK, \
     .mirror = &GPDMR ## BLOCK, \
     .control = &GPCR ## BLOCK ## NUMBER, \
-    .value = (1 << NUMBER), \
+    .value = BIT(NUMBER), \
 }
 
 bool gpio_get(struct Gpio * gpio);

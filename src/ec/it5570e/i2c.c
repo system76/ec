@@ -43,7 +43,7 @@ struct I2C __code I2C_4 = {
 void i2c_reset(struct I2C * i2c, bool kill) {
     if (*(i2c->hosta) & HOSTA_BUSY) {
         // Set kill bit
-        if (kill) *(i2c->hoctl) |= (1 << 1);
+        if (kill) *(i2c->hoctl) |= BIT(1);
         // Wait for host to finish
         while (*(i2c->hosta) & HOSTA_BUSY) {}
     }
@@ -63,7 +63,7 @@ int i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
             // If we are switching to read mode
             if (read) {
                 // Enable direction switch
-                *(i2c->hoctl2) |= (1 << 3) | (1 << 2);
+                *(i2c->hoctl2) |= BIT(3) | BIT(2);
             } else {
                 // Unsupported!
                 i2c_reset(i2c, true);
@@ -74,7 +74,7 @@ int i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
         i2c_reset(i2c, true);
 
         // Enable host controller with i2c compatibility
-        *(i2c->hoctl2) = (1 << 1) | 1;
+        *(i2c->hoctl2) = BIT(1) | BIT(0);
 
         // Set address
         *(i2c->trasla) = (addr << 1) | read;
@@ -85,7 +85,7 @@ int i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
 
 void i2c_stop(struct I2C * i2c) {
     // Disable i2c compatibility
-    *(i2c->hoctl2) &= ~(1 << 1);
+    *(i2c->hoctl2) &= ~BIT(1);
     // Clear status
     *(i2c->hosta) = *(i2c->hosta);
 
@@ -99,7 +99,7 @@ static int i2c_transaction(struct I2C * i2c, uint8_t * data, int length, bool re
             // If last byte
             if ((i + 1) == length) {
                 // Set last byte bit
-                *(i2c->hoctl) |= (1 << 5);
+                *(i2c->hoctl) |= BIT(5);
             }
         } else {
             // Write byte
@@ -112,13 +112,13 @@ static int i2c_transaction(struct I2C * i2c, uint8_t * data, int length, bool re
             *(i2c->hosta) = *(i2c->hosta);
         } else {
             // Start new transaction
-            *(i2c->hoctl) = (1 << 6) | (0b111 << 2);
+            *(i2c->hoctl) = BIT(6) | (0b111 << 2);
         }
 
         // If we are waiting on direction switch
-        if (*(i2c->hoctl2) & (1 << 2)) {
+        if (*(i2c->hoctl2) & BIT(2)) {
             // Complete direction switch
-            *(i2c->hoctl2) &= ~(1 << 2);
+            *(i2c->hoctl2) &= ~BIT(2);
         }
 
         // Wait for byte done, timeout, or error

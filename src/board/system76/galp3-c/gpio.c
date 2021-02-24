@@ -48,15 +48,15 @@ void gpio_init() {
     // Set GPIO data
     GPDRA = 0;
     // NC
-    GPDRB = (1 << 0);
+    GPDRB = BIT(0);
     GPDRC = 0;
     // PWR_BTN#, SCI#, SMI#
-    GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
+    GPDRD = BIT(5) | BIT(4) | BIT(3);
     GPDRE = 0;
     // USB_PWR_EN#, H_PECI
-    GPDRF = 0xC0; // (1 << 7) | (1 << 6)
+    GPDRF = BIT(7) | BIT(6);
     // AIRPLAN_LED#
-    GPDRG = (1 << 6);
+    GPDRG = BIT(6);
     GPDRH = 0;
     GPDRI = 0;
     GPDRJ = 0;

@@ -3,6 +3,8 @@
 #ifndef _EC_PMC_H
 #define _EC_PMC_H
 
+#include <common/macro.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -23,9 +25,9 @@ extern struct Pmc __code PMC_3;
 extern struct Pmc __code PMC_4;
 extern struct Pmc __code PMC_5;
 
-#define PMC_STS_OBF (1 << 0)
-#define PMC_STS_IBF (1 << 1)
-#define PMC_STS_CMD (1 << 3)
+#define PMC_STS_OBF BIT(0)
+#define PMC_STS_IBF BIT(1)
+#define PMC_STS_CMD BIT(3)
 
 uint8_t pmc_status(struct Pmc * pmc);
 void pmc_set_status(struct Pmc * pmc, uint8_t status);

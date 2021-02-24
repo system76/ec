@@ -6,6 +6,7 @@
 
 #include <board/cpu.h>
 #include <common/i2c.h>
+#include <common/macro.h>
 
 #define TIMEOUT (F_CPU/1000)
 
@@ -15,10 +16,10 @@ int i2c_start(struct I2C * i2c, uint8_t addr, bool read) {
 	// reset TWI control register
 	TWCR = 0;
 	// transmit START condition
-	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+	TWCR = BIT(TWINT) | BIT(TWSTA) | BIT(TWEN);
 	// wait for end of transmission
 	count = TIMEOUT;
-	while(!(TWCR & (1<<TWINT)) && count > 0) count -= 1;
+	while(!(TWCR & BIT(TWINT)) && count > 0) count -= 1;
 	if (count == 0) return -1;
 
 	// check if the start condition was successfully transmitted
@@ -27,10 +28,10 @@ int i2c_start(struct I2C * i2c, uint8_t addr, bool read) {
 	// load slave addr into data register
 	TWDR = ((addr << 1) | read);
 	// start transmission of addr
-	TWCR = (1<<TWINT) | (1<<TWEN);
+	TWCR = BIT(TWINT) | BIT(TWEN);
 	// wait for end of transmission
 	count = TIMEOUT;
-	while(!(TWCR & (1<<TWINT)) && count > 0) count -= 1;
+	while(!(TWCR & BIT(TWINT)) && count > 0) count -= 1;
 	if (count == 0) return -1;
 
 	// check if the device has acknowledged the READ / WRITE mode
@@ -42,7 +43,7 @@ int i2c_start(struct I2C * i2c, uint8_t addr, bool read) {
 
 void i2c_stop(struct I2C * i2c) {
 	// transmit STOP condition
-	TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+	TWCR = BIT(TWINT) | BIT(TWEN) | BIT(TWSTO);
 }
 
 int i2c_write(struct I2C * i2c, uint8_t * data, int length) {
@@ -51,10 +52,10 @@ int i2c_write(struct I2C * i2c, uint8_t * data, int length) {
 		// load data into data register
 		TWDR = data[i];
 		// start transmission of data
-		TWCR = (1<<TWINT) | (1<<TWEN);
+		TWCR = BIT(TWINT) | BIT(TWEN);
 		// wait for end of transmission
 		uint32_t count = TIMEOUT;
-		while(!(TWCR & (1<<TWINT)) && count > 0) count -= 1;
+		while(!(TWCR & BIT(TWINT)) && count > 0) count -= 1;
 		// timed out
 		if (count == 0) return -1;
 		// failed to receive ack
@@ -69,14 +70,14 @@ int i2c_read(struct I2C * i2c, uint8_t * data, int length) {
 	for (i = 0; i < length; i++) {
 	    if ((i + 1) < length) {
 	    	// start TWI module and acknowledge data after reception
-	    	TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWEA);
+	    	TWCR = BIT(TWINT) | BIT(TWEN) | BIT(TWEA);
 	    } else {
 	        // start receiving without acknowledging reception
-	    	TWCR = (1<<TWINT) | (1<<TWEN);
+	    	TWCR = BIT(TWINT) | BIT(TWEN);
 	    }
 		// wait for end of transmission
 		uint32_t count = TIMEOUT;
-		while(!(TWCR & (1<<TWINT)) && count > 0) count -= 1;
+		while(!(TWCR & BIT(TWINT)) && count > 0) count -= 1;
 		if (count == 0) return -1;
 		// return received data from TWDR
 		data[i] = TWDR;

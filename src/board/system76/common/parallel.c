@@ -3,6 +3,7 @@
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/parallel.h>
+#include <common/macro.h>
 #include <ec/kbscan.h>
 
 #include <stdbool.h>
@@ -18,12 +19,12 @@
  * nWAIT    = KSOH[1]
  */
 
-#define CTL_WRITE   (1 << 0)
-#define CTL_DATA    (1 << 1)
-#define CTL_RESET   (1 << 2)
-#define CTL_ADDR    (1 << 3)
+#define CTL_WRITE   BIT(0)
+#define CTL_DATA    BIT(1)
+#define CTL_RESET   BIT(2)
+#define CTL_ADDR    BIT(3)
 
-#define STS_WAIT    (1 << 1)
+#define STS_WAIT    BIT(1)
 
 // Maximum peripheral response time in ms
 #define PARALLEL_TIMEOUT 10

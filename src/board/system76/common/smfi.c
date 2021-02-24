@@ -96,10 +96,10 @@ void smfi_init(void) {
     HRAMW1AAS = 0x34;
 
     // Enable H2RAM window 0 and 1 using LPC I/O
-    HRAMWC |= (1 << 4) | (1 << 1) | (1 << 0);
+    HRAMWC |= BIT(4) | BIT(1) | BIT(0);
 
     // Enable backup ROM access
-    FLHCTRL3 |= (1 << 3);
+    FLHCTRL3 |= BIT(3);
 }
 
 static enum Result cmd_print(void) {
@@ -298,7 +298,7 @@ static enum Result cmd_spi(void) {
 
 static enum Result cmd_reset(void) {
     // Attempt to trigger watchdog reset
-    ETWCFG |= (1 << 5);
+    ETWCFG |= BIT(5);
     EWDKEYR = 0;
 
     // Failed if it got this far
