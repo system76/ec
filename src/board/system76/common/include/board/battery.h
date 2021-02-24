@@ -3,6 +3,8 @@
 #ifndef _BOARD_BATTERY_H
 #define _BOARD_BATTERY_H
 
+#include <common/macro.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -14,7 +16,7 @@
     #define CHARGER_ADDRESS 0x09
 #endif
 
-#define BATTERY_INITIALIZED (1U << 7)
+#define BATTERY_INITIALIZED BIT(7)
 
 extern uint16_t battery_temp;
 extern uint16_t battery_voltage;

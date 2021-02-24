@@ -42,28 +42,28 @@ void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;
     // Enable SMBus channel 4
-    GCR15 = (1 << 4);
+    GCR15 = BIT(4);
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
 
     // Set GPIO data
     GPDRA = 0x00;
     // XLP_OUT, PWR_SW#
-    GPDRB = (1 << 4) | (1 << 3);
+    GPDRB = BIT(4) | BIT(3);
     GPDRC = 0x00;
     // PWR_BTN#, SCI#, SMI#
-    GPDRD = (1 << 5) | (1 << 4) | (1 << 3);
+    GPDRD = BIT(5) | BIT(4) | BIT(3);
     // PLVDD_RST_EC
-    GPDRE = (1 << 6);
+    GPDRE = BIT(6);
     // EC_PECI
-    GPDRF = (1 << 6);
+    GPDRF = BIT(6);
     // H_PROCHOT#_EC, LED_NUM#
-    GPDRG = (1 << 6) | (1 << 0);
+    GPDRG = BIT(6) | BIT(0);
     // AIRPLAN_LED#
-    GPDRH = 0x80; // (1 << 7)
+    GPDRH = BIT(7);
     GPDRI = 0x00;
     // LED_SCROLL#, LED_CAP#
-    GPDRJ = (1 << 3) | (1 << 2);
+    GPDRJ = BIT(3) | BIT(2);
 
     // Set GPIO control
     // EC_PWM_LEDKB_P

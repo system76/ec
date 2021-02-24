@@ -4,6 +4,7 @@
 #include <board/acpi.h>
 #include <board/gpio.h>
 #include <board/pmc.h>
+#include <common/macro.h>
 #include <common/debug.h>
 #include <ec/espi.h>
 
@@ -54,7 +55,7 @@ static void pmc_sci_interrupt(void) {
 
 bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
     // Set SCI pending bit
-    pmc_set_status(pmc, pmc_status(pmc) | (1 << 5));
+    pmc_set_status(pmc, pmc_status(pmc) | BIT(5));
 
     // Send SCI
     pmc_sci_interrupt();
@@ -107,7 +108,7 @@ static void pmc_on_input_command(struct Pmc * pmc, uint8_t data) {
     case 0x82:
         TRACE("  burst enable\n");
         // Set burst bit
-        pmc_set_status(pmc, pmc_status(pmc) | (1 << 4));
+        pmc_set_status(pmc, pmc_status(pmc) | BIT(4));
         // Send acknowledgement byte
         state = PMC_STATE_WRITE;
         state_data = 0x90;
@@ -115,14 +116,14 @@ static void pmc_on_input_command(struct Pmc * pmc, uint8_t data) {
     case 0x83:
         TRACE("  burst disable\n");
         // Clear burst bit
-        pmc_set_status(pmc, pmc_status(pmc) & ~(1 << 4));
+        pmc_set_status(pmc, pmc_status(pmc) & ~BIT(4));
         // Send SCI for IBF=0
         pmc_sci_interrupt();
         break;
     case 0x84:
         TRACE("  SCI queue\n");
         // Clear SCI pending bit
-        pmc_set_status(pmc, pmc_status(pmc) & ~(1 << 5));
+        pmc_set_status(pmc, pmc_status(pmc) & ~BIT(5));
         // Send SCI queue
         state = PMC_STATE_WRITE;
         state_data = pmc_sci_queue;

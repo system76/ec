@@ -3,6 +3,8 @@
 #ifndef _COMMON_COMMAND_H
 #define _COMMON_COMMAND_H
 
+#include <common/macro.h>
+
 enum Command {
     // Indicates that EC is ready to accept commands
     CMD_NONE = 0,
@@ -55,13 +57,13 @@ enum Result {
 
 enum CommandSpiFlag {
     // Read from SPI chip if set, write otherwise
-    CMD_SPI_FLAG_READ = (1 << 0),
+    CMD_SPI_FLAG_READ = BIT(0),
     // Disable SPI chip after executing command
-    CMD_SPI_FLAG_DISABLE = (1 << 1),
+    CMD_SPI_FLAG_DISABLE = BIT(1),
     // Run firmware from scratch RAM if necessary
-    CMD_SPI_FLAG_SCRATCH = (1 << 2),
+    CMD_SPI_FLAG_SCRATCH = BIT(2),
     // Write to backup ROM instead
-    CMD_SPI_FLAG_BACKUP = (1 << 3),
+    CMD_SPI_FLAG_BACKUP = BIT(3),
 };
 
 #define CMD_LED_INDEX_ALL 0xFF

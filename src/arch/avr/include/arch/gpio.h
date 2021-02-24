@@ -3,6 +3,8 @@
 #ifndef _ARCH_GPIO_H
 #define _ARCH_GPIO_H
 
+#include <common/macro.h>
+
 #include <avr/io.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -18,7 +20,7 @@ struct Gpio {
     .pin = &PIN ## BLOCK, \
     .ddr = &DDR ## BLOCK, \
     .port = &PORT ## BLOCK, \
-    .value = (1 << NUMBER), \
+    .value = BIT(NUMBER), \
 }
 
 bool gpio_get(struct Gpio * gpio);

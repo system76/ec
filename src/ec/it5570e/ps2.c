@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 
+#include <common/macro.h>
 #include <ec/ps2.h>
 
 #define PS2(NUM) { \
@@ -13,11 +14,11 @@
 
 #define PS2_TIMEOUT 10000
 
-#define PSSTS_TIMEOUT_ERR (1 << 6)
-#define PSSTS_FRAME_ERR (1 << 5)
-#define PSSTS_PARITY_ERR (1 << 4)
+#define PSSTS_TIMEOUT_ERR BIT(6)
+#define PSSTS_FRAME_ERR BIT(5)
+#define PSSTS_PARITY_ERR BIT(4)
 #define PSSTS_ALL_ERR (PSSTS_TIMEOUT_ERR | PSSTS_FRAME_ERR | PSSTS_PARITY_ERR)
-#define PSSTS_DONE (1 << 3)
+#define PSSTS_DONE BIT(3)
 
 struct Ps2 __code PS2_1 = PS2(1);
 struct Ps2 __code PS2_2 = PS2(2);

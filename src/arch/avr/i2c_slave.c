@@ -9,6 +9,7 @@
 
 #include <board/cpu.h>
 #include <arch/i2c_slave.h>
+#include <common/macro.h>
 
 static void (* volatile i2c_slave_new_cb)() = NULL;
 static void (* volatile i2c_slave_recv_cb)(uint8_t) = NULL;
@@ -28,7 +29,7 @@ void i2c_slave_init(uint8_t address, void (*new_cb)(), void (*recv_cb)(uint8_t),
 	// load address into TWI address register
 	TWAR = (address << 1);
 	// set the TWCR to enable address matching and enable TWI, clear TWINT, enable TWI interrupt
-	TWCR = (1<<TWIE) | (1<<TWEA) | (1<<TWINT) | (1<<TWEN);
+	TWCR = BIT(TWIE) | BIT(TWEA) | BIT(TWINT) | BIT(TWEN);
 
 	// set interrupts
 	sei();
@@ -39,7 +40,7 @@ void i2c_slave_stop(){
 	cli();
 
 	// clear acknowledge and enable bits
-	TWCR &= ~((1<<TWEA) | (1<<TWEN));
+	TWCR &= ~(BIT(TWEA) | BIT(TWEN));
 	// clear address
 	TWAR = 0;
 	// remove callbacks
@@ -59,14 +60,14 @@ ISR(TWI_vect) {
 		if (i2c_slave_new_cb != NULL) {
 			i2c_slave_new_cb();
 		}
-		TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+		TWCR = BIT(TWIE) | BIT(TWINT) | BIT(TWEA) | BIT(TWEN);
 		break;
 	case TW_SR_DATA_ACK:
 		// received data from master, call the receive callback
 		if(i2c_slave_send_cb != NULL){
 			i2c_slave_recv_cb(TWDR);
 		}
-		TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+		TWCR = BIT(TWIE) | BIT(TWINT) | BIT(TWEA) | BIT(TWEN);
 		break;
 	case TW_ST_SLA_ACK:
 	case TW_ST_DATA_ACK:
@@ -74,16 +75,16 @@ ISR(TWI_vect) {
 		if(i2c_slave_recv_cb != NULL) {
 			TWDR = i2c_slave_send_cb();
 		}
-		TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+		TWCR = BIT(TWIE) | BIT(TWINT) | BIT(TWEA) | BIT(TWEN);
 		break;
 	case TW_BUS_ERROR:
 		// some sort of erroneous state, prepare TWI to be readdressed
 		printf("TWI_vect bus error\n");
 		TWCR = 0;
-		TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+		TWCR = BIT(TWIE) | BIT(TWINT) | BIT(TWEA) | BIT(TWEN);
 		break;
 	default:
-		TWCR = (1<<TWIE) | (1<<TWINT) | (1<<TWEA) | (1<<TWEN);
+		TWCR = BIT(TWIE) | BIT(TWINT) | BIT(TWEA) | BIT(TWEN);
 		break;
 	}
 }

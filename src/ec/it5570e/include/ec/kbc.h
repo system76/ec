@@ -3,6 +3,8 @@
 #ifndef _EC_KBC_H
 #define _EC_KBC_H
 
+#include <common/macro.h>
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -25,9 +27,9 @@ struct Kbc {
 
 extern struct Kbc __code KBC;
 
-#define KBC_STS_OBF (1 << 0)
-#define KBC_STS_IBF (1 << 1)
-#define KBC_STS_CMD (1 << 3)
+#define KBC_STS_OBF BIT(0)
+#define KBC_STS_IBF BIT(1)
+#define KBC_STS_CMD BIT(3)
 
 uint8_t kbc_status(struct Kbc * kbc);
 uint8_t kbc_read(struct Kbc * kbc);
