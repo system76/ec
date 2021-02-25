@@ -31,6 +31,8 @@ enum Cmd {
     LedSetValue = 12,
     LedGetColor = 13,
     LedSetColor = 14,
+    LedGetMode = 15,
+    LedSetMode = 16,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -245,6 +247,26 @@ impl<A: Access> Ec<A> {
             blue,
         ];
         self.command(Cmd::LedSetColor, &mut data)
+    }
+
+    pub unsafe fn led_get_mode(&mut self) -> Result<(u8, u8), Error> {
+        let mut data = [
+            0,
+            0,
+        ];
+        self.command(Cmd::LedGetMode, &mut data)?;
+        Ok((
+            data[0],
+            data[1]
+        ))
+    }
+
+    pub unsafe fn led_set_mode(&mut self, mode: u8, speed: u8) -> Result<(), Error> {
+        let mut data = [
+            mode,
+            speed,
+        ];
+        self.command(Cmd::LedSetMode, &mut data)
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>

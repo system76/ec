@@ -329,6 +329,15 @@ fn main() {
                 .validator(validate_from_str::<u8>)
             )
         )
+        .subcommand(SubCommand::with_name("led_mode")
+            .arg(Arg::with_name("mode")
+                .validator(validate_from_str::<u8>)
+                .requires("speed")
+            )
+            .arg(Arg::with_name("speed")
+                .validator(validate_from_str::<u8>)
+            )
+        )
         .subcommand(SubCommand::with_name("print")
             .arg(Arg::with_name("message")
                 .required(true)
@@ -498,6 +507,30 @@ fn main() {
                     },
                     Err(err) => {
                         eprintln!("failed to get value: {:X?}", err);
+                        process::exit(1);
+                    },
+                }
+            }
+        },
+        ("led_mode", Some(sub_m)) => {
+            let mode = sub_m.value_of("mode").map(|x| x.parse::<u8>().unwrap());
+            let speed = sub_m.value_of("speed").map(|x| x.parse::<u8>().unwrap());
+            if let (Some(mode), Some(speed)) = (mode, speed) {
+                match unsafe { ec.led_set_mode(mode, speed) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to set mode {} at speed {}: {:X?}", mode, speed, err);
+                        process::exit(1);
+                    },
+                }
+            } else {
+                match unsafe { ec.led_get_mode() } {
+                    Ok((mode, speed)) => {
+                        println!("mode: {}", mode);
+                        println!("speed: {}", speed);
+                    },
+                    Err(err) => {
+                        eprintln!("failed to get mode: {:X?}", err);
                         process::exit(1);
                     },
                 }
