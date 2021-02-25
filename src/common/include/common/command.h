@@ -34,6 +34,10 @@ enum Command {
     CMD_LED_GET_COLOR = 13,
     // Set LED color by index
     CMD_LED_SET_COLOR = 14,
+    // Get LED matrix mode and speed
+    CMD_LED_GET_MODE = 15,
+    // Set LED matrix mode and speed
+    CMD_LED_SET_MODE = 16,
     //TODO
 };
 
