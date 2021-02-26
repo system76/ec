@@ -53,16 +53,15 @@ static void pmc_sci_interrupt(void) {
 }
 
 bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
-    // Set SCI queue if possible
+    // Set SCI pending bit
+    pmc_set_status(pmc, pmc_status(pmc) | (1 << 5));
+
+    // Send SCI
+    pmc_sci_interrupt();
+
+    // Set SCI queue if not already set
     if (pmc_sci_queue == 0) {
         pmc_sci_queue = sci;
-
-        // Set SCI pending bit
-        pmc_set_status(pmc, pmc_status(pmc) | (1 << 5));
-
-        // Send SCI
-        pmc_sci_interrupt();
-
         return true;
     } else {
         return false;
