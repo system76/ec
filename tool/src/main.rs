@@ -222,6 +222,35 @@ unsafe fn info(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     Ok(())
 }
 
+unsafe fn matrix(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
+    let data_size = ec.access().data_size();
+
+    let mut data = vec![0; data_size];
+    ec.matrix_get(&mut data)?;
+    let rows = *data.get(0).unwrap_or(&0);
+    let cols = *data.get(1).unwrap_or(&0);
+    let mut byte = 2;
+    let mut bit = 0;
+    for row in 0..rows {
+        for col in 0..cols {
+            if (data.get(byte).unwrap_or(&0) & (1 << bit)) != 0 {
+                print!("#");
+            } else {
+                print!("-");
+            }
+
+            bit += 1;
+            if bit >= 8 {
+                byte += 1;
+                bit = 0;
+            }
+        }
+        println!();
+    }
+
+    Ok(())
+}
+
 unsafe fn print(ec: &mut Ec<Box<dyn Access>>, message: &[u8]) -> Result<(), Error> {
     ec.print(message)?;
 
@@ -338,6 +367,7 @@ fn main() {
                 .validator(validate_from_str::<u8>)
             )
         )
+        .subcommand(SubCommand::with_name("matrix"))
         .subcommand(SubCommand::with_name("print")
             .arg(Arg::with_name("message")
                 .required(true)
@@ -535,6 +565,13 @@ fn main() {
                     },
                 }
             }
+        },
+        ("matrix", Some(_sub_m)) => match unsafe { matrix(&mut ec) } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to read matrix: {:X?}", err);
+                process::exit(1);
+            },
         },
         ("print", Some(sub_m)) => for arg in sub_m.values_of("message").unwrap() {
             let mut arg = arg.to_owned();

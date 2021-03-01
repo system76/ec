@@ -38,6 +38,8 @@ enum Command {
     CMD_LED_GET_MODE = 15,
     // Set LED matrix mode and speed
     CMD_LED_SET_MODE = 16,
+    // Get key matrix state
+    CMD_MATRIX_GET = 17,
     //TODO
 };
 

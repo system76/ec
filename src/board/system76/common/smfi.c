@@ -20,7 +20,7 @@
 #ifndef __SCRATCH__
     #include <board/scratch.h>
     #include <board/kbled.h>
-    #include <board/keymap.h>
+    #include <board/kbscan.h>
 #endif
 #include <board/smfi.h>
 #include <common/command.h>
@@ -232,6 +232,17 @@ static enum Result cmd_led_set_color(void) {
         return RES_ERR;
     }
 }
+
+static enum Result cmd_matrix_get(void) {
+    smfi_cmd[SMFI_CMD_DATA] = KM_OUT;
+    smfi_cmd[SMFI_CMD_DATA + 1] = KM_IN;
+    for (uint8_t row = 0; row < KM_OUT; row++) {
+        if ((SMFI_CMD_DATA + 2 + row) < ARRAY_SIZE(smfi_cmd)) {
+            smfi_cmd[SMFI_CMD_DATA + 2 + row] = kbscan_matrix[row];
+        }
+    }
+    return RES_OK;
+}
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -356,6 +367,9 @@ void smfi_event(void) {
                 break;
             case CMD_LED_SET_COLOR:
                 smfi_cmd[SMFI_CMD_RES] = cmd_led_set_color();
+                break;
+            case CMD_MATRIX_GET:
+                smfi_cmd[SMFI_CMD_RES] = cmd_matrix_get();
                 break;
 #endif // !defined(__SCRATCH__)
             case CMD_SPI:
