@@ -8,7 +8,6 @@
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
-#include <board/keymap.h>
 #include <board/lid.h>
 #include <board/pmc.h>
 #include <board/power.h>
@@ -25,6 +24,8 @@ bool kbscan_esc_held = false;
 bool kbscan_enabled = false;
 uint16_t kbscan_repeat_period = 91;
 uint16_t kbscan_repeat_delay = 500;
+
+uint8_t kbscan_matrix[KM_OUT] = { 0 };
 
 uint8_t sci_extra = 0;
 
@@ -289,7 +290,6 @@ static inline bool key_should_repeat(uint16_t key) {
 void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
     uint8_t layer = kbscan_layer;
-    static uint8_t kbscan_last[KM_OUT] = { 0 };
     static uint8_t kbscan_last_layer[KM_OUT][KM_IN] = { { 0 } };
     static bool kbscan_ghost[KM_OUT] = { false };
 
@@ -312,7 +312,7 @@ void kbscan_event(void) {
     int i;
     for (i = 0; i < KM_OUT; i++) {
         uint8_t new = kbscan_get_row(i);
-        uint8_t last = kbscan_last[i];
+        uint8_t last = kbscan_matrix[i];
         if (new != last) {
             if (kbscan_has_ghost_in_row(i, new)) {
                 kbscan_ghost[i] = true;
@@ -388,7 +388,7 @@ void kbscan_event(void) {
                 }
             }
 
-            kbscan_last[i] = new;
+            kbscan_matrix[i] = new;
         } else if (new && repeat_key != 0 && key_should_repeat(repeat_key)) {
             // A key is being pressed
             uint32_t time = time_get();

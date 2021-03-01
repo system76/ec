@@ -33,6 +33,7 @@ enum Cmd {
     LedSetColor = 14,
     LedGetMode = 15,
     LedSetMode = 16,
+    MatrixGet = 17,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -267,6 +268,10 @@ impl<A: Access> Ec<A> {
             speed,
         ];
         self.command(Cmd::LedSetMode, &mut data)
+    }
+
+    pub unsafe fn matrix_get(&mut self, matrix: &mut [u8]) -> Result<(), Error> {
+        self.command(Cmd::MatrixGet, matrix)
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>
