@@ -231,8 +231,8 @@ unsafe fn matrix(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     let cols = *data.get(1).unwrap_or(&0);
     let mut byte = 2;
     let mut bit = 0;
-    for row in 0..rows {
-        for col in 0..cols {
+    for _row in 0..rows {
+        for _col in 0..cols {
             if (data.get(byte).unwrap_or(&0) & (1 << bit)) != 0 {
                 print!("#");
             } else {
