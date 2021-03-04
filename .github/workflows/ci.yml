@@ -13,6 +13,12 @@ jobs:
         run: ./scripts/spdx.sh
 
   tool:
+    strategy:
+      matrix:
+        include:
+          - features:
+          - features: --no-default-features
+
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -21,7 +27,7 @@ jobs:
         run: ./scripts/deps.sh
 
       - name: Build tool
-        run: cargo build --release --manifest-path tool/Cargo.toml
+        run: cargo build ${{ matrix.features }} --release --manifest-path tool/Cargo.toml
 
   ec:
     runs-on: ubuntu-20.04
