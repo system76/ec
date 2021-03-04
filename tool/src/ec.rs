@@ -250,20 +250,22 @@ impl<A: Access> Ec<A> {
         self.command(Cmd::LedSetColor, &mut data)
     }
 
-    pub unsafe fn led_get_mode(&mut self) -> Result<(u8, u8), Error> {
+    pub unsafe fn led_get_mode(&mut self, layer: u8) -> Result<(u8, u8), Error> {
         let mut data = [
+            layer,
             0,
             0,
         ];
         self.command(Cmd::LedGetMode, &mut data)?;
         Ok((
-            data[0],
-            data[1]
+            data[1],
+            data[2]
         ))
     }
 
-    pub unsafe fn led_set_mode(&mut self, mode: u8, speed: u8) -> Result<(), Error> {
+    pub unsafe fn led_set_mode(&mut self, layer: u8, mode: u8, speed: u8) -> Result<(), Error> {
         let mut data = [
+            layer,
             mode,
             speed,
         ];
