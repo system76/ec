@@ -3,6 +3,9 @@
 use crate::Error;
 use downcast_rs::Downcast;
 
+#[cfg(not(feature = "std"))]
+use alloc::boxed::Box;
+
 #[cfg(feature = "hidapi")]
 pub use self::hid::AccessHid;
 #[cfg(feature = "hidapi")]
