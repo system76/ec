@@ -17,7 +17,7 @@ jobs:
       matrix:
         include:
           - features:
-          - features: --no-default-features
+          - features: --no-default-features --features="redox_hwio"
 
     runs-on: ubuntu-20.04
     steps:
