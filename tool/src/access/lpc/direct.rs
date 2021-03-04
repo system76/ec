@@ -13,7 +13,7 @@ use crate::{
 use super::*;
 
 /// Use direct hardware access. Unsafe due to not having mutual exclusion
-pub struct AccessLpcDirect<T: Timeout> {
+pub struct AccessLpcDirect<T: Timeout + 'static> {
     cmd: u16,
     dbg: u16,
     timeout: T,
