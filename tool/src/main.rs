@@ -359,6 +359,10 @@ fn main() {
             )
         )
         .subcommand(SubCommand::with_name("led_mode")
+            .arg(Arg::with_name("layer")
+                .validator(validate_from_str::<u8>)
+                .required(true)
+            )
             .arg(Arg::with_name("mode")
                 .validator(validate_from_str::<u8>)
                 .requires("speed")
@@ -543,24 +547,25 @@ fn main() {
             }
         },
         ("led_mode", Some(sub_m)) => {
+            let layer = sub_m.value_of("layer").unwrap().parse::<u8>().unwrap();
             let mode = sub_m.value_of("mode").map(|x| x.parse::<u8>().unwrap());
             let speed = sub_m.value_of("speed").map(|x| x.parse::<u8>().unwrap());
             if let (Some(mode), Some(speed)) = (mode, speed) {
-                match unsafe { ec.led_set_mode(mode, speed) } {
+                match unsafe { ec.led_set_mode(layer, mode, speed) } {
                     Ok(()) => (),
                     Err(err) => {
-                        eprintln!("failed to set mode {} at speed {}: {:X?}", mode, speed, err);
+                        eprintln!("failed to set layer {} mode {} at speed {}: {:X?}", layer, mode, speed, err);
                         process::exit(1);
                     },
                 }
             } else {
-                match unsafe { ec.led_get_mode() } {
+                match unsafe { ec.led_get_mode(layer) } {
                     Ok((mode, speed)) => {
                         println!("mode: {}", mode);
                         println!("speed: {}", speed);
                     },
                     Err(err) => {
-                        eprintln!("failed to get mode: {:X?}", err);
+                        eprintln!("failed to get mode for layer {}: {:X?}", layer, err);
                         process::exit(1);
                     },
                 }
