@@ -60,7 +60,7 @@ do
     else
         F="$(date "+%T")"
 
-        last_E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
+        last_E="$(sudo cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
         sleep 1
 
         if [ "${has_bat}" == "1" ]
@@ -73,15 +73,15 @@ do
             F="${F}\t$(printf "%.2f" "${bat_W}")"
         fi
 
-        E="$(cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
+        E="$(sudo cat /sys/class/powercap/intel-rapl\:0/energy_uj)"
         W="$(echo "(${E} - ${last_E})/1000000" | bc -lq)"
         F="${F}\t$(printf "%.1f" "${W}")"
 
-        PL1_uW="$(cat /sys/class/powercap/intel-rapl\:0/constraint_0_power_limit_uw)"
+        PL1_uW="$(sudo cat /sys/class/powercap/intel-rapl\:0/constraint_0_power_limit_uw)"
         PL1_W="$(echo "${PL1_uW}/1000000" | bc -lq)"
         F="${F}\t$(printf "%.1f" "${PL1_W}")"
 
-        PL2_uW="$(cat /sys/class/powercap/intel-rapl\:0/constraint_1_power_limit_uw)"
+        PL2_uW="$(sudo cat /sys/class/powercap/intel-rapl\:0/constraint_1_power_limit_uw)"
         PL2_W="$(echo "${PL2_uW}/1000000" | bc -lq)"
         F="${F}\t$(printf "%.1f" "${PL2_W}")"
 
