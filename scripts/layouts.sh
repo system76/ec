@@ -18,8 +18,8 @@ grep '^#define \(K_\|KT_FN\)' "$header" \
 | cut -d ' ' -f2 \
 | while read keycode
 do
-	name="$(echo "$keycode" | cut -d '_' -f2-)"
-	echo "printf(\"${name},0x%04X\\n\", $keycode);" >> "$source"
+    name="$(echo "$keycode" | cut -d '_' -f2-)"
+    echo "printf(\"${name},0x%04X\\n\", $keycode);" >> "$source"
 done
 echo "return 0;" >> "$source"
 echo "}" >> "$source"
@@ -29,37 +29,37 @@ gcc -I. "$source" -o "$binary"
 cd src/board
 for board in */*
 do
-	file="$board/include/board/keymap.h"
-	if [ ! -e "$file" ]
-	then
-		continue
-	fi
-	echo "# $board"
-	mkdir -p "$D/$board"
-	cp "$D/keymap.csv" "$D/$board"
-	row=0
-	rg \
-		--multiline \
-		--multiline-dotall \
-		--regexp '#define LAYOUT\(.*\) \{.*\}' \
-		"$file" \
-	| grep --only-matching '\{.*\}' \
-	| sed 's/^{ //' \
-	| sed 's/ }$//' \
-	| sed 's/, / /g' \
-	| while read line
-	do
-		col=0
-		for word in $line
-		do
-			if [ "$word" != "___" ]
-			then
-				echo "$word,$row,$col"
-			fi
-			col=$(expr $col + 1)
-		done
-		row=$(expr $row + 1)
-	done \
-	| sort -n \
-	| tee "$D/${board}/layout.csv"
+    file="$board/include/board/keymap.h"
+    if [ ! -e "$file" ]
+    then
+        continue
+    fi
+    echo "# $board"
+    mkdir -p "$D/$board"
+    cp "$D/keymap.csv" "$D/$board"
+    row=0
+    rg \
+        --multiline \
+        --multiline-dotall \
+        --regexp '#define LAYOUT\(.*\) \{.*\}' \
+        "$file" \
+    | grep --only-matching '\{.*\}' \
+    | sed 's/^{ //' \
+    | sed 's/ }$//' \
+    | sed 's/, / /g' \
+    | while read line
+    do
+        col=0
+        for word in $line
+        do
+            if [ "$word" != "___" ]
+            then
+                echo "$word,$row,$col"
+            fi
+            col=$(expr $col + 1)
+        done
+        row=$(expr $row + 1)
+    done \
+    | sort -n \
+    | tee "$D/${board}/layout.csv"
 done
