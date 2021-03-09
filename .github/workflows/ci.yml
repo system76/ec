@@ -5,12 +5,14 @@ on:
   pull_request:
 
 jobs:
-  spdx:
+  lint:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Check SPDX identifiers
-        run: ./scripts/spdx.sh
+        run: ./scripts/lint/spdx.sh
+      - name: Check indentation
+        run: ./scripts/lint/indent.sh
 
   tool:
     strategy:
