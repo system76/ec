@@ -16,7 +16,7 @@ void delay_ticks(uint16_t ticks);
 // Warning: this will round to the nearest tick
 #define delay_ns(X) \
     delay_ticks((uint16_t)((((uint32_t)(X)) * 69UL + 89999UL) / 90000UL));
-    
+
 void delay_ms(int ms);
 
 #endif // _ARCH_DELAY_H

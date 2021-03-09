@@ -4,7 +4,7 @@
 
 // Main program while running in scratch ROM
 void main(void) {
-	for (;;) {
+    for (;;) {
         smfi_event();
     }
 }

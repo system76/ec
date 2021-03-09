@@ -80,7 +80,7 @@ int i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
         *(i2c->trasla) = (addr << 1) | read;
     }
 
-	return 0;
+    return 0;
 }
 
 void i2c_stop(struct I2C * i2c) {

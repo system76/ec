@@ -6,7 +6,7 @@
 #include <board/i2c.h>
 
 void i2c_init(unsigned long baud) {
-	TWAR = 0;
-	TWBR = (uint8_t)(((F_CPU / baud) - 16 ) / 2);
-	TWCR = 0;
+    TWAR = 0;
+    TWBR = (uint8_t)(((F_CPU / baud) - 16 ) / 2);
+    TWCR = 0;
 }
