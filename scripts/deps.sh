@@ -51,10 +51,7 @@ if ! which rustup &> /dev/null; then
     source "${HOME}/.cargo/env"
 fi
 
-msg "Installing pinned Rust toolchain"
-rustup toolchain install "$(cat rust-toolchain)"
-
-msg "Installing source for pinned Rust toolchain"
-rustup component add --toolchain "$(cat rust-toolchain)" rust-src
+msg "Installing pinned Rust toolchain and components"
+rustup show
 
 msg "\x1B[32mSuccessfully installed dependencies"
