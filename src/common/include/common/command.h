@@ -40,6 +40,8 @@ enum Command {
     CMD_LED_SET_MODE = 16,
     // Get key matrix state
     CMD_MATRIX_GET = 17,
+    // Save LED settings to ROM
+    CMD_LED_SAVE = 18,
     //TODO
 };
 

@@ -371,6 +371,7 @@ fn main() {
                 .validator(validate_from_str::<u8>)
             )
         )
+        .subcommand(SubCommand::with_name("led_save"))
         .subcommand(SubCommand::with_name("matrix"))
         .subcommand(SubCommand::with_name("print")
             .arg(Arg::with_name("message")
@@ -570,6 +571,13 @@ fn main() {
                     },
                 }
             }
+        },
+        ("led_save", Some(_sub_m)) => match unsafe { ec.led_save() } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to save LED settings: {:X?}", err);
+                process::exit(1);
+            },
         },
         ("matrix", Some(_sub_m)) => match unsafe { matrix(&mut ec) } {
             Ok(()) => (),
