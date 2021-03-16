@@ -34,6 +34,7 @@ enum Cmd {
     LedGetMode = 15,
     LedSetMode = 16,
     MatrixGet = 17,
+    LedSave = 18,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -270,6 +271,10 @@ impl<A: Access> Ec<A> {
             speed,
         ];
         self.command(Cmd::LedSetMode, &mut data)
+    }
+
+    pub unsafe fn led_save(&mut self) -> Result<(), Error> {
+        self.command(Cmd::LedSave, &mut [])
     }
 
     pub unsafe fn matrix_get(&mut self, matrix: &mut [u8]) -> Result<(), Error> {
