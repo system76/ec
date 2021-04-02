@@ -60,6 +60,11 @@ void kbscan_init(void) {
 #define DEBOUNCE_DELAY 15
 
 static uint8_t kbscan_get_row(int i) {
+    // Report all keys as released when lid is closed
+    if (!lid_state) {
+        return 0;
+    }
+
     // Set current line as output
     if (i < 8) {
         KSOLGOEN = 1 << i;
