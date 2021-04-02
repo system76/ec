@@ -6,6 +6,7 @@
 
 #include <board/fan.h>
 #include <board/gpio.h>
+#include <board/peci.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
@@ -81,7 +82,7 @@ void dgpu_event(void) {
         duty = PWM_DUTY(0);
     }
 
-    if (fan_max) {
+    if (peci_on && fan_max) {
         // Override duty if fans are manually set to maximum
         duty = PWM_DUTY(100);
     } else {
