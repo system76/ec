@@ -5,6 +5,7 @@
 
 #include <ec/peci.h>
 
+extern bool peci_on;
 extern int16_t peci_temp;
 
 void peci_init(void);

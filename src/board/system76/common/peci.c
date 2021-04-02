@@ -27,6 +27,7 @@ static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
 #define T_JUNCTION 100
 
+bool peci_on = false;
 int16_t peci_temp = 0;
 
 #define PECI_TEMP(X) (((int16_t)(X)) << 6)
@@ -123,12 +124,13 @@ void peci_event(void) {
 
 #if EC_ESPI
     // Use PECI if CPU is not in C10 state
-    if (gpio_get(&CPU_C10_GATE_N))
+    peci_on = gpio_get(&CPU_C10_GATE_N);
 #else // EC_ESPI
     // Use PECI if in S0 state
-    if (power_state == POWER_STATE_S0)
+    peci_on = power_state == POWER_STATE_S0;
 #endif // EC_ESPI
-    {
+
+    if (peci_on) {
         // Wait for completion
         while (HOSTAR & 1) {}
         // Clear status
@@ -169,7 +171,7 @@ void peci_event(void) {
         duty = PWM_DUTY(0);
     }
 
-    if (fan_max) {
+    if (peci_on && fan_max) {
         // Override duty if fans are manually set to maximum
         duty = PWM_DUTY(100);
     } else {
