@@ -13,13 +13,13 @@ use crate::{
 use super::*;
 
 /// Use direct hardware access. Unsafe due to not having mutual exclusion
-pub struct AccessLpcDirect<T: Timeout + 'static> {
+pub struct AccessLpcDirect<T: Timeout + Send + 'static> {
     cmd: u16,
     dbg: u16,
     timeout: T,
 }
 
-impl<T: Timeout> AccessLpcDirect<T> {
+impl<T: Timeout + Send> AccessLpcDirect<T> {
     /// Checks that Super I/O ID matches and then returns access object
     pub unsafe fn new(timeout: T) -> Result<Self, Error> {
         // Make sure EC ID matches
@@ -71,7 +71,7 @@ impl<T: Timeout> AccessLpcDirect<T> {
     }
 }
 
-impl<T: Timeout> Access for AccessLpcDirect<T> {
+impl<T: Timeout + Send> Access for AccessLpcDirect<T> {
     unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error> {
         // Test data length
         if data.len() > self.data_size() {
