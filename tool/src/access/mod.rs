@@ -23,7 +23,7 @@ pub use self::lpc::*;
 mod lpc;
 
 /// Access method for running an EC command
-pub trait Access: Downcast {
+pub trait Access: Downcast + Send + 'static {
     /// Sends a command using the access method. Only internal use is recommended
     unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error>;
 
