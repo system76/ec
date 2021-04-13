@@ -13,6 +13,7 @@ source /etc/os-release
 
 msg "Installing system build dependencies"
 if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
+    sudo apt-get update
     sudo apt-get install \
         --no-install-recommends \
         --yes \
