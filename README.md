@@ -18,3 +18,9 @@ Install dependencies using the provided script:
 ```
 ./scripts/deps.sh
 ```
+
+The dependencies include `rustup` - if it wasn't installed on your system before and you plan to flash the firmware within the same shell session, you should additionally source the environment variables for cargo to avoid build failures:
+
+```
+source $HOME/.cargo/env
+```
