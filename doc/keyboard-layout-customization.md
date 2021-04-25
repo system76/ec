@@ -41,6 +41,7 @@ KEYMAP?=jeremy
 ```
 
 ## Test build your EC
+* Make sure all dependencies are installed (see above).
 * From the `ec` directory, run `make` to make sure it builds correctly.
 
 ## Flash your EC
