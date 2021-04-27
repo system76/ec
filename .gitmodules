@@ -9,3 +9,7 @@
 [submodule "ecspy"]
 	path = ecspy
 	url = https://github.com/system76/ecspy.git
+[submodule "lufa"]
+	path = lufa
+	url = https://github.com/system76/lufa.git
+	branch = master
