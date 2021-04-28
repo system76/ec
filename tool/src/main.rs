@@ -379,6 +379,7 @@ fn main() {
                 .multiple(true)
             )
         )
+        .subcommand(SubCommand::with_name("reset"))
         .get_matches();
 
     let get_ec = || -> Result<_, Error> {
@@ -596,6 +597,13 @@ fn main() {
                     process::exit(1);
                 },
             }
+        },
+        ("reset", Some(_sub_m)) => match unsafe { ec.reset() } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to reset: {:X?}", err);
+                process::exit(1);
+            },
         },
         _ => unreachable!()
     }
