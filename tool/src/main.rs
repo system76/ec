@@ -301,7 +301,7 @@ fn main() {
         .setting(AppSettings::SubcommandRequired)
         .arg(Arg::with_name("access")
             .long("access")
-            .possible_values(&["lpc-linux", "lpc-sim", "hid"])
+            .possible_values(&["lpc-linux", "lpc-sim", "hid", "hid-launch-nelson"])
             .default_value("lpc-linux")
         )
         .subcommand(SubCommand::with_name("console"))
@@ -402,8 +402,23 @@ fn main() {
                                 let device = info.open_device(&api)?;
                                 let access = AccessHid::new(device, 10, 100)?;
                                 return Ok(Ec::new(access)?.into_dyn());
-                            }
-                            _ => {},
+                            },
+                            _ => (),
+                        }
+                    }
+                    Err(hidapi::HidError::OpenHidDeviceError.into())
+                }
+                "hid-launch-nelson" => {
+                    let api = HidApi::new()?;
+                    for info in api.device_list() {
+                        match (info.vendor_id(), info.product_id(), info.interface_number()) {
+                            // System76 launch_nelson
+                            (0x3384, 0x0002, 0) => {
+                                let device = info.open_device(&api)?;
+                                let access = AccessHid::new(device, 10, 100)?;
+                                return Ok(Ec::new(access)?.into_dyn());
+                            },
+                            _ => (),
                         }
                     }
                     Err(hidapi::HidError::OpenHidDeviceError.into())
