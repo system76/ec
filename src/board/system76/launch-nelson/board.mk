@@ -13,7 +13,7 @@ USB_SRC=\
 USB_OBJ=$(USB_DIR)/libRawHID.a
 $(USB_OBJ): $(USB_SRC)
 	make -C $(USB_DIR) lib
-OBJ+=$(USB_OBJ)
+LATE_OBJ+=$(USB_OBJ)
 
 dfu: $(BUILD)/ec.ihx
 	sudo dfu-programmer $(EC) flash $<
