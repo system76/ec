@@ -14,6 +14,9 @@ $(USB_OBJ): $(USB_SRC)
 	make -C $(USB_DIR) lib
 LATE_OBJ+=$(USB_OBJ)
 
+bootloader:
+	echo 1 | sudo tee /sys/bus/usb/drivers/system76-io/*.1/bootloader
+
 dfu: $(BUILD)/ec.ihx
 	sudo dfu-programmer $(EC) flash $<
 	sudo dfu-programmer $(EC) reset
