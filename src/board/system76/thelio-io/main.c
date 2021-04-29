@@ -15,6 +15,7 @@
 #include <board/device.h>
 #include <board/tach.h>
 #include <common/macro.h>
+#include <common/version.h>
 #include <util/delay.h>
 #include "usb/USBtoSerial.h"
 
@@ -307,7 +308,7 @@ void thelio_command(struct Thelio * thelio, uint64_t time, char * command, FILE 
                 }
             }
         } else if (strncmp(command + 2, "REVISION", 8) == 0) {
-            fprintf(output, "\r\n%s\r\n", xstr(__REVISION__));
+            fprintf(output, "\r\n%s\r\n", version());
 
             error = 0;
         } else if (strncmp(command + 2, "RSET", 4) == 0) {
