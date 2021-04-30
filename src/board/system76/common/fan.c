@@ -9,6 +9,10 @@ bool fan_max = false;
 #define max_speed PWM_DUTY(100)
 #define min_speed PWM_DUTY(0)
 
+#ifndef SYNC_FANS
+  #define SYNC_FANS 1
+#endif
+
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
     fan_max = false;
@@ -52,7 +56,7 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
 }
 
 void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
-  #ifdef SYNC_FANS
+  #if SYNC_FANS != 0
     peci_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
     dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
   #endif
