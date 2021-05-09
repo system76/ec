@@ -27,5 +27,18 @@ CFLAGS+=\
 	-DBATTERY_START_THRESHOLD=0 \
 	-DBATTERY_END_THRESHOLD=100
 
+# Custom fan curve
+CFLAGS+=-DBOARD_HEATUP=2
+CFLAGS+=-DBOARD_COOLDOWN=5
+CFLAGS+=-DBOARD_FAN_POINTS="\
+        FAN_POINT(40, 27), \
+        FAN_POINT(45, 40), \
+        FAN_POINT(50, 50), \
+        FAN_POINT(55, 65), \
+        FAN_POINT(60, 75), \
+        FAN_POINT(65, 90), \
+        FAN_POINT(70, 100) \
+"
+
 # Add system76 common code
 include src/board/system76/common/common.mk
