@@ -34,6 +34,16 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         make \
         sdcc \
         systemd-devel
+elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
+    sudo pacman -S \
+        --noconfirm \
+        avr-gcc \
+        avr-libc \
+        avrdude \
+        curl \
+        make \
+        sdcc \
+        systemd-libs
 else
     msg "Please add support for your distribution to:"
     msg "scripts/deps.sh"
