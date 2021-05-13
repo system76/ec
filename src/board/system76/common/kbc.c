@@ -22,7 +22,7 @@ void kbc_init(void) {
     *(KBC.status) = BIT(4);
 }
 
-#define KBC_TIMEOUT 10000
+#define KBC_TIMEOUT 1000
 
 // Enable first port - TODO
 static bool kbc_first = false;
