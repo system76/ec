@@ -23,7 +23,8 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         gcc-avr \
         libudev-dev \
         make \
-        sdcc
+        sdcc \
+        xxd
 elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
     sudo dnf install \
         --assumeyes \
@@ -33,7 +34,8 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         curl \
         make \
         sdcc \
-        systemd-devel
+        systemd-devel \
+        vim-common
 elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
     sudo pacman -S \
         --noconfirm \
@@ -43,7 +45,8 @@ elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         curl \
         make \
         sdcc \
-        systemd-libs
+        systemd-libs \
+        vim
 else
     msg "Please add support for your distribution to:"
     msg "scripts/deps.sh"
