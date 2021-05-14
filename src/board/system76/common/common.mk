@@ -24,6 +24,11 @@ SRC+=$(wildcard $(SYSTEM76_COMMON_DIR)/*.c)
 INCLUDE+=$(wildcard $(SYSTEM76_COMMON_DIR)/include/common/*.h) $(SYSTEM76_COMMON_DIR)/common.mk
 CFLAGS+=-I$(SYSTEM76_COMMON_DIR)/include
 
+# Set battery charging thresholds
+CFLAGS+=\
+	-DBATTERY_START_THRESHOLD=0 \
+	-DBATTERY_END_THRESHOLD=100
+
 # Add charger
 CHARGER?=bq24780s
 SRC+=$(SYSTEM76_COMMON_DIR)/charger/$(CHARGER).c

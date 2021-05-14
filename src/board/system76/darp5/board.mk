@@ -22,10 +22,5 @@ CFLAGS+=\
 	-DCHARGER_CHARGE_VOLTAGE=17600 \
 	-DCHARGER_INPUT_CURRENT=3200
 
-# Set battery charging thresholds
-CFLAGS+=\
-	-DBATTERY_START_THRESHOLD=0 \
-	-DBATTERY_END_THRESHOLD=100
-
 # Add system76 common code
 include src/board/system76/common/common.mk
