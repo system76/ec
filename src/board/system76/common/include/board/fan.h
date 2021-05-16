@@ -11,24 +11,24 @@
 #define MIN_FAN_SPEED PWM_DUTY(0)
 
 #ifndef SMOOTH_FANS
-  #define SMOOTH_FANS 40
+  #define SMOOTH_FANS 1 // default to fan smoothing
 #endif
 
 #ifndef SYNC_FANS
-  #define SYNC_FANS 1
+  #define SYNC_FANS 1 // default to syncing fan speeds
 #endif
 
 #if SMOOTH_FANS != 0
   #ifndef SMOOTH_FANS_UP
-    #define SMOOTH_FANS_UP SMOOTH_FANS
+    #define SMOOTH_FANS_UP 45 // default to ~11 seconds for full ramp-up
   #endif
   #ifndef SMOOTH_FANS_DOWN
-    #define SMOOTH_FANS_DOWN SMOOTH_FANS
+    #define SMOOTH_FANS_DOWN 100 // default to ~25 seconds for full ramp-down
   #endif
 #endif
 
 #ifndef SMOOTH_FANS_MIN
-  #define SMOOTH_FANS_MIN 0
+  #define SMOOTH_FANS_MIN 0 // default to smoothing all fan speed changes
 #endif
 
 struct FanPoint {
