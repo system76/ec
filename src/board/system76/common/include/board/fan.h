@@ -27,6 +27,10 @@
   #endif
 #endif
 
+#ifndef SMOOTH_FANS_MIN
+  #define SMOOTH_FANS_MIN 0
+#endif
+
 struct FanPoint {
     int16_t temp;
     uint8_t duty;

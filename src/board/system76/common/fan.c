@@ -12,6 +12,8 @@
   const uint8_t max_jump_down = MAX_FAN_SPEED - MIN_FAN_SPEED;
 #endif
 
+const uint8_t min_speed_to_smooth = PWM_DUTY(SMOOTH_FANS_MIN);
+
 bool fan_max = false;
 uint8_t last_duty_dgpu = 0;
 uint8_t last_duty_peci = 0;
@@ -123,7 +125,8 @@ uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
       ? MIN_FAN_SPEED
       : last_duty - max_jump_down;
 
-    if (smoothed > duty) {
+    // use smoothed value if above min and if smoothed is closer than raw
+    if (last_duty > min_speed_to_smooth && smoothed > duty) {
       next_duty = smoothed;
     }
   }
@@ -135,7 +138,8 @@ uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
       ? MAX_FAN_SPEED
       : last_duty + max_jump_up;
 
-    if (smoothed < duty) {
+    // use smoothed value if above min and if smoothed is closer than raw
+    if (duty > min_speed_to_smooth && smoothed < duty) {
       next_duty = smoothed;
     }
   }
