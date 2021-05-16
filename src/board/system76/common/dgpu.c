@@ -5,7 +5,6 @@
 
 #if HAVE_DGPU
 
-#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/peci.h>
 #include <board/power.h>
@@ -54,7 +53,7 @@ static struct Fan __code FAN = {
     .heatup_size = ARRAY_SIZE(FAN_HEATUP),
     .cooldown = FAN_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    .interpolate = false,
+    .interpolate = SMOOTH_FANS != 0,
 };
 
 void dgpu_init(void) {

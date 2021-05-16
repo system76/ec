@@ -43,6 +43,10 @@ void serial(void) __interrupt(4) {}
 void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
+const uint16_t battery_interval = 1000;
+// update fan speed more frequently for smoother fans
+// NOTE: event loop is longer than 100ms and maybe even longer than 250
+const uint16_t fan_interval = SMOOTH_FANS != 0 ? 250 : 1000;
 
 void init(void) {
     // Must happen first
@@ -91,7 +95,9 @@ void main(void) {
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
-    uint32_t last_time = 0;
+    uint32_t last_time_battery = 0;
+    uint32_t last_time_fan = 0;
+
     for(main_cycle = 0; ; main_cycle++) {
         switch (main_cycle % 3) {
             case 0:
@@ -115,12 +121,17 @@ void main(void) {
 
         if (main_cycle == 0) {
             uint32_t time = time_get();
-            // Only run the following once a second
-            if (last_time > time || (time - last_time) >= 1000) {
-                last_time = time;
+            // Only run the following once per interval
+            if (last_time_fan > time || (time - last_time_fan) >= fan_interval) {
+                last_time_fan = time;
 
                 // Update fan speeds
                 fan_duty_set(peci_get_fan_duty(), dgpu_get_fan_duty());
+            }
+
+            // Only run the following once per interval
+            if (last_time_battery > time || (time - last_time_battery) >= battery_interval) {
+                last_time_battery = time;
 
                 // Updates battery status
                 battery_event();

@@ -30,7 +30,7 @@ static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 bool peci_on = false;
 int16_t peci_temp = 0;
 
-#define PECI_TEMP(X) (((int16_t)(X)) << 6)
+#define PECI_TEMP(X) ((int16_t)(X))
 
 #define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
 
@@ -54,7 +54,7 @@ static struct Fan __code FAN = {
     .heatup_size = ARRAY_SIZE(FAN_HEATUP),
     .cooldown = FAN_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    .interpolate = false,
+    .interpolate = SMOOTH_FANS != 0,
 };
 
 void peci_init(void) {
@@ -156,7 +156,7 @@ uint8_t peci_get_fan_duty(void) {
             // Use result if finished successfully
             uint8_t low = HORDDR;
             uint8_t high = HORDDR;
-            uint16_t peci_offset = ((int16_t)high << 8) | (int16_t)low;
+            uint16_t peci_offset = (((int16_t)high << 8) | (int16_t)low) >> 6;
 
             peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
             duty = fan_duty(&FAN, peci_temp);
