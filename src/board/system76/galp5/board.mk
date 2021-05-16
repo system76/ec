@@ -40,6 +40,12 @@ CFLAGS+=\
 	-DPOWER_LIMIT_AC=65 \
 	-DPOWER_LIMIT_DC=45
 
+# smooth the fan speed updates such that 0 to full speed happens over this period
+# divide by 4 for seconds, set SMOOTH_FANS=0 to disable entirely
+CFLAGS+=\
+	-DSMOOTH_FANS_UP=45 \
+	-DSMOOTH_FANS_DOWN=100
+
 # Custom fan curve
 CFLAGS+=-DBOARD_FAN_POINTS="\
 	FAN_POINT(70, 25), \
@@ -52,10 +58,7 @@ CFLAGS+=-DBOARD_FAN_POINTS="\
 # DGPU support
 CFLAGS+=-DHAVE_DGPU=1
 CFLAGS+=-DBOARD_DGPU_FAN_POINTS="\
-	FAN_POINT(70, 25), \
-	FAN_POINT(75, 40), \
-	FAN_POINT(80, 75), \
-	FAN_POINT(85, 90), \
+	FAN_POINT(75, 25), \
 	FAN_POINT(90, 100) \
 "
 
