@@ -5,14 +5,14 @@
 #include <ec/pwm.h>
 
 #if SMOOTH_FANS != 0
-  const uint8_t max_jump_up = (MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t) SMOOTH_FANS_UP;
-  const uint8_t max_jump_down = (MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t) SMOOTH_FANS_DOWN;
+    static const uint8_t max_jump_up = (MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t) SMOOTH_FANS_UP;
+    static const uint8_t max_jump_down = (MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t) SMOOTH_FANS_DOWN;
 #else
-  const uint8_t max_jump_up = MAX_FAN_SPEED - MIN_FAN_SPEED;
-  const uint8_t max_jump_down = MAX_FAN_SPEED - MIN_FAN_SPEED;
+    static const uint8_t max_jump_up = MAX_FAN_SPEED - MIN_FAN_SPEED;
+    static const uint8_t max_jump_down = MAX_FAN_SPEED - MIN_FAN_SPEED;
 #endif
 
-const uint8_t min_speed_to_smooth = PWM_DUTY(SMOOTH_FANS_MIN);
+static const uint8_t min_speed_to_smooth = PWM_DUTY(SMOOTH_FANS_MIN);
 
 bool fan_max = false;
 uint8_t last_duty_dgpu = 0;
@@ -61,26 +61,26 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
 }
 
 void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
-  #if SYNC_FANS != 0
-    peci_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
-    dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
-  #endif
+    #if SYNC_FANS != 0
+        peci_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
+        dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
+    #endif
 
-  // set PECI fan duty
-  if (peci_fan_duty != DCR2) {
-      DEBUG("PECI fan_duty_raw=%d\n", peci_fan_duty);
-      last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
-      DCR2 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
-      DEBUG("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
-  }
+    // set PECI fan duty
+    if (peci_fan_duty != DCR2) {
+        DEBUG("PECI fan_duty_raw=%d\n", peci_fan_duty);
+        last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
+        DCR2 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
+        DEBUG("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
+    }
 
-  // set dGPU fan duty
-  if (dgpu_fan_duty != DCR4) {
-      DEBUG("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
-      last_duty_dgpu = dgpu_fan_duty = fan_smooth(last_duty_dgpu, dgpu_fan_duty);
-      DCR4 = fan_max ? MAX_FAN_SPEED : dgpu_fan_duty;
-      DEBUG("DGPU fan_duty_smoothed=%d\n", dgpu_fan_duty);
-  }
+    // set dGPU fan duty
+    if (dgpu_fan_duty != DCR4) {
+        DEBUG("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
+        last_duty_dgpu = dgpu_fan_duty = fan_smooth(last_duty_dgpu, dgpu_fan_duty);
+        DCR4 = fan_max ? MAX_FAN_SPEED : dgpu_fan_duty;
+        DEBUG("DGPU fan_duty_smoothed=%d\n", dgpu_fan_duty);
+    }
 }
 
 uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant {
@@ -116,33 +116,33 @@ uint8_t fan_cooldown(const struct Fan * fan, uint8_t duty) __reentrant {
 }
 
 uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
-  uint8_t next_duty = duty;
+    uint8_t next_duty = duty;
 
-  // ramping down
-  if (duty < last_duty) {
-    // out of bounds (lower) safeguard
-    uint8_t smoothed = last_duty < MIN_FAN_SPEED + max_jump_down
-      ? MIN_FAN_SPEED
-      : last_duty - max_jump_down;
+    // ramping down
+    if (duty < last_duty) {
+        // out of bounds (lower) safeguard
+        uint8_t smoothed = last_duty < MIN_FAN_SPEED + max_jump_down
+            ? MIN_FAN_SPEED
+            : last_duty - max_jump_down;
 
-    // use smoothed value if above min and if smoothed is closer than raw
-    if (last_duty > min_speed_to_smooth && smoothed > duty) {
-      next_duty = smoothed;
+        // use smoothed value if above min and if smoothed is closer than raw
+        if (last_duty > min_speed_to_smooth && smoothed > duty) {
+            next_duty = smoothed;
+        }
     }
-  }
 
-  // ramping up
-  if (duty > last_duty) {
-    // out of bounds (higher) safeguard
-    uint8_t smoothed = last_duty > MAX_FAN_SPEED - max_jump_up
-      ? MAX_FAN_SPEED
-      : last_duty + max_jump_up;
+    // ramping up
+    if (duty > last_duty) {
+        // out of bounds (higher) safeguard
+        uint8_t smoothed = last_duty > MAX_FAN_SPEED - max_jump_up
+            ? MAX_FAN_SPEED
+            : last_duty + max_jump_up;
 
-    // use smoothed value if above min and if smoothed is closer than raw
-    if (duty > min_speed_to_smooth && smoothed < duty) {
-      next_duty = smoothed;
+        // use smoothed value if above min and if smoothed is closer than raw
+        if (duty > min_speed_to_smooth && smoothed < duty) {
+            next_duty = smoothed;
+        }
     }
-  }
 
-  return next_duty;
+    return next_duty;
 }
