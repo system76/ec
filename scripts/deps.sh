@@ -20,9 +20,12 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         avr-libc \
         avrdude \
         curl \
+        gcc \
         gcc-avr \
+        libc-dev \
         libudev-dev \
         make \
+        pkgconf \
         sdcc \
         xxd
 elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
@@ -32,6 +35,7 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avr-libc \
         avrdude \
         curl \
+        gcc \
         make \
         sdcc \
         systemd-devel \
@@ -43,7 +47,9 @@ elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         avr-libc \
         avrdude \
         curl \
+        gcc \
         make \
+        pkgconf \
         sdcc \
         systemd-libs \
         vim
