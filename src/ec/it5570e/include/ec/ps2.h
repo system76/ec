@@ -5,6 +5,12 @@
 
 #include <stdint.h>
 
+#define PSSTS_TIMEOUT_ERR BIT(6)
+#define PSSTS_FRAME_ERR BIT(5)
+#define PSSTS_PARITY_ERR BIT(4)
+#define PSSTS_ALL_ERR (PSSTS_TIMEOUT_ERR | PSSTS_FRAME_ERR | PSSTS_PARITY_ERR)
+#define PSSTS_DONE BIT(3)
+
 struct Ps2 {
     volatile uint8_t * control;
     volatile uint8_t * interrupt;
@@ -17,8 +23,6 @@ extern struct Ps2 __code PS2_2;
 extern struct Ps2 __code PS2_3;
 
 void ps2_reset(struct Ps2 * ps2);
-int ps2_read(struct Ps2 * ps2, uint8_t * data, int length);
-int ps2_write(struct Ps2 * ps2, uint8_t * data, int length);
 
 volatile uint8_t __xdata __at(0x1700) PSCTL1;
 volatile uint8_t __xdata __at(0x1701) PSCTL2;

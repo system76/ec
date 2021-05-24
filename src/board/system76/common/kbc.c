@@ -24,10 +24,12 @@ void kbc_init(void) {
 
 #define KBC_TIMEOUT 1000
 
-// Enable first port - TODO
+// Enable first port
 static bool kbc_first = false;
-// Enable second port - TODO
+// Enable second port
 static bool kbc_second = false;
+// Second port input timeout
+static uint8_t kbc_second_wait = 0;
 // Translate from scancode set 2 to scancode set 1
 // for basically no good reason
 static bool kbc_translate = true;
@@ -359,7 +361,15 @@ static void kbc_on_input_data(struct Kbc * kbc, uint8_t data) {
         case KBC_STATE_SECOND_PORT_INPUT:
             TRACE("  write second port input\n");
             state = KBC_STATE_NORMAL;
-            ps2_write(&PS2_TOUCHPAD, &data, 1);
+            // Begin write
+            *(PS2_TOUCHPAD.control) = 0x0D;
+            *(PS2_TOUCHPAD.data) = data;
+            // Pull data line low
+            *(PS2_TOUCHPAD.control) = 0x0C;
+            // Pull clock line high
+            *(PS2_TOUCHPAD.control) = 0x0E;
+            // Set wait timeout of 100 cycles
+            kbc_second_wait = 100;
             break;
     }
 }
@@ -408,12 +418,37 @@ void kbc_event(struct Kbc * kbc) {
 
     // Read from touchpad when possible
     if (kbc_second) {
-        *(PS2_TOUCHPAD.control) = 0x07;
-        if (state == KBC_STATE_NORMAL) {
+        if (kbc_second_wait > 0) {
+            // Wait for touchpad write transaction to finish
+            kbc_second_wait -= 1;
             uint8_t sts = *(PS2_TOUCHPAD.status);
-            *(PS2_TOUCHPAD.status) = sts;
-            if (sts & BIT(3)) {
-                state = KBC_STATE_TOUCHPAD;
+            // If transaction is done, stop waiting
+            if (sts & PSSTS_DONE) {
+                kbc_second_wait = 0;
+            }
+            // If an error happened, clear status, print error, and stop waiting
+            else if (sts & PSSTS_ALL_ERR) {
+                ps2_reset(&PS2_TOUCHPAD);
+                TRACE("  write second port input ERROR %02X\n", sts);
+                kbc_second_wait = 0;
+            }
+            // If a timeout occurs, clear status, print error, and stop waiting
+            else if (kbc_second_wait == 0) {
+                ps2_reset(&PS2_TOUCHPAD);
+                TRACE("  write second port input TIMEOUT\n");
+                kbc_second_wait = 0;
+            }
+        }
+
+        if (kbc_second_wait == 0) {
+            // Attempt to read from touchpad
+            *(PS2_TOUCHPAD.control) = 0x07;
+            if (state == KBC_STATE_NORMAL) {
+                uint8_t sts = *(PS2_TOUCHPAD.status);
+                *(PS2_TOUCHPAD.status) = sts;
+                if (sts & PSSTS_DONE) {
+                    state = KBC_STATE_TOUCHPAD;
+                }
             }
         }
     } else {
