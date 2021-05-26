@@ -11,6 +11,9 @@ void arch_init(void) {
 
     time_init();
 
+    // Enable external interrupts for INTC
+    EX1 = 1;
+
     // Enable interrupts
     EA = 1;
 }
