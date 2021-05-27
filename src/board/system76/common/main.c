@@ -11,8 +11,9 @@
 #include <board/dgpu.h>
 #include <board/ecpm.h>
 #include <board/fan.h>
-#include <board/gpio.h>
 #include <board/gctrl.h>
+#include <board/gpio.h>
+#include <board/interrupts.h>
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
@@ -37,7 +38,8 @@
 void external_0(void) __interrupt(0) {}
 // timer_0 is in time.c
 void timer_0(void) __interrupt(1);
-void external_1(void) __interrupt(2) {}
+// external_1 is board-specific
+void external_1(void) __interrupt(2);
 void timer_1(void) __interrupt(3) {}
 void serial(void) __interrupt(4) {}
 void timer_2(void) __interrupt(5) {}
@@ -79,6 +81,7 @@ void init(void) {
     smfi_init();
 
     //TODO: INTC
+    interrupts_init();
 
     // Must happen last
     power_init();
