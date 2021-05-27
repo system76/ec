@@ -21,4 +21,6 @@ void power_cpu_reset(void);
 
 void power_event(void);
 
+void power_handle_lan_wakeup(void);
+
 #endif // _BOARD_POWER_H
