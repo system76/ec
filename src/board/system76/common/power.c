@@ -370,6 +370,16 @@ void power_handle_lan_wakeup(void) {
     }
 }
 
+// ISR for BUF_PLT_RST#
+void power_handle_buf_plt_rst(void) {
+    DEBUG("PLT_RST# de-asserted\n");
+#if EC_ESPI
+    espi_reset();
+#else // EC_ESPI
+    power_cpu_reset();
+#endif // EC_ESPI
+}
+
 void power_event(void) {
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
@@ -491,25 +501,6 @@ void power_event(void) {
 #endif // HAVE_PM_PWROK
     }
     pg_last = pg_new;
-
-    // clang-format off
-    static bool rst_last = false;
-    bool rst_new = gpio_get(&BUF_PLT_RST_N);
-#if LEVEL >= LEVEL_DEBUG
-    if (!rst_new && rst_last) {
-        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
-    } else
-#endif
-    if (rst_new && !rst_last) {
-        DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
-#if CONFIG_BUS_ESPI
-        espi_reset();
-#else // CONFIG_BUS_ESPI
-        power_cpu_reset();
-#endif // CONFIG_BUS_ESPI
-    }
-    rst_last = rst_new;
-    // clang-format on
 
 #if HAVE_SLP_SUS_N
 #if LEVEL >= LEVEL_DEBUG
