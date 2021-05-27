@@ -367,6 +367,32 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
+// ISR for PWR_SW#
+void power_handle_pwr_sw(void) {
+    bool pwr_sw = gpio_get(&PWR_SW_N);
+
+    if (power_button_disabled()) {
+        DEBUG("Power switch is disabled\n");
+        return;
+    }
+
+    // We only want to handle switch press, not release
+    if (pwr_sw) {
+        DEBUG("Power switch released\n");
+        return;
+    }
+
+    DEBUG("Power switch pressed\n");
+
+    // Enable S5 power if necessary, before sending PWR_BTN
+    update_power_state();
+    if (power_state == POWER_STATE_DS5) {
+        if (config_should_reset())
+            config_reset();
+        power_on_s5();
+    }
+}
+
 void power_event(void) {
     // Always switch to ds5 if EC is running
     if (power_state == POWER_STATE_DEFAULT) {
@@ -413,45 +439,8 @@ void power_event(void) {
         battery_charger_configure();
     }
 
-    // Read power switch state
-    static bool ps_last = true;
-    bool ps_new = gpio_get(&PWR_SW_N);
-    if (!ps_new && ps_last) {
-        // Ensure press is not spurious
-        for (int i = 0; i < 100; i++) {
-            delay_ms(1);
-            if (gpio_get(&PWR_SW_N) != ps_new) {
-                DEBUG("%02X: Spurious press\n", main_cycle);
-                ps_new = ps_last;
-                break;
-            } else if (power_button_disabled()) {
-                // Ignore press when power button disabled
-                ps_new = ps_last;
-                break;
-            }
-        }
-
-        if (ps_new != ps_last) {
-            DEBUG("%02X: Power switch press\n", main_cycle);
-
-            // Enable S5 power if necessary, before sending PWR_BTN
-            update_power_state();
-            if (power_state == POWER_STATE_DS5) {
-                if (config_should_reset())
-                    config_reset();
-                power_on_s5();
-            }
-        }
-    }
-    #if LEVEL >= LEVEL_DEBUG
-        else if (ps_new && !ps_last) {
-            DEBUG("%02X: Power switch release\n", main_cycle);
-        }
-    #endif
-    ps_last = ps_new;
-
     // Send power signal to PCH
-    gpio_set(&PWR_BTN_N, ps_new);
+    gpio_set(&PWR_BTN_N, gpio_get(&PWR_SW_N));
 
     // Update power state before determining actions
     update_power_state();
