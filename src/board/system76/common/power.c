@@ -361,6 +361,15 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
+// ISR for LAN_WAKEUP#
+void power_handle_lan_wakeup(void) {
+    DEBUG("Wake-on-LAN received\n");
+    update_power_state();
+    if (power_state == POWER_STATE_OFF) {
+        power_on();
+    }
+}
+
 void power_event(void) {
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
@@ -539,24 +548,6 @@ void power_event(void) {
             power_off();
         }
     }
-
-#if HAVE_LAN_WAKEUP_N
-    static bool wake_last = true;
-    bool wake_new = gpio_get(&LAN_WAKEUP_N);
-    if (!wake_new && wake_last) {
-        update_power_state();
-        DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
-        if (power_state == POWER_STATE_OFF) {
-            power_on();
-        }
-    }
-#if LEVEL >= LEVEL_DEBUG
-    else if (wake_new && !wake_last) {
-        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
-    }
-#endif
-    wake_last = wake_new;
-#endif // HAVE_LAN_WAKEUP_N
 
     static uint32_t last_time = 0;
     uint32_t time = time_get();
