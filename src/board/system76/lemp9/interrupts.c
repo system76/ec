@@ -13,4 +13,9 @@ void interrupts_init(void) {
 }
 
 void external_1(void) __interrupt(2) {
+    if (ISR19 & BIT(7)) {
+        // INT159: PLL Frequency Change Event
+        // TODO: What needs to be done?
+        ISR19 = BIT(7);
+    }
 }

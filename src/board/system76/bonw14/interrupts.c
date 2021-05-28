@@ -20,5 +20,9 @@ void external_1(void) __interrupt(2) {
         power_handle_lan_wakeup();
         ISR11 = BIT(4);
         WUESR8 = BIT(4);
+    } else if (ISR19 & BIT(7)) {
+        // INT159: PLL Frequency Change Event
+        // TODO: What needs to be done?
+        ISR19 = BIT(7);
     }
 }
