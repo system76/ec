@@ -96,7 +96,7 @@ void gpio_init() {
     // LID_SW#
     GPCRB1 = GPIO_IN | GPIO_UP;
     // EC_LAN_WAKEUP#
-    GPCRB2 = GPIO_IN | GPIO_UP;
+    GPCRB2 = GPIO_IN;
     // PWR_SW#
     GPCRB3 = GPIO_IN;
     // XLP_OUT
