@@ -5,9 +5,8 @@ EC=it5570e
 # Enable eSPI
 CFLAGS+=-DEC_ESPI=1
 
-# Add keymap to src
-KEYMAP?=default
-SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
+# Include keyboard
+KEYBOARD=14in_83
 
 # Set keyboard LED mechanism
 KBLED=white_dac
