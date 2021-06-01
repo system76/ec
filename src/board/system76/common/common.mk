@@ -36,6 +36,13 @@ CFLAGS+=\
 CHARGER?=bq24780s
 SRC+=$(SYSTEM76_COMMON_DIR)/charger/$(CHARGER).c
 
+# Add keyboard
+ifndef KEYBOARD
+$(error KEYBOARD is not set by the board)
+endif
+KEYBOARD_DIR=src/keyboard/system76/$(KEYBOARD)
+include $(KEYBOARD_DIR)/keyboard.mk
+
 # Add kbled
 KBLED?=none
 SRC+=$(SYSTEM76_COMMON_DIR)/kbled/$(KBLED).c

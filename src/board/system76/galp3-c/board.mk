@@ -2,9 +2,8 @@
 
 EC=it8587e
 
-# Add keymap to src
-KEYMAP?=default
-SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
+# Include keyboard
+KEYBOARD=14in_86
 
 # Set keyboard LED mechanism
 KBLED=white_dac

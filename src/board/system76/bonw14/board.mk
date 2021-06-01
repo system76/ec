@@ -2,9 +2,8 @@
 
 EC=it5570e
 
-# Add keymap to src
-KEYMAP?=default
-SRC+=$(BOARD_DIR)/keymap/$(KEYMAP).c
+# Include keyboard
+KEYBOARD=15in_102_nkey
 
 # Set keyboard LED mechanism
 KBLED=bonw14
