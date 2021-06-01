@@ -21,7 +21,7 @@ PROGRAMMER=$(wildcard /dev/serial/by-id/usb-Arduino*)
 # Include system76 common source
 SYSTEM76_COMMON_DIR=src/board/system76/common
 SRC+=$(wildcard $(SYSTEM76_COMMON_DIR)/*.c)
-INCLUDE+=$(wildcard $(SYSTEM76_COMMON_DIR)/include/common/*.h) $(SYSTEM76_COMMON_DIR)/common.mk
+INCLUDE+=$(wildcard $(SYSTEM76_COMMON_DIR)/include/board/*.h) $(SYSTEM76_COMMON_DIR)/common.mk
 CFLAGS+=-I$(SYSTEM76_COMMON_DIR)/include
 
 # Set battery charging thresholds
