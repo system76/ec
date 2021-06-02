@@ -9,26 +9,24 @@
 void interrupts_init(void) {
     // INT17: BUF_PLT_RST#
     WUESR2 = BIT(4);
-    ISR2 = BIT(1);
-    IER2 = BIT(1);
+    interrupt_enable(17);
 
     // INT92: LAN_WAKEUP#
     WUEMR8 = BIT(4);
     WUESR8 = BIT(4);
-    ISR11 = BIT(4);
-    IER11 = BIT(4);
+    interrupt_enable(92);
 }
 
 void external_1(void) __interrupt(2) {
-    if (ISR2 & BIT(1)) {
+    if (interrupt_is_pending(17)) {
         // INT17: BUF_PLT_RST#
         power_handle_buf_plt_rst();
-        ISR2 = BIT(1);
+        interrupt_clear(17);
         WUESR2 = BIT(4);
-    } else if (ISR11 & BIT(4)) {
+    } else if (interrupt_is_pending(92)) {
         // INT92: LAN_WAKEUP#
         power_handle_lan_wakeup();
-        ISR11 = BIT(4);
+        interrupt_clear(92);
         WUESR8 = BIT(4);
     }
 }
