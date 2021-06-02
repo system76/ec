@@ -55,13 +55,6 @@ void interrupt_disable(unsigned int nr) {
     *(Irqs[group].enable) &= ~BIT(bit);
 }
 
-bool interrupt_is_pending(unsigned int nr) {
-    unsigned int group = nr / 8;
-    unsigned int bit = nr % 8;
-
-    return *(Irqs[group].status) & BIT(bit);
-}
-
 void interrupt_clear(unsigned int nr) {
     unsigned int group = nr / 8;
     unsigned int bit = nr % 8;

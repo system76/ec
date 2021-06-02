@@ -5,12 +5,19 @@
 #ifndef _EC_INTC_H
 #define _EC_INTC_H
 
-#include <stdbool.h>
 #include <stdint.h>
+
+volatile uint8_t __xdata __at(0x1110) IVCT;
+
+/*
+ * Returns the highest priority IRQ
+ */
+static inline uint8_t interrupt_get_irq(void) {
+    return IVCT - 0x10;
+}
 
 void interrupt_enable(unsigned int nr);
 void interrupt_disable(unsigned int nr);
-bool interrupt_is_pending(unsigned int nr);
 void interrupt_clear(unsigned int nr);
 
 volatile uint8_t __xdata __at(0x1100) ISR0;
@@ -124,7 +131,5 @@ volatile uint8_t __xdata __at(0x1159) IER21;
 volatile uint8_t __xdata __at(0x115A) IELMR21;
 volatile uint8_t __xdata __at(0x115B) IPOLR21;
 #endif
-
-volatile uint8_t __xdata __at(0x1110) IVCT;
 
 #endif // _EC_INTC_H
