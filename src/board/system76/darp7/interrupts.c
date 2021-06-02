@@ -2,6 +2,7 @@
 
 #include <board/interrupts.h>
 #include <board/power.h>
+#include <common/debug.h>
 #include <common/macro.h>
 #include <ec/intc.h>
 #include <ec/wuc.h>
@@ -18,19 +19,26 @@ void interrupts_init(void) {
 }
 
 void external_1(void) __interrupt(2) {
-    if (interrupt_is_pending(17)) {
+    uint8_t intr = IVCT - 0x10;
+
+    switch (intr) {
+    case 17:
         // INT17: BUF_PLT_RST#
         power_handle_buf_plt_rst();
-        interrupt_clear(17);
         WUESR2 = BIT(4);
-    } else if (interrupt_is_pending(85)) {
+        break;
+
+    case 85:
         // INT85: LAN_WAKEUP#
         power_handle_lan_wakeup();
-        interrupt_clear(85);
-        WUESR9 = BIT(0);
-    } else if (interrupt_is_pending(159)) {
-        // INT159: PLL Frequency Change Event
-        // TODO: What needs to be done?
-        interrupt_clear(159);
+        WUESR8 = BIT(4);
+        break;
+
+    default:
+        WARN("Unhandled interrupt: INT%d\n", intr);
+        break;
     }
+
+    // XXX: Must be acknowledged or cause an interrupt storm
+    interrupt_clear(intr);
 }
