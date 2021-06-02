@@ -19,9 +19,9 @@ void interrupts_init(void) {
 }
 
 void external_1(void) __interrupt(2) {
-    uint8_t intr = IVCT - 0x10;
+    uint8_t irq = interrupt_get_irq();
 
-    switch (intr) {
+    switch (irq) {
     case 17:
         // INT17: BUF_PLT_RST#
         power_handle_buf_plt_rst();
@@ -35,10 +35,10 @@ void external_1(void) __interrupt(2) {
         break;
 
     default:
-        WARN("Unhandled interrupt: INT%d\n", intr);
+        WARN("Unhandled interrupt: INT%d\n", irq);
         break;
     }
 
     // XXX: Must be acknowledged or cause an interrupt storm
-    interrupt_clear(intr);
+    interrupt_clear(irq);
 }
