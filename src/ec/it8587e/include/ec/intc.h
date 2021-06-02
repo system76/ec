@@ -7,6 +7,12 @@
 
 #include <stdint.h>
 
+volatile uint8_t __xdata __at(0x1110) IVCT;
+
+static inline uint8_t interrupt_get_irq(void) {
+    return IVCT - 0x10;
+}
+
 void interrupt_enable(unsigned int nr);
 void interrupt_disable(unsigned int nr);
 void interrupt_clear(unsigned int nr);
@@ -105,7 +111,5 @@ volatile uint8_t __xdata __at(0x114C) ISR18;
 volatile uint8_t __xdata __at(0x114D) IER18;
 volatile uint8_t __xdata __at(0x114E) IELMR18;
 volatile uint8_t __xdata __at(0x114F) IPOLR18;
-
-volatile uint8_t __xdata __at(0x1110) IVCT;
 
 #endif // _EC_INTC_H
