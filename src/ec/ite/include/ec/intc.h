@@ -5,7 +5,13 @@
 #ifndef _EC_INTC_H
 #define _EC_INTC_H
 
+#include <stdbool.h>
 #include <stdint.h>
+
+void interrupt_enable(unsigned int nr);
+void interrupt_disable(unsigned int nr);
+bool interrupt_is_pending(unsigned int nr);
+void interrupt_clear(unsigned int nr);
 
 volatile uint8_t __xdata __at(0x1100) ISR0;
 volatile uint8_t __xdata __at(0x1104) IER0;
