@@ -7,6 +7,10 @@
 
 #include <stdint.h>
 
+void interrupt_enable(unsigned int nr);
+void interrupt_disable(unsigned int nr);
+void interrupt_clear(unsigned int nr);
+
 volatile uint8_t __xdata __at(0x1100) ISR0;
 volatile uint8_t __xdata __at(0x1104) IER0;
 volatile uint8_t __xdata __at(0x1108) IELMR0;
