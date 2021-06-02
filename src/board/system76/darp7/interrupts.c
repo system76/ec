@@ -9,30 +9,28 @@
 void interrupts_init(void) {
     // INT17: BUF_PLT_RST#
     WUESR2 = BIT(4);
-    ISR2 = BIT(1);
-    IER2 = BIT(1);
+    interrupt_enable(17);
 
     // INT85: LAN_WAKEUP#
     WUEMR9 = BIT(0);
     WUESR9 = BIT(0);
-    ISR10 = BIT(5);
-    IER10 = BIT(5);
+    interrupt_enable(85);
 }
 
 void external_1(void) __interrupt(2) {
-    if (ISR2 & BIT(1)) {
+    if (interrupt_is_pending(17)) {
         // INT17: BUF_PLT_RST#
         power_handle_buf_plt_rst();
-        ISR2 = BIT(1);
+        interrupt_clear(17);
         WUESR2 = BIT(4);
-    } else if (ISR10 & BIT(5)) {
+    } else if (interrupt_is_pending(85)) {
         // INT85: LAN_WAKEUP#
         power_handle_lan_wakeup();
-        ISR10 = BIT(5);
+        interrupt_clear(85);
         WUESR9 = BIT(0);
-    } else if (ISR19 & BIT(7)) {
+    } else if (interrupt_is_pending(159)) {
         // INT159: PLL Frequency Change Event
         // TODO: What needs to be done?
-        ISR19 = BIT(7);
+        interrupt_clear(159);
     }
 }

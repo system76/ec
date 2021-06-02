@@ -12,19 +12,18 @@
 void interrupts_init(void) {
     // INT17: BUF_PLT_RST#
     WUESR2 = BIT(4);
-    ISR2 = BIT(1);
-    IER2 = BIT(1);
+    interrupt_enable(17);
 }
 
 void external_1(void) __interrupt(2) {
-    if (ISR2 & BIT(1)) {
+    if (interrupt_is_pending(17)) {
         // INT17: BUF_PLT_RST#
         power_handle_buf_plt_rst();
-        ISR2 = BIT(1);
+        interrupt_clear(17);
         WUESR2 = BIT(4);
-    } else if (ISR19 & BIT(7)) {
+    } else if (interrupt_is_pending(159)) {
         // INT159: PLL Frequency Change Event
         // TODO: What needs to be done?
-        ISR19 = BIT(7);
+        interrupt_clear(159);
     }
 }
