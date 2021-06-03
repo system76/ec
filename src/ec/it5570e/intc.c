@@ -40,24 +40,24 @@ static const struct IrqGroup Irqs[] = {
     IRQ_GROUP(21),
 };
 
-void interrupt_enable(unsigned int nr) {
-    unsigned int group = nr / 8;
-    unsigned int bit = nr % 8;
+void interrupt_enable(uint8_t nr) {
+    uint8_t group = nr / 8;
+    uint8_t bit = nr % 8;
 
     *(Irqs[group].status) = BIT(bit);
     *(Irqs[group].enable) |= BIT(bit);
 }
 
-void interrupt_disable(unsigned int nr) {
-    unsigned int group = nr / 8;
-    unsigned int bit = nr % 8;
+void interrupt_disable(uint8_t nr) {
+    uint8_t group = nr / 8;
+    uint8_t bit = nr % 8;
 
     *(Irqs[group].enable) &= ~BIT(bit);
 }
 
-void interrupt_clear(unsigned int nr) {
-    unsigned int group = nr / 8;
-    unsigned int bit = nr % 8;
+void interrupt_clear(uint8_t nr) {
+    uint8_t group = nr / 8;
+    uint8_t bit = nr % 8;
 
     *(Irqs[group].status) = BIT(bit);
 }
