@@ -8,6 +8,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define GPIO_ALT    (0b00U << 6)
+#define GPIO_IN     (0b10U << 6)
+#define GPIO_OUT    (0b01U << 6)
+#define GPIO_UP     BIT(2)
+#define GPIO_DOWN   BIT(1)
+
 struct Gpio {
     volatile uint8_t __xdata * data;
     volatile uint8_t __xdata * mirror;
