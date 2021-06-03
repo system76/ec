@@ -16,9 +16,9 @@ static inline uint8_t interrupt_get_irq(void) {
     return IVCT - 0x10;
 }
 
-void interrupt_enable(unsigned int nr);
-void interrupt_disable(unsigned int nr);
-void interrupt_clear(unsigned int nr);
+void interrupt_enable(uint8_t nr);
+void interrupt_disable(uint8_t nr);
+void interrupt_clear(uint8_t nr);
 
 volatile uint8_t __xdata __at(0x1100) ISR0;
 volatile uint8_t __xdata __at(0x1104) IER0;
