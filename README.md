@@ -41,3 +41,17 @@ git ls-tree <release_hash> ec
 ```
 
 [firmware-open]: https://github.com/system76/firmware-open
+
+## Legal
+
+System76 EC is copyright System76 and contributors.
+
+System76 EC firmware is made available under the terms of the GNU General
+Public License, version 3. See [LICENSE](./LICENSE) for details.
+
+- firmware: GPL-3.0-only
+- ecflash: LGPL-2.1-or-later
+- ecsim: MIT
+- ectool: MIT
+
+Datasheets for ITE embedded controllers cannot be shared outside of System76.
