@@ -7,6 +7,15 @@
 #include <ec/intc.h>
 #include <ec/wuc.h>
 
+static const struct {
+    volatile uint8_t *wuesr;
+    uint8_t wuc_bit;
+    void (*isr)(void);
+} irqs[] = {
+    [17] = { &WUESR2, 4, power_handle_buf_plt_rst },
+    [92] = { &WUESR8, 4, power_handle_lan_wakeup },
+};
+
 void interrupts_init(void) {
     // INT17: BUF_PLT_RST#
     WUESR2 = BIT(4);
@@ -21,24 +30,17 @@ void interrupts_init(void) {
 void external_1(void) __interrupt(2) {
     uint8_t irq = interrupt_get_irq();
 
-    switch (irq) {
-    case 17:
-        // INT17: BUF_PLT_RST#
-        power_handle_buf_plt_rst();
-        WUESR2 = BIT(4);
-        break;
+    if (irqs[irq].isr) {
+        irqs[irq].isr();
 
-    case 92:
-        // INT92: LAN_WAKEUP#
-        power_handle_lan_wakeup();
-        WUESR8 = BIT(4);
-        break;
-
-    default:
+        if (irqs[irq].wuesr) {
+            // Acknowledge the WUC source
+            *(irqs[irq].wuesr) = BIT(irqs[irq].wuc_bit);
+        }
+    } else {
         WARN("Unhandled interrupt: INT%d\n", irq);
-        break;
     }
 
-    // XXX: Must be acknowledged or cause an interrupt storm
+    // Must be acknowledged or cause an interrupt storm
     interrupt_clear(irq);
 }
