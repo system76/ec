@@ -11,11 +11,11 @@ laptops.
 - [Creating a custom keyboard layout](./doc/keyboard-layout-customization.md)
 - [Adding a new board](./doc/adding-a-new-board.md)
 
-## Dependencies
+## Quickstart
 
-Install dependencies using the provided script:
+Install dependencies using the provided script.
 
-```
+```sh
 ./scripts/deps.sh
 ```
 
@@ -23,9 +23,17 @@ If rustup was installed as part of this, then the correct `cargo` will not be
 available in the running session. Start a new shell session or source the env
 file to update `PATH`.
 
-```
+```sh
 source $HOME/.cargo/env
 ```
+
+Then build the firmware for your laptop model.
+
+```sh
+make BOARD=system76/<model>
+```
+
+See [Flashing](./doc/flashing.md) for how to use the new firmware image.
 
 ## Releases
 
