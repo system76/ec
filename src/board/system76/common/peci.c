@@ -19,7 +19,7 @@ static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
 #ifndef BOARD_COOLDOWN
-    #define BOARD_COOLDOWN 20
+    #define BOARD_COOLDOWN 10
 #endif
 
 static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };

@@ -22,7 +22,7 @@ static uint8_t FAN_HEATUP[BOARD_DGPU_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
 #ifndef BOARD_DGPU_COOLDOWN
-    #define BOARD_DGPU_COOLDOWN 20
+    #define BOARD_DGPU_COOLDOWN 10
 #endif
 
 static uint8_t FAN_COOLDOWN[BOARD_DGPU_COOLDOWN] = { 0 };
