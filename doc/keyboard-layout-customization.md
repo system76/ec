@@ -1,66 +1,122 @@
 # Keyboard layout customization
 
-## Dependencies
-* Dependencies are listed in the README file for the EC project.
+System76 EC firmware suppports using custom keyboard layouts. For example,
+having the physical "Caps Lock" key function as "Escape" when pressed.
 
-## Select firmware version
+This only applies to the internal keyboard. External keyboards are not
+affected.
+
+Advanced functionality, such as macros or QMK's Mod-Tap, are not supported.
+
+You must be able to build and flash firmware. See the [README](../README.md)
+if you have not built the firmware before.
+
+## Firmware version
 
 To ensure compatibility with other system components (e.g. your current BIOS
 version), it's recommended to flash the same firmware version as you're
 currently using.
-* Go to Settings -> Firmware and check the current version. It will look
-  something like "2020-09-17_f10af76".
-* Clone the [system76/firmware-open](https://github.com/system76/firmware-open)
-  repository.
-* Checkout the version that matches your firmware, e.g.:
-  `git checkout f10af76`.
-* Run `git submodule init && git submodule update && cd ec`.
-* This documentation is subject to change, please use the version in the
-  repository you just cloned.
 
-## Adding your layout
-* In `src/board/system76/{your-model}/board.mk`, locate the line starting with
-  `KEYBOARD=`. The value after the equal sign is your keyboard type, the most
-  common is `15in_102`. We will use the `lemp9` keyboard as an example, which
-  is `14in_83`
-* In `src/board/keyboard/{keyboard-type}/keymap/`, copy `default.c` and rename
-  it. There are two examples to reference in the `14in_83` directory:
-  `jeremy.c` and `levi.c`.
-* In `src/common/include/common/keymap.h` you will find a list of the key
-  definitions.
-* You will notice two sets of keys in these layout files. The top one is the 
-  standard mapping. The bottom one is the Fn layer, meaning it is active when
-  the Fn key is being held. If you look at the Fn layer in the `levi.c` layout,
-  you will see that there are arrow keys at WASD, media and volume keys on the
-  bottom row, etc. 
-* Hint: To avoid losing your place change one key at a time, referencing the
-  key code you are deleting to keep yourself positioned correctly in the list
-  of keycodes.
+Determine the BIOS version using dmidecode. The BIOS version is formatted as
+`<date>_<revision>`.
 
-## Configure your EC to build with your layout
-* Create a file in the project's root directory called `config.mk` and add your
-  board and keyboard layout to it. For example, if you want to build lemp9
-  firmware with Jeremy's layout (which is at 
-  `ec/src/keyboard/14in_83/keymap/jeremy.c`):
+```sh
+sudo dmidecode -t bios | grep Version
 ```
+
+From the [firmware-open](https://github.com/system76/firmware-open) repo,
+determine the EC commit used for the BIOS version.
+
+```sh
+git ls-tree <bios_rev> ec
+```
+
+Checkout that commit in the EC repo and update the submodules.
+
+```sh
+git checkout <ec_rev>
+git submodule update --recursive
+```
+
+## Adding a layout file
+
+Determine the keyboard used for your model.
+
+```sh
+grep KEYBOARD src/board/system76/<model>/board.mk
+```
+
+Copy the default layout file for the keyboard to a separate file in the keymap
+directory.
+
+```sh
+cp src/keyboard/system76/<keyboard>/keymap/default.c src/keyboard/system76/<keyboard>/keymap/<custom>.c
+```
+
+The name of the keymap can be anything. Following QMK convention, the file name
+could be your username.
+
+## Modifying the layout
+
+A keymap file is a C file that defines the position of key and its function.
+Only the `LAYOUT`s should be modified.
+
+There are 2 layers in a keymap file.
+
+- `KEYMAP[0]`: The first `LAYOUT` defines the default layer
+- `KEYMAP[1]`: The second `LAYOUT` defines the function layer
+
+A `KT_FN` key must be assigned on the first layer in order to access the second
+layer. The `KT_FN` key must be held to use keys on the second layer.
+
+Change one key at a time to avoid losing your place.
+
+Some related files are:
+
+- `src/common/include/common/keymap.h`: Defines the key scancodes
+- `src/keyboard/system76/<keyboard>/include/board/keymap.h`: Defines the
+    keyboard matrix
+
+## Building with the new layout
+
+Build the firmware specifying the `KEYMAP` you have added.
+
+```sh
+make BOARD=system76/lemp9 KEYMAP=custom
+```
+
+Use a config file to simplify this. In the EC project's root directory, create
+a file named `config.mk`. Define the `BOARD` and `KEYMAP` variables.
+
+```mk
 BOARD?=system76/lemp9
-KEYMAP?=jeremy
+KEYMAP?=custom
 ```
 
-## Test build your EC
-* Make sure all dependencies are installed (see above).
-* From the `ec` directory, run `make` to make sure it builds correctly.
+Then building the firmware only requires calling make.
 
-## Flash your EC
-* If the test build went well, you should be ready to flash your EC:
-  - Close all running applications.
-  - Unplug everything from your laptop except the charger.
-  - Flash with `make flash_internal`
-  - When it says, "Waiting 5 seconds for all keys to be released", it is
-    important to not touch the keyboard or trackpad until it finishes writing
-    the new EC and turns itself off. 
-  - Once it shuts down, you can power it back on, and your keymap will be
-    active. 
-  - If you changed your layout in such a way that you can't easily type, just
-    plug in a USB keyboard and re-flash to the default layout until you can
-    fix. The USB keyboard's layout will be unaffected.
+```sh
+# Make will read config.mk to determine which board and keymap to use.
+make
+```
+
+## Flashing the new firmware
+
+See [flashing firmware](./flashing.md) for details.
+
+```sh
+make flash_internal
+```
+
+Do not use the keyboard or touchpad while it is flashing.
+
+The system will power off as part of the flash process. Turn it back on after
+it has powered off.
+
+The keyboard can now be used with your new layout.
+
+## Troubleshooting
+
+If your layout does not work as you intended, only the internal keyboard will
+be affected. An external USB keyboard or SSH session can be used to correct the
+layout and reflash the firmware.
