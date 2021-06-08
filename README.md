@@ -9,6 +9,7 @@ laptops.
 - [Flashing firmware](./doc/flashing.md)
 - [Debugging](./doc/debugging.md)
 - [Creating a custom keyboard layout](./doc/keyboard-layout-customization.md)
+- [Development environment](./doc/dev-env.md)
 - [Adding a new board](./doc/adding-a-new-board.md)
 
 ## Quickstart
