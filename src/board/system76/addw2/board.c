@@ -1,13 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <arch/time.h>
-#include <board/battery.h>
 #include <board/board.h>
-#include <board/dgpu.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
-#include <board/peci.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <ec/ec.h>
