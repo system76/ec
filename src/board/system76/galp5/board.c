@@ -83,13 +83,4 @@ void board_event(void) {
 #endif // HAVE_DGPU
 
     espi_event();
-
-    // Read POST codes
-    while (P80H81HS & 1) {
-        uint8_t p80h = P80HD;
-        uint8_t p81h = P81HD;
-        P80H81HS |= 1;
-
-        DEBUG("POST %02X%02X\n", p81h, p80h);
-    }
 }

@@ -29,6 +29,7 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/ec.h>
+#include <ec/intc.h>
 
 #ifdef PARALLEL_DEBUG
     #include <board/parallel.h>
@@ -76,6 +77,7 @@ void init(void) {
     smfi_init();
 
     //TODO: INTC
+    interrupt_init();
 
     // Must happen last
     board_init();
