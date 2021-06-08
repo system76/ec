@@ -1,17 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <arch/time.h>
-#include <board/battery.h>
 #include <board/board.h>
-#include <board/dgpu.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
-#include <board/kbc.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <ec/ec.h>
-
-extern uint8_t main_cycle;
 
 void board_init(void) {
     // Allow CPU to boot
