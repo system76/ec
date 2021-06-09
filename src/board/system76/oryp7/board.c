@@ -9,6 +9,7 @@
 #include <board/kbc.h>
 #include <board/power.h>
 #include <common/debug.h>
+#include <ec/ec.h>
 
 extern uint8_t main_cycle;
 
@@ -36,12 +37,5 @@ void board_init(void) {
 void board_event(void) {
     power_set_limit();
 
-    // Read POST codes
-    while (P80H81HS & 1) {
-        uint8_t p80h = P80HD;
-        uint8_t p81h = P81HD;
-        P80H81HS |= 1;
-
-        DEBUG("POST %02X%02X\n", p81h, p80h);
-    }
+    ec_read_post_codes();
 }
