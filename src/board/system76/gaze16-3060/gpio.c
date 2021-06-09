@@ -6,62 +6,67 @@
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
-struct Gpio __code BKL_EN =         GPIO(H, 2);
-struct Gpio __code BT_EN =          GPIO(F, 3);
+struct Gpio __code BKL_EN =         GPIO(C, 7);
 struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2);
 struct Gpio __code CCD_EN =         GPIO(D, 1);
+struct Gpio __code CPU_C10_GATE_N = GPIO(I, 5);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code DGPU_PWR_EN =    GPIO(J, 2);
+struct Gpio __code EC_EN =          GPIO(B, 6); // renamed to SUSBC_EN#
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code GC6_FB_EN =      GPIO(J, 3);
 struct Gpio __code LAN_WAKEUP_N =   GPIO(B, 2);
-struct Gpio __code LED_ACIN =       GPIO(C, 7);
+struct Gpio __code LED_ACIN =       GPIO(H, 2);
 struct Gpio __code LED_AIRPLANE_N = GPIO(H, 7);
-struct Gpio __code LED_BAT_CHG =    GPIO(H, 5);
+struct Gpio __code LED_BAT_CHG =    GPIO(H, 3);
 struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
-struct Gpio __code PM_PWROK =       GPIO(C, 6);
+struct Gpio __code PCH_DPWROK_EC =  GPIO(F, 7);
+struct Gpio __code PCH_PWROK_EC =   GPIO(C, 6); // renamed to EC_SYS_PWROK
+struct Gpio __code PM_PWROK =       GPIO(H, 5); // actually VR_ON
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
-struct Gpio __code SCI_N =          GPIO(D, 3);
-struct Gpio __code SMI_N =          GPIO(D, 4);
+struct Gpio __code SLP_SUS_N =      GPIO(I, 6);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
-struct Gpio __code SUSWARN_N =      GPIO(H, 0);
-struct Gpio __code SUS_PWR_ACK =    GPIO(F, 7);
-struct Gpio __code SWI_N =          GPIO(B, 5);
-struct Gpio __code VA_EC_EN =       GPIO(J, 4); // renamed to SLP_SUS#
-struct Gpio __code WLAN_EN =        GPIO(G, 1);
-struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
+struct Gpio __code VA_EC_EN =       GPIO(J, 4);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init() {
     // Enable LPC reset on GPD2
     GCR = 0x04;
+    // Disable UARTs
+    GCR6 = 0;
     // Enable SMBus channel 4
     GCR15 = BIT(4);
+    // Set GPD2 to 1.8V
+    GCR19 = BIT(0);
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
+    // Set GPH0 to 1.8V
+    GCR21 = BIT(2);
 
     // Set GPIO data
-    GPDRA = 0;
-    // H_PROCHOT_EC, XLP_OUT, PWR_SW#
-    GPDRB = BIT(6) | BIT(4) | BIT(3);
+    // WLAN_PWR_EN
+    GPDRA = BIT(3);
+    // SWI#, XLP_OUT, PWR_SW#
+    GPDRB = BIT(5) | BIT(4) | BIT(3);
     GPDRC = 0;
     // PWR_BTN#, SMI#, SCI#
     GPDRD = BIT(5) | BIT(4) | BIT(3);
     GPDRE = 0;
-    // EC_PECI
-    GPDRF = BIT(6);
-    GPDRG = 0;
+    // PCH_DPWROK_EC
+    GPDRF = BIT(7);
+    // H_PROCHOT#_EC, WLAN_EN
+    GPDRG = BIT(6) | BIT(1);
     // AIRPLAN_LED#
     GPDRH = BIT(7);
     GPDRI = 0;
     GPDRJ = 0;
 
     // Set GPIO control
-    // EC_PWM_PIN_24
+    // EC_PWM_LEDKB_P
     GPCRA0 = GPIO_ALT;
     // KBC_BEEP
     GPCRA1 = GPIO_ALT;
@@ -81,7 +86,7 @@ void gpio_init() {
     GPCRB0 = GPIO_IN | GPIO_UP;
     // LID_SW#
     GPCRB1 = GPIO_IN | GPIO_UP;
-    // LAN_WAKEUP#
+    // EC_LAN_WAKEUP#
     GPCRB2 = GPIO_IN | GPIO_UP;
     // PWR_SW#
     GPCRB3 = GPIO_IN;
@@ -89,9 +94,9 @@ void gpio_init() {
     GPCRB4 = GPIO_OUT;
     // SWI#
     GPCRB5 = GPIO_OUT | GPIO_UP;
-    // H_PROCHOT_EC
+    // SUSBC_EC#
     GPCRB6 = GPIO_OUT | GPIO_UP;
-    //
+    // Doesn't exist
     GPCRB7 = GPIO_IN;
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
@@ -101,19 +106,19 @@ void gpio_init() {
     GPCRC2 = GPIO_ALT;
     // KB-SO16
     GPCRC3 = GPIO_IN;
-    // CNVI_DET#_EC
+    // CNVI_DET#
     GPCRC4 = GPIO_IN | GPIO_UP;
     // KB-SO17
     GPCRC5 = GPIO_IN;
-    // PM_PWROK
+    // EC_SYS_PWROK
     GPCRC6 = GPIO_OUT;
-    // LED_ACIN
+    // BKL_EN
     GPCRC7 = GPIO_OUT | GPIO_UP;
     // LED_PWR
     GPCRD0 = GPIO_OUT | GPIO_UP;
     // CCD_EN
     GPCRD1 = GPIO_OUT | GPIO_UP;
-    // BUF_PLT_RST#
+    // BUF_PLT_RST# / ESPI_RESET_N
     GPCRD2 = GPIO_ALT;
     // SCI#
     GPCRD3 = GPIO_IN;
@@ -131,7 +136,7 @@ void gpio_init() {
     GPCRE1 = GPIO_OUT | GPIO_UP;
     // RGBKB-DET#
     GPCRE2 = GPIO_IN | GPIO_UP;
-    // USB_PWR_EN# (on 1650/1650Ti), NC (on 1660Ti)
+    // USB_PWR_EN#
     GPCRE3 = GPIO_OUT;
     // DD_ON
     GPCRE4 = GPIO_OUT | GPIO_DOWN;
@@ -147,22 +152,22 @@ void gpio_init() {
     GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
     GPCRF2 = GPIO_IN | GPIO_UP;
-    // BT_EN
-    GPCRF3 = GPIO_OUT | GPIO_UP;
+    // XXX: M2M_SSD1_PLN# / M2M_SSD2_PLN#
+    GPCRF3 = GPIO_IN;
     // TP_CLK
     GPCRF4 = GPIO_ALT;
     // TP_DATA
     GPCRF5 = GPIO_ALT;
-    // EC_PECI
+    // H_PECI
     GPCRF6 = GPIO_ALT;
-    // SUS_PWR_ACK#
-    GPCRF7 = GPIO_IN;
-    // dGPU_GPIO8_OVERT
+    // PCH_DPWROK_EC
+    GPCRF7 = GPIO_OUT;
+    // dGPU_OVERT_EC
     GPCRG0 = GPIO_IN | GPIO_UP;
     // WLAN_EN
     GPCRG1 = GPIO_OUT | GPIO_UP;
     // AUTO_LOAD_PWR
-    GPCRG2 = GPIO_OUT;
+    GPCRG2 = GPIO_IN;
     // ALSPI_CE#
     GPCRG3 = GPIO_ALT;
     // ALSPI_MSI
@@ -173,19 +178,19 @@ void gpio_init() {
     GPCRG6 = GPIO_OUT | GPIO_UP;
     // ALSPI_SCLK
     GPCRG7 = GPIO_ALT;
-    // SUS_WARN#
+    // SLP_S0#
     GPCRH0 = GPIO_IN;
-    // SUSC#
+    // SUSC#_PCH
     GPCRH1 = GPIO_IN;
-    // BKL_EN
+    // LED_ACIN
     GPCRH2 = GPIO_OUT | GPIO_UP;
-    // LIGHT_KB_DET#
-    GPCRH3 = GPIO_IN;
-    // d_GPIO9_ALERT_FAN
-    GPCRH4 = GPIO_IN | GPIO_UP;
     // LED_BAT_CHG
-    GPCRH5 = GPIO_OUT | GPIO_UP;
-    // SUSB#
+    GPCRH3 = GPIO_OUT | GPIO_UP;
+    // d_GPIO9_ALERT_FAN
+    GPCRH4 = GPIO_IN;
+    // VR_ON
+    GPCRH5 = GPIO_OUT;
+    // SUSB#_PCH
     GPCRH6 = GPIO_IN;
     // AIRPLAN_LED#
     GPCRH7 = GPIO_OUT | GPIO_UP;
@@ -199,9 +204,9 @@ void gpio_init() {
     GPCRI3 = GPIO_ALT;
     // TOTAL_CUR
     GPCRI4 = GPIO_ALT;
-    // PERKB_ID#_R
+    // SLP_A# / CPU_C10_GATE#_EC
     GPCRI5 = GPIO_IN;
-    // PERKB_ID2#_R
+    // SLP_SUS#
     GPCRI6 = GPIO_IN;
     // MODEL_ID
     GPCRI7 = GPIO_IN;
@@ -213,7 +218,7 @@ void gpio_init() {
     GPCRJ2 = GPIO_IN;
     // GC6_FB_EN_PCH
     GPCRJ3 = GPIO_IN;
-    // SLP_SUS#
+    // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
     GPCRJ5 = GPIO_OUT;
@@ -221,20 +226,20 @@ void gpio_init() {
     GPCRJ6 = GPIO_OUT;
     // PERKB-DET#_R
     GPCRJ7 = GPIO_IN | GPIO_UP;
-    // LPC_AD0
+    // ESPI_IO0
     GPCRM0 = GPIO_ALT;
-    // LPC_AD1
+    // ESPI_IO1
     GPCRM1 = GPIO_ALT;
-    // LPC_AD2
+    // ESPI_IO2
     GPCRM2 = GPIO_ALT;
-    // LPC_AD3
+    // ESPI_IO3
     GPCRM3 = GPIO_ALT;
-    // PCLK_KBC
+    // ESPI_CLK
     GPCRM4 = GPIO_ALT;
-    // LPC_FRAME#
+    // ESPI_CS#
     GPCRM5 = GPIO_ALT;
-    // SERIRQ
-    GPCRM6 = GPIO_ALT;
+    // ESPI_ALRT0#
+    GPCRM6 = GPIO_IN | GPIO_UP;
 }
 
 #if GPIO_DEBUG
