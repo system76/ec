@@ -91,7 +91,7 @@ uint8_t dgpu_get_fan_duty(void) {
         duty = fan_cooldown(&FAN, duty);
     }
 
-    DEBUG("DGPU temp=%d\n", dgpu_temp);
+    TRACE("DGPU temp=%d\n", dgpu_temp);
     return duty;
 }
 
