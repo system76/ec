@@ -31,9 +31,6 @@ void board_init(void) {
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
-
-    // Enable POST codes
-    SPCTRL1 |= 0xC8;
 }
 
 // Set PL4 using PECI

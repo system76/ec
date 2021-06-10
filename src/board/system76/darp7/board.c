@@ -27,9 +27,6 @@ void board_init(void) {
     // Assert SMI# and SWI#
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
-
-    // Enable POST codes
-    SPCTRL1 |= 0xC8;
 }
 
 void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }

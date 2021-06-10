@@ -3,9 +3,13 @@
 #include <ec/ec.h>
 #include <ec/gctrl.h>
 #include <common/debug.h>
+#include <common/macro.h>
 
 void ec_init(void) {
     RSTS = 0x44;
+
+    // Enable POST codes
+    SPCTRL1 |= BIT(7) | BIT(6) | BIT(3);
 }
 
 void ec_read_post_codes(void) {
