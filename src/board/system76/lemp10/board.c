@@ -33,8 +33,6 @@ void board_init(void) {
     SPCTRL1 |= 0xC8;
 }
 
-void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
-
 void board_event(void) {
     espi_event();
 

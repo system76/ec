@@ -25,8 +25,6 @@ void board_init(void) {
     gpio_set(&SWI_N, true);
 }
 
-void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
-
 void board_event(void) {
     if (main_cycle == 0) {
         if (power_state == POWER_STATE_S0 || power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
