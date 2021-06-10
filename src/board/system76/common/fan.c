@@ -68,18 +68,18 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
 
     // set PECI fan duty
     if (peci_fan_duty != DCR2) {
-        DEBUG("PECI fan_duty_raw=%d\n", peci_fan_duty);
+        TRACE("PECI fan_duty_raw=%d\n", peci_fan_duty);
         last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
         DCR2 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
-        DEBUG("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
+        TRACE("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
     }
 
     // set dGPU fan duty
     if (dgpu_fan_duty != DCR4) {
-        DEBUG("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
+        TRACE("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
         last_duty_dgpu = dgpu_fan_duty = fan_smooth(last_duty_dgpu, dgpu_fan_duty);
         DCR4 = fan_max ? MAX_FAN_SPEED : dgpu_fan_duty;
-        DEBUG("DGPU fan_duty_smoothed=%d\n", dgpu_fan_duty);
+        TRACE("DGPU fan_duty_smoothed=%d\n", dgpu_fan_duty);
     }
 }
 

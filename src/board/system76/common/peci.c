@@ -180,6 +180,6 @@ uint8_t peci_get_fan_duty(void) {
         duty = fan_cooldown(&FAN, duty);
     }
 
-    DEBUG("PECI temp=%d\n", peci_temp);
+    TRACE("PECI temp=%d\n", peci_temp);
     return duty;
 }
