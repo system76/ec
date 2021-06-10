@@ -10,6 +10,7 @@
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
+#include <board/peci.h>
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
@@ -350,6 +351,47 @@ void power_off_s5(void) {
     update_power_state();
 }
 
+#ifdef HAVE_DGPU
+static void power_peci_limit(bool ac) {
+    uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
+    // Retry, timeout errors happen occasionally
+    for (int i = 0; i < 16; i++) {
+        // Set PL4 using PECI
+        int res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
+        DEBUG("power_peci_limit %d = %d\n", watts, res);
+        if (res == 0x40) {
+            break;
+        } else if (res < 0) {
+            ERROR("power_peci_limit failed: 0x%02X\n", -res);
+        } else {
+            ERROR("power_peci_limit unknown response: 0x%02X\n", res);
+        }
+    }
+}
+
+// Set the power draw limit depending on if on AC or DC power
+void power_set_limit(void) {
+    static bool last_power_limit_ac = true;
+    // We don't use power_state because the latency needs to be low
+#if EC_ESPI
+    if (gpio_get(&CPU_C10_GATE_N)) {
+#else
+    if (gpio_get(&BUF_PLT_RST_N)) {
+#endif
+        bool ac = !gpio_get(&ACIN_N);
+        if (last_power_limit_ac != ac) {
+            power_peci_limit(ac);
+            last_power_limit_ac = ac;
+        }
+    } else {
+        last_power_limit_ac = true;
+    }
+}
+#else
+static void power_peci_limit(bool ac) { ac = ac; }
+void power_set_limit(void) {}
+#endif // HAVE_DGPU
+
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {
     // LPC was just reset, enable PNP devices
@@ -378,7 +420,7 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        board_on_ac(!ac_new);
+        power_peci_limit(!ac_new);
 
         DEBUG("Power adapter ");
         if (ac_new) {
