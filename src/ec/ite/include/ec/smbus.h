@@ -95,6 +95,31 @@ volatile uint8_t __xdata __at(0x1C44) RESLADR2B;
 // SMCLK timing setting for channel B
 volatile uint8_t __xdata __at(0x1C41) SCLKTSB;
 
+#ifdef it5570e
+// Host status for channel E
+volatile uint8_t __xdata __at(0x1CA0) HOSTAE;
+// Host control for channel E
+volatile uint8_t __xdata __at(0x1CA1) HOCTLE;
+// Host command for channel E
+volatile uint8_t __xdata __at(0x1CA2) HOCMDE;
+// Transmit slave address for channel E
+volatile uint8_t __xdata __at(0x1CA3) TRASLAE;
+// Host data 0 for channel E
+volatile uint8_t __xdata __at(0x1CA4) D0REGE;
+// Host data 1 for channel E
+volatile uint8_t __xdata __at(0x1CA6) D1REGE;
+// Host block data byte for channel E
+volatile uint8_t __xdata __at(0x1CA7) HOBDBE;
+// Packet error check for channel E
+volatile uint8_t __xdata __at(0x1CA8) PECERCE;
+// SMBus pin control for channel E
+volatile uint8_t __xdata __at(0x1CA9) SMBPCTLE;
+// Host control 2 for channel E
+volatile uint8_t __xdata __at(0x1CAA) HOCTL2E;
+// SMCLK timing setting for channel E
+volatile uint8_t __xdata __at(0x1CAB) SCLKTSE;
+#endif
+
 // Timing registers
 volatile uint8_t __xdata __at(0x1C22) SMB4P7USL;
 volatile uint8_t __xdata __at(0x1C23) SMB4P0USL;

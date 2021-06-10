@@ -2,11 +2,15 @@
 
 #ifndef _EC_ESPI_H
 #define _EC_ESPI_H
-#include <stdint.h>
 
+// eSPI not supported on IT8587E, may not be used on IT5570E
 #ifndef EC_ESPI
 #define EC_ESPI 0
-#endif // EC_ESPI
+#endif
+
+#include <stdint.h>
+
+#ifdef it5570e
 
 struct VirtualWire {
     volatile uint8_t __xdata * index;
@@ -119,5 +123,7 @@ volatile uint8_t __xdata __at(0x3292) VWCTRL2;
 volatile uint8_t __xdata __at(0x3293) VWCTRL3;
 volatile uint8_t __xdata __at(0x3295) VWCTRL5;
 volatile uint8_t __xdata __at(0x3296) VWCTRL6;
+
+#endif // it5570e
 
 #endif // _EC_ESPI_H
