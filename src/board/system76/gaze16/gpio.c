@@ -26,15 +26,10 @@ struct Gpio __code PCH_DPWROK_EC =  GPIO(F, 3);
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
-struct Gpio __code SCI_N =          GPIO(D, 3);
 struct Gpio __code SLP_SUS_N =      GPIO(H, 3);
-struct Gpio __code SMI_N =          GPIO(D, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
-struct Gpio __code SWI_N =          GPIO(B, 5);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4);
-struct Gpio __code WLAN_EN =        GPIO(G, 1);
-struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init() {
@@ -52,18 +47,21 @@ void gpio_init() {
     GCR21 = BIT(2);
 
     // Set GPIO data
-    GPDRA = 0;
-    // XLP_OUT, PWR_SW#
-    GPDRB = BIT(4) | BIT(3);
+    // WLAN_PWR_EN
+    GPDRA = BIT(3);
+    // SWI#, XLP_OUT, PWR_SW#
+    GPDRB = BIT(5) | BIT(4) | BIT(3);
     GPDRC = 0;
-    GPDRD = 0;
+    // PWR_BTN#, SMI#, SCI#
+    GPDRD = BIT(5) | BIT(4) | BIT(3);
     // USB_PWR_EN#
     GPDRE = BIT(3);
     // PCH_DPWROK_EC
     GPDRF = BIT(3);
-    // H_PROCHOT_EC
-    GPDRG = BIT(6);
-    GPDRH = 0;
+    // H_PROCHOT_EC, WLAN_EN
+    GPDRG = BIT(6) | BIT(1);
+    // AIRPLAN_LED#
+    GPDRH = BIT(7);
     GPDRI = 0;
     GPDRJ = 0;
 
