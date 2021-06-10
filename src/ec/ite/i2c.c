@@ -32,6 +32,16 @@ struct I2C __code I2C_1 = {
     .trasla = TRASLAB,
 };
 
+#ifdef it5570e
+struct I2C __code I2C_4 = {
+    .hosta = HOSTAE,
+    .hoctl = HOCTLE,
+    .hoctl2 = HOCTL2E,
+    .hobdb = HOBDBE,
+    .trasla = TRASLAE,
+};
+#endif
+
 void i2c_reset(struct I2C * i2c, bool kill) {
     if (*(i2c->hosta) & HOSTA_BUSY) {
         // Set kill bit

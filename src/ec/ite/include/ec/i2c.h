@@ -7,6 +7,9 @@
 
 extern struct I2C __code I2C_0;
 extern struct I2C __code I2C_1;
+#ifdef it5570e
+extern struct I2C __code I2C_4;
+#endif
 
 void i2c_reset(struct I2C * i2c, bool kill);
 
