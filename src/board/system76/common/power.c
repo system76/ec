@@ -294,7 +294,7 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 5000; i++) {
         // If we reached S0, exit this loop
         update_power_state();
         if (power_state == POWER_STATE_S0) {

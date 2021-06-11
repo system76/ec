@@ -54,10 +54,9 @@ void gpio_init() {
     GPDRC = 0;
     // PWR_BTN#, SMI#, SCI#
     GPDRD = BIT(5) | BIT(4) | BIT(3);
-    // USB_PWR_EN#
-    GPDRE = BIT(3);
-    // PCH_DPWROK_EC
-    GPDRF = BIT(3);
+    GPDRE = 0;
+    // CC_EN, PCH_DPWROK_EC
+    GPDRF = BIT(7) | BIT(3);
     // H_PROCHOT_EC, WLAN_EN
     GPDRG = BIT(6) | BIT(1);
     // AIRPLAN_LED#
@@ -223,9 +222,9 @@ void gpio_init() {
     // VBATT_BOOST#
     GPCRJ5 = GPIO_OUT;
     // EC_GPIO
-    GPCRJ6 = GPIO_IN;
+    GPCRJ6 = GPIO_OUT;
     // VR_ON
-    GPCRJ7 = GPIO_OUT;
+    GPCRJ7 = GPIO_IN;
     // ESPI_AD0
     GPCRM0 = GPIO_ALT;
     // ESPI_AD1
