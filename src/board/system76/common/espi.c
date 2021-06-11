@@ -1,16 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <8051.h>
-#include <stdint.h>
+#include <board/espi.h>
+
+#if EC_ESPI
 
 #include <arch/delay.h>
-#include <board/espi.h>
-#include <board/gpio.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <ec/ecpm.h>
 #include <ec/gctrl.h>
+#include <ec/gpio.h>
+
+#include <8051.h>
+#include <stdint.h>
 
 #define DEBUG_SET(REG, MASK, BITS) { \
     DEBUG("%s: %X", #REG, REG); \
@@ -194,3 +197,5 @@ void espi_event(void) {
     // Detect when I/O mode changes
     DEBUG_CHANGED(ESGCTRL3);
 }
+
+#endif // EC_ESPI
