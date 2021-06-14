@@ -5,7 +5,6 @@
 
 #if HAVE_DGPU
 
-#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/peci.h>
 #include <board/power.h>
@@ -16,7 +15,7 @@
 
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_DGPU_HEATUP
-    #define BOARD_DGPU_HEATUP 10
+    #define BOARD_DGPU_HEATUP 4
 #endif
 
 static uint8_t FAN_HEATUP[BOARD_DGPU_HEATUP] = { 0 };
@@ -54,7 +53,7 @@ static struct Fan __code FAN = {
     .heatup_size = ARRAY_SIZE(FAN_HEATUP),
     .cooldown = FAN_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    .interpolate = false,
+    .interpolate = SMOOTH_FANS != 0,
 };
 
 void dgpu_init(void) {

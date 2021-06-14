@@ -94,7 +94,7 @@ uint8_t acpi_read(uint8_t addr) {
             }
             break;
 
-        ACPI_8(0x07, peci_temp >> 6);
+        ACPI_8(0x07, peci_temp);
 
         // Handle AC adapter and battery present
         case 0x10:
