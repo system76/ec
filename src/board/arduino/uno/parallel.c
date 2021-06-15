@@ -11,6 +11,7 @@
 #include <arch/gpio.h>
 #include <arch/uart.h>
 
+// clang-format off
 // Mapping of 24-pin ribbon cable to parallel pins. See schematic
 #define PINS \
     /* Data (KSO0 - KSO7) - bi-directional */ \
@@ -64,7 +65,7 @@ static struct Gpio GPIOS[13] = {
     GPIO(C, 1),
     GPIO(C, 0),
 };
-
+// clang-format on
 
 // Parallel struct definition
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm

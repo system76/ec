@@ -21,6 +21,7 @@
     #define KI2 K_INT_2
 #endif
 
+// clang-format off
 // Conversion of physical layout to keyboard matrix
 #define LAYOUT( \
     K00, K01, K02, K03, K04, K05, K06, K07, K08, K09, K0A, K0B, K0C, K0D, K0E, K0F, K0G, K0H, K0I, K0J, \
@@ -49,6 +50,7 @@
     { K0H, K0G, K43, K4C, K59, K10, K0B, K0C }, \
     { K35, K1C, K4F, K51, K4D, K58, K5A, ___ } \
 }
+// clang-format on
 
 // Position of physical Esc key in the matrix
 #define MATRIX_ESC_INPUT    7

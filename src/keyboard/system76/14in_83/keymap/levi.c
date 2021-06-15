@@ -4,6 +4,7 @@
 
 #include <board/keymap.h>
 
+// clang-format off
 uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN] = {
 LAYOUT(
     K_ESC, K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12, K_HOME, K_END, K_PRINT_SCREEN, K_DEL,
@@ -24,3 +25,4 @@ LAYOUT(
     K_LEFT, K_DOWN, K_RIGHT
 )
 };
+// clang-format on

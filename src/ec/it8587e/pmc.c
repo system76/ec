@@ -2,12 +2,14 @@
 
 #include <ec/pmc.h>
 
+// clang-format off
 #define PMC(NUM) { \
     .status = &PM ## NUM ## STS, \
     .data_out = &PM ## NUM ## DO, \
     .data_in = &PM ## NUM ## DI, \
     .control = &PM ## NUM ## CTL, \
 }
+// clang-format on
 
 struct Pmc __code PMC_1 = PMC(1);
 struct Pmc __code PMC_2 = PMC(2);

@@ -2,6 +2,7 @@
 
 #include <ec/espi.h>
 
+// clang-format off
 #if EC_ESPI
 // eSPI signature (byte 7 = 0xA4)
 static __code char __at(0x40) SIGNATURE[32] = {
@@ -21,3 +22,4 @@ static __code char __at(0x40) SIGNATURE[32] = {
     0x2E, 0x20, 0x49, 0x6E, 0x63, 0x2E, 0x20, 0x20
 };
 #endif // EC_ESPI
+// clang-format on

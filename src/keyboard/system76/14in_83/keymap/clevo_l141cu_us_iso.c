@@ -5,6 +5,7 @@
 
 #include <board/keymap.h>
 
+// clang-format off
 uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN] = {
 // TODO: K0E=K_PAUSE (once defined in src/common/include/common/keymap.h)
 LAYOUT_ISO(
@@ -27,3 +28,4 @@ LAYOUT_ISO(
     K_LEFT, K_DOWN, K_RIGHT
 )
 };
+// clang-format on
