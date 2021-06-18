@@ -32,10 +32,8 @@ struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code SB_KBCRST_N =    GPIO(E, 6);
 struct Gpio __code SLP_S0_N =       GPIO(A, 5);
 struct Gpio __code SLP_SUS_N =      GPIO(J, 7);
-struct Gpio __code SMI_N =          GPIO(D, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
-struct Gpio __code SWI_N =          GPIO(B, 5);
 struct Gpio __code USB_PWR_EN_N =   GPIO(E, 3);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4);
 struct Gpio __code WLAN_EN =        GPIO(G, 1);
@@ -60,8 +58,8 @@ void gpio_init() {
     GPDRB = BIT(4) | BIT(3);
     // PCH_DPWROK_EC
     GPDRC = BIT(5);
-    // PWR_BTN#, SMI#
-    GPDRD = BIT(5) | BIT(4);
+    // PWR_BTN#
+    GPDRD = BIT(5);
     GPDRE = 0;
     // H_PECI
     GPDRF = BIT(6);
@@ -101,7 +99,7 @@ void gpio_init() {
     // XLP_OUT
     GPCRB4 = GPIO_OUT;
     // SWI#
-    GPCRB5 = GPIO_OUT | GPIO_UP;
+    GPCRB5 = GPIO_IN;
     // SUSBC_EC
     GPCRB6 = GPIO_OUT | GPIO_UP;
     // N/A
