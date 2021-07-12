@@ -24,6 +24,7 @@ struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(F, 7);
 struct Gpio __code PCH_PWROK_EC =   GPIO(C, 6); // renamed to EC_SYS_PWROK
+struct Gpio __code PM_PWROK =       GPIO(H, 5); // actually VR_ON
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code SLP_SUS_N =      GPIO(I, 6);
@@ -188,7 +189,7 @@ void gpio_init() {
     // d_GPIO9_ALERT_FAN
     GPCRH4 = GPIO_IN;
     // VR_ON
-    GPCRH5 = GPIO_IN;
+    GPCRH5 = GPIO_OUT;
     // SUSB#_PCH
     GPCRH6 = GPIO_IN;
     // AIRPLAN_LED#
