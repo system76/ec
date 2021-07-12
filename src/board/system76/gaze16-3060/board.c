@@ -17,6 +17,9 @@ extern uint8_t main_cycle;
 void board_init(void) {
     espi_init();
 
+    // Make sure charger is in off state, also enables PSYS
+    battery_charger_disable();
+
     // Allow backlight to be turned on
     gpio_set(&BKL_EN, true);
     // Enable camera
