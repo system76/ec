@@ -55,6 +55,10 @@
     #define HAVE_PCH_PWROK_EC 1
 #endif
 
+#ifndef HAVE_PM_PWROK
+    #define HAVE_PM_PWROK 1
+#endif
+
 #ifndef HAVE_SLP_SUS_N
     #define HAVE_SLP_SUS_N 1
 #endif
@@ -290,7 +294,7 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 5000; i++) {
         // If we reached S0, exit this loop
         update_power_state();
         if (power_state == POWER_STATE_S0) {
@@ -321,8 +325,10 @@ void power_off_s5(void) {
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
 #endif // HAVE_PCH_PWROK_EC
 
+#if HAVE_PM_PWROK
     // De-assert PCH_PWROK
     GPIO_SET_DEBUG(PM_PWROK, false);
+#endif // HAVE_PM_PWROK
 
 #if HAVE_EC_EN
     // Block processor from controlling SUSB# and SUSC#
@@ -506,8 +512,10 @@ void power_event(void) {
 
         //TODO: tPLT04;
 
+#if HAVE_PM_PWROK
         // Allow H_VR_READY to set PCH_PWROK
         GPIO_SET_DEBUG(PM_PWROK, true);
+#endif // HAVE_PM_PWROK
 
         // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
         delay_ms(10);
@@ -524,8 +532,10 @@ void power_event(void) {
         GPIO_SET_DEBUG(PCH_PWROK_EC, false);
 #endif // HAVE_PCH_PWROK_EC
 
+#if HAVE_PM_PWROK
         // De-assert PCH_PWROK
         GPIO_SET_DEBUG(PM_PWROK, false);
+#endif // HAVE_PM_PWROK
     }
     pg_last = pg_new;
 

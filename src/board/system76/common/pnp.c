@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 
+#include <board/pnp.h>
 #include <common/macro.h>
 #include <common/debug.h>
 #include <ec/espi.h>
@@ -10,20 +11,34 @@ volatile uint8_t __xdata __at(0x1200) IHIOA;
 volatile uint8_t __xdata __at(0x1201) IHD;
 volatile uint8_t __xdata __at(0x1204) IBMAE;
 volatile uint8_t __xdata __at(0x1205) IBCTL;
-void e2ci_write(uint8_t port, uint8_t data) {
+
+uint8_t ec2i_read(uint8_t port) {
     while (IBCTL & (BIT(2) | BIT(1))) {}
+    IBCTL = 1;
+    IBMAE = 1;
+    IHIOA = port;
+    IBCTL |= BIT(1);
+    while (IBCTL & BIT(1)) {}
+    return IHD;
+}
+
+void ec2i_write(uint8_t port, uint8_t data) {
+    while (IBCTL & (BIT(2) | BIT(1))) {}
+    IBCTL = 1;
+    IBMAE = 1;
     IHIOA = port;
     IHD = data;
-    IBMAE = 1;
-    IBCTL = 1;
     while (IBCTL & BIT(2)) {}
-    IBMAE = 0;
-    IBCTL = 0;
+}
+
+uint8_t pnp_read(uint8_t reg) {
+    ec2i_write(0x2E, reg);
+    return ec2i_read(0x2F);
 }
 
 void pnp_write(uint8_t reg, uint8_t data) {
-    e2ci_write(0x2E, reg);
-    e2ci_write(0x2F, data);
+    ec2i_write(0x2E, reg);
+    ec2i_write(0x2F, data);
 }
 
 void pnp_enable() {
