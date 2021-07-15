@@ -15,8 +15,8 @@ void delay_ticks(uint16_t ticks) {
 
     // Start timer in mode 1
     TMOD = (TMOD & 0x0F) | 0x10;
-    TH1 = (unsigned char)(value >> 8);
-    TL1 = (unsigned char)value;
+    TH1 = (uint8_t)(value >> 8);
+    TL1 = (uint8_t)value;
     TR1 = 1;
 
     // Wait until complete
@@ -24,8 +24,8 @@ void delay_ticks(uint16_t ticks) {
 }
 
 // This loops through delays of one ms in order to avoid overflow
-void delay_ms(int ms) {
-    for (int i = 0; i < ms; i++) {
+void delay_ms(uint8_t ms) {
+    for (uint8_t i = ms; i != 0; i--) {
         delay_us(1000);
     }
 }
