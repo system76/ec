@@ -3,6 +3,7 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 
+// clang-format off
 struct Gpio __code ACIN_N =         GPIO(B, 6);
 struct Gpio __code AC_PRESENT =     GPIO(E, 7);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
@@ -35,6 +36,7 @@ struct Gpio __code USB_PWR_EN_N =   GPIO(F, 7);
 struct Gpio __code VA_EC_EN =       GPIO(J, 0); // renamed to EC_SLP_SUS#
 struct Gpio __code WLAN_EN =        GPIO(J, 7);
 struct Gpio __code WLAN_PWR_EN =    GPIO(B, 0);
+// clang-format on
 
 void gpio_init(void) {
     // Enable LPC reset on GPD2

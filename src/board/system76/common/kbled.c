@@ -3,6 +3,7 @@
 #include <board/kbled.h>
 #include <common/macro.h>
 
+// clang-format off
 static uint8_t LEVEL_I = 1;
 static const uint8_t __code LEVELS[] = {
     48,
@@ -23,6 +24,7 @@ static const uint32_t __code COLORS[] = {
     0x00FFFF,
     0xFFFF00
 };
+// clang-format on
 
 void kbled_hotkey_color(void) {
     if (COLOR_I < (ARRAY_SIZE(COLORS) - 1)) {
