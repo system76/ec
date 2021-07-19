@@ -72,16 +72,46 @@ static const uint16_t kbc_typematic_period[32] = {
     500,    //  2.0 cps = 500ms
 };
 
-bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed) {
+static uint8_t kbc_buffer[16] = { 0 };
+static uint8_t kbc_buffer_head = 0;
+static uint8_t kbc_buffer_tail = 0;
+
+static bool kbc_buffer_pop(uint8_t * scancode) {
+    if (kbc_buffer_head == kbc_buffer_tail) {
+        return false;
+    }
+    *scancode = kbc_buffer[kbc_buffer_head];
+    kbc_buffer_head = (kbc_buffer_head + 1U) % ARRAY_SIZE(kbc_buffer);
+    return true;
+}
+
+static bool kbc_buffer_push(uint8_t * scancodes, uint8_t len) {
+    //TODO: make this test more efficient
+    for (uint8_t i = 0; i < len; i++) {
+        if ((kbc_buffer_tail + i + 1U) % ARRAY_SIZE(kbc_buffer) == kbc_buffer_head) {
+            return false;
+        }
+    }
+
+    for (uint8_t i = 0; i < len; i++) {
+        kbc_buffer[kbc_buffer_tail] = scancodes[i];
+        kbc_buffer_tail = (kbc_buffer_tail + 1U) % ARRAY_SIZE(kbc_buffer);
+    }
+    return true;
+}
+
+bool kbc_scancode(uint16_t key, bool pressed) {
     if (!kbc_first) return true;
     if (kbc_translate) {
         key = keymap_translate(key);
     }
     if (!key) return true;
+
+    uint8_t scancodes[3] = {0, 0, 0};
+    uint8_t scancodes_len = 0;
     switch (key & 0xFF00) {
         case KF_E0:
-            TRACE("  E0\n");
-            if (!kbc_keyboard(kbc, 0xE0, KBC_TIMEOUT)) return false;
+            scancodes[scancodes_len++] = 0xE0;
             key &= 0xFF;
             // Fall through
         case 0x00:
@@ -89,15 +119,14 @@ bool kbc_scancode(struct Kbc * kbc, uint16_t key, bool pressed) {
                 if (kbc_translate) {
                     key |= 0x80;
                 } else {
-                    TRACE("  F0\n");
-                    if (!kbc_keyboard(kbc, 0xF0, KBC_TIMEOUT)) return false;
+                    scancodes[scancodes_len++] = 0xF0;
                 }
             }
-            TRACE("  %02X\n", key);
-            if (!kbc_keyboard(kbc, (uint8_t)key, KBC_TIMEOUT)) return false;
+            scancodes[scancodes_len++] = (uint8_t)key;
             break;
     }
-    return true;
+
+    return kbc_buffer_push(scancodes, scancodes_len);
 }
 
 enum KbcState {
@@ -415,6 +444,11 @@ static void kbc_on_output_empty(struct Kbc * kbc) {
 
 void kbc_event(struct Kbc * kbc) {
     uint8_t sts;
+
+    // Read from scancode buffer when possible
+    if (state == KBC_STATE_NORMAL && kbc_buffer_pop(&state_data)) {
+        state = KBC_STATE_KEYBOARD;
+    }
 
     // Read from touchpad when possible
     if (kbc_second) {
