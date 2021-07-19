@@ -66,6 +66,7 @@ void acpi_reset(void) {
 #endif
 }
 
+// clang-format off
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;
 
@@ -174,6 +175,7 @@ uint8_t acpi_read(uint8_t addr) {
     TRACE("acpi_read %02X = %02X\n", addr, data);
     return data;
 }
+// clang-format on
 
 void acpi_write(uint8_t addr, uint8_t data) {
     TRACE("acpi_write %02X = %02X\n", addr, data);

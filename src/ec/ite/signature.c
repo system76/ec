@@ -2,6 +2,7 @@
 
 #include <ec/espi.h>
 
+// clang-format off
 #if EC_ESPI
 // eSPI signature (byte 7 = 0xA4)
 static __code const uint8_t __at(0x40) SIGNATURE[16] = {
@@ -15,3 +16,4 @@ static __code const uint8_t __at(0x40) SIGNATURE[16] = {
     0x85, 0x12, 0x5A, 0x5A, 0xAA, 0x00, 0x55, 0x55,
 };
 #endif // EC_ESPI
+// clang-format on
