@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 CC=sdcc -mmcs51 --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
-OBJ=$(sort $(patsubst src/%.c,$(BUILD)/%.rel,$(SRC)))
+OBJ=$(sort $(patsubst src/%.c,$(BUILD)/%.rel,$(SRC))) $(LATE_OBJ)
 
 # Run EC rom in simulator
 sim: $(BUILD)/ec.rom

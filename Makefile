@@ -28,6 +28,7 @@ COMMON_DIR=src/common
 SRC=$(wildcard $(COMMON_DIR)/*.c)
 INCLUDE=$(wildcard $(COMMON_DIR)/include/common/*.h) $(COMMON_DIR)/common.mk
 CFLAGS=-I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
+LATE_OBJ=
 include $(COMMON_DIR)/common.mk
 
 # Include the board's source
