@@ -20,8 +20,8 @@
 // XXX: Assumption: ac_last is initialized high.
 static bool charger_enabled = false;
 
-int battery_charger_disable(void) {
-    int res = 0;
+int16_t battery_charger_disable(void) {
+    int16_t res = 0;
 
     if (!charger_enabled) return 0;
 
@@ -61,8 +61,8 @@ int battery_charger_disable(void) {
     return 0;
 }
 
-int battery_charger_enable(void) {
-    int res = 0;
+int16_t battery_charger_enable(void) {
+    int16_t res = 0;
 
     if (charger_enabled) return 0;
 
@@ -112,7 +112,7 @@ void battery_charger_event(void) {
 
 void battery_debug(void) {
     uint16_t data = 0;
-    int res = 0;
+    int16_t res = 0;
 
     #define command(N, A, V) { \
         DEBUG("  " #N ": "); \

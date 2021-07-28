@@ -294,7 +294,7 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    for (int i = 0; i < 5000; i++) {
+    for (int16_t i = 0; i < 5000; i++) {
         // If we reached S0, exit this loop
         update_power_state();
         if (power_state == POWER_STATE_S0) {
@@ -361,9 +361,9 @@ void power_off_s5(void) {
 static void power_peci_limit(bool ac) {
     uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
     // Retry, timeout errors happen occasionally
-    for (int i = 0; i < 16; i++) {
+    for (int16_t i = 0; i < 16; i++) {
         // Set PL4 using PECI
-        int res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
+        int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
         DEBUG("power_peci_limit %d = %d\n", watts, res);
         if (res == 0x40) {
             break;
@@ -466,7 +466,7 @@ void power_event(void) {
     bool ps_new = gpio_get(&PWR_SW_N);
     if (!ps_new && ps_last) {
         // Ensure press is not spurious
-        for (int i = 0; i < 100; i++) {
+        for (int16_t i = 0; i < 100; i++) {
             delay_ms(1);
             if (gpio_get(&PWR_SW_N) != ps_new) {
                 DEBUG("%02X: Spurious press\n", main_cycle);

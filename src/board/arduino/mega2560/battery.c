@@ -4,17 +4,17 @@
 
 #include <common/i2c.h>
 
-int smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
+int16_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
     return i2c_get(NULL, address, command, (uint8_t *)data, 2);
 }
 
-int smbus_write(uint8_t address, uint8_t command, uint16_t data) {
+int16_t smbus_write(uint8_t address, uint8_t command, uint16_t data) {
     return i2c_set(NULL, address, command, (uint8_t *)&data, 2);
 }
 
 void battery_debug(void) {
     uint16_t data = 0;
-    int res = 0;
+    int16_t res = 0;
 
     #define command(N, A, V) { \
         printf(#N ": "); \

@@ -71,7 +71,7 @@ static volatile uint8_t __xdata __at(0xF00) smfi_dbg[256];
 
 #if !defined(__SCRATCH__)
 void smfi_init(void) {
-    int i;
+    int16_t i;
 
     // Clear command region
     for (i = (SMFI_CMD_CMD + 1); i < ARRAY_SIZE(smfi_cmd); i++) {
@@ -151,9 +151,9 @@ static enum Result cmd_fan_set(void) {
 }
 
 static enum Result cmd_keymap_get(void) {
-    int layer = smfi_cmd[SMFI_CMD_DATA];
-    int output = smfi_cmd[SMFI_CMD_DATA + 1];
-    int input = smfi_cmd[SMFI_CMD_DATA + 2];
+    int16_t layer = smfi_cmd[SMFI_CMD_DATA];
+    int16_t output = smfi_cmd[SMFI_CMD_DATA + 1];
+    int16_t input = smfi_cmd[SMFI_CMD_DATA + 2];
     uint16_t key = 0;
     if (keymap_get(layer, output, input, &key)) {
         smfi_cmd[SMFI_CMD_DATA + 3] = (uint8_t)key;
@@ -165,9 +165,9 @@ static enum Result cmd_keymap_get(void) {
 }
 
 static enum Result cmd_keymap_set(void) {
-    int layer = smfi_cmd[SMFI_CMD_DATA];
-    int output = smfi_cmd[SMFI_CMD_DATA + 1];
-    int input = smfi_cmd[SMFI_CMD_DATA + 2];
+    int16_t layer = smfi_cmd[SMFI_CMD_DATA];
+    int16_t output = smfi_cmd[SMFI_CMD_DATA + 1];
+    int16_t input = smfi_cmd[SMFI_CMD_DATA + 2];
     uint16_t key =
         ((uint16_t)smfi_cmd[SMFI_CMD_DATA + 3]) |
         (((uint16_t)smfi_cmd[SMFI_CMD_DATA + 4]) << 8);
@@ -389,8 +389,8 @@ void smfi_event(void) {
     }
 }
 
-void smfi_debug(unsigned char byte) {
-    int tail = (int)smfi_dbg[SMFI_DBG_TAIL];
+void smfi_debug(uint8_t byte) {
+    int16_t tail = (int16_t)smfi_dbg[SMFI_DBG_TAIL];
     tail++;
     if (tail >= ARRAY_SIZE(smfi_dbg)) {
         tail = SMFI_DBG_TAIL + 1;

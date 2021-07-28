@@ -57,7 +57,7 @@ void i2c_reset(struct I2C * i2c, bool kill) {
     *(i2c->hoctl2) = 0;
 }
 
-int i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
+int16_t i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
     // If we are already in a transaction
     if (*(i2c->hosta) & HOSTA_BYTE_DONE) {
         // If we are switching direction
@@ -94,8 +94,8 @@ void i2c_stop(struct I2C * i2c) {
     i2c_reset(i2c, false);
 }
 
-static int i2c_transaction(struct I2C * i2c, uint8_t * data, int length, bool read) {
-    int i;
+static int16_t i2c_transaction(struct I2C * i2c, uint8_t * data, int16_t length, bool read) {
+    int16_t i;
     for (i = 0; i < length; i++) {
         if (read) {
             // If last byte
@@ -131,7 +131,7 @@ static int i2c_transaction(struct I2C * i2c, uint8_t * data, int length, bool re
             // If error occured, kill transaction and return error
             if (status & HOSTA_ERR) {
                 i2c_reset(i2c, true);
-                return -(int)(status);
+                return -(int16_t)(status);
             } else
             // If byte done, break
             if (status & HOSTA_BYTE_DONE) {
@@ -141,7 +141,7 @@ static int i2c_transaction(struct I2C * i2c, uint8_t * data, int length, bool re
         // If timeout occured, kill transaction and return error
         if (timeout == 0) {
             i2c_reset(i2c, true);
-            return -(0x1000 | (int)status);
+            return -(0x1000 | (int16_t)status);
         }
 
         if (read) {
@@ -153,10 +153,10 @@ static int i2c_transaction(struct I2C * i2c, uint8_t * data, int length, bool re
     return i;
 }
 
-int i2c_read(struct I2C * i2c, uint8_t * data, int length) __reentrant {
+int16_t i2c_read(struct I2C * i2c, uint8_t * data, int16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, true);
 }
 
-int i2c_write(struct I2C * i2c, uint8_t * data, int length) __reentrant {
+int16_t i2c_write(struct I2C * i2c, uint8_t * data, int16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, false);
 }
