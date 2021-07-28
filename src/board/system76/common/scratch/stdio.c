@@ -5,7 +5,7 @@
 #include <board/smfi.h>
 
 int putchar(int c) {
-    unsigned char byte = (unsigned char)c;
+    uint8_t byte = (uint8_t)c;
     smfi_debug(byte);
     return (int)byte;
 }

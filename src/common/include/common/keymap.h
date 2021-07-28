@@ -27,9 +27,9 @@
     // Save dynamic keymap to flash
     bool keymap_save_config(void);
     // Get a keycode from the dynamic keymap
-    bool keymap_get(int layer, int output, int input, uint16_t * value);
+    bool keymap_get(int16_t layer, int16_t output, int16_t input, uint16_t * value);
     // Set a keycode in the dynamic keymap
-    bool keymap_set(int layer, int output, int input, uint16_t value);
+    bool keymap_set(int16_t layer, int16_t output, int16_t input, uint16_t value);
 #endif
 
 // Translate a keycode from PS/2 set 2 to PS/2 set 1

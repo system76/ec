@@ -30,11 +30,11 @@ uint8_t kbscan_matrix[KM_OUT] = { 0 };
 
 uint8_t sci_extra = 0;
 
-static inline bool matrix_position_is_esc(int row, int col) {
+static inline bool matrix_position_is_esc(int16_t row, int16_t col) {
     return (row == MATRIX_ESC_OUTPUT) && (col == MATRIX_ESC_INPUT);
 }
 
-static inline bool matrix_position_is_fn(int row, int col) {
+static inline bool matrix_position_is_fn(int16_t row, int16_t col) {
     return (row == MATRIX_FN_OUTPUT) && (col == MATRIX_FN_INPUT);
 }
 
@@ -60,7 +60,7 @@ void kbscan_init(void) {
 // Debounce time in milliseconds
 #define DEBOUNCE_DELAY 15
 
-static uint8_t kbscan_get_row(int i) {
+static uint8_t kbscan_get_row(int16_t i) {
     // Report all keys as released when lid is closed
     if (!lid_state) {
         return 0;
@@ -118,7 +118,7 @@ static uint8_t kbscan_get_row(int i) {
 }
 
 #if KM_NKEY
-static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
+static bool kbscan_has_ghost_in_row(int16_t row, uint8_t rowdata) {
     // Use arguments
     row = row;
     rowdata = rowdata;
@@ -129,7 +129,7 @@ static inline bool popcount_more_than_one(uint8_t rowdata) {
     return rowdata & (rowdata - 1);
 }
 
-static uint8_t kbscan_get_real_keys(int row, uint8_t rowdata) {
+static uint8_t kbscan_get_real_keys(int16_t row, uint8_t rowdata) {
     // Remove any "active" blanks from the matrix.
     uint8_t realdata = 0;
     for (uint8_t col = 0; col < KM_IN; col++) {
@@ -143,7 +143,7 @@ static uint8_t kbscan_get_real_keys(int row, uint8_t rowdata) {
     return realdata;
 }
 
-static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
+static bool kbscan_has_ghost_in_row(int16_t row, uint8_t rowdata) {
     rowdata = kbscan_get_real_keys(row, rowdata);
 
     // No ghosts exist when  less than 2 keys in the row are active.
@@ -152,7 +152,7 @@ static bool kbscan_has_ghost_in_row(int row, uint8_t rowdata) {
     }
 
     // Check against other rows to see if more than one column matches.
-    for (int i = 0; i < KM_OUT; i++) {
+    for (int16_t i = 0; i < KM_OUT; i++) {
         uint8_t otherrow = kbscan_get_real_keys(i, kbscan_get_row(i));
         if (i != row && popcount_more_than_one(otherrow & rowdata)) {
             return true;
@@ -315,7 +315,7 @@ void kbscan_event(void) {
         }
     }
 
-    int i;
+    int16_t i;
     for (i = 0; i < KM_OUT; i++) {
         uint8_t new = kbscan_get_row(i);
         uint8_t last = kbscan_matrix[i];
@@ -331,7 +331,7 @@ void kbscan_event(void) {
             }
 
             // A key was pressed or released
-            int j;
+            int16_t j;
             for (j = 0; j < KM_IN; j++) {
                 bool new_b = new & BIT(j);
                 bool last_b = last & BIT(j);

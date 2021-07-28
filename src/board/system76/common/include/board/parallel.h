@@ -8,6 +8,6 @@
 
 extern bool parallel_debug;
 bool parallel_init(void);
-int parallel_write(uint8_t * data, int length);
+int16_t parallel_write(uint8_t * data, int16_t length);
 
 #endif // _BOARD_PARALLEL_H

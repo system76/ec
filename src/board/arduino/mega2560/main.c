@@ -12,7 +12,7 @@ void init(void) {
 struct Gpio LED = GPIO(B, 7);
 
 //TODO: .h file
-void parallel_main(void);
+int parallel_main(void);
 
 int main(void) {
     init();

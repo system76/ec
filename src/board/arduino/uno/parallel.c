@@ -162,7 +162,7 @@ void parallel_write_data(struct Parallel * port, uint8_t byte) {
 }
 
 //TODO: timeout
-int parallel_transaction(struct Parallel * port, uint8_t * data, int length, bool read, bool addr) {
+int16_t parallel_transaction(struct Parallel * port, uint8_t * data, int16_t length, bool read, bool addr) {
     if (!read) {
         // Set write line low
         gpio_set(port->write_n, false);
@@ -171,7 +171,7 @@ int parallel_transaction(struct Parallel * port, uint8_t * data, int length, boo
         parallel_data_forward(port);
     }
 
-    int i;
+    int16_t i;
     uint8_t byte = 0;
     for (i = 0; i < length; i++) {
         // Wait for peripheral to indicate it's ready for next cycle
@@ -278,8 +278,8 @@ static uint8_t SPI_ENABLE = 0xFE;
 static uint8_t SPI_DATA = 0xFD;
 
 // Disable chip
-int parallel_spi_reset(struct Parallel *port) {
-    int res;
+int16_t parallel_spi_reset(struct Parallel *port) {
+    int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
     if (res < 0) return res;
@@ -294,8 +294,8 @@ int parallel_spi_reset(struct Parallel *port) {
 }
 
 // Enable chip and read or write data
-int parallel_spi_transaction(struct Parallel *port, uint8_t * data, int length, bool read) {
-    int res;
+int16_t parallel_spi_transaction(struct Parallel *port, uint8_t * data, int16_t length, bool read) {
+    int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
     if (res < 0) return res;
@@ -313,10 +313,10 @@ int parallel_spi_transaction(struct Parallel *port, uint8_t * data, int length, 
 #define parallel_spi_write(P, D, L) parallel_spi_transaction(P, D, L, false)
 
 // "Hardware" accelerated SPI programming, requires ECINDARs to be set
-int parallel_spi_program(struct Parallel * port, uint8_t * data, int length, bool initialized) {
+int16_t parallel_spi_program(struct Parallel * port, uint8_t * data, int16_t length, bool initialized) {
     static uint8_t aai[6] = { 0xAD, 0, 0, 0, 0, 0 };
-    int res;
-    int i;
+    int16_t res;
+    int16_t i;
     uint8_t status;
 
     for(i = 0; (i + 1) < length; i+=2) {
@@ -365,13 +365,13 @@ int parallel_spi_program(struct Parallel * port, uint8_t * data, int length, boo
     return i;
 }
 
-int serial_transaction(uint8_t * data, int length, bool read) {
-    int i;
+int16_t serial_transaction(uint8_t * data, int16_t length, bool read) {
+    int16_t i;
     for (i = 0; i < length; i++) {
         if (read) {
             data[i] = (uint8_t)uart_read(uart_stdio);
         } else {
-            uart_write(uart_stdio, (unsigned char)data[i]);
+            uart_write(uart_stdio, (uint8_t)data[i]);
         }
     }
 
@@ -381,21 +381,21 @@ int serial_transaction(uint8_t * data, int length, bool read) {
 #define serial_read(D, L) serial_transaction(D, L, true)
 #define serial_write(D, L) serial_transaction(D, L, false)
 
-int parallel_main(void) {
-    int res = 0;
+int16_t parallel_main(void) {
+    int16_t res = 0;
 
     struct Parallel * port = &PORT;
     parallel_reset(port, true);
 
     static uint8_t data[128];
     char command;
-    int length;
-    int i;
+    int16_t length;
+    int16_t i;
     uint8_t address;
     bool set_address = false;
     bool program_aai = false;
 
-    unsigned char console_msg[] = "Entering console mode\n";
+    uint8_t console_msg[] = "Entering console mode\n";
 
     for (;;) {
         // Read command and length
@@ -416,7 +416,7 @@ int parallel_main(void) {
         }
 
         // Length is received data + 1
-        length = ((int)data[1]) + 1;
+        length = ((int16_t)data[1]) + 1;
         // Truncate length to size of data
         if (length > sizeof(data)) length = sizeof(data);
 

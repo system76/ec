@@ -15,7 +15,7 @@ void kbled_init(void) {
 
 void kbled_reset(void) {
     uint8_t value = 0xE4;
-    int res = i2c_set(&I2C_DGPU, 0x2D, 0xA0, &value, 1);
+    int16_t res = i2c_set(&I2C_DGPU, 0x2D, 0xA0, &value, 1);
     DEBUG("kbled_reset 0x2D: %d\n", res);
 
     //value = 0xC4;

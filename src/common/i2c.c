@@ -2,8 +2,8 @@
 
 #include <common/i2c.h>
 
-int i2c_recv(struct I2C * i2c, uint8_t addr, uint8_t* data, int length) __reentrant {
-    int res = 0;
+int16_t i2c_recv(struct I2C * i2c, uint8_t addr, uint8_t* data, int16_t length) __reentrant {
+    int16_t res = 0;
 
     res = i2c_start(i2c, addr, true);
     if (res < 0) return res;
@@ -16,8 +16,8 @@ int i2c_recv(struct I2C * i2c, uint8_t addr, uint8_t* data, int length) __reentr
     return res;
 }
 
-int i2c_send(struct I2C * i2c, uint8_t addr, uint8_t* data, int length) __reentrant {
-    int res = 0;
+int16_t i2c_send(struct I2C * i2c, uint8_t addr, uint8_t* data, int16_t length) __reentrant {
+    int16_t res = 0;
 
     res = i2c_start(i2c, addr, false);
     if (res < 0) return res;
@@ -30,8 +30,8 @@ int i2c_send(struct I2C * i2c, uint8_t addr, uint8_t* data, int length) __reentr
     return res;
 }
 
-int i2c_get(struct I2C * i2c, uint8_t addr, uint8_t reg, uint8_t* data, int length) __reentrant {
-    int res = 0;
+int16_t i2c_get(struct I2C * i2c, uint8_t addr, uint8_t reg, uint8_t* data, int16_t length) __reentrant {
+    int16_t res = 0;
 
     res = i2c_start(i2c, addr, false);
     if (res < 0) return res;
@@ -42,8 +42,8 @@ int i2c_get(struct I2C * i2c, uint8_t addr, uint8_t reg, uint8_t* data, int leng
     return i2c_recv(i2c, addr, data, length);
 }
 
-int i2c_set(struct I2C * i2c, uint8_t addr, uint8_t reg, uint8_t* data, int length) __reentrant {
-    int res = 0;
+int16_t i2c_set(struct I2C * i2c, uint8_t addr, uint8_t reg, uint8_t* data, int16_t length) __reentrant {
+    int16_t res = 0;
 
     res = i2c_start(i2c, addr, false);
     if (res < 0) return res;
