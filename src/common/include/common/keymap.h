@@ -36,7 +36,8 @@
 uint16_t keymap_translate(uint16_t key);
 
 // Helper definition for empty key
-#define ___ 0
+#define ___ (0x0000)
+#define K_NONE (0x0000)
 
 // Key types
 #define KT_MASK (0xF000)
