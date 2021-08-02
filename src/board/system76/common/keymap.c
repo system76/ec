@@ -17,9 +17,9 @@ void keymap_init(void) {
 }
 
 void keymap_load_default(void) {
-    for (int16_t layer = 0; layer < KM_LAY; layer++) {
-        for (int16_t output = 0; output < KM_OUT; output++) {
-            for (int16_t input = 0; input < KM_IN; input++) {
+    for (uint8_t layer = 0; layer < KM_LAY; layer++) {
+        for (uint8_t output = 0; output < KM_OUT; output++) {
+            for (uint8_t input = 0; input < KM_IN; input++) {
                 DYNAMIC_KEYMAP[layer][output][input] = KEYMAP[layer][output][input];
             }
         }
@@ -57,7 +57,7 @@ bool keymap_save_config(void) {
     return flash_read_u16(CONFIG_ADDR) == CONFIG_SIGNATURE;
 }
 
-bool keymap_get(int16_t layer, int16_t output, int16_t input, uint16_t * value) {
+bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t * value) {
     if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
         *value = DYNAMIC_KEYMAP[layer][output][input];
         return true;
@@ -66,7 +66,7 @@ bool keymap_get(int16_t layer, int16_t output, int16_t input, uint16_t * value) 
     }
 }
 
-bool keymap_set(int16_t layer, int16_t output, int16_t input, uint16_t value) {
+bool keymap_set(uint8_t layer, uint8_t output, uint8_t input, uint16_t value) {
     if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
         DYNAMIC_KEYMAP[layer][output][input] = value;
         return true;
