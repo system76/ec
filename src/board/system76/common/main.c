@@ -99,7 +99,7 @@ void main(void) {
     uint32_t last_time_fan = 0;
 
     for(main_cycle = 0; ; main_cycle++) {
-        switch (main_cycle % 3) {
+        switch (main_cycle % 3U) {
             case 0:
                 // Handle power states
                 power_event();
