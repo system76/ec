@@ -82,14 +82,14 @@ bool parallel_init(void) {
     return parallel_wait_peripheral(STS_WAIT, 0);
 }
 
-int16_t parallel_write(uint8_t * data, int16_t length) {
+int16_t parallel_write(uint8_t * data, uint16_t length) {
     // Assert nWRITE
     KSIGDAT &= ~CTL_WRITE;
 
     // Set data lines as outputs
     KSOLGOEN = 0xFF;
 
-    int16_t i;
+    uint16_t i;
     for (i = 0; i < length; i++) {
         // Wait for peripheral to indicate it's ready for next cycle
         if (!parallel_wait_peripheral(STS_WAIT, 0)) {
