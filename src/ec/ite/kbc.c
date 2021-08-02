@@ -20,7 +20,7 @@ uint8_t kbc_read(struct Kbc * kbc) {
     return *(kbc->data_in);
 }
 
-static bool kbc_wait(struct Kbc * kbc, int16_t timeout) {
+static bool kbc_wait(struct Kbc * kbc, uint16_t timeout) {
     while (*(kbc->status) & KBC_STS_OBF) {
         if (timeout == 0) return false;
         timeout -= 1;
@@ -29,14 +29,14 @@ static bool kbc_wait(struct Kbc * kbc, int16_t timeout) {
     return true;
 }
 
-bool kbc_keyboard(struct Kbc * kbc, uint8_t data, int16_t timeout) {
+bool kbc_keyboard(struct Kbc * kbc, uint8_t data, uint16_t timeout) {
     if (!kbc_wait(kbc, timeout)) return false;
     *(kbc->status) &= ~0x20;
     *(kbc->keyboard_out) = data;
     return true;
 }
 
-bool kbc_mouse(struct Kbc * kbc, uint8_t data, int16_t timeout) {
+bool kbc_mouse(struct Kbc * kbc, uint8_t data, uint16_t timeout) {
     if (!kbc_wait(kbc, timeout)) return false;
     *(kbc->status) |= 0x20;
     *(kbc->mouse_out) = data;

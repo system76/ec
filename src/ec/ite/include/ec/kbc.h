@@ -33,8 +33,8 @@ extern struct Kbc __code KBC;
 
 uint8_t kbc_status(struct Kbc * kbc);
 uint8_t kbc_read(struct Kbc * kbc);
-bool kbc_keyboard(struct Kbc * kbc, uint8_t data, int16_t timeout);
-bool kbc_mouse(struct Kbc * kbc, uint8_t data, int16_t timeout);
+bool kbc_keyboard(struct Kbc * kbc, uint8_t data, uint16_t timeout);
+bool kbc_mouse(struct Kbc * kbc, uint8_t data, uint16_t timeout);
 
 volatile uint8_t __xdata __at(0x1300) KBHICR;
 volatile uint8_t __xdata __at(0x1302) KBIRQR;
