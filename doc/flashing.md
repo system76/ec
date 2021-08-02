@@ -43,3 +43,18 @@ This requires:
 ```
 make BOARD=<vendor>/<model> flash_external
 ```
+
+One of the first things it does is read the EC ID and version. If working, the
+ID will be the EC model the machine uses.
+
+```
+ID: 5570 VER: 2
+ID: 8587 VER: 6
+```
+
+Any other values means that the Mega 2560 is misconfigured or the FPC is not
+seated correctly. E.g., this is wrong:
+
+```
+ID: FF7F VER: 127
+```
