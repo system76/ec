@@ -94,8 +94,8 @@ void i2c_stop(struct I2C * i2c) {
     i2c_reset(i2c, false);
 }
 
-static int16_t i2c_transaction(struct I2C * i2c, uint8_t * data, int16_t length, bool read) {
-    int16_t i;
+static int16_t i2c_transaction(struct I2C * i2c, uint8_t * data, uint16_t length, bool read) {
+    uint16_t i;
     for (i = 0; i < length; i++) {
         if (read) {
             // If last byte
@@ -153,10 +153,10 @@ static int16_t i2c_transaction(struct I2C * i2c, uint8_t * data, int16_t length,
     return i;
 }
 
-int16_t i2c_read(struct I2C * i2c, uint8_t * data, int16_t length) __reentrant {
+int16_t i2c_read(struct I2C * i2c, uint8_t * data, uint16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, true);
 }
 
-int16_t i2c_write(struct I2C * i2c, uint8_t * data, int16_t length) __reentrant {
+int16_t i2c_write(struct I2C * i2c, uint8_t * data, uint16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, false);
 }

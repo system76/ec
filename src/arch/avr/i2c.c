@@ -46,8 +46,8 @@ void i2c_stop(struct I2C * i2c) {
     TWCR = BIT(TWINT) | BIT(TWEN) | BIT(TWSTO);
 }
 
-int16_t i2c_write(struct I2C * i2c, uint8_t * data, int16_t length) {
-    int16_t i;
+int16_t i2c_write(struct I2C * i2c, uint8_t * data, uint16_t length) {
+    uint16_t i;
     for (i = 0; i < length; i++) {
         // load data into data register
         TWDR = data[i];
@@ -65,8 +65,8 @@ int16_t i2c_write(struct I2C * i2c, uint8_t * data, int16_t length) {
     return i;
 }
 
-int16_t i2c_read(struct I2C * i2c, uint8_t * data, int16_t length) {
-    int16_t i;
+int16_t i2c_read(struct I2C * i2c, uint8_t * data, uint16_t length) {
+    uint16_t i;
     for (i = 0; i < length; i++) {
         if ((i + 1) < length) {
             // start TWI module and acknowledge data after reception
