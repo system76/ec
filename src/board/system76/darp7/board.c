@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <arch/delay.h>
 #include <board/board.h>
 #include <board/espi.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
-#include <common/debug.h>
 #include <ec/ec.h>
 
 void board_init(void) {
@@ -24,6 +24,11 @@ void board_init(void) {
     // Assert SMI# and SWI#
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
+
+    // FIXME: LID_SW# takes a while (sometimes >200ms) to read the correct
+    // state of the lid. Give it time to settle. Done here because it is the
+    // last init called.
+    delay_ms(200);
 }
 
 void board_event(void) {
