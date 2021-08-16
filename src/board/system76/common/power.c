@@ -618,11 +618,7 @@ void power_event(void) {
 #if EC_ESPI
         if (!gpio_get(&CPU_C10_GATE_N)) {
             // Modern suspend, flashing green light
-            if (
-                (time < last_time) // overflow
-                ||
-                (time >= (last_time + 1000)) // timeout
-            ) {
+            if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
                 last_time = time;
             }
@@ -636,11 +632,7 @@ void power_event(void) {
         }
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
-        if (
-            (time < last_time) // overflow
-            ||
-            (time >= (last_time + 1000)) // timeout
-        ) {
+        if ((time - last_time) >= 1000) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
             last_time = time;
         }
@@ -652,11 +644,7 @@ void power_event(void) {
     } else {
         // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
-        if (
-            (time < last_time) // overflow
-            ||
-            (time >= (last_time + 1000)) // timeout
-        ) {
+        if ((time - last_time) >= 1000) {
             gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
             last_time = time;
         }

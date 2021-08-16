@@ -34,7 +34,7 @@ bool parallel_debug = false;
 static bool parallel_wait_peripheral(uint8_t mask, uint8_t value) {
     uint32_t start = time_get();
 
-    while (time_get() < start + PARALLEL_TIMEOUT) {
+    while ((time_get() - start) < PARALLEL_TIMEOUT) {
         if ((KSOHGDMRR & mask) == value) {
             return true;
         }
