@@ -358,20 +358,19 @@ void power_off_s5(void) {
 }
 
 #ifdef HAVE_DGPU
-static void power_peci_limit(bool ac) {
+static bool power_peci_limit(bool ac) {
     uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
-    // Retry, timeout errors happen occasionally
-    for (uint8_t i = 16; i != 0; i--) {
-        // Set PL4 using PECI
-        int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
-        DEBUG("power_peci_limit %d = %d\n", watts, res);
-        if (res == 0x40) {
-            break;
-        } else if (res < 0) {
-            ERROR("power_peci_limit failed: 0x%02X\n", -res);
-        } else {
-            ERROR("power_peci_limit unknown response: 0x%02X\n", res);
-        }
+    // Set PL4 using PECI
+    int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
+    DEBUG("power_peci_limit %d = %d\n", watts, res);
+    if (res == 0x40) {
+        return true;
+    } else if (res < 0) {
+        ERROR("power_peci_limit failed: 0x%02X\n", -res);
+        return false;
+    } else {
+        ERROR("power_peci_limit unknown response: 0x%02X\n", res);
+        return false;
     }
 }
 
@@ -386,15 +385,15 @@ void power_set_limit(void) {
 #endif
         bool ac = !gpio_get(&ACIN_N);
         if (last_power_limit_ac != ac) {
-            power_peci_limit(ac);
-            last_power_limit_ac = ac;
+            if (power_peci_limit(ac)) {
+                last_power_limit_ac = ac;
+            }
         }
     } else {
         last_power_limit_ac = true;
     }
 }
 #else
-static void power_peci_limit(bool ac) { ac = ac; }
 void power_set_limit(void) {}
 #endif // HAVE_DGPU
 
@@ -426,7 +425,7 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        power_peci_limit(!ac_new);
+        power_set_limit();
 
         DEBUG("Power adapter ");
         if (ac_new) {
