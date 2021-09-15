@@ -127,6 +127,8 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x2E, battery_remaining_capacity);
         ACPI_16(0x32, battery_voltage);
 
+        ACPI_16(0x42, battery_cycle_count);
+
         ACPI_8(0x68, acpi_ecos);
 
         case 0xBC:
