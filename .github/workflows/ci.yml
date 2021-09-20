@@ -57,6 +57,10 @@ jobs:
           - vendor: system76
             board: gaze15
           - vendor: system76
+            board: gaze16-3050
+          - vendor: system76
+            board: gaze16-3060
+          - vendor: system76
             board: lemp9
           - vendor: system76
             board: lemp10
