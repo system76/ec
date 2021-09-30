@@ -55,8 +55,8 @@ void gpio_init() {
     // PWR_BTN#, SMI#, SCI#
     GPDRD = BIT(5) | BIT(4) | BIT(3);
     GPDRE = 0;
-    // CC_EN, PCH_DPWROK_EC
-    GPDRF = BIT(7) | BIT(3);
+    // CC_EN
+    GPDRF = BIT(7);
     // H_PROCHOT_EC, WLAN_EN
     GPDRG = BIT(6) | BIT(1);
     // AIRPLAN_LED#
