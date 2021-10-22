@@ -196,7 +196,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
                     (page_address >> 8) as u8,
                     page_address as u8,
                 ])?;
-                self.spi.write(&page)?;
+                self.spi.write(page)?;
 
                 // Poll status for busy unset
                 self.status_wait(1, 0)?;

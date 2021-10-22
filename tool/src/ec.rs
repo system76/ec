@@ -128,9 +128,7 @@ impl<A: Access> Ec<A> {
             let mut data = [0; 256 - 2];
             data[0] = flags;
             data[1] = chunk.len() as u8;
-            for i in 0..chunk.len() {
-                data[i + 2] = chunk[i];
-            }
+            data[2..chunk.len()].clone_from_slice(chunk);
             self.command(Cmd::Print, &mut data)?;
             if data[1] != chunk.len() as u8 {
                 return Err(Error::Verify);

@@ -4,6 +4,7 @@ const SMFI_CMD_BASE: u16 = 0xE00;
 const SMFI_CMD_SIZE: usize = 0x100;
 
 const SMFI_DBG_BASE: u16 = 0xF00;
+#[cfg(all(feature = "std", target_os = "linux"))]
 const SMFI_DBG_SIZE: usize = 0x100;
 
 const SMFI_CMD_CMD: u8 = 0x00;
