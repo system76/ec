@@ -14,6 +14,9 @@
 //!    compiler. It is only recommended to use these in firmware, as mutual exclusion is not
 //!    guaranteed.
 
+#![allow(clippy::missing_safety_doc)]
+#![allow(clippy::needless_range_loop)]
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(not(feature = "std"))]

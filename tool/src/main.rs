@@ -155,9 +155,7 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
         let ec_board = &data[..size];
         println!("ec board: {:?}", str::from_utf8(ec_board));
 
-        if ec_board != firmware.board {
-            panic!("file board does not match ec board");
-        }
+        assert!(ec_board == firmware.board, "file board does not match ec board");
     }
 
     {
@@ -395,6 +393,7 @@ fn main() {
                 "hid" => {
                     let api = HidApi::new()?;
                     for info in api.device_list() {
+                        #[allow(clippy::single_match)]
                         match (info.vendor_id(), info.product_id(), info.interface_number()) {
                             // System76 launch_1
                             (0x3384, 0x0001, 1) => {
@@ -449,7 +448,7 @@ fn main() {
         },
         ("flash", Some(sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&mut ec, &path, SpiTarget::Main) } {
+            match unsafe { flash(&mut ec, path, SpiTarget::Main) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
@@ -459,7 +458,7 @@ fn main() {
         },
         ("flash_backup", Some(sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&mut ec, &path, SpiTarget::Backup) } {
+            match unsafe { flash(&mut ec, path, SpiTarget::Backup) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
@@ -589,7 +588,7 @@ fn main() {
         ("print", Some(sub_m)) => for arg in sub_m.values_of("message").unwrap() {
             let mut arg = arg.to_owned();
             arg.push('\n');
-            match unsafe { print(&mut ec, &arg.as_bytes()) } {
+            match unsafe { print(&mut ec, arg.as_bytes()) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to print '{}': {:X?}", arg, err);
