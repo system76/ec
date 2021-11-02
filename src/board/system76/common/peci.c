@@ -14,6 +14,12 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
+// Replace PECI with alternative if using AMD CPU
+//TODO: replace with better abstraction
+#ifndef HAVE_AMD_CPU
+#define HAVE_AMD_CPU 0
+#endif
+
 bool peci_on = false;
 int16_t peci_temp = 0;
 
@@ -22,6 +28,44 @@ int16_t peci_temp = 0;
 
 // Maximum OOB channel response time in ms
 #define PECI_ESPI_TIMEOUT 10
+
+#if HAVE_AMD_CPU
+
+#include <ec/i2c.h>
+
+void peci_init(void) {}
+
+bool peci_available(void) {
+    return power_state == POWER_STATE_S0;
+}
+
+int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
+    (void)index;
+    (void)param;
+    (void)data;
+
+    return 0;
+}
+
+// This uses SB-TSI, in AMD document 40821
+bool peci_get_temp(int16_t *const data) {
+    // Use SB-TSI if in S0 state
+    // We only read the CPU temp high value, since a resolution of 1C is
+    // good enough
+    int8_t cpu_temp_high;
+    int res = i2c_get(&I2C_SMBUS, 0x4C, 0x01, &cpu_temp_high, 1);
+
+    if (res == 1) {
+        // Convert from AMD format
+        *data = (int16_t)cpu_temp_high;
+        return true;
+    }
+
+    DEBUG("SB-TSI temp error: %d\n", res);
+    return false;
+}
+
+#else // HAVE_AMD_CPU
 
 // Returns true if peci is available
 bool peci_available(void) {
@@ -380,6 +424,8 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 }
 
 #endif // CONFIG_PECI_OVER_ESPI
+
+#endif // HAVE_AMD_CPU
 
 void peci_read_temp(void) {
     peci_on = peci_available();
