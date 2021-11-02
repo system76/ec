@@ -172,31 +172,30 @@ void power_init(void) {
 void power_on(void) {
     DEBUG("power_on\n");
 
-    delay_ms(100);
-
+    // 0ms
     GPIO_SET_DEBUG(VA_EC_EN, true);
 
-    delay_ms(30);
+    delay_ms(3);
+    // 3ms
+    GPIO_SET_DEBUG(PWR_BTN_N, true);
 
+    delay_ms(27);
+    // 30ms
     GPIO_SET_DEBUG(DD_ON, true);
 
-    delay_us(9);
+    delay_ms(80);
+    // 110ms
+    GPIO_SET_DEBUG(EC_RSMRST_N, true);
 
     GPIO_SET_DEBUG(EC_EN, true);
 
-    delay_ms(81);
-
+    delay_ms(70);
+    // 180ms
     GPIO_SET_DEBUG(PWR_BTN_N, false);
 
-    delay_ms(19);
-
-    GPIO_SET_DEBUG(EC_RSMRST_N, true);
-
-    delay_ms(102);
-
+    delay_ms(120);
+    // 300ms
     GPIO_SET_DEBUG(PWR_BTN_N, true);
-
-    delay_ms(98);
 
     update_power_state();
 }
