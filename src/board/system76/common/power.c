@@ -34,6 +34,12 @@
         gpio_set(&G, V); \
     }
 
+// Adjust power states for AMD CPU
+//TODO: replace with better abstraction
+#ifndef HAVE_AMD_CPU
+    #define HAVE_AMD_CPU 0
+#endif
+
 #ifndef HAVE_EC_EN
 #define HAVE_EC_EN 1
 #endif
@@ -88,39 +94,6 @@
 #endif
 
 extern uint8_t main_cycle;
-
-// VccRTC stable (55%) to RTCRST# high
-#define tPCH01 delay_ms(9)
-// VccDSW stable (95%) to RSMRST# high
-#define tPCH02 delay_ms(10)
-// VccPrimary stable (95%) to RSMRST# high
-#define tPCH03 delay_ms(10)
-// VccRTC stable (90%) to start of VccDSW voltage ramp
-#define tPCH04 delay_ms(9)
-// RTCRST# high to DSW_PWROK
-#define tPCH05 delay_us(1)
-// VccDSW 3.3 stable to VccPrimary 1.05V
-#define tPCH06 delay_us(200)
-// DSW_PWROK high to RSMRST# high
-#define tPCH07 delay_ms(0)
-// SLP_S3# de-assertion to PCH_PWROK assertion
-#define tPCH08 delay_ms(1)
-// SLP_A# high when ASW rails are stable (95%)
-#define tPCH09 delay_ms(2, 4, 8, 16) //TODO
-// PCH_PWROK low to VCCIO dropping 5%
-#define tPCH10 delay_ns(400)
-// SLP_SUS# asserting to VccPRIM dropping 5%
-#define tPCH11 delay_ns(100)
-// RSMRST# asserting to VccPRIM dropping 5%
-#define tPCH12 delay_ns(400)
-// DSW_PWROK falling to any of VccDSW, VccPRIM dropping 5%
-#define tPCH14 delay_ns(400)
-// De-assertion of RSMRST# to de-assertion of ESPI_RESET#
-#define tPCH18 delay_ms(95)
-// DSW_PWROK assertion to SLP_SUS# de-assertion
-#define tPCH32 delay_ms(95)
-// RSMRST# de-assertion to SUSPWRDNACK valid
-#define tPLT01 delay_ms(200)
 
 enum PowerState power_state = POWER_STATE_OFF;
 
@@ -183,6 +156,108 @@ void update_power_state(void) {
 #endif
     }
 }
+
+#if HAVE_AMD_CPU
+
+// Enable deep sleep well power
+void power_init(void) {
+    DEBUG("power_init\n");
+
+    delay_ms(100);
+
+    update_power_state();
+}
+
+// Enable S5 power
+void power_on(void) {
+    DEBUG("power_on\n");
+
+    delay_ms(100);
+
+    GPIO_SET_DEBUG(VA_EC_EN, true);
+
+    delay_ms(30);
+
+    GPIO_SET_DEBUG(DD_ON, true);
+
+    delay_us(9);
+
+    GPIO_SET_DEBUG(EC_EN, true);
+
+    delay_ms(81);
+
+    GPIO_SET_DEBUG(PWR_BTN_N, false);
+
+    delay_ms(19);
+
+    GPIO_SET_DEBUG(EC_RSMRST_N, true);
+
+    delay_ms(102);
+
+    GPIO_SET_DEBUG(PWR_BTN_N, true);
+
+    delay_ms(98);
+
+    update_power_state();
+}
+
+void power_off(void) {
+    DEBUG("power_off\n");
+
+    GPIO_SET_DEBUG(PM_PWROK, false);
+
+    GPIO_SET_DEBUG(EC_EN, false);
+
+    GPIO_SET_DEBUG(EC_RSMRST_N, false);
+
+    GPIO_SET_DEBUG(DD_ON, false);
+
+    delay_us(1);
+
+    GPIO_SET_DEBUG(VA_EC_EN, false);
+
+    update_power_state();
+}
+
+static bool power_peci_limit(bool ac) {
+    (void)ac;
+    return false;
+}
+
+#else // HAVE_AMD_CPU
+
+// VccRTC stable (55%) to RTCRST# high
+#define tPCH01 delay_ms(9)
+// VccDSW stable (95%) to RSMRST# high
+#define tPCH02 delay_ms(10)
+// VccPrimary stable (95%) to RSMRST# high
+#define tPCH03 delay_ms(10)
+// VccRTC stable (90%) to start of VccDSW voltage ramp
+#define tPCH04 delay_ms(9)
+// RTCRST# high to DSW_PWROK
+#define tPCH05 delay_us(1)
+// VccDSW 3.3 stable to VccPrimary 1.05V
+#define tPCH06 delay_us(200)
+// DSW_PWROK high to RSMRST# high
+#define tPCH07 delay_ms(0)
+// SLP_S3# de-assertion to PCH_PWROK assertion
+#define tPCH08 delay_ms(1)
+// SLP_A# high when ASW rails are stable (95%)
+#define tPCH09 delay_ms(2, 4, 8, 16) //TODO
+// PCH_PWROK low to VCCIO dropping 5%
+#define tPCH10 delay_ns(400)
+// SLP_SUS# asserting to VccPRIM dropping 5%
+#define tPCH11 delay_ns(100)
+// RSMRST# asserting to VccPRIM dropping 5%
+#define tPCH12 delay_ns(400)
+// DSW_PWROK falling to any of VccDSW, VccPRIM dropping 5%
+#define tPCH14 delay_ns(400)
+// De-assertion of RSMRST# to de-assertion of ESPI_RESET#
+#define tPCH18 delay_ms(95)
+// DSW_PWROK assertion to SLP_SUS# de-assertion
+#define tPCH32 delay_ms(95)
+// RSMRST# de-assertion to SUSPWRDNACK valid
+#define tPLT01 delay_ms(200)
 
 void power_init(void) {
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
@@ -334,6 +409,8 @@ static bool power_peci_limit(bool ac) {
     }
 }
 
+#endif // HAVE_AMD_CPU
+
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {
     // LPC was just reset, enable PNP devices
@@ -462,6 +539,9 @@ void power_event(void) {
     if (pg_new && !pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
 
+#if HAVE_AMD_CPU
+        delay_ms(300);
+#endif
         //TODO: tPLT04;
 
 #if HAVE_PM_PWROK
