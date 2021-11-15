@@ -239,6 +239,18 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
                         }
                     }
                     break;
+                case COMBO_PAUSE:
+                    if (kbscan_enabled) {
+                        if (pressed) {
+                            kbc_scancode(0xE1, true);
+                            kbc_scancode(0x14, true);
+                            kbc_scancode(0x77, true);
+                            kbc_scancode(0xE1, true);
+                            kbc_scancode(0x14, false);
+                            kbc_scancode(0x77, false);
+                        }
+                    }
+                    break;
             }
             break;
         case (KT_SCI):
@@ -287,6 +299,7 @@ static inline bool key_should_repeat(uint16_t key) {
     case K_KBD_BKL:
     case K_KBD_COLOR:
     case K_KBD_TOGGLE:
+    case K_PAUSE:
         return false;
     }
 

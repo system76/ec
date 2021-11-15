@@ -54,6 +54,8 @@ uint16_t keymap_translate(uint16_t key);
 #define K_DISPLAY_MODE (KT_COMBO | COMBO_DISPLAY_MODE)
 #define COMBO_PRINT_SCREEN 1
 #define K_PRINT_SCREEN (KT_COMBO | COMBO_PRINT_SCREEN)
+#define COMBO_PAUSE 2
+#define K_PAUSE (KT_COMBO | COMBO_PAUSE)
 
 // SCI
 #define KT_SCI (0x4000)
@@ -167,7 +169,7 @@ uint16_t keymap_translate(uint16_t key);
 // Escape key
 #define K_ESC (0x76)
 
-//TODO: Pause/break, sys request
+//TODO: sys request
 
 // Scroll lock
 #define K_SCROLL_LOCK (0x7E)
