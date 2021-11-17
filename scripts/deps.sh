@@ -23,6 +23,7 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         gcc \
         gcc-avr \
         libc-dev \
+		libhidapi-dev \
         libudev-dev \
         make \
         pkgconf \
