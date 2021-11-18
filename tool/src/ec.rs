@@ -35,6 +35,7 @@ enum Cmd {
     LedSetMode = 16,
     MatrixGet = 17,
     LedSave = 18,
+    SetNoInput = 19,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -277,6 +278,10 @@ impl<A: Access> Ec<A> {
 
     pub unsafe fn matrix_get(&mut self, matrix: &mut [u8]) -> Result<(), Error> {
         self.command(Cmd::MatrixGet, matrix)
+    }
+
+    pub unsafe fn set_no_input(&mut self, no_input: bool) -> Result<(), Error> {
+        self.command(Cmd::SetNoInput, &mut [no_input as u8])
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>

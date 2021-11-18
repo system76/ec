@@ -377,6 +377,12 @@ fn main() {
                 .multiple(true)
             )
         )
+        .subcommand(SubCommand::with_name("set_no_input")
+            .arg(Arg::with_name("value")
+                .possible_values(&["true", "false"])
+                .required(true)
+            )
+        )
         .get_matches();
 
     let get_ec = || -> Result<_, Error> {
@@ -596,6 +602,16 @@ fn main() {
                 },
             }
         },
+        ("set_no_input", Some(sub_m)) => {
+            let no_input = sub_m.value_of("value").unwrap().parse::<bool>().unwrap();
+            match unsafe { ec.set_no_input(no_input) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to set no_input mode: {:X?}", err);
+                    process::exit(1);
+                }
+            }
+        }
         _ => unreachable!()
     }
 }
