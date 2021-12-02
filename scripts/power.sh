@@ -10,7 +10,7 @@ then
 fi
 
 has_ec=0
-if ./ectool.sh info 2> /dev/null
+if ./scripts/ectool.sh info 2> /dev/null
 then
     has_ec=1
 fi
