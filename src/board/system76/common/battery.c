@@ -4,6 +4,8 @@
 #include <board/smbus.h>
 #include <common/debug.h>
 
+struct battery_info battery_info = { 0 };
+
 // Default values to disable battery charging thresholds
 #define BATTERY_START_DEFAULT   0
 #define BATTERY_END_DEFAULT     100
@@ -56,7 +58,7 @@ int16_t battery_charger_configure(void) {
         // Stop threshold not configured: Always charge on AC.
         should_charge = true;
     }
-    else if (battery_charge >= battery_get_end_threshold()) {
+    else if (battery_info.charge >= battery_get_end_threshold()) {
         // Stop threshold configured: Stop charging at threshold.
         should_charge = false;
     }
@@ -64,7 +66,7 @@ int16_t battery_charger_configure(void) {
         // Start threshold not configured: Always charge up to stop threshold.
         should_charge = true;
     }
-    else if (battery_charge <= battery_get_start_threshold()) {
+    else if (battery_info.charge <= battery_get_start_threshold()) {
         // Start threshold configured: Start charging at threshold.
         should_charge = true;
     }
@@ -73,17 +75,6 @@ int16_t battery_charger_configure(void) {
         return battery_charger_enable();
     return battery_charger_disable();
 }
-
-uint16_t battery_temp = 0;
-uint16_t battery_voltage = 0;
-uint16_t battery_current = 0;
-uint16_t battery_charge = 0;
-uint16_t battery_remaining_capacity = 0;
-uint16_t battery_full_capacity = 0;
-uint16_t battery_status = 0;
-uint16_t battery_cycle_count = 0;
-uint16_t battery_design_capacity = 0;
-uint16_t battery_design_voltage = 0;
 
 void battery_event(void) {
     int16_t res = 0;
@@ -95,16 +86,16 @@ void battery_event(void) {
         } \
     }
 
-    command(battery_temp, 0x08);
-    command(battery_voltage, 0x09);
-    command(battery_current, 0x0A);
-    command(battery_charge, 0x0D);
-    command(battery_remaining_capacity, 0x0F);
-    command(battery_full_capacity, 0x10);
-    command(battery_status, 0x16);
-    command(battery_cycle_count, 0x17);
-    command(battery_design_capacity, 0x18);
-    command(battery_design_voltage, 0x19);
+    command(battery_info.temp, 0x08);
+    command(battery_info.voltage, 0x09);
+    command(battery_info.current, 0x0A);
+    command(battery_info.charge, 0x0D);
+    command(battery_info.remaining_capacity, 0x0F);
+    command(battery_info.full_capacity, 0x10);
+    command(battery_info.status, 0x16);
+    command(battery_info.cycle_count, 0x17);
+    command(battery_info.design_capacity, 0x18);
+    command(battery_info.design_voltage, 0x19);
 
     #undef command
 

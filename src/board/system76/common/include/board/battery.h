@@ -18,16 +18,19 @@
 
 #define BATTERY_INITIALIZED BIT(7)
 
-extern uint16_t battery_temp;
-extern uint16_t battery_voltage;
-extern uint16_t battery_current;
-extern uint16_t battery_charge;
-extern uint16_t battery_remaining_capacity;
-extern uint16_t battery_full_capacity;
-extern uint16_t battery_status;
-extern uint16_t battery_cycle_count;
-extern uint16_t battery_design_capacity;
-extern uint16_t battery_design_voltage;
+struct battery_info {
+    uint16_t temp;
+    uint16_t voltage;
+    uint16_t current;
+    uint16_t charge;
+    uint16_t remaining_capacity;
+    uint16_t full_capacity;
+    uint16_t status;
+    uint16_t cycle_count;
+    uint16_t design_capacity;
+    uint16_t design_voltage;
+};
+extern struct battery_info battery_info;
 
 uint8_t battery_get_start_threshold(void);
 bool battery_set_start_threshold(uint8_t value);
