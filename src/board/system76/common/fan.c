@@ -5,14 +5,14 @@
 #include <ec/pwm.h>
 
 #if SMOOTH_FANS != 0
-    static const uint8_t max_jump_up = (MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t) SMOOTH_FANS_UP;
-    static const uint8_t max_jump_down = (MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t) SMOOTH_FANS_DOWN;
+#define MAX_JUMP_UP ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_UP)
+#define MAX_JUMP_DOWN ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_DOWN)
 #else
-    static const uint8_t max_jump_up = MAX_FAN_SPEED - MIN_FAN_SPEED;
-    static const uint8_t max_jump_down = MAX_FAN_SPEED - MIN_FAN_SPEED;
+#define MAX_JUMP_UP (MAX_FAN_SPEED - MIN_FAN_SPEED)
+#define MAX_JUMP_DOWN (MAX_FAN_SPEED - MIN_FAN_SPEED)
 #endif
 
-static const uint8_t min_speed_to_smooth = PWM_DUTY(SMOOTH_FANS_MIN);
+#define MIN_SPEED_TO_SMOOTH PWM_DUTY(SMOOTH_FANS_MIN)
 
 bool fan_max = false;
 uint8_t last_duty_dgpu = 0;
@@ -121,12 +121,12 @@ uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
     // ramping down
     if (duty < last_duty) {
         // out of bounds (lower) safeguard
-        uint8_t smoothed = last_duty < MIN_FAN_SPEED + max_jump_down
+        uint8_t smoothed = last_duty < MIN_FAN_SPEED + MAX_JUMP_DOWN
             ? MIN_FAN_SPEED
-            : last_duty - max_jump_down;
+            : last_duty - MAX_JUMP_DOWN;
 
         // use smoothed value if above min and if smoothed is closer than raw
-        if (last_duty > min_speed_to_smooth && smoothed > duty) {
+        if (last_duty > MIN_SPEED_TO_SMOOTH && smoothed > duty) {
             next_duty = smoothed;
         }
     }
@@ -134,12 +134,12 @@ uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
     // ramping up
     if (duty > last_duty) {
         // out of bounds (higher) safeguard
-        uint8_t smoothed = last_duty > MAX_FAN_SPEED - max_jump_up
+        uint8_t smoothed = last_duty > MAX_FAN_SPEED - MAX_JUMP_UP
             ? MAX_FAN_SPEED
-            : last_duty + max_jump_up;
+            : last_duty + MAX_JUMP_UP;
 
         // use smoothed value if above min and if smoothed is closer than raw
-        if (duty > min_speed_to_smooth && smoothed < duty) {
+        if (duty > MIN_SPEED_TO_SMOOTH && smoothed < duty) {
             next_duty = smoothed;
         }
     }
