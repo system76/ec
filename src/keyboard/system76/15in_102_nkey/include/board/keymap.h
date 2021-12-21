@@ -54,4 +54,29 @@
 #define MATRIX_FN_INPUT     0
 #define MATRIX_FN_OUTPUT    4
 
+static inline bool keymap_is_f_key(uint8_t row, uint8_t col) {
+    switch (row) {
+    case 1:
+        return col == 1;
+    case 4:
+        return col == 2;
+    case 6:
+        return col == 2 || col == 3 || col == 4;
+    case 7:
+        return col == 1;
+    case 10:
+        return col == 2;
+    case 11:
+        return col == 2 || col == 3;
+    case 12:
+        return col == 0;
+    case 13:
+        return col == 3;
+    case 15:
+        return col == 1;
+    default:
+        return false;
+    }
+}
+
 #endif // _BOARD_KEYMAP_H

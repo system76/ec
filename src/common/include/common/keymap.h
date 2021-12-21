@@ -16,6 +16,9 @@
 #endif
 
 #if HAVE_KEYMAP
+    // FnLock config
+    extern bool keymap_fnlock;
+
     // Initialize the dynamic keymap
     void keymap_init(void);
     // Set the dynamic keymap to the default keymap
@@ -273,5 +276,10 @@ uint16_t keymap_translate(uint16_t key);
 
 #define K_INT_1 (0x61)
 #define K_INT_2 (0x5D)
+
+// XXX: Custom keys
+
+#define KF_CUSTOM (0x0200)
+#define K_FNLOCK (KF_CUSTOM | 0x01)
 
 #endif // _COMMON_KEYMAP_H
