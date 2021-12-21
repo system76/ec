@@ -3,6 +3,8 @@
 #include <board/flash.h>
 #include <board/keymap.h>
 
+bool keymap_fnlock = false;
+
 uint16_t __xdata DYNAMIC_KEYMAP[KM_LAY][KM_OUT][KM_IN];
 
 // Config is in the last sector of flash
@@ -69,6 +71,8 @@ bool keymap_save_config(void) {
 
 bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t *value) {
     if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
+        if (keymap_fnlock && keymap_is_f_key(output, input))
+            layer ^= 1;
         *value = DYNAMIC_KEYMAP[layer][output][input];
         return true;
     } else {
