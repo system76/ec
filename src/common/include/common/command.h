@@ -44,6 +44,8 @@ enum Command {
     CMD_MATRIX_GET = 17,
     // Save LED settings to ROM
     CMD_LED_SAVE = 18,
+    // Enable/disable no input mode
+    CMD_SET_NO_INPUT = 19,
     //TODO
 };
 

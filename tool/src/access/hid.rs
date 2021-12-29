@@ -40,9 +40,7 @@ impl AccessHid {
         }
 
         hid_data[HID_CMD] = cmd;
-        for i in 0..data.len() {
-            hid_data[HID_DATA + i] = data[i];
-        }
+        hid_data[HID_DATA..(data.len() + HID_DATA)].clone_from_slice(data);
 
         let count = self.device.write(&hid_data)?;
         if count != hid_data.len() {
@@ -51,9 +49,7 @@ impl AccessHid {
 
         let count = self.device.read_timeout(&mut hid_data[1..], self.timeout)?;
         if count == hid_data.len() - 1 {
-            for i in 0..data.len() {
-                data[i] = hid_data[HID_DATA + i];
-            }
+            data.clone_from_slice(&hid_data[HID_DATA..(data.len() + HID_DATA)]);
 
             Ok(Some(hid_data[HID_RES]))
         } else if count == 0 {

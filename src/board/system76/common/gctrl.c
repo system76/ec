@@ -3,6 +3,8 @@
 #include <board/gctrl.h>
 
 void gctrl_init(void) {
-    SPCTRL1 = 0x03;
+    // Set I2EC as R/W
+    SPCTRL1 |= 0x03;
+    // Set PNPCFG base address
     BADRSEL = 0;
 }

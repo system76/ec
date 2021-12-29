@@ -35,6 +35,7 @@ enum Cmd {
     LedSetMode = 16,
     MatrixGet = 17,
     LedSave = 18,
+    SetNoInput = 19,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -128,9 +129,7 @@ impl<A: Access> Ec<A> {
             let mut data = [0; 256 - 2];
             data[0] = flags;
             data[1] = chunk.len() as u8;
-            for i in 0..chunk.len() {
-                data[i + 2] = chunk[i];
-            }
+            data[2..chunk.len()].clone_from_slice(chunk);
             self.command(Cmd::Print, &mut data)?;
             if data[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
@@ -279,6 +278,10 @@ impl<A: Access> Ec<A> {
 
     pub unsafe fn matrix_get(&mut self, matrix: &mut [u8]) -> Result<(), Error> {
         self.command(Cmd::MatrixGet, matrix)
+    }
+
+    pub unsafe fn set_no_input(&mut self, no_input: bool) -> Result<(), Error> {
+        self.command(Cmd::SetNoInput, &mut [no_input as u8])
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>

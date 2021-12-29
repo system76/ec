@@ -27,9 +27,9 @@
     // Save dynamic keymap to flash
     bool keymap_save_config(void);
     // Get a keycode from the dynamic keymap
-    bool keymap_get(int layer, int output, int input, uint16_t * value);
+    bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t * value);
     // Set a keycode in the dynamic keymap
-    bool keymap_set(int layer, int output, int input, uint16_t value);
+    bool keymap_set(uint8_t layer, uint8_t output, uint8_t input, uint16_t value);
 #endif
 
 // Translate a keycode from PS/2 set 2 to PS/2 set 1
@@ -167,7 +167,10 @@ uint16_t keymap_translate(uint16_t key);
 // Escape key
 #define K_ESC (0x76)
 
-//TODO: Print screen, scroll lock, pause, sys request, break
+//TODO: Pause/break, sys request
+
+// Scroll lock
+#define K_SCROLL_LOCK (0x7E)
 
 // Tick/tilde key
 #define K_TICK (0x0E)

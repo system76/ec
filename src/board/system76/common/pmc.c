@@ -71,8 +71,17 @@ bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
 
 void pmc_swi(void) {
 #if EC_ESPI
-    // Use SCI interrupt
-    pmc_sci_interrupt();
+    // Start PME interrupt
+    vw_set(&VW_PME_N, VWS_LOW);
+
+    // Delay T_HOLD (value assumed)
+    delay_us(65);
+
+    // Stop PME interrupt
+    vw_set(&VW_PME_N, VWS_HIGH);
+
+    // Delay T_HOLD (value assumed)
+    delay_us(65);
 #else // EC_ESPI
     // Start SWI interrupt
     gpio_set(&SWI_N, false);

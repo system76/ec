@@ -17,6 +17,6 @@ void delay_ticks(uint16_t ticks);
 #define delay_ns(X) \
     delay_ticks((uint16_t)((((uint32_t)(X)) * 69UL + 89999UL) / 90000UL));
 
-void delay_ms(int ms);
+void delay_ms(uint8_t ms);
 
 #endif // _ARCH_DELAY_H

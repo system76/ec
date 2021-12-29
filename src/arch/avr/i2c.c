@@ -10,7 +10,7 @@
 
 #define TIMEOUT (F_CPU/1000)
 
-int i2c_start(struct I2C * i2c, uint8_t addr, bool read) {
+int16_t i2c_start(struct I2C * i2c, uint8_t addr, bool read) {
     uint32_t count;
 
     // reset TWI control register
@@ -46,8 +46,8 @@ void i2c_stop(struct I2C * i2c) {
     TWCR = BIT(TWINT) | BIT(TWEN) | BIT(TWSTO);
 }
 
-int i2c_write(struct I2C * i2c, uint8_t * data, int length) {
-    int i;
+int16_t i2c_write(struct I2C * i2c, uint8_t * data, uint16_t length) {
+    uint16_t i;
     for (i = 0; i < length; i++) {
         // load data into data register
         TWDR = data[i];
@@ -65,8 +65,8 @@ int i2c_write(struct I2C * i2c, uint8_t * data, int length) {
     return i;
 }
 
-int i2c_read(struct I2C * i2c, uint8_t * data, int length) {
-    int i;
+int16_t i2c_read(struct I2C * i2c, uint8_t * data, uint16_t length) {
+    uint16_t i;
     for (i = 0; i < length; i++) {
         if ((i + 1) < length) {
             // start TWI module and acknowledge data after reception

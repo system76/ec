@@ -10,6 +10,7 @@
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
+#include <board/peci.h>
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
@@ -52,6 +53,10 @@
 
 #ifndef HAVE_PCH_PWROK_EC
     #define HAVE_PCH_PWROK_EC 1
+#endif
+
+#ifndef HAVE_PM_PWROK
+    #define HAVE_PM_PWROK 1
 #endif
 
 #ifndef HAVE_SLP_SUS_N
@@ -289,7 +294,7 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    for (int i = 0; i < 1000; i++) {
+    for (uint16_t i = 5000; i != 0; i--) {
         // If we reached S0, exit this loop
         update_power_state();
         if (power_state == POWER_STATE_S0) {
@@ -320,8 +325,10 @@ void power_off_s5(void) {
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
 #endif // HAVE_PCH_PWROK_EC
 
+#if HAVE_PM_PWROK
     // De-assert PCH_PWROK
     GPIO_SET_DEBUG(PM_PWROK, false);
+#endif // HAVE_PM_PWROK
 
 #if HAVE_EC_EN
     // Block processor from controlling SUSB# and SUSC#
@@ -349,6 +356,46 @@ void power_off_s5(void) {
 
     update_power_state();
 }
+
+#ifdef HAVE_DGPU
+static bool power_peci_limit(bool ac) {
+    uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
+    // Set PL4 using PECI
+    int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
+    DEBUG("power_peci_limit %d = %d\n", watts, res);
+    if (res == 0x40) {
+        return true;
+    } else if (res < 0) {
+        ERROR("power_peci_limit failed: 0x%02X\n", -res);
+        return false;
+    } else {
+        ERROR("power_peci_limit unknown response: 0x%02X\n", res);
+        return false;
+    }
+}
+
+// Set the power draw limit depending on if on AC or DC power
+void power_set_limit(void) {
+    static bool last_power_limit_ac = true;
+    // We don't use power_state because the latency needs to be low
+#if EC_ESPI
+    if (gpio_get(&CPU_C10_GATE_N)) {
+#else
+    if (gpio_get(&BUF_PLT_RST_N)) {
+#endif
+        bool ac = !gpio_get(&ACIN_N);
+        if (last_power_limit_ac != ac) {
+            if (power_peci_limit(ac)) {
+                last_power_limit_ac = ac;
+            }
+        }
+    } else {
+        last_power_limit_ac = true;
+    }
+}
+#else
+void power_set_limit(void) {}
+#endif // HAVE_DGPU
 
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {
@@ -378,7 +425,7 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        board_on_ac(!ac_new);
+        power_set_limit();
 
         DEBUG("Power adapter ");
         if (ac_new) {
@@ -418,7 +465,7 @@ void power_event(void) {
     bool ps_new = gpio_get(&PWR_SW_N);
     if (!ps_new && ps_last) {
         // Ensure press is not spurious
-        for (int i = 0; i < 100; i++) {
+        for (uint8_t i = 100; i != 0; i--) {
             delay_ms(1);
             if (gpio_get(&PWR_SW_N) != ps_new) {
                 DEBUG("%02X: Spurious press\n", main_cycle);
@@ -464,8 +511,10 @@ void power_event(void) {
 
         //TODO: tPLT04;
 
+#if HAVE_PM_PWROK
         // Allow H_VR_READY to set PCH_PWROK
         GPIO_SET_DEBUG(PM_PWROK, true);
+#endif // HAVE_PM_PWROK
 
         // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
         delay_ms(10);
@@ -482,8 +531,10 @@ void power_event(void) {
         GPIO_SET_DEBUG(PCH_PWROK_EC, false);
 #endif // HAVE_PCH_PWROK_EC
 
+#if HAVE_PM_PWROK
         // De-assert PCH_PWROK
         GPIO_SET_DEBUG(PM_PWROK, false);
+#endif // HAVE_PM_PWROK
     }
     pg_last = pg_new;
 
@@ -566,11 +617,7 @@ void power_event(void) {
 #if EC_ESPI
         if (!gpio_get(&CPU_C10_GATE_N)) {
             // Modern suspend, flashing green light
-            if (
-                (time < last_time) // overflow
-                ||
-                (time >= (last_time + 1000)) // timeout
-            ) {
+            if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
                 last_time = time;
             }
@@ -584,11 +631,7 @@ void power_event(void) {
         }
     } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
         // Suspended, flashing green light
-        if (
-            (time < last_time) // overflow
-            ||
-            (time >= (last_time + 1000)) // timeout
-        ) {
+        if ((time - last_time) >= 1000) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
             last_time = time;
         }
@@ -600,11 +643,7 @@ void power_event(void) {
     } else {
         // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
-        if (
-            (time < last_time) // overflow
-            ||
-            (time >= (last_time + 1000)) // timeout
-        ) {
+        if ((time - last_time) >= 1000) {
             gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
             last_time = time;
         }

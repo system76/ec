@@ -45,16 +45,20 @@ void gpio_init() {
     GCR20 = 0;
 
     // Set GPIO data
-    GPDRA = 0x00;
-    GPDRB = 0x58;
-    GPDRC = 0x00;
-    GPDRD = 0x38;
-    GPDRE = 0x00;
-    GPDRF = 0x40;
-    GPDRG = 0x00;
-    GPDRH = 0x80;
-    GPDRI = 0x00;
-    GPDRJ = 0x00;
+    GPDRA = 0;
+    // H_PROCHOT_EC, XLP_OUT, PWR_SW#
+    GPDRB = BIT(6) | BIT(4) | BIT(3);
+    GPDRC = 0;
+    // PWR_BTN#, SMI#, SCI#
+    GPDRD = BIT(5) | BIT(4) | BIT(3);
+    GPDRE = 0;
+    // EC_PECI
+    GPDRF = BIT(6);
+    GPDRG = 0;
+    // AIRPLAN_LED#
+    GPDRH = BIT(7);
+    GPDRI = 0;
+    GPDRJ = 0;
 
     // Set GPIO control
     // EC_PWM_PIN_24

@@ -26,7 +26,7 @@ void fan_reset(void) {
 // Get duty cycle based on temperature, adapted from
 // https://github.com/pop-os/system76-power/blob/master/src/fan.rs
 uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
-    for (int i = 0; i < fan->points_size; i++) {
+    for (uint8_t i = 0; i < fan->points_size; i++) {
         const struct FanPoint * cur = &fan->points[i];
 
         // If exactly the current temp, return the current duty
@@ -68,25 +68,25 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
 
     // set PECI fan duty
     if (peci_fan_duty != DCR2) {
-        DEBUG("PECI fan_duty_raw=%d\n", peci_fan_duty);
+        TRACE("PECI fan_duty_raw=%d\n", peci_fan_duty);
         last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
         DCR2 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
-        DEBUG("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
+        TRACE("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
     }
 
     // set dGPU fan duty
     if (dgpu_fan_duty != DCR4) {
-        DEBUG("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
+        TRACE("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
         last_duty_dgpu = dgpu_fan_duty = fan_smooth(last_duty_dgpu, dgpu_fan_duty);
         DCR4 = fan_max ? MAX_FAN_SPEED : dgpu_fan_duty;
-        DEBUG("DGPU fan_duty_smoothed=%d\n", dgpu_fan_duty);
+        TRACE("DGPU fan_duty_smoothed=%d\n", dgpu_fan_duty);
     }
 }
 
 uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant {
     uint8_t lowest = duty;
 
-    int i;
+    uint8_t i;
     for (i = 0; (i + 1) < fan->heatup_size; i++) {
         uint8_t value = fan->heatup[i + 1];
         if (value < lowest) {
@@ -102,7 +102,7 @@ uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant {
 uint8_t fan_cooldown(const struct Fan * fan, uint8_t duty) __reentrant {
     uint8_t highest = duty;
 
-    int i;
+    uint8_t i;
     for (i = 0; (i + 1) < fan->cooldown_size; i++) {
         uint8_t value = fan->cooldown[i + 1];
         if (value > highest) {

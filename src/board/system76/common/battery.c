@@ -49,7 +49,7 @@ bool battery_set_end_threshold(uint8_t value) {
 /**
  * Configure the charger based on charging threshold values.
  */
-int battery_charger_configure(void) {
+int16_t battery_charger_configure(void) {
     static bool should_charge = true;
 
     if (battery_get_end_threshold() == BATTERY_END_DEFAULT) {
@@ -81,11 +81,12 @@ uint16_t battery_charge = 0;
 uint16_t battery_remaining_capacity = 0;
 uint16_t battery_full_capacity = 0;
 uint16_t battery_status = 0;
+uint16_t battery_cycle_count = 0;
 uint16_t battery_design_capacity = 0;
 uint16_t battery_design_voltage = 0;
 
 void battery_event(void) {
-    int res = 0;
+    int16_t res = 0;
 
     #define command(N, V) { \
         res = smbus_read(BATTERY_ADDRESS, V, &N); \
@@ -101,12 +102,13 @@ void battery_event(void) {
     command(battery_remaining_capacity, 0x0F);
     command(battery_full_capacity, 0x10);
     command(battery_status, 0x16);
+    command(battery_cycle_count, 0x17);
     command(battery_design_capacity, 0x18);
     command(battery_design_voltage, 0x19);
 
     #undef command
 
-    DEBUG("BAT %d mV %d mA\n", battery_voltage, battery_current);
+    TRACE("BAT %d mV %d mA\n", battery_voltage, battery_current);
 
     battery_charger_event();
 }
