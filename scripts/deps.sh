@@ -23,7 +23,7 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         gcc \
         gcc-avr \
         libc-dev \
-		libhidapi-dev \
+        libhidapi-dev \
         libudev-dev \
         make \
         pkgconf \
@@ -63,7 +63,12 @@ fi
 msg "Initializing submodules"
 git submodule update --init --recursive
 
-if ! which rustup &> /dev/null; then
+RUSTUP_NEW_INSTALL=0
+if which rustup &> /dev/null; then
+    msg "Updating rustup"
+    rustup self update
+else
+    RUSTUP_NEW_INSTALL=1
     msg "Installing Rust"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
       | sh -s -- -y --default-toolchain none
@@ -74,5 +79,10 @@ fi
 
 msg "Installing pinned Rust toolchain and components"
 rustup show
+
+if [[ $RUSTUP_NEW_INSTALL = 1 ]]; then
+    msg "rustup was just installed. Ensure cargo is on the PATH with:"
+    echo -e "    source ~/.cargo/env\n"
+fi
 
 msg "\x1B[32mSuccessfully installed dependencies"
