@@ -224,10 +224,12 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    for (uint16_t i = 5000; i != 0; i--) {
+    uint16_t i;
+    for (i = 0; i < 5000; i++) {
         // If we reached S0, exit this loop
         update_power_state();
         if (power_state == POWER_STATE_S0) {
+            DEBUG("reached S0 in %d ms\n", i);
             break;
         }
 
@@ -240,7 +242,10 @@ void power_on_s5(void) {
         delay_ms(1);
     }
 
-    update_power_state();
+    if (power_state != POWER_STATE_S0) {
+        DEBUG("failed to reach S0, powering off");
+        power_off_s5();
+    }
 }
 
 void power_off_s5(void) {
