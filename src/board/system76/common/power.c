@@ -26,11 +26,6 @@
     gpio_set(&G, V); \
 }
 
-#ifndef DEEP_SX
-    // Platform does not currently support Deep Sx
-    #define DEEP_SX 0
-#endif
-
 #ifndef HAVE_EC_EN
     #define HAVE_EC_EN 1
 #endif
@@ -111,11 +106,7 @@ extern uint8_t main_cycle;
 // DSW_PWROK falling to any of VccDSW, VccPRIM dropping 5%
 #define tPCH14 delay_ns(400)
 // De-assertion of RSMRST# to de-assertion of ESPI_RESET#
-#if DEEP_SX
-    #define tPCH18 delay_us(90)
-#else
-    #define tPCH18 delay_ms(95)
-#endif
+#define tPCH18 delay_ms(95)
 // DSW_PWROK assertion to SLP_SUS# de-assertion
 #define tPCH32 delay_ms(95)
 // RSMRST# de-assertion to SUSPWRDNACK valid
@@ -140,12 +131,6 @@ enum PowerState calculate_power_state(void) {
         // S5 plane powered
         return POWER_STATE_S5;
     }
-
-#if HAVE_PCH_DPWROK_EC && DEEP_SX
-    if (!gpio_get(&PCH_DPWROK_EC)) {
-        return POWER_STATE_DEFAULT;
-    }
-#endif // HAVE_PCH_DPWROK_EC && DEEP_SX
 
     return POWER_STATE_DS5;
 }
@@ -184,25 +169,6 @@ void update_power_state(void) {
 void power_on_ds5(void) {
     DEBUG("%02X: power_on_ds5\n", main_cycle);
 
-#if DEEP_SX
-    // See Figure 12-18 in Whiskey Lake Platform Design Guide
-    // | VCCRTC | RTCRST# | VCCDSW_3P3 | DSW_PWROK |
-    // | tPCH01---------- |            |           |
-    // | tPCH04----------------------- |           |
-    // |        | tPCH05-------------------------- |
-    // |        |         | tPCH02---------------- |
-
-    // tPCH01 and tPCH02 combined make the longest delay
-    tPCH01;
-    tPCH02;
-
-#if HAVE_PCH_DPWROK_EC
-    // Deep sleep well is a-ok
-    GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
-#endif // HAVE_PCH_DPWROK_EC
-    // Wait for deep sleep well to propogate
-    tPCH32;
-#else // DEEP_SX
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // | VCCRTC | RTCRST# | VccPRIM |
     // | tPCH01---------- |         |
@@ -210,7 +176,6 @@ void power_on_ds5(void) {
 
     // tPCH04 is the ideal delay
     tPCH04;
-#endif // DEEP_SX
 
     update_power_state();
 }
@@ -219,41 +184,6 @@ void power_on_ds5(void) {
 void power_on_s5(void) {
     DEBUG("%02X: power_on_s5\n", main_cycle);
 
-#if DEEP_SX
-    // See Figure 12-18 in Whiskey Lake Platform Design Guide
-    // TODO - signal timing graph
-    // See Figure 12-24 in Whiskey Lake Platform Design Guide
-    // TODO - rail timing graph
-
-    // TODO: Must have SL_SUS# set high by PCH
-
-#if HAVE_VA_EC_EN
-    // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
-    // avoid leakage
-    GPIO_SET_DEBUG(VA_EC_EN, true);
-#endif // HAVE_VA_EC_EN
-    tPCH06;
-
-    // Enable VDD5
-    GPIO_SET_DEBUG(DD_ON, true);
-
-    //TODO: Should SUS_ACK# be de-asserted here?
-    tPCH03;
-
-    // De-assert RSMRST#
-    GPIO_SET_DEBUG(EC_RSMRST_N, true);
-
-    // Wait for PCH stability
-    tPCH18;
-
-#if HAVE_EC_EN
-    // Allow processor to control SUSB# and SUSC#
-    GPIO_SET_DEBUG(EC_EN, true);
-#endif // HAVE_EC_EN
-
-    // Extra wait - TODO remove
-    delay_ms(200);
-#else // DEEP_SX
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // TODO - signal timing graph
     // See Figure 12-25 in Whiskey Lake Platform Design Guide
@@ -309,7 +239,6 @@ void power_on_s5(void) {
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
     }
-#endif // DEEP_SX
 
     update_power_state();
 }
@@ -317,9 +246,6 @@ void power_on_s5(void) {
 void power_off_s5(void) {
     DEBUG("%02X: power_off_s5\n", main_cycle);
 
-#if DEEP_SX
-    // TODO
-#else // DEEP_SX
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
@@ -352,7 +278,6 @@ void power_off_s5(void) {
     GPIO_SET_DEBUG(PCH_DPWROK_EC, false);
 #endif // HAVE_PCH_DPWROK_EC
     tPCH14;
-#endif // DEEP_SX
 
     update_power_state();
 }
