@@ -2,7 +2,7 @@
 
 // Make galp5 keyboard behave more similar to MacBook Pro keyboard (2015 15")
 // 1. top row function keys are inverted (hold fn for f1-12) to allow for easy screen brightness and volume adjust
-// 2. left-side ctrl = fn, fn = super, super = alt, alt = ctrl
+// 2. left-side ctrl = super, super = alt, alt = ctrl
 // 3. unrelated to apple, but make the tiny pgup and pgdown buttons duplicate the left/right arrows
 
 #include <board/keymap.h>
@@ -14,7 +14,7 @@ LAYOUT(
     K_TAB, K_Q, K_W, K_E, K_R, K_T, K_Y, K_U, K_I, K_O, K_P, K_BRACE_OPEN, K_BRACE_CLOSE, K_BACKSLASH,
     K_CAPS, K_A, K_S, K_D, K_F, K_G, K_H, K_J, K_K, K_L, K_SEMICOLON, K_QUOTE, K_ENTER,
     K_LEFT_SHIFT, K_Z, K_X, K_C, K_V, K_B, K_N, K_M, K_COMMA, K_PERIOD, K_SLASH, K_RIGHT_SHIFT,
-    KT_FN, K_LEFT_SUPER, K_LEFT_ALT, K_LEFT_CTRL, K_SPACE, K_RIGHT_CTRL, K_RIGHT_ALT, K_LEFT, K_UP, K_RIGHT,
+    K_LEFT_SUPER, KT_FN, K_LEFT_ALT, K_LEFT_CTRL, K_SPACE, K_RIGHT_CTRL, K_RIGHT_ALT, K_LEFT, K_UP, K_RIGHT,
     K_LEFT, K_DOWN, K_RIGHT
 ),
 LAYOUT(
