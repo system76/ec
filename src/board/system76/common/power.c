@@ -159,6 +159,18 @@ void update_power_state(void) {
     }
 }
 
+void power_init(void) {
+    // See Figure 12-19 in Whiskey Lake Platform Design Guide
+    // | VCCRTC | RTCRST# | VccPRIM |
+    // | tPCH01---------- |         |
+    // | tPCH04-------------------- |
+
+    // tPCH04 is the ideal delay
+    tPCH04;
+
+    update_power_state();
+}
+
 void power_on(void) {
     DEBUG("%02X: power_on\n", main_cycle);
 
