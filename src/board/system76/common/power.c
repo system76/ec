@@ -112,7 +112,7 @@ extern uint8_t main_cycle;
 // RSMRST# de-assertion to SUSPWRDNACK valid
 #define tPLT01 delay_ms(200)
 
-enum PowerState power_state = POWER_STATE_DEFAULT;
+enum PowerState power_state = POWER_STATE_OFF;
 
 enum PowerState calculate_power_state(void) {
     //TODO: Deep Sx states using SLP_SUS#
@@ -132,7 +132,7 @@ enum PowerState calculate_power_state(void) {
         return POWER_STATE_S5;
     }
 
-    return POWER_STATE_DS5;
+    return POWER_STATE_OFF;
 }
 
 void update_power_state(void) {
@@ -142,17 +142,11 @@ void update_power_state(void) {
 
     #if LEVEL >= LEVEL_DEBUG
         switch (power_state) {
-            case POWER_STATE_DEFAULT:
-                DEBUG("POWER_STATE_DEFAULT\n");
-                break;
-            case POWER_STATE_DS5:
-                DEBUG("POWER_STATE_DS5\n");
+            case POWER_STATE_OFF:
+                DEBUG("POWER_STATE_OFF\n");
                 break;
             case POWER_STATE_S5:
                 DEBUG("POWER_STATE_S5\n");
-                break;
-            case POWER_STATE_DS3:
-                DEBUG("POWER_STATE_DS3\n");
                 break;
             case POWER_STATE_S3:
                 DEBUG("POWER_STATE_S3\n");
@@ -165,24 +159,8 @@ void update_power_state(void) {
     }
 }
 
-// Enable deep sleep well power
-void power_on_ds5(void) {
-    DEBUG("%02X: power_on_ds5\n", main_cycle);
-
-    // See Figure 12-19 in Whiskey Lake Platform Design Guide
-    // | VCCRTC | RTCRST# | VccPRIM |
-    // | tPCH01---------- |         |
-    // | tPCH04-------------------- |
-
-    // tPCH04 is the ideal delay
-    tPCH04;
-
-    update_power_state();
-}
-
-// Enable S5 power
-void power_on_s5(void) {
-    DEBUG("%02X: power_on_s5\n", main_cycle);
+void power_on(void) {
+    DEBUG("%02X: power_on\n", main_cycle);
 
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // TODO - signal timing graph
@@ -224,6 +202,10 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
+    GPIO_SET_DEBUG(PWR_BTN_N, false);
+    delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
+    GPIO_SET_DEBUG(PWR_BTN_N, true);
+
     uint16_t i;
     for (i = 0; i < 5000; i++) {
         // If we reached S0, exit this loop
@@ -244,12 +226,12 @@ void power_on_s5(void) {
 
     if (power_state != POWER_STATE_S0) {
         DEBUG("failed to reach S0, powering off\n");
-        power_off_s5();
+        power_off();
     }
 }
 
-void power_off_s5(void) {
-    DEBUG("%02X: power_off_s5\n", main_cycle);
+void power_off(void) {
+    DEBUG("%02X: power_off\n", main_cycle);
 
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
@@ -345,11 +327,6 @@ static bool power_button_disabled(void) {
 }
 
 void power_event(void) {
-    // Always switch to ds5 if EC is running
-    if (power_state == POWER_STATE_DEFAULT) {
-        power_on_ds5();
-    }
-
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
     static bool ac_last = true;
@@ -413,10 +390,13 @@ void power_event(void) {
 
             // Enable S5 power if necessary, before sending PWR_BTN
             update_power_state();
-            if (power_state == POWER_STATE_DS5) {
+            if (power_state == POWER_STATE_OFF) {
                 if (config_should_reset())
                     config_reset();
-                power_on_s5();
+                power_on();
+
+                // After power on ensure there is no secondary press sent to PCH
+                ps_new = ps_last;
             }
         }
     }
@@ -519,7 +499,7 @@ void power_event(void) {
     {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
-            power_off_s5();
+            power_off();
         }
     }
 
@@ -529,8 +509,8 @@ void power_event(void) {
     if (!wake_new && wake_last) {
         update_power_state();
         DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
-        if (power_state == POWER_STATE_DS5) {
-            power_on_s5();
+        if (power_state == POWER_STATE_OFF) {
+            power_on();
         }
     }
     #if LEVEL >= LEVEL_DEBUG
@@ -559,7 +539,7 @@ void power_event(void) {
             gpio_set(&LED_PWR, true);
             gpio_set(&LED_ACIN, false);
         }
-    } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
+    } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
         if ((time - last_time) >= 1000) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));

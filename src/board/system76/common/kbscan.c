@@ -196,7 +196,7 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
     // Wake from sleep on keypress
     if (pressed &&
         lid_state &&
-        (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3)) {
+        (power_state == POWER_STATE_S3)) {
         pmc_swi();
     }
 

@@ -4,19 +4,16 @@
 #define _BOARD_POWER_H
 
 enum PowerState {
-    POWER_STATE_DEFAULT,
-    POWER_STATE_DS5,
+    POWER_STATE_OFF,
     POWER_STATE_S5,
-    POWER_STATE_DS3,
     POWER_STATE_S3,
     POWER_STATE_S0,
 };
 
 extern enum PowerState power_state;
 
-void power_on_ds5(void);
-void power_on_s5(void);
-void power_off_s5(void);
+void power_on(void);
+void power_off(void);
 void power_set_limit(void);
 void power_cpu_reset(void);
 
