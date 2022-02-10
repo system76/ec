@@ -327,10 +327,34 @@ bool parallel_peripheral_cycle(struct Parallel * port, uint8_t * data, bool * re
 
 static uint8_t ADDRESS_INDAR1 = 0x05;
 static uint8_t ADDRESS_INDDR = 0x08;
+static uint8_t ADDRESS_ECMSADDR0 = 0x2E;
+static uint8_t ADDRESS_ECMSADDR1 = 0x2F;
+static uint8_t ADDRESS_ECMSDATA = 0x30;
 
 static uint8_t ZERO = 0x00;
 static uint8_t SPI_ENABLE = 0xFE;
 static uint8_t SPI_DATA = 0xFD;
+
+int16_t parallel_ecms_read(struct Parallel *port, uint16_t addr, uint8_t * data, int16_t length) {
+    int16_t res;
+
+    res = parallel_set_address(port, &ADDRESS_ECMSADDR1, 1);
+    if (res < 0) return res;
+
+    res = parallel_write(port, ((uint8_t *)&addr) + 1, 1);
+    if (res < 0) return res;
+
+    res = parallel_set_address(port, &ADDRESS_ECMSADDR0, 1);
+    if (res < 0) return res;
+
+    res = parallel_write(port, (uint8_t *)&addr, 1);
+    if (res < 0) return res;
+
+    res = parallel_set_address(port, &ADDRESS_ECMSDATA, 1);
+    if (res < 0) return res;
+
+    return parallel_read(port, data, length);
+}
 
 // Disable chip
 int16_t parallel_spi_reset(struct Parallel *port) {
@@ -522,6 +546,46 @@ int parallel_main(void) {
                 // Write data to serial
                 res = serial_write(data, length);
                 if (res < 0) goto err;
+
+                break;
+
+            // Forced debug console (can be used on all firmware but may miss bytes)
+            case 'F':
+                serial_write(console_msg, sizeof(console_msg));
+
+                // We must be in host mode
+                parallel_state(port, PARALLEL_STATE_HOST);
+
+                uint16_t head = 0;
+                for (;;) {
+                    // Read current position
+                    res = parallel_ecms_read(port, 0xF00, data, 1);
+                    if (res < 0) goto err;
+
+                    uint16_t tail = (uint16_t)data[0];
+                    if (tail == 0 || head == tail) {
+                        // No new data
+                        continue;
+                    }
+
+                    if (head == 0) {
+                        // Set head if necessary
+                        head = tail;
+                        continue;
+                    }
+
+                    while (head != tail) {
+                        head += 1;
+                        if (head >= 256) { head = 1; }
+
+                        // Read byte at head
+                        res = parallel_ecms_read(port, 0xF00 + head, data, 1);
+                        if (res < 0) goto err;
+
+                        // Print read byte
+                        serial_write(data, 1);
+                    }
+                }
 
                 break;
 
