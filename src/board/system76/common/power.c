@@ -243,7 +243,7 @@ void power_on_s5(void) {
     }
 
     if (power_state != POWER_STATE_S0) {
-        DEBUG("failed to reach S0, powering off");
+        DEBUG("failed to reach S0, powering off\n");
         power_off_s5();
     }
 }
