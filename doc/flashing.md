@@ -14,6 +14,11 @@ make BOARD=<vendor>/<model> flash_internal
 
 ## External programmer
 
+Change the rust toolchain to nightly in this repository:
+```
+rustup override set nightly
+```
+
 Use this method for:
 
 - flashing from proprietary firmware to System76 EC firmware
