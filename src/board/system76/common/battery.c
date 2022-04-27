@@ -99,7 +99,7 @@ void battery_event(void) {
 
     #undef command
 
-    TRACE("BAT %d mV %d mA\n", battery_voltage, battery_current);
+    TRACE("BAT %d mV %d mA\n", battery_info.voltage, battery_info.current);
 
     battery_charger_event();
 }
