@@ -506,7 +506,7 @@ void power_event(void) {
 #endif // HAVE_SLP_SUS_N
 
 #if EC_ESPI
-    if (vw_get(&VW_SUS_PWRDN_ACK) == VWS_HIGH)
+    // ESPI systems, always power off if in S5 power state
 #elif HAVE_SUSWARN_N
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
