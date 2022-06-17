@@ -17,6 +17,9 @@
     #define CHARGE_OPTION_2_PSYS_EN BIT(11)
 #define REG_ADAPTER_CURRENT 0x3F
 
+// Bits 0-6 are ignored. Bits 12-15 must be 0.
+#define INPUT_CURRENT (CHARGER_INPUT_CURRENT & 0x0FFF)
+
 // XXX: Assumption: ac_last is initialized high.
 static bool charger_enabled = false;
 
@@ -53,7 +56,7 @@ int16_t battery_charger_disable(void) {
 
     // Set input current in mA
     //TODO: needed when charging disabled?
-    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, CHARGER_INPUT_CURRENT);
+    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
     if (res < 0) return res;
 
     DEBUG("Charger disabled\n");
@@ -94,7 +97,7 @@ int16_t battery_charger_enable(void) {
     if (res < 0) return res;
 
     // Set input current in mA
-    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, CHARGER_INPUT_CURRENT);
+    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
     if (res < 0) return res;
 
     DEBUG("Charger enabled\n");

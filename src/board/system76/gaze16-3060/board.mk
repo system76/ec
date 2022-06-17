@@ -21,11 +21,13 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
+# Adapter input current = 9.23A
+# PRS1 = 0.005 ohm. Divide input current by 4.
 CHARGER=oz26786
 CFLAGS+=\
 	-DCHARGER_CHARGE_CURRENT=1536 \
 	-DCHARGER_CHARGE_VOLTAGE=16800 \
-	-DCHARGER_INPUT_CURRENT=9230
+	-DCHARGER_INPUT_CURRENT=0x900
 
 # Set CPU power limits in watts
 CFLAGS+=\

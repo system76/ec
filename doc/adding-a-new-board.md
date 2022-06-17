@@ -2,33 +2,40 @@
 
 ## Charger parameters
 
-- `CHARGER_CHARGE_CURRENT`: Currently the same for all boards (1536).
+- `CHARGER_CHARGE_CURRENT`: Currently the same for all boards (3A).
 - `CHARGER_CHARGE_VOLTAGE`: On the battery, look for 充电限制电压 (charge limit
   voltage). Convert this from volts to millivolts.
 - `CHARGER_INPUT_CURRENT`: On the charger, look for DC output. Convert the
   current from amps to milliamps.
 
+These values need to be adjusted based on the values of the sense resistors
+(PRS1, PRS2) and how the charger interprets the value.
+
 #### Example
 
-The gaze15 battery has
+The gaze15 battery has:
 
 ```
 充电限制电压: 16.8Vdc
 ```
 
-and its charger has
+Its charger has:
 
 ```
 DC OUTPUT (输出/輸出): 19.5V⎓9.23A 180W
 ```
 
-This gives
+The schematics show it uses a 0.005 ohm sense resistor for both PRS1 and PRS2.
+This means that the charge current and input current must be divided by 2 when
+configuring the smart charger.
+
+This gives:
 
 ```
 CFLAGS+=\
-	-DCHARGER_CHARGE_CURRENT=1536 \
+	-DCHARGER_CHARGE_CURRENT=0x600 \
 	-DCHARGER_CHARGE_VOLTAGE=16800 \
-	-DCHARGER_INPUT_CURRENT=9230
+	-DCHARGER_INPUT_CURRENT=0x1200
 ```
 
 ## GPIOs
