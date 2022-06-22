@@ -17,10 +17,12 @@ struct VirtualWire {
     uint8_t shift;
 };
 
+// clang-format off
 #define VIRTUAL_WIRE(INDEX, SHIFT) { \
     .index = &VWIDX ## INDEX, \
     .shift = SHIFT, \
 }
+// clang-format on
 
 enum VirtualWireState {
     VWS_INVALID = 0x00,

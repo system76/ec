@@ -81,6 +81,7 @@ void init(void) {
     //TODO: INTC
 
     // Must happen last
+    power_init();
     board_init();
 }
 

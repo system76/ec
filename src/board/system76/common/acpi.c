@@ -66,6 +66,7 @@ void acpi_reset(void) {
 #endif
 }
 
+// clang-format off
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;
 
@@ -102,32 +103,32 @@ uint8_t acpi_read(uint8_t addr) {
                 // AC adapter connected
                 data |= BIT(0);
             }
-            if (battery_status & BATTERY_INITIALIZED) {
+            if (battery_info.status & BATTERY_INITIALIZED) {
                 // BAT0 connected
                 data |= BIT(2);
             }
             break;
 
-        ACPI_16(0x16, battery_design_capacity);
-        ACPI_16(0x1A, battery_full_capacity);
-        ACPI_16(0x22, battery_design_voltage);
+        ACPI_16(0x16, battery_info.design_capacity);
+        ACPI_16(0x1A, battery_info.full_capacity);
+        ACPI_16(0x22, battery_info.design_voltage);
 
         case 0x26:
             // If AC adapter connected
             if (!gpio_get(&ACIN_N)) {
                 // And battery is not fully charged
-                if (battery_current != 0) {
+                if (battery_info.current != 0) {
                     // Battery is charging
                     data |= BIT(1);
                 }
             }
             break;
 
-        ACPI_16(0x2A, battery_current);
-        ACPI_16(0x2E, battery_remaining_capacity);
-        ACPI_16(0x32, battery_voltage);
+        ACPI_16(0x2A, battery_info.current);
+        ACPI_16(0x2E, battery_info.remaining_capacity);
+        ACPI_16(0x32, battery_info.voltage);
 
-        ACPI_16(0x42, battery_cycle_count);
+        ACPI_16(0x42, battery_info.cycle_count);
 
         ACPI_8(0x68, acpi_ecos);
 
@@ -174,6 +175,7 @@ uint8_t acpi_read(uint8_t addr) {
     TRACE("acpi_read %02X = %02X\n", addr, data);
     return data;
 }
+// clang-format on
 
 void acpi_write(uint8_t addr, uint8_t data) {
     TRACE("acpi_write %02X = %02X\n", addr, data);

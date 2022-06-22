@@ -26,11 +26,6 @@
     gpio_set(&G, V); \
 }
 
-#ifndef DEEP_SX
-    // Platform does not currently support Deep Sx
-    #define DEEP_SX 0
-#endif
-
 #ifndef HAVE_EC_EN
     #define HAVE_EC_EN 1
 #endif
@@ -111,17 +106,13 @@ extern uint8_t main_cycle;
 // DSW_PWROK falling to any of VccDSW, VccPRIM dropping 5%
 #define tPCH14 delay_ns(400)
 // De-assertion of RSMRST# to de-assertion of ESPI_RESET#
-#if DEEP_SX
-    #define tPCH18 delay_us(90)
-#else
-    #define tPCH18 delay_ms(95)
-#endif
+#define tPCH18 delay_ms(95)
 // DSW_PWROK assertion to SLP_SUS# de-assertion
 #define tPCH32 delay_ms(95)
 // RSMRST# de-assertion to SUSPWRDNACK valid
 #define tPLT01 delay_ms(200)
 
-enum PowerState power_state = POWER_STATE_DEFAULT;
+enum PowerState power_state = POWER_STATE_OFF;
 
 enum PowerState calculate_power_state(void) {
     //TODO: Deep Sx states using SLP_SUS#
@@ -141,13 +132,7 @@ enum PowerState calculate_power_state(void) {
         return POWER_STATE_S5;
     }
 
-#if HAVE_PCH_DPWROK_EC && DEEP_SX
-    if (!gpio_get(&PCH_DPWROK_EC)) {
-        return POWER_STATE_DEFAULT;
-    }
-#endif // HAVE_PCH_DPWROK_EC && DEEP_SX
-
-    return POWER_STATE_DS5;
+    return POWER_STATE_OFF;
 }
 
 void update_power_state(void) {
@@ -157,17 +142,11 @@ void update_power_state(void) {
 
     #if LEVEL >= LEVEL_DEBUG
         switch (power_state) {
-            case POWER_STATE_DEFAULT:
-                DEBUG("POWER_STATE_DEFAULT\n");
-                break;
-            case POWER_STATE_DS5:
-                DEBUG("POWER_STATE_DS5\n");
+            case POWER_STATE_OFF:
+                DEBUG("POWER_STATE_OFF\n");
                 break;
             case POWER_STATE_S5:
                 DEBUG("POWER_STATE_S5\n");
-                break;
-            case POWER_STATE_DS3:
-                DEBUG("POWER_STATE_DS3\n");
                 break;
             case POWER_STATE_S3:
                 DEBUG("POWER_STATE_S3\n");
@@ -180,29 +159,7 @@ void update_power_state(void) {
     }
 }
 
-// Enable deep sleep well power
-void power_on_ds5(void) {
-    DEBUG("%02X: power_on_ds5\n", main_cycle);
-
-#if DEEP_SX
-    // See Figure 12-18 in Whiskey Lake Platform Design Guide
-    // | VCCRTC | RTCRST# | VCCDSW_3P3 | DSW_PWROK |
-    // | tPCH01---------- |            |           |
-    // | tPCH04----------------------- |           |
-    // |        | tPCH05-------------------------- |
-    // |        |         | tPCH02---------------- |
-
-    // tPCH01 and tPCH02 combined make the longest delay
-    tPCH01;
-    tPCH02;
-
-#if HAVE_PCH_DPWROK_EC
-    // Deep sleep well is a-ok
-    GPIO_SET_DEBUG(PCH_DPWROK_EC, true);
-#endif // HAVE_PCH_DPWROK_EC
-    // Wait for deep sleep well to propogate
-    tPCH32;
-#else // DEEP_SX
+void power_init(void) {
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // | VCCRTC | RTCRST# | VccPRIM |
     // | tPCH01---------- |         |
@@ -210,50 +167,13 @@ void power_on_ds5(void) {
 
     // tPCH04 is the ideal delay
     tPCH04;
-#endif // DEEP_SX
 
     update_power_state();
 }
 
-// Enable S5 power
-void power_on_s5(void) {
-    DEBUG("%02X: power_on_s5\n", main_cycle);
+void power_on(void) {
+    DEBUG("%02X: power_on\n", main_cycle);
 
-#if DEEP_SX
-    // See Figure 12-18 in Whiskey Lake Platform Design Guide
-    // TODO - signal timing graph
-    // See Figure 12-24 in Whiskey Lake Platform Design Guide
-    // TODO - rail timing graph
-
-    // TODO: Must have SL_SUS# set high by PCH
-
-#if HAVE_VA_EC_EN
-    // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
-    // avoid leakage
-    GPIO_SET_DEBUG(VA_EC_EN, true);
-#endif // HAVE_VA_EC_EN
-    tPCH06;
-
-    // Enable VDD5
-    GPIO_SET_DEBUG(DD_ON, true);
-
-    //TODO: Should SUS_ACK# be de-asserted here?
-    tPCH03;
-
-    // De-assert RSMRST#
-    GPIO_SET_DEBUG(EC_RSMRST_N, true);
-
-    // Wait for PCH stability
-    tPCH18;
-
-#if HAVE_EC_EN
-    // Allow processor to control SUSB# and SUSC#
-    GPIO_SET_DEBUG(EC_EN, true);
-#endif // HAVE_EC_EN
-
-    // Extra wait - TODO remove
-    delay_ms(200);
-#else // DEEP_SX
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // TODO - signal timing graph
     // See Figure 12-25 in Whiskey Lake Platform Design Guide
@@ -294,10 +214,16 @@ void power_on_s5(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
-    for (uint16_t i = 5000; i != 0; i--) {
+    GPIO_SET_DEBUG(PWR_BTN_N, false);
+    delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
+    GPIO_SET_DEBUG(PWR_BTN_N, true);
+
+    uint16_t i;
+    for (i = 0; i < 5000; i++) {
         // If we reached S0, exit this loop
         update_power_state();
         if (power_state == POWER_STATE_S0) {
+            DEBUG("reached S0 in %d ms\n", i);
             break;
         }
 
@@ -309,17 +235,16 @@ void power_on_s5(void) {
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
     }
-#endif // DEEP_SX
 
-    update_power_state();
+    if (power_state != POWER_STATE_S0) {
+        DEBUG("failed to reach S0, powering off\n");
+        power_off();
+    }
 }
 
-void power_off_s5(void) {
-    DEBUG("%02X: power_off_s5\n", main_cycle);
+void power_off(void) {
+    DEBUG("%02X: power_off\n", main_cycle);
 
-#if DEEP_SX
-    // TODO
-#else // DEEP_SX
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
@@ -352,7 +277,6 @@ void power_off_s5(void) {
     GPIO_SET_DEBUG(PCH_DPWROK_EC, false);
 #endif // HAVE_PCH_DPWROK_EC
     tPCH14;
-#endif // DEEP_SX
 
     update_power_state();
 }
@@ -415,11 +339,6 @@ static bool power_button_disabled(void) {
 }
 
 void power_event(void) {
-    // Always switch to ds5 if EC is running
-    if (power_state == POWER_STATE_DEFAULT) {
-        power_on_ds5();
-    }
-
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
     static bool ac_last = true;
@@ -483,10 +402,13 @@ void power_event(void) {
 
             // Enable S5 power if necessary, before sending PWR_BTN
             update_power_state();
-            if (power_state == POWER_STATE_DS5) {
+            if (power_state == POWER_STATE_OFF) {
                 if (config_should_reset())
                     config_reset();
-                power_on_s5();
+                power_on();
+
+                // After power on ensure there is no secondary press sent to PCH
+                ps_new = ps_last;
             }
         }
     }
@@ -589,7 +511,7 @@ void power_event(void) {
     {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
-            power_off_s5();
+            power_off();
         }
     }
 
@@ -599,8 +521,8 @@ void power_event(void) {
     if (!wake_new && wake_last) {
         update_power_state();
         DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
-        if (power_state == POWER_STATE_DS5) {
-            power_on_s5();
+        if (power_state == POWER_STATE_OFF) {
+            power_on();
         }
     }
     #if LEVEL >= LEVEL_DEBUG
@@ -629,7 +551,7 @@ void power_event(void) {
             gpio_set(&LED_PWR, true);
             gpio_set(&LED_ACIN, false);
         }
-    } else if (power_state == POWER_STATE_S3 || power_state == POWER_STATE_DS3) {
+    } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
         if ((time - last_time) >= 1000) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
@@ -656,7 +578,7 @@ void power_event(void) {
 
 //TODO: do not require both LEDs
 #if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
-    if (!(battery_status & BATTERY_INITIALIZED)) {
+    if (!(battery_info.status & BATTERY_INITIALIZED)) {
         // No battery connected
         gpio_set(&LED_BAT_CHG, false);
         gpio_set(&LED_BAT_FULL, false);
@@ -664,7 +586,7 @@ void power_event(void) {
         // Discharging (no AC adapter)
         gpio_set(&LED_BAT_CHG, false);
         gpio_set(&LED_BAT_FULL, false);
-    } else if (battery_current == 0) {
+    } else if (battery_info.current == 0) {
         // Fully charged
         // TODO: turn off charger
         gpio_set(&LED_BAT_CHG, false);

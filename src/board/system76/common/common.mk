@@ -62,6 +62,11 @@ console_external:
 	sleep 1 && echo C | sudo tee "$(PROGRAMMER)" &
 	sudo tio -b 1000000 -m INLCRNL -t "$(PROGRAMMER)"
 
+console_external_forced:
+	sudo test -c "$(PROGRAMMER)"
+	sleep 1 && echo F | sudo tee "$(PROGRAMMER)" &
+	sudo tio -b 1000000 -m INLCRNL -t "$(PROGRAMMER)"
+
 flash_internal: $(BUILD)/ec.rom
 	cargo build --manifest-path tool/Cargo.toml --release
 	sudo tool/target/release/system76_ectool flash $<
