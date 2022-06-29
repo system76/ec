@@ -78,6 +78,8 @@ jobs:
             board: oryp7
           - vendor: system76
             board: oryp8
+          - vendor: system76
+            board: oryp9
 
     steps:
       - uses: actions/checkout@v2
