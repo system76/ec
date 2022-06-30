@@ -55,6 +55,8 @@ jobs:
           - vendor: system76
             board: darp7
           - vendor: system76
+            board: darp8
+          - vendor: system76
             board: galp3-c
           - vendor: system76
             board: galp5
@@ -70,6 +72,8 @@ jobs:
             board: lemp9
           - vendor: system76
             board: lemp10
+          - vendor: system76
+            board: lemp11
           - vendor: system76
             board: oryp5
           - vendor: system76
