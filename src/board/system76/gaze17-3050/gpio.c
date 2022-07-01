@@ -44,25 +44,22 @@ void gpio_init() {
     GCR20 = 0;
 
     // Set GPIO data
-    GPDRA = 0;
+    // WLAN_PWR_EN
+    GPDRA = BIT(3);
     // XLP_OUT
     GPDRB = BIT(4);
     GPDRC = 0;
     GPDRD = 0;
-    GPDRE = 0;
-    GPDRF = 0;
-    // H_PROCHOT#_EC
-    GPDRG = BIT(6);
+    // USB_PWR_EN
+    GPDRE = BIT(3);
+    // CC_EN
+    GPDRF = BIT(7);
+    // H_PROCHOT#_EC, WLAN_EN
+    GPDRG = BIT(6) | BIT(1);
     GPDRH = 0;
     GPDRI = 0;
-    GPDRJ = 0;
-    GPOTA = 0;
-    GPOTB = 0;
-    GPOTD = 0;
-    GPOTE = 0;
-    GPOTF = 0;
-    GPOTH = 0;
-    GPOTJ = 0;
+    // KBC_MUTE#
+    GPDRJ = BIT(1);
 
     // Set GPIO control
     // EC_PWM_PIN_24
