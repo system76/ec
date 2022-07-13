@@ -22,12 +22,14 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
-#TODO: Find out why input current must by divided by two
+# FIXME: Verify parts and values.
 CHARGER=oz26786
 CFLAGS+=\
+	-DCHARGER_ADAPTER_RSENSE=10 \
+	-DCHARGER_BATTERY_RSENSE=10 \
 	-DCHARGER_CHARGE_CURRENT=1536 \
 	-DCHARGER_CHARGE_VOLTAGE=17400 \
-	-DCHARGER_INPUT_CURRENT=1600
+	-DCHARGER_INPUT_CURRENT=3420
 
 # Set CPU power limits in watts
 CFLAGS+=\

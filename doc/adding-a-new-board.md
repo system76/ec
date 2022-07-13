@@ -2,7 +2,9 @@
 
 ## Charger parameters
 
-- `CHARGER_CHARGE_CURRENT`: Currently the same for all boards (1536).
+- `CHARGER_ADAPTER_RSENSE`: The adapter RSENSE value in milliohms.
+- `CHARGER_BATTERY_RSENSE`: The battery RSENSE value in milliohms.
+- `CHARGER_CHARGE_CURRENT`: The desired charge current in milliamps.
 - `CHARGER_CHARGE_VOLTAGE`: On the battery, look for 充电限制电压 (charge limit
   voltage). Convert this from volts to millivolts.
 - `CHARGER_INPUT_CURRENT`: On the charger, look for DC output. Convert the
@@ -10,23 +12,28 @@
 
 #### Example
 
-The gaze15 battery has
+The gaze15 battery has:
 
 ```
 充电限制电压: 16.8Vdc
 ```
 
-and its charger has
+Its charger has:
 
 ```
 DC OUTPUT (输出/輸出): 19.5V⎓9.23A 180W
 ```
 
-This gives
+The schematics show it uses a 0.005 ohm sense resistor for both the adapter and
+the battery.
+
+This gives:
 
 ```
 CFLAGS+=\
-	-DCHARGER_CHARGE_CURRENT=1536 \
+	-DCHARGER_ADAPTER_RSENSE=5 \
+	-DCHARGER_BATTERY_RSENSE=5 \
+	-DCHARGER_CHARGE_CURRENT=3072 \
 	-DCHARGER_CHARGE_VOLTAGE=16800 \
 	-DCHARGER_INPUT_CURRENT=9230
 ```

@@ -22,13 +22,12 @@ CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
 # TODO: actually bq24800
-# Adapter input current = 11.5A
-# PRS1 = 0.005 ohm. Divide adapter input current by 2.
-# PRS2 = 0.010 ohm. Use desired charge current.
 CFLAGS+=\
-	-DCHARGER_CHARGE_CURRENT=0xB80 \
+	-DCHARGER_ADAPTER_RSENSE=5 \
+	-DCHARGER_BATTERY_RSENSE=10 \
+	-DCHARGER_CHARGE_CURRENT=3072 \
 	-DCHARGER_CHARGE_VOLTAGE=13050 \
-	-DCHARGER_INPUT_CURRENT=0x1600
+	-DCHARGER_INPUT_CURRENT=11500
 
 # Set CPU power limits in watts
 CFLAGS+=\
