@@ -18,14 +18,13 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
-# Adapter input current = 4.74A
-# PRS1 = 0.010 ohm. Divide adapter input current by 2.
-# PRS2 = 0.010 ohm. Use desired charge current.
 CHARGER=oz26786
 CFLAGS+=\
-	-DCHARGER_CHARGE_CURRENT=0xB80 \
+	-DCHARGER_ADAPTER_RSENSE=10 \
+	-DCHARGER_BATTERY_RSENSE=10 \
+	-DCHARGER_CHARGE_CURRENT=3072 \
 	-DCHARGER_CHARGE_VOLTAGE=8800 \
-	-DCHARGER_INPUT_CURRENT=0x900
+	-DCHARGER_INPUT_CURRENT=4740
 
 # Add system76 common code
 include src/board/system76/common/common.mk
