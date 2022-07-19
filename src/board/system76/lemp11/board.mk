@@ -28,5 +28,19 @@ CFLAGS+=\
 	-DCHARGER_CHARGE_VOLTAGE=8800 \
 	-DCHARGER_INPUT_CURRENT=0x300
 
+# Fan curve
+CFLAGS+=-DBOARD_HEATUP=5
+CFLAGS+=-DBOARD_COOLDOWN=20
+CFLAGS+=-DBOARD_FAN_POINTS="\
+	FAN_POINT(45, 25), \
+	FAN_POINT(50, 30), \
+	FAN_POINT(55, 30), \
+	FAN_POINT(60, 40), \
+	FAN_POINT(65, 50), \
+	FAN_POINT(70, 60), \
+	FAN_POINT(75, 70), \
+	FAN_POINT(80, 80) \
+"
+
 # Add system76 common code
 include src/board/system76/common/common.mk
