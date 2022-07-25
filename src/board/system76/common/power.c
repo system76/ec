@@ -322,7 +322,7 @@ void power_set_limit(void) {
     static bool last_power_limit_ac = true;
     // We don't use power_state because the latency needs to be low
 #if USE_S0IX
-    if (gpio_get(&CPU_C10_GATE_N)) {
+    if (gpio_get(&SLP_S0_N)) {
 #else
     if (gpio_get(&BUF_PLT_RST_N)) {
 #endif
@@ -575,7 +575,7 @@ void power_event(void) {
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
 #if USE_S0IX
-        if (!gpio_get(&CPU_C10_GATE_N)) {
+        if (!gpio_get(&SLP_S0_N)) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
