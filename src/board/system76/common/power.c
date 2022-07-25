@@ -576,8 +576,7 @@ void power_event(void) {
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
 #if CONFIG_BUS_ESPI
-        // HOST_C10 virtual wire is high when CPU is in C10 sleep state
-        if (vw_get(&VW_HOST_C10) == VWS_HIGH) {
+        if (!gpio_get(&SLP_S0_N)) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
