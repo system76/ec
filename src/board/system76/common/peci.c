@@ -127,8 +127,8 @@ uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
 
 #if USE_S0IX
-    // Use PECI if CPU is not in C10 state
-    peci_on = gpio_get(&CPU_C10_GATE_N);
+    // Use PECI if platform is not in CS
+    peci_on = gpio_get(&SLP_S0_N);
 #else // USE_S0IX
     // Use PECI if in S0 state
     peci_on = power_state == POWER_STATE_S0;
