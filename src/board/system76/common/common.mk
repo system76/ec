@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+LVFS_VENDOR_NAME = System76
+LVFS_VENDOR_HOMEPAGE = https://system76.com/
+
 # Set log level
 # 0 - NONE
 # 1 - ERROR

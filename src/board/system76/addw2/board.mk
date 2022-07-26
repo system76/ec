@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+LVFS_DEVICE_ID = com.system76.addw2.ec.firmware
+LVFS_DEVICE_NAME = "Adder Workstation 2"
+# TODO
+LVFS_DEVICE_UUID = "00000000-0000-0000-0000-000000000000"
+
 EC=ite
 EC_VARIANT=it5570e
 

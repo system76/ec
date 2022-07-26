@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+LVFS_DEVICE_ID = com.system76.galp3-c.ec.firmware
+LVFS_DEVICE_NAME = "Galago Pro 3"
+# TODO
+LVFS_DEVICE_UUID = "00000000-0000-0000-0000-000000000000"
+
 EC=ite
 EC_VARIANT=it8587e
 
