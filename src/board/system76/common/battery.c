@@ -58,7 +58,7 @@ int16_t battery_charger_configure(void) {
         // Stop threshold not configured: Always charge on AC.
         should_charge = true;
     }
-    else if (battery_info.charge >= battery_get_end_threshold()) {
+    else if (battery_info.charge > battery_get_end_threshold()) {
         // Stop threshold configured: Stop charging at threshold.
         should_charge = false;
     }
@@ -66,7 +66,7 @@ int16_t battery_charger_configure(void) {
         // Start threshold not configured: Always charge up to stop threshold.
         should_charge = true;
     }
-    else if (battery_info.charge <= battery_get_start_threshold()) {
+    else if (battery_info.charge < battery_get_start_threshold()) {
         // Start threshold configured: Start charging at threshold.
         should_charge = true;
     }
