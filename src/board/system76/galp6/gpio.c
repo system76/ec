@@ -72,8 +72,8 @@ void gpio_init(void) {
     GPDRD = BIT(5) | BIT(4);
     // USB_PWR_EN
     GPDRE = BIT(3);
-    // H_PECI
-    GPDRF = BIT(6);
+    // H_PECI, PD_EN
+    GPDRF = BIT(6) | BIT(3);
     // H_PROCHOT_EC
     GPDRG = BIT(6);
     GPDRH = 0;
@@ -156,7 +156,7 @@ void gpio_init(void) {
     // USB_PWR_EN# (Actually active high)
     GPCRE3 = GPIO_OUT;
     // DD_ON
-    GPCRE4 = GPIO_OUT;
+    GPCRE4 = GPIO_OUT | GPIO_DOWN;
     // EC_RSMRST#
     GPCRE5 = GPIO_OUT;
     // JACK_IN#_EC
@@ -166,7 +166,7 @@ void gpio_init(void) {
     // 80CLK
     GPCRF0 = GPIO_IN;
     // USB_CHARGE_EN
-    GPCRF1 = GPIO_OUT;
+    GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
     GPCRF2 = GPIO_IN | GPIO_UP;
     // PD_EN
