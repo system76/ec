@@ -61,6 +61,8 @@ jobs:
           - vendor: system76
             board: galp5
           - vendor: system76
+            board: galp6
+          - vendor: system76
             board: gaze15
           - vendor: system76
             board: gaze16-3050
