@@ -73,6 +73,11 @@
     #define HAVE_VA_EC_EN 1
 #endif
 
+// Only galp6 has this, so disable by default.
+#ifndef HAVE_PD_EN
+    #define HAVE_PD_EN 0
+#endif
+
 #ifndef HAVE_XLP_OUT
     #define HAVE_XLP_OUT 1
 #endif
@@ -184,6 +189,9 @@ void power_on(void) {
     // avoid leakage
     GPIO_SET_DEBUG(VA_EC_EN, true);
 #endif // HAVE_VA_EC_EN
+#if HAVE_PD_EN
+    GPIO_SET_DEBUG(PD_EN, true);
+#endif
     tPCH06;
 
     // Enable VDD5
@@ -267,6 +275,9 @@ void power_off(void) {
     GPIO_SET_DEBUG(DD_ON, false);
     tPCH12;
 
+#if HAVE_PD_EN
+    GPIO_SET_DEBUG(PD_EN, false);
+#endif
 #if HAVE_VA_EC_EN
     // Disable VCCPRIM_* planes
     GPIO_SET_DEBUG(VA_EC_EN, false);

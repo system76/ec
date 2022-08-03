@@ -25,6 +25,7 @@ struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(C, 5);
 struct Gpio __code PCH_PWROK_EC =   GPIO(A, 6);
+struct Gpio __code PD_EN =          GPIO(F, 3);
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
@@ -72,8 +73,8 @@ void gpio_init(void) {
     GPDRD = BIT(5) | BIT(4);
     // USB_PWR_EN
     GPDRE = BIT(3);
-    // H_PECI, PD_EN
-    GPDRF = BIT(6) | BIT(3);
+    // H_PECI
+    GPDRF = BIT(6);
     // H_PROCHOT_EC
     GPDRG = BIT(6);
     GPDRH = 0;
