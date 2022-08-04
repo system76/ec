@@ -21,6 +21,10 @@
     #include <board/espi.h>
 #endif
 
+#ifndef USE_S0IX
+    #define USE_S0IX 0
+#endif
+
 #define GPIO_SET_DEBUG(G, V) { \
     DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
     gpio_set(&G, V); \
@@ -313,7 +317,7 @@ static bool power_peci_limit(bool ac) {
 void power_set_limit(void) {
     static bool last_power_limit_ac = true;
     // We don't use power_state because the latency needs to be low
-#if EC_ESPI
+#if USE_S0IX
     if (gpio_get(&CPU_C10_GATE_N)) {
 #else
     if (gpio_get(&BUF_PLT_RST_N)) {
@@ -547,7 +551,7 @@ void power_event(void) {
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
-#if EC_ESPI
+#if USE_S0IX
         if (!gpio_get(&CPU_C10_GATE_N)) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
