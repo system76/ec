@@ -12,8 +12,8 @@ CONFIG_BUS_ESPI=y
 # Enable firmware security
 CONFIG_SECURITY=y
 
-# Apply PMC hack for S0ix
-CFLAGS+=-DPMC_S0IX_HACK=1
+# FIXME: Use S3 instead of S0ix
+CFLAGS+=-DUSE_S0IX=1
 
 # Include keyboard
 KEYBOARD=15in_102

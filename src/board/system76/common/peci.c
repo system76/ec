@@ -11,6 +11,10 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
+#ifndef USE_S0IX
+    #define USE_S0IX 0
+#endif
+
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_HEATUP
 #define BOARD_HEATUP 4
