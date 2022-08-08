@@ -25,6 +25,7 @@ struct Gpio __code PCH_DPWROK_EC =  GPIO(H, 4);
 struct Gpio __code PCH_PWROK_EC =   GPIO(F, 3);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
+struct Gpio __code SLP_S0_N =       GPIO(C, 6); // XXX: Really CPU_C10_GATE#
 struct Gpio __code SLP_SUS_N =      GPIO(J, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
