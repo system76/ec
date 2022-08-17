@@ -255,6 +255,18 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
                 }
             }
             break;
+        case COMBO_TOUCHPAD:
+            // Not actually a combo, just sends a keypress and an SCI
+            if (kbscan_enabled)
+                kbc_scancode(KF_E0 | 0x63, pressed);
+
+            if (pressed && acpi_ecos != EC_OS_NONE) {
+                if (!pmc_sci(&PMC_1, 0x0A)) {
+                    // In the case of ignored SCI, reset bit
+                    return false;
+                }
+            }
+            break;
         }
         break;
     case (KT_SCI):
