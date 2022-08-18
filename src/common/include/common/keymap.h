@@ -56,6 +56,8 @@ uint16_t keymap_translate(uint16_t key);
 #define K_PRINT_SCREEN (KT_COMBO | COMBO_PRINT_SCREEN)
 #define COMBO_PAUSE 2
 #define K_PAUSE (KT_COMBO | COMBO_PAUSE)
+#define COMBO_TOUCHPAD 3
+#define K_TOUCHPAD (KT_COMBO | COMBO_TOUCHPAD)
 
 // SCI
 #define KT_SCI (0x4000)
@@ -104,8 +106,6 @@ uint16_t keymap_translate(uint16_t key);
 // More media keys
 #define K_MEDIA_NEXT (KF_E0 | 0x4D)
 #define K_MEDIA_PREV (KF_E0 | 0x15)
-// Custom scancode
-#define K_TOUCHPAD (KF_E0 | 0x63)
 
 // Function keys
 
