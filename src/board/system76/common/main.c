@@ -77,6 +77,7 @@ void init(void) {
     pwm_init();
     smbus_init();
     smfi_init();
+    ps2_init();
 
     //TODO: INTC
 
