@@ -397,7 +397,7 @@ static void kbc_on_input_data(struct Kbc *kbc, uint8_t data) {
         // Begin write
         *(PS2_TOUCHPAD.control) = 0x0D;
         // Enable Transaction Done interrupt
-        *(PS2_TOUCHPAD.interrupt) |= BIT(2);
+        *(PS2_TOUCHPAD.interrupt) = *(PS2_TOUCHPAD.interrupt) | BIT(2);
         // Write the data
         *(PS2_TOUCHPAD.data) = data;
         // Pull data line low
@@ -484,8 +484,7 @@ void kbc_event(struct Kbc *kbc) {
         if (kbc_second_wait == 0) {
             // Attempt to read from touchpad
             *(PS2_TOUCHPAD.control) = 0x07;
-            // Enable Transaction Done interrupt
-            *(PS2_TOUCHPAD.interrupt) |= BIT(2);
+            *(PS2_TOUCHPAD.interrupt) = *(PS2_TOUCHPAD.interrupt) | BIT(2);
             if (state == KBC_STATE_NORMAL) {
                 uint8_t sts = *(PS2_TOUCHPAD.status);
                 *(PS2_TOUCHPAD.status) = sts;
