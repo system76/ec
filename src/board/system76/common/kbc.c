@@ -462,17 +462,17 @@ void kbc_event(struct Kbc * kbc) {
             if (sts & PSSTS_DONE) {
                 kbc_second_wait = 0;
             }
-            // If an error happened, clear status, print error, and stop waiting
+            // If an error happened, clear status, print error, and skip read
             else if (sts & PSSTS_ALL_ERR) {
                 ps2_reset(&PS2_TOUCHPAD);
                 TRACE("  write second port input ERROR %02X\n", sts);
-                kbc_second_wait = 0;
+                kbc_second_wait = 1;
             }
-            // If a timeout occurs, clear status, print error, and stop waiting
+            // If a timeout occurs, clear status, print error, and skip read
             else if (kbc_second_wait == 0) {
                 ps2_reset(&PS2_TOUCHPAD);
                 TRACE("  write second port input TIMEOUT\n");
-                kbc_second_wait = 0;
+                kbc_second_wait = 1;
             }
         }
 
@@ -505,10 +505,8 @@ void kbc_event(struct Kbc * kbc) {
             kbc_on_input_data(kbc, data);
         }
     }
-
     // Write data if possible
-    sts = kbc_status(kbc);
-    if (!(sts & KBC_STS_OBF)) {
+    else if (!(sts & KBC_STS_OBF)) {
         kbc_on_output_empty(kbc);
     }
 }
