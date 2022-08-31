@@ -79,6 +79,7 @@ void init(void) {
     smbus_init();
     smfi_init();
     usbpd_init();
+    ps2_init();
 
     //TODO: INTC
 
