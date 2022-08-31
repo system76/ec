@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <arch/delay.h>
 #include <board/kbc.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
@@ -490,6 +491,9 @@ void kbc_event(struct Kbc *kbc) {
                 *(PS2_TOUCHPAD.status) = sts;
                 if (sts & PSSTS_DONE) {
                     state = KBC_STATE_TOUCHPAD;
+                    // FIXME figure out a way to do this without blocking
+                    // Without this delay reading data from PS/2 fails
+                    delay_us(100);
                 }
             }
         }
