@@ -66,7 +66,7 @@
     { ___, K58, K4A, K3A, K2A, K1A, K08, K07 }, \
     { ___, K41, K4B, K3B, K2B, K1B, K0A, K09 }, \
     { K3C, ___, K0D, K2C, K1C, K62, K0E, K0B }, \
-    { ___, ___, K60, K1D, K57, K0F, ___, K0G }, \
+    { ___, K3C, K60, K1D, K57, K0F, ___, K0G }, \
     { ___, ___, K2D, ___, K61, K0C, ___, K59 } \
 }
 // clang-format on
