@@ -13,6 +13,10 @@
 #define REG_CHARGE_VOLTAGE 0x15
 #define REG_DISCHARGE_CURRENT 0x39
 #define REG_INPUT_CURRENT 0x3F
+#define REG_CHARGE_OPTION_0 0x12
+#define REG_CHARGE_OPTION_1 0x3B
+#define REG_CHARGE_OPTION_2 0x38
+#define REG_CHARGE_OPTION_3 0x37
 
 // ChargeOption0 flags
 // Low Power Mode Enable
@@ -23,6 +27,19 @@
 #define SBC_PWM_FREQ_800KHZ ((uint16_t)(0b01 << 8))
 // IDCHG Amplifier Gain
 #define SBC_IDCHC_GAIN      ((uint16_t)(BIT(3)))
+
+// ChargeOption1 flags
+// Independent Comparator Deglitch
+#define SBC_CMP_DEG_1US     (0b01 << 4)
+// PMON Gain
+#define SBC_PMON_RATIO      BIT(9)
+// Adapter:Battery RSENSE ratio
+#define SBC_RSENSE_RATIO_1_1    (0b00 << 12)
+#define SBC_RSENSE_RATIO_2_1    (0b01 << 12)
+#define SBC_RSENSE_RATIO_1_2    (0b10 << 12)
+// Battery depletion threshold
+#define SBC_BAT_DEPL_VTH    (0b11 << 14)
+
 
 // Bits 0-5 are ignored. Bits 13-15 must be 0.
 #define CHARGE_CURRENT_MASK 0x1FC0
@@ -54,6 +71,20 @@
     #error Invalid adapter RSENSE value
 #endif
 
+#if (CHARGER_ADAPTER_RSENSE == 5 && CHARGER_BATTERY_RSENSE == 5) || \
+    (CHARGER_ADAPTER_RSENSE == 10 && CHARGER_BATTERY_RSENSE == 10) || \
+    (CHARGER_ADAPTER_RSENSE == 20 && CHARGER_BATTERY_RSENSE == 20)
+#define RSENSE_RATIO SBC_RSENSE_RATIO_1_1
+#elif (CHARGER_ADAPTER_RSENSE == 10 && CHARGER_BATTERY_RSENSE == 5) || \
+    (CHARGER_ADAPTER_RSENSE == 20 && CHARGER_BATTERY_RSENSE == 10)
+#define RSENSE_RATIO SBC_RSENSE_RATIO_2_1
+#elif (CHARGER_ADAPTER_RSENSE == 5 && CHARGER_BATTERY_RSENSE == 10) || \
+    (CHARGER_ADAPTER_RSENSE == 10 && CHARGER_BATTERY_RSENSE == 20)
+#define RSENSE_RATIO SBC_RSENSE_RATIO_1_2
+#else
+    #error Invalid adapter:battery RSENSE ratio
+#endif
+
 // XXX: Assumption: ac_last is initialized high.
 static bool charger_enabled = false;
 
@@ -65,7 +96,7 @@ int16_t battery_charger_disable(void) {
     // Set charge option 0 with 175s watchdog
     res = smbus_write(
         CHARGER_ADDRESS,
-        0x12,
+        REG_CHARGE_OPTION_0,
         SBC_EN_LWPWR |
         SBC_WDTMR_ADJ_175S |
         SBC_PWM_FREQ_800KHZ |
@@ -112,10 +143,20 @@ int16_t battery_charger_enable(void) {
     // Set charge option 0 with watchdog disabled
     res = smbus_write(
         CHARGER_ADDRESS,
-        0x12,
+        REG_CHARGE_OPTION_0,
         SBC_EN_LWPWR |
         SBC_PWM_FREQ_800KHZ |
         SBC_IDCHC_GAIN
+    );
+
+    // Set the RSENSE ratio
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        REG_CHARGE_OPTION_1,
+        SBC_CMP_DEG_1US |
+        SBC_PMON_RATIO |
+        RSENSE_RATIO |
+        SBC_BAT_DEPL_VTH
     );
 
     DEBUG("Charger enabled\n");
@@ -149,10 +190,10 @@ void battery_debug(void) {
     command(Status, BATTERY_ADDRESS, 0x16);
 
     DEBUG("Charger (bq24780s):\n");
-    command(ChargeOption0, CHARGER_ADDRESS, 0x12);
-    command(ChargeOption1, CHARGER_ADDRESS, 0x3B);
-    command(ChargeOption2, CHARGER_ADDRESS, 0x38);
-    command(ChargeOption3, CHARGER_ADDRESS, 0x37);
+    command(ChargeOption0, CHARGER_ADDRESS, REG_CHARGE_OPTION_0);
+    command(ChargeOption1, CHARGER_ADDRESS, REG_CHARGE_OPTION_1);
+    command(ChargeOption2, CHARGER_ADDRESS, REG_CHARGE_OPTION_2);
+    command(ChargeOption3, CHARGER_ADDRESS, REG_CHARGE_OPTION_3);
     command(ChargeCurrent, CHARGER_ADDRESS, REG_CHARGE_CURRENT);
     command(ChargeVoltage, CHARGER_ADDRESS, REG_CHARGE_VOLTAGE);
     command(DishargeCurrent, CHARGER_ADDRESS, REG_DISCHARGE_CURRENT);
