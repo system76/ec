@@ -13,4 +13,8 @@
 
 #define BIT(X) (1UL << (X))
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define CLAMP(val, min, max) (MIN(MAX(val, min), max))
+
 #endif // _COMMON_MACRO_H
