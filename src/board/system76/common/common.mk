@@ -35,7 +35,7 @@ board-common-y += wireless.c
 # 3 - INFO
 # 4 - DEBUG
 # 5 - TRACE
-CFLAGS+=-DLEVEL=4
+CFLAGS+=-DLEVEL=5
 
 # Uncomment to enable debug logging over keyboard parallel port
 #CFLAGS+=-DPARALLEL_DEBUG
