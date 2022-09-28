@@ -39,11 +39,10 @@ static struct FanPoint __code FAN_POINTS[] = {
 #ifdef BOARD_FAN_POINTS
     BOARD_FAN_POINTS
 #else
-    FAN_POINT(70, 40),
-    FAN_POINT(75, 50),
-    FAN_POINT(80, 60),
-    FAN_POINT(85, 65),
-    FAN_POINT(90, 65)
+	FAN_POINT(0, 25),
+	FAN_POINT(65, 30),
+	FAN_POINT(75, 35),
+	FAN_POINT(100, 100)
 #endif
 };
 
@@ -181,5 +180,6 @@ uint8_t peci_get_fan_duty(void) {
     }
 
     TRACE("PECI temp=%d\n", peci_temp);
+    TRACE("fan duty set to=%d\n", duty);
     return duty;
 }
