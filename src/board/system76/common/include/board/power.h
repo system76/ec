@@ -3,6 +3,8 @@
 #ifndef _BOARD_POWER_H
 #define _BOARD_POWER_H
 
+#include <stdbool.h>
+
 enum PowerState {
     POWER_STATE_OFF,
     POWER_STATE_S5,
@@ -12,6 +14,10 @@ enum PowerState {
 
 extern enum PowerState power_state;
 void update_power_state(void);
+
+#if EC_ESPI
+extern bool in_s0ix;
+#endif
 
 void power_init(void);
 void power_on(void);

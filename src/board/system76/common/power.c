@@ -123,6 +123,10 @@ extern uint8_t main_cycle;
 
 enum PowerState power_state = POWER_STATE_OFF;
 
+#if EC_ESPI
+bool in_s0ix = false;
+#endif
+
 enum PowerState calculate_power_state(void) {
     if (!gpio_get(&EC_RSMRST_N)) {
         // S5 plane not powered
@@ -358,11 +362,30 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
+#if EC_ESPI
+static void update_s0ix_state()
+{
+    uint32_t time = time_get();
+    static uint32_t last_sleep_time = 0;
+
+    if (!gpio_get(&SLP_S0_N)) {
+        last_sleep_time = time;
+    }
+    // Allow for sub-500ms wakeups
+    in_s0ix = (time - last_sleep_time) < 500;
+}
+#endif
+
 void power_event(void) {
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
+
+    #if EC_ESPI
+    update_s0ix_state();
+    #endif
+
     if (ac_new != ac_last) {
         // Set CPU power limit to DC limit until we determine available current
         //TODO: if this returns false, retry?
@@ -575,8 +598,13 @@ void power_event(void) {
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
+<<<<<<< HEAD
 #if CONFIG_BUS_ESPI
         if (!gpio_get(&SLP_S0_N)) {
+=======
+#if EC_ESPI
+        if (in_s0ix) {
+>>>>>>> f5b9517 (Allow sub-500 ms wakeups while in s0ix)
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
