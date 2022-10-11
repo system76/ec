@@ -26,6 +26,11 @@ void pwm_init(void) {
     // Turn off CPU fan (temperature control in peci_get_fan_duty)
     DCR2 = 0;
 
+#ifdef it5570e
+    // Reload counters when they reach 0 instead of immediately
+    PWMLCCR = 0xFF;
+#endif
+
     // Enable PWM
     ZTIER = BIT(1);
 }
