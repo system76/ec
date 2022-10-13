@@ -1,12 +1,12 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-CC=avr-gcc -mmcu=$(EC)
+CC=avr-gcc -mmcu=$(EC_VARIANT)
 CFLAGS+=-Os -fstack-usage -Wall -Werror -Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
 OBJ=$(sort $(patsubst src/%.c,$(BUILD)/%.o,$(SRC)))
 
 # Run EC rom in simulator
 sim: $(BUILD)/ec.elf
-	simavr $< --mcu $(EC)
+	simavr $< --mcu $(EC_VARIANT)
 
 # Convert from Intel Hex file to binary file
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx

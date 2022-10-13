@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-EC=it8587e
+EC=ite
+EC_VARIANT=it8587e
 
 # Include keyboard
 KEYBOARD=15in_102
