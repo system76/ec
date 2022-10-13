@@ -42,7 +42,7 @@ include $(BOARD_DIR)/board.mk
 EC_DIR=src/ec/$(EC)
 SRC+=$(wildcard $(EC_DIR)/*.c)
 INCLUDE+=$(wildcard $(EC_DIR)/include/ec/*.h) $(EC_DIR)/ec.mk
-CFLAGS+=-I$(EC_DIR)/include -D__EC__=$(EC) -D$(EC)
+CFLAGS+=-I$(EC_DIR)/include -D__EC__=$(EC_VARIANT) -D$(EC_VARIANT)
 include $(EC_DIR)/ec.mk
 
 # The EC will define the architecture

@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-EC=atmega2560
+EC=atmega
+EC_VARIANT=atmega2560
 
 PORT=$(wildcard /dev/ttyACM*)
 CONSOLE_BAUD=1000000
@@ -10,4 +11,4 @@ console:
 	sudo tio -b $(CONSOLE_BAUD) $(PORT)
 
 flash: $(BUILD)/ec.ihx
-	sudo avrdude -v -v -p $(EC) -c wiring -P $(PORT) -b 115200 -D -U flash:w:$<:i
+	sudo avrdude -v -v -p $(EC_VARIANT) -c wiring -P $(PORT) -b 115200 -D -U flash:w:$<:i
