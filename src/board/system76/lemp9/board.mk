@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+board-y += board.c
+board-y += gpio.c
+
 EC=ite
 EC_VARIANT=it5570e
 

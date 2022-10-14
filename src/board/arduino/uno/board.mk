@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+board-y += battery.c
+board-y += i2c.c
+board-y += main.c
+board-y += parallel.c
+
 EC=atmega
 EC_VARIANT=atmega328p
 

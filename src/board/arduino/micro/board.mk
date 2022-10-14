@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+board-y += main.c
+
 EC=atmega
 EC_VARIANT=atmega32u4
 

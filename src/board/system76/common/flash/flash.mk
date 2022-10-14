@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
+flash-y += main.c
+
 # Set flash ROM parameters
 FLASH_OFFSET=2048
 FLASH_SIZE=1024
@@ -12,9 +14,9 @@ FLASH_CFLAGS=$(CFLAGS)
 # Include flash source.
 FLASH_DIR=$(SYSTEM76_COMMON_DIR)/flash
 # Note: main.c *must* be first to ensure that flash_start is at the correct address
-FLASH_SRC=$(FLASH_DIR)/main.c
 FLASH_INCLUDE+=$(wildcard $(FLASH_DIR)/include/flash/*.h) $(FLASH_DIR)/flash.mk
 FLASH_CFLAGS+=-I$(FLASH_DIR)/include -D__FLASH__
+FLASH_SRC += $(foreach src, $(flash-y), $(FLASH_DIR)/$(src))
 
 FLASH_BUILD=$(BUILD)/flash
 FLASH_OBJ=$(sort $(patsubst src/%.c,$(FLASH_BUILD)/%.rel,$(FLASH_SRC)))
@@ -52,4 +54,3 @@ $(FLASH_OBJ): $(FLASH_BUILD)/%.rel: src/%.c $(FLASH_INCLUDE)
 CFLAGS+=-I$(BUILD)/include
 LDFLAGS+=-Wl -g_flash_entry=$(FLASH_OFFSET)
 INCLUDE+=$(BUILD)/include/flash.h
-SRC+=$(FLASH_DIR)/wrapper.c
