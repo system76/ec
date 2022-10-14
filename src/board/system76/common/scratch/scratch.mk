@@ -1,5 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+scratch-y += main.c
+scratch-y += stdio.c
+# TODO: Use relative path; generates different binary
+SCRATCH_SRC += $(SYSTEM76_COMMON_DIR)/smfi.c
+
 # Set scratch ROM parameters
 SCRATCH_OFFSET=1024
 SCRATCH_SIZE=1024
@@ -9,15 +14,11 @@ CFLAGS+=-DSCRATCH_OFFSET=$(SCRATCH_OFFSET) -DSCRATCH_SIZE=$(SCRATCH_SIZE)
 SCRATCH_INCLUDE=$(INCLUDE)
 SCRATCH_CFLAGS=$(CFLAGS)
 
-#Include scratch source
+# Include scratch source
 SCRATCH_DIR=$(SYSTEM76_COMMON_DIR)/scratch
-SCRATCH_SRC=$(wildcard $(SCRATCH_DIR)/*.c)
 SCRATCH_INCLUDE+=$(wildcard $(SCRATCH_DIR)/include/scratch/*.h) $(SCRATCH_DIR)/scratch.mk
 SCRATCH_CFLAGS+=-I$(SCRATCH_DIR)/include -D__SCRATCH__
-
-# Add minimal source from other directories
-SCRATCH_SRC+=\
-	$(SYSTEM76_COMMON_DIR)/smfi.c
+SCRATCH_SRC += $(foreach src, $(scratch-y), $(SCRATCH_DIR)/$(src))
 
 SCRATCH_BUILD=$(BUILD)/scratch
 SCRATCH_OBJ=$(sort $(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC)))
