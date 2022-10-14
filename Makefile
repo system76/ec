@@ -53,6 +53,8 @@ INCLUDE+=$(wildcard $(ARCH_DIR)/include/arch/*.h) $(ARCH_DIR)/arch.mk
 CFLAGS+=-I$(ARCH_DIR)/include -D__ARCH__=$(ARCH)
 include $(ARCH_DIR)/arch.mk
 
+include $(ARCH_DIR)/toolchain.mk
+
 # The architecture defines build targets, no more is required
 endif
 
