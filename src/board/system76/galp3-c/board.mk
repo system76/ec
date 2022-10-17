@@ -4,7 +4,7 @@ board-y += board.c
 board-y += gpio.c
 
 EC=ite
-EC_VARIANT=it8587e
+CONFIG_EC_ITE_IT8587E=y
 
 # Include keyboard
 KEYBOARD=14in_86

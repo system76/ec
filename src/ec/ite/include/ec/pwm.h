@@ -62,7 +62,7 @@ volatile uint8_t __xdata __at(0x1823) ZTIER;
 // Tachometer switch control register
 volatile uint8_t __xdata __at(0x1848) TSWCTLR;
 
-#ifdef it5570e
+#if CONFIG_EC_ITE_IT5570E
 // PWM Load Counter Control Register
 volatile uint8_t __xdata __at(0x185A) PWMLCCR;
 #endif

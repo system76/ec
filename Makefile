@@ -43,7 +43,7 @@ SRC += $(foreach src, $(keyboard-y), $(KEYBOARD_DIR)/$(src))
 # Include the embedded controller's source
 EC_DIR=src/ec/$(EC)
 INCLUDE+=$(wildcard $(EC_DIR)/include/ec/*.h) $(EC_DIR)/ec.mk
-CFLAGS+=-I$(EC_DIR)/include -D__EC__=$(EC_VARIANT) -D$(EC_VARIANT)
+CFLAGS+=-I$(EC_DIR)/include
 include $(EC_DIR)/ec.mk
 SRC += $(foreach src, $(ec-y), $(EC_DIR)/$(src))
 

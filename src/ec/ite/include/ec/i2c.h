@@ -7,7 +7,7 @@
 
 extern struct I2C __code I2C_0;
 extern struct I2C __code I2C_1;
-#ifdef it5570e
+#if CONFIG_EC_ITE_IT5570E
 extern struct I2C __code I2C_4;
 #endif
 
