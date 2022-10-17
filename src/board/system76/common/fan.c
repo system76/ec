@@ -15,6 +15,8 @@
 #define MIN_SPEED_TO_SMOOTH PWM_DUTY(SMOOTH_FANS_MIN)
 
 bool fan_max = false;
+uint8_t acpi_peci_fan_duty = 0;
+uint8_t acpi_dgpu_fan_duty = 0;
 uint8_t last_duty_dgpu = 0;
 uint8_t last_duty_peci = 0;
 
@@ -68,8 +70,13 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
     dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
 #endif
 
+    // allow for ACPI to request a higher duty
+    peci_fan_duty = peci_fan_duty > acpi_peci_fan_duty ? peci_fan_duty : acpi_peci_fan_duty;
+    dgpu_fan_duty = dgpu_fan_duty > acpi_dgpu_fan_duty ? dgpu_fan_duty : acpi_dgpu_fan_duty;
+
     // set PECI fan duty
     if (peci_fan_duty != DCR2) {
+        TRACE("PECI acpi_fan_duty_raw=%d\n", acpi_peci_fan_duty);
         TRACE("PECI fan_duty_raw=%d\n", peci_fan_duty);
         last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
         DCR2 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
@@ -78,6 +85,7 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
 
     // set dGPU fan duty
     if (dgpu_fan_duty != DCR4) {
+        TRACE("DGPU acpi_fan_duty_raw=%d\n", acpi_peci_fan_duty);
         TRACE("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
         last_duty_dgpu = dgpu_fan_duty = fan_smooth(last_duty_dgpu, dgpu_fan_duty);
         DCR4 = fan_max ? MAX_FAN_SPEED : dgpu_fan_duty;
