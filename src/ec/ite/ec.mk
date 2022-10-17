@@ -9,16 +9,18 @@ ec-y += pmc.c
 ec-y += ps2.c
 ec-y += signature.c
 
-ifeq ($(EC_VARIANT), it8587e)
+ifeq ($(CONFIG_EC_ITE_IT8587E), y)
+CFLAGS+=-DCONFIG_EC_ITE_IT8587E=1
 # SRAM is 4096 bytes, but SRAM at address 2048 is used for scratch ROM
 SRAM_SIZE=2048
-else ifeq ($(EC_VARIANT), it5570e)
+else ifeq ($(CONFIG_EC_ITE_IT5570E), y)
+CFLAGS+=-DCONFIG_EC_ITE_IT5570E=1
 # SRAM is 6144 bytes, only 4096 bytes are mapped at address 0. Region at
 # 0x0E00-0x1000 is used for AP communication. So this is brought down to 2048,
-# which matches it8587e limits
+# which matches IT8587E limits
 SRAM_SIZE=2048
 else
-$(error Unsupported EC: $(EC_VARIANT))
+$(error Unsupported EC)
 endif
 
 ARCH=8051

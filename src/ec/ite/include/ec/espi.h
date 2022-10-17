@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#ifdef it5570e
+#if CONFIG_EC_ITE_IT5570E
 
 struct VirtualWire {
     volatile uint8_t __xdata * index;
@@ -126,6 +126,6 @@ volatile uint8_t __xdata __at(0x3293) VWCTRL3;
 volatile uint8_t __xdata __at(0x3295) VWCTRL5;
 volatile uint8_t __xdata __at(0x3296) VWCTRL6;
 
-#endif // it5570e
+#endif // CONFIG_EC_ITE_IT5570E
 
 #endif // _EC_ESPI_H
