@@ -16,8 +16,6 @@ void board_init(void) {
     // Enable wireless
     gpio_set(&WLAN_EN, true);
     gpio_set(&WLAN_PWR_EN, true);
-    // Enable USB power
-    gpio_set(&USB_PWR_EN_N, false);
     // Assert SMI# and SWI#
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);

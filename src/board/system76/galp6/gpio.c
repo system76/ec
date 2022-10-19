@@ -25,6 +25,7 @@ struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(C, 5);
 struct Gpio __code PCH_PWROK_EC =   GPIO(A, 6);
+struct Gpio __code PD_EN =          GPIO(F, 3);
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
@@ -34,7 +35,6 @@ struct Gpio __code SMI_N =          GPIO(D, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code SWI_N =          GPIO(B, 5);
-struct Gpio __code USB_PWR_EN_N =   GPIO(E, 3);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4);
 struct Gpio __code WLAN_EN =        GPIO(G, 1);
 struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
@@ -71,8 +71,8 @@ void gpio_init(void) {
     GPDRC = BIT(5);
     // PWR_BTN#, SMI#
     GPDRD = BIT(5) | BIT(4);
-    // SMD_BAT, SMC_BAT
-    GPDRE = BIT(7) | BIT(0);
+    // USB_PWR_EN
+    GPDRE = BIT(3);
     // H_PECI
     GPDRF = BIT(6);
     // H_PROCHOT_EC
@@ -154,10 +154,10 @@ void gpio_init(void) {
     GPCRE1 = GPIO_OUT;
     // KB-DET
     GPCRE2 = GPIO_IN | GPIO_UP;
-    // USB_PWR_EN#
-    GPCRE3 = GPIO_OUT | GPIO_UP;
+    // USB_PWR_EN# (Actually active high)
+    GPCRE3 = GPIO_OUT;
     // DD_ON
-    GPCRE4 = GPIO_OUT;
+    GPCRE4 = GPIO_OUT | GPIO_DOWN;
     // EC_RSMRST#
     GPCRE5 = GPIO_OUT;
     // JACK_IN#_EC
@@ -167,7 +167,7 @@ void gpio_init(void) {
     // 80CLK
     GPCRF0 = GPIO_IN;
     // USB_CHARGE_EN
-    GPCRF1 = GPIO_OUT;
+    GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
     GPCRF2 = GPIO_IN | GPIO_UP;
     // PD_EN

@@ -30,6 +30,8 @@ extern struct Gpio __code LED_PWR;
 extern struct Gpio __code LID_SW_N;
 extern struct Gpio __code PCH_DPWROK_EC;
 extern struct Gpio __code PCH_PWROK_EC;
+#define HAVE_PD_EN 1
+extern struct Gpio __code PD_EN;
 extern struct Gpio __code PM_PWROK;
 extern struct Gpio __code PWR_BTN_N;
 extern struct Gpio __code PWR_SW_N;
@@ -42,7 +44,6 @@ extern struct Gpio __code SUSC_N_PCH;
 #define HAVE_SUSWARN_N 0
 #define HAVE_SUS_PWR_ACK 0
 extern struct Gpio __code SWI_N;
-extern struct Gpio __code USB_PWR_EN_N;
 extern struct Gpio __code VA_EC_EN;
 extern struct Gpio __code WLAN_EN;
 extern struct Gpio __code WLAN_PWR_EN;
