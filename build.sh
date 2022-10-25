@@ -12,6 +12,7 @@ errorCheck() {
     errorCode=$?
     errorMessage="$1"
     [ "$errorCode" -ne 0 ] && errorExit "$errorMessage : ($errorCode)"
+    return $errorCode
 }
 
 usage() {
