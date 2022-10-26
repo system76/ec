@@ -32,12 +32,12 @@ SCRATCH_CC=\
 # Convert from binary file to C header
 $(BUILD)/include/scratch.h: $(SCRATCH_BUILD)/scratch.rom
 	@mkdir -p $(@D)
-	xxd -s $(SCRATCH_OFFSET) --include < $< > $@
+	xxd -include < $< > $@
 
 # Convert from Intel Hex file to binary file
 $(SCRATCH_BUILD)/scratch.rom: $(SCRATCH_BUILD)/scratch.ihx
 	@mkdir -p $(@D)
-	makebin -p < $< > $@
+	objcopy -I ihex -O binary $< $@
 
 # Link object files into Intel Hex file
 $(SCRATCH_BUILD)/scratch.ihx: $(SCRATCH_OBJ)

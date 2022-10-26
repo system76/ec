@@ -14,7 +14,7 @@ sim: $(BUILD)/ec.rom
 # Convert from Intel Hex file to binary file
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx
 	@mkdir -p $(@D)
-	makebin -s $(CODE_SIZE) -p < $< > $@
+	objcopy -I ihex -O binary --gap-fill=0xFF $< $@
 
 # Link object files into Intel Hex file
 $(BUILD)/ec.ihx: $(OBJ)
