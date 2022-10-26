@@ -31,12 +31,12 @@ FLASH_CC=\
 # Convert from binary file to C header
 $(BUILD)/include/flash.h: $(FLASH_BUILD)/flash.rom
 	@mkdir -p $(@D)
-	xxd -s $(FLASH_OFFSET) --include < $< > $@
+	xxd -include < $< > $@
 
 # Convert from Intel Hex file to binary file
 $(FLASH_BUILD)/flash.rom: $(FLASH_BUILD)/flash.ihx
 	@mkdir -p $(@D)
-	makebin -p < $< > $@
+	objcopy -I ihex -O binary $< $@
 
 # Link object files into Intel Hex file
 $(FLASH_BUILD)/flash.ihx: $(FLASH_OBJ)
