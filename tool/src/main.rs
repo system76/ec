@@ -402,7 +402,13 @@ fn main() {
                         #[allow(clippy::single_match)]
                         match (info.vendor_id(), info.product_id(), info.interface_number()) {
                             // System76 launch_1
-                            (0x3384, 0x0001, 1) => {
+                            (0x3384, 0x0001, 1) |
+                            // System76 launch_lite_1
+                            (0x3384, 0x0005, 1) |
+                            // System76 launch_2
+                            (0x3384, 0x0006, 1) |
+                            // System76 launch_heavy_1
+                            (0x3384, 0x0007, 1) => {
                                 let device = info.open_device(&api)?;
                                 let access = AccessHid::new(device, 10, 100)?;
                                 return Ok(Ec::new(access)?.into_dyn());
