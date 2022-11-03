@@ -9,6 +9,9 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
+# Apply PMC hack for S0ix
+CFLAGS+=-DPMC_S0IX_HACK=1
+
 # Include keyboard
 KEYBOARD=15in_102
 
