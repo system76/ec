@@ -33,6 +33,9 @@ struct Gpio __code VA_EC_EN =       GPIO(J, 4);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init() {
+    // Set VCC power domain to 1.8V
+    GCR22 = BIT(7);
+
     // Enable LPC reset on GPD2
     GCR = 0x04;
     // Disable UARTs
@@ -43,6 +46,10 @@ void gpio_init() {
     GCR19 = BIT(0);
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
+    // Set VCC power domain to 1.8V
+    GCR22 = BIT(7);
+    // Set GPM6 power domain to VCC
+    GCR23 = BIT(0);
 
     // Set GPIO data
     GPDRA = 0;

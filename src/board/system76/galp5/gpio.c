@@ -45,6 +45,9 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clang-format on
 
 void gpio_init() {
+    // Set VCC power domain to 1.8V
+    GCR22 = BIT(7);
+
     // Enable LPC reset on GPD2
     GCR = 0x04;
     // Enable SMBus channel 4
@@ -55,6 +58,10 @@ void gpio_init() {
     GCR20 = 0;
     // Set GPH0 to 1.8V
     GCR21 = BIT(2);
+    // Set VCC power domain to 1.8V
+    GCR22 = BIT(7);
+    // Set GPM6 power domain to VCC
+    GCR23 = BIT(0);
 
     // Set GPIO data
     GPDRA = 0;

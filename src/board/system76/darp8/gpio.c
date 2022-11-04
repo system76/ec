@@ -39,6 +39,9 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clange-format on
 
 void gpio_init(void) {
+    // Set VCC power domain to 1.8V
+    GCR22 = BIT(7);
+
     // PWRSW WDT 2 Enable 2
     //GCR9 = BIT(5);
     // PWRSW WDT 2 Enable 1
@@ -54,11 +57,10 @@ void gpio_init(void) {
     GCR19 = BIT(0);
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
-
-    // Not documented
-    //GCR22 = BIT(7);
+    // Set VCC power domain to 1.8V
+    GCR22 = BIT(7);
     // Set GPM6 power domain to VCC
-    //GCR23 = BIT(0);
+    GCR23 = BIT(0);
 
     // Set GPIO data
     GPDRA = 0;
