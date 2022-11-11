@@ -16,10 +16,9 @@ use ectool::{
 };
 use hidapi::HidApi;
 use std::{
-    fmt::Display,
     fs,
     process,
-    str::{self, FromStr},
+    str,
     time::Duration,
     thread,
 };
@@ -277,13 +276,6 @@ unsafe fn keymap_set(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input:
     ec.keymap_set(layer, output, input, value)
 }
 
-fn validate_from_str<T: FromStr>(s: String) -> Result<(), String>
-    where T::Err: Display {
-    s.parse::<T>()
-        .and(Ok(()))
-        .map_err(|err| format!("{}", err))
-}
-
 fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
     let r = u8::from_str_radix(&s[0..2], 16);
     let g = u8::from_str_radix(&s[2..4], 16);
@@ -305,11 +297,11 @@ fn main() {
         .subcommand(SubCommand::with_name("console"))
         .subcommand(SubCommand::with_name("fan")
             .arg(Arg::with_name("index")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .required(true)
             )
             .arg(Arg::with_name("duty")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
             )
         )
         .subcommand(SubCommand::with_name("flash")
@@ -325,48 +317,48 @@ fn main() {
         .subcommand(SubCommand::with_name("info"))
         .subcommand(SubCommand::with_name("keymap")
             .arg(Arg::with_name("layer")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .required(true)
             )
             .arg(Arg::with_name("output")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .required(true)
             )
             .arg(Arg::with_name("input")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .required(true)
             )
             .arg(Arg::with_name("value"))
         )
         .subcommand(SubCommand::with_name("led_color")
             .arg(Arg::with_name("index")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .required(true)
             )
             .arg(Arg::with_name("value")
-                .validator(|x| parse_color(&x).and(Ok(())))
+                .value_parser(parse_color)
             )
         )
         .subcommand(SubCommand::with_name("led_value")
             .arg(Arg::with_name("index")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .required(true)
             )
             .arg(Arg::with_name("value")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
             )
         )
         .subcommand(SubCommand::with_name("led_mode")
             .arg(Arg::with_name("layer")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .required(true)
             )
             .arg(Arg::with_name("mode")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
                 .requires("speed")
             )
             .arg(Arg::with_name("speed")
-                .validator(validate_from_str::<u8>)
+                .value_parser(clap::value_parser!(u8))
             )
         )
         .subcommand(SubCommand::with_name("led_save"))
@@ -431,14 +423,14 @@ fn main() {
     };
 
     match matches.subcommand() {
-        ("console", Some(_sub_m)) => match unsafe { console(&mut ec) } {
+        Some(("console", _sub_m)) => match unsafe { console(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read console: {:X?}", err);
                 process::exit(1);
             },
         },
-        ("fan", Some(sub_m)) => {
+        Some(("fan", sub_m)) => {
             let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
             let duty_opt = sub_m.value_of("duty").map(|x| x.parse::<u8>().unwrap());
             match duty_opt {
@@ -458,7 +450,7 @@ fn main() {
                 },
             }
         },
-        ("flash", Some(sub_m)) => {
+        Some(("flash", sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
             match unsafe { flash(&mut ec, path, SpiTarget::Main) } {
                 Ok(()) => (),
@@ -468,7 +460,7 @@ fn main() {
                 },
             }
         },
-        ("flash_backup", Some(sub_m)) => {
+        Some(("flash_backup", sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
             match unsafe { flash(&mut ec, path, SpiTarget::Backup) } {
                 Ok(()) => (),
@@ -478,14 +470,14 @@ fn main() {
                 },
             }
         },
-        ("info", Some(_sub_m)) => match unsafe { info(&mut ec) } {
+        Some(("info", _sub_m)) => match unsafe { info(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read info: {:X?}", err);
                 process::exit(1);
             },
         },
-        ("keymap", Some(sub_m)) => {
+        Some(("keymap", sub_m)) => {
             let layer = sub_m.value_of("layer").unwrap().parse::<u8>().unwrap();
             let output = sub_m.value_of("output").unwrap().parse::<u8>().unwrap();
             let input = sub_m.value_of("input").unwrap().parse::<u8>().unwrap();
@@ -512,7 +504,7 @@ fn main() {
                 },
             }
         },
-        ("led_color", Some(sub_m)) => {
+        Some(("led_color", sub_m)) => {
             let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
             let value = sub_m.value_of("value");
             if let Some(value) = value {
@@ -534,7 +526,7 @@ fn main() {
                 }
             }
         },
-        ("led_value", Some(sub_m)) => {
+        Some(("led_value", sub_m)) => {
             let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
             let value = sub_m.value_of("value").map(|x| x.parse::<u8>().unwrap());
             if let Some(value) = value {
@@ -558,7 +550,7 @@ fn main() {
                 }
             }
         },
-        ("led_mode", Some(sub_m)) => {
+        Some(("led_mode", sub_m)) => {
             let layer = sub_m.value_of("layer").unwrap().parse::<u8>().unwrap();
             let mode = sub_m.value_of("mode").map(|x| x.parse::<u8>().unwrap());
             let speed = sub_m.value_of("speed").map(|x| x.parse::<u8>().unwrap());
@@ -583,21 +575,21 @@ fn main() {
                 }
             }
         },
-        ("led_save", Some(_sub_m)) => match unsafe { ec.led_save() } {
+        Some(("led_save", _sub_m)) => match unsafe { ec.led_save() } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to save LED settings: {:X?}", err);
                 process::exit(1);
             },
         },
-        ("matrix", Some(_sub_m)) => match unsafe { matrix(&mut ec) } {
+        Some(("matrix", _sub_m)) => match unsafe { matrix(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read matrix: {:X?}", err);
                 process::exit(1);
             },
         },
-        ("print", Some(sub_m)) => for arg in sub_m.values_of("message").unwrap() {
+        Some(("print", sub_m)) => for arg in sub_m.values_of("message").unwrap() {
             let mut arg = arg.to_owned();
             arg.push('\n');
             match unsafe { print(&mut ec, arg.as_bytes()) } {
@@ -608,7 +600,7 @@ fn main() {
                 },
             }
         },
-        ("set_no_input", Some(sub_m)) => {
+        Some(("set_no_input", sub_m)) => {
             let no_input = sub_m.value_of("value").unwrap().parse::<bool>().unwrap();
             match unsafe { ec.set_no_input(no_input) } {
                 Ok(()) => (),
