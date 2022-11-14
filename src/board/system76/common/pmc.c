@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <arch/time.h>
 #include <arch/delay.h>
 #include <board/acpi.h>
 #include <board/gpio.h>
@@ -7,6 +8,12 @@
 #include <common/macro.h>
 #include <common/debug.h>
 #include <ec/espi.h>
+
+#ifndef PMC_S0IX_HACK
+#define PMC_S0IX_HACK 0
+#endif
+
+bool pmc_s0_hack = false;
 
 void pmc_init(void) {
     *(PMC_1.control) = 0x41;
@@ -180,8 +187,36 @@ static void pmc_on_output_empty(struct Pmc * pmc) {
     }
 }
 
+#if PMC_S0IX_HACK
+// HACK: Kick PMC to fix suspend on lemp11
+static void pmc_hack(void) {
+    static bool pmc_s0_hack2 = false;
+    static uint32_t last_time = 0;
+    // Get time the system requested S0ix (ACPI MS0X)
+    if (pmc_s0_hack) {
+        last_time = time_get();
+        pmc_s0_hack = false;
+        pmc_s0_hack2 = true;
+    }
+    uint32_t time = time_get();
+    // If SLP_S0# not asserted after 5 seconds, apply the hack
+    if ((time - last_time) >= 5000) {
+        if (pmc_s0_hack2 && gpio_get(&SLP_S0_N)) {
+            DEBUG("FIXME: PMC HACK\n");
+            pmc_sci(&PMC_1, 0x50);
+        }
+        pmc_s0_hack2 = false;
+        last_time = time;
+    }
+}
+#else
+static void pmc_hack(void) {}
+#endif
+
 void pmc_event(struct Pmc * pmc) {
     uint8_t sts;
+
+    pmc_hack();
 
     // Read command/data if available
     sts = pmc_status(pmc);

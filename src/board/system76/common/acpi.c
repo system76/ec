@@ -19,6 +19,8 @@ extern uint8_t sci_extra;
 
 enum EcOs acpi_ecos = EC_OS_NONE;
 
+extern bool pmc_s0_hack;
+
 static uint8_t fcmd = 0;
 static uint8_t fdat = 0;
 static uint8_t fbuf[4] = { 0, 0, 0, 0 };
@@ -130,7 +132,11 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_16(0x42, battery_info.cycle_count);
 
-        ACPI_8(0x68, acpi_ecos);
+        case 0x68:
+            data = acpi_ecos;
+            // HACK: Kick PMC to fix suspend on lemp11
+            pmc_s0_hack = true;
+            break;
 
         case 0xBC:
             data = battery_get_start_threshold();
