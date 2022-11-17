@@ -2,8 +2,7 @@
 
 scratch-y += main.c
 scratch-y += stdio.c
-# TODO: Use relative path; generates different binary
-SCRATCH_SRC += $(SYSTEM76_COMMON_DIR)/smfi.c
+scratch-y += ../smfi.c
 
 # Set scratch ROM parameters
 SCRATCH_OFFSET=1024
