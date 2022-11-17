@@ -9,7 +9,6 @@ struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
 struct Gpio __code BKL_EN =         GPIO(H, 2);
-struct Gpio __code BT_EN =          GPIO(F, 3);
 struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2); // renamed to EC_ERST#
 struct Gpio __code CCD_EN =         GPIO(D, 1);
 struct Gpio __code CPU_C10_GATE_N = GPIO(D, 3);
@@ -162,7 +161,7 @@ void gpio_init() {
     GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
     GPCRF2 = GPIO_IN | GPIO_UP;
-    // BT_EN
+    // BT_EN: Not connected
     GPCRF3 = GPIO_OUT | GPIO_UP;
     // TP_CLK
     GPCRF4 = GPIO_ALT | GPIO_UP;

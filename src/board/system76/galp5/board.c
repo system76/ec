@@ -22,7 +22,6 @@ void board_init(void) {
     // Enable camera
     gpio_set(&CCD_EN, true);
     // Enable wireless
-    gpio_set(&BT_EN, true);
     gpio_set(&WLAN_EN, true);
     gpio_set(&WLAN_PWR_EN, true);
     // Enable right USB port
