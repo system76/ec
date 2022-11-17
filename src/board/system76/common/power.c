@@ -14,6 +14,7 @@
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
+#include <board/wireless.h>
 #include <common/debug.h>
 
 #include <ec/espi.h>
@@ -256,6 +257,8 @@ void power_on(void) {
 
 void power_off(void) {
     DEBUG("%02X: power_off\n", main_cycle);
+
+    wireless_power(false);
 
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK

@@ -4,6 +4,7 @@
 #include <board/espi.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
+#include <board/wireless.h>
 #include <common/debug.h>
 #include <ec/ec.h>
 
@@ -16,14 +17,13 @@ void board_init(void) {
     gpio_set(&BKL_EN, true);
     // Enable camera
     gpio_set(&CCD_EN, true);
-    // Enable wireless
-    gpio_set(&WLAN_EN, true);
-    gpio_set(&WLAN_PWR_EN, true);
     // Enable right USB port
     gpio_set(&USB_PWR_EN_N, false);
     // Assert SMI# and SWI#
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
+
+    wireless_power(true);
 }
 
 void board_event(void) {
