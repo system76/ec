@@ -2,6 +2,7 @@
 
 #include <board/board.h>
 #include <board/gpio.h>
+#include <board/wireless.h>
 
 void board_init(void) {
     // Allow CPU to boot
@@ -10,16 +11,14 @@ void board_init(void) {
     gpio_set(&BKL_EN, true);
     // Enable camera
     gpio_set(&CCD_EN, true);
-    // Enable wireless
-    gpio_set(&BT_EN, true);
-    gpio_set(&WLAN_EN, true);
-    gpio_set(&WLAN_PWR_EN, true);
     // Enable right USB port
     gpio_set(&USB_PWR_EN_N, false);
     // Assert SMI#, SCI#, and SWI#
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
+
+    wireless_power(true);
 }
 
 void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }

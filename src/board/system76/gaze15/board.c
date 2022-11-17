@@ -4,6 +4,7 @@
 #include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/power.h>
+#include <board/wireless.h>
 #include <common/debug.h>
 #include <ec/ec.h>
 
@@ -12,14 +13,12 @@ void board_init(void) {
     gpio_set(&BKL_EN, true);
     // Enable camera
     gpio_set(&CCD_EN, true);
-    // Enable wireless
-    gpio_set(&BT_EN, true);
-    gpio_set(&WLAN_EN, true);
-    gpio_set(&WLAN_PWR_EN, true);
     // Assert SMI#, SCI#, and SWI#
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
+
+    wireless_power(true);
 }
 
 void board_event(void) {

@@ -29,6 +29,8 @@ struct Gpio __code SLP_SUS_N =      GPIO(D, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4); // renamed to EC_SLP_SUS#
+struct Gpio __code WLAN_EN =        GPIO(G, 1);
+struct Gpio __code WLAN_PWR_EN =    GPIO(H, 4);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init() {
@@ -46,7 +48,7 @@ void gpio_init() {
     GCR21 = BIT(2);
 
     // Set GPIO data
-    // WLAN_PWR_EN
+    // DDS_EC_PWM
     GPDRA = BIT(3);
     // SWI#, XLP_OUT, PWR_SW#
     GPDRB = BIT(5) | BIT(4) | BIT(3);
@@ -56,10 +58,9 @@ void gpio_init() {
     GPDRE = 0;
     // BL_PWM_EN_EC, PCH_DPWROK_EC
     GPDRF = BIT(7) | BIT(3);
-    // H_PROCHOT#_EC, WLAN_EN
-    GPDRG = BIT(6) | BIT(1);
-    // WLAN_PWR_EN
-    GPDRH = BIT(4);
+    // H_PROCHOT#_EC
+    GPDRG = BIT(6);
+    GPDRH = 0;
     // PLVDD_RST_EC, EC_AMP_EN
     GPDRI = BIT(6) | BIT(5);
     GPDRJ = 0;

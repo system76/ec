@@ -13,6 +13,7 @@ extern struct Gpio __code ACIN_N;
 extern struct Gpio __code AC_PRESENT;
 extern struct Gpio __code ALL_SYS_PWRGD;
 extern struct Gpio __code BKL_EN;
+#define HAVE_BT_EN 0
 extern struct Gpio __code BUF_PLT_RST_N;
 extern struct Gpio __code CCD_EN;
 extern struct Gpio __code CPU_C10_GATE_N;
@@ -43,6 +44,7 @@ extern struct Gpio __code SUSC_N_PCH;
 extern struct Gpio __code SWI_N;
 extern struct Gpio __code USB_PWR_EN_N;
 extern struct Gpio __code VA_EC_EN;
+#define HAVE_WLAN_EN 0
 extern struct Gpio __code WLAN_PWR_EN;
 extern struct Gpio __code XLP_OUT;
 // clang-format on

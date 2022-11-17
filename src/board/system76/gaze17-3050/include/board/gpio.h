@@ -12,6 +12,7 @@ extern struct Gpio __code ACIN_N;
 extern struct Gpio __code AC_PRESENT;
 extern struct Gpio __code ALL_SYS_PWRGD;
 extern struct Gpio __code BKL_EN;
+#define HAVE_BT_EN 0
 extern struct Gpio __code BUF_PLT_RST_N;
 extern struct Gpio __code CCD_EN;
 extern struct Gpio __code CPU_C10_GATE_N;
@@ -38,6 +39,8 @@ extern struct Gpio __code SLP_SUS_N;
 extern struct Gpio __code SUSB_N_PCH;
 extern struct Gpio __code SUSC_N_PCH;
 extern struct Gpio __code VA_EC_EN;
+extern struct Gpio __code WLAN_EN;
+extern struct Gpio __code WLAN_PWR_EN;
 extern struct Gpio __code XLP_OUT;
 
 #endif // _BOARD_GPIO_H

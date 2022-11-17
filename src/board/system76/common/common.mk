@@ -25,6 +25,7 @@ board-common-y += scratch.c
 board-common-y += smbus.c
 board-common-y += smfi.c
 board-common-y += stdio.c
+board-common-y += wireless.c
 
 # Set log level
 # 0 - NONE
