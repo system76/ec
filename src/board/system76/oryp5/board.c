@@ -3,7 +3,6 @@
 #include <board/board.h>
 #include <board/gpio.h>
 #include <board/power.h>
-#include <board/wireless.h>
 #include <common/debug.h>
 
 void board_init(void) {
@@ -19,8 +18,6 @@ void board_init(void) {
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
-
-    wireless_power(true);
 }
 
 void board_event(void) {

@@ -2,7 +2,6 @@
 
 #include <board/board.h>
 #include <board/gpio.h>
-#include <board/wireless.h>
 
 void board_init(void) {
     // Allow CPU to boot
@@ -17,8 +16,6 @@ void board_init(void) {
     gpio_set(&SCI_N, true);
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
-
-    wireless_power(true);
 }
 
 void board_event(void) {}

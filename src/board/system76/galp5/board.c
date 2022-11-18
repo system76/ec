@@ -6,7 +6,6 @@
 #include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/power.h>
-#include <board/wireless.h>
 #include <common/debug.h>
 #include <ec/ec.h>
 
@@ -27,8 +26,6 @@ void board_init(void) {
     // Assert SMI# and SWI#
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
-
-    wireless_power(true);
 }
 
 void board_event(void) {
