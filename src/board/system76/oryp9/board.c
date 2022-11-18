@@ -4,7 +4,6 @@
 #include <board/board.h>
 #include <board/espi.h>
 #include <board/gpio.h>
-#include <board/wireless.h>
 #include <ec/ec.h>
 
 void board_init(void) {
@@ -19,8 +18,6 @@ void board_init(void) {
     gpio_set(&CCD_EN, true);
     // Enable USB port power
     gpio_set(&USB_PWR_EN_N, false);
-
-    wireless_power(true);
 }
 
 void board_event(void) {

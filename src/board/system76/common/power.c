@@ -182,6 +182,9 @@ void power_init(void) {
 }
 
 void power_on(void) {
+    // Configure WLAN GPIOs before powering on
+    wireless_power(true);
+
     DEBUG("%02X: power_on\n", main_cycle);
 
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
@@ -258,8 +261,6 @@ void power_on(void) {
 void power_off(void) {
     DEBUG("%02X: power_off\n", main_cycle);
 
-    wireless_power(false);
-
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
@@ -295,6 +296,9 @@ void power_off(void) {
     GPIO_SET_DEBUG(PCH_DPWROK_EC, false);
 #endif // HAVE_PCH_DPWROK_EC
     tPCH14;
+
+    // Configure WLAN GPIOs after powering off
+    wireless_power(false);
 
     update_power_state();
 }

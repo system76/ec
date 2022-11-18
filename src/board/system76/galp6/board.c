@@ -4,7 +4,6 @@
 #include <board/board.h>
 #include <board/espi.h>
 #include <board/gpio.h>
-#include <board/wireless.h>
 #include <ec/ec.h>
 
 void board_init(void) {
@@ -17,8 +16,6 @@ void board_init(void) {
     // Assert SMI# and SWI#
     gpio_set(&SMI_N, true);
     gpio_set(&SWI_N, true);
-
-    wireless_power(true);
 
     // Make sure charger is in off state, also enables PSYS
     battery_charger_disable();
