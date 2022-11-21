@@ -2,6 +2,7 @@
 
 board-y += board.c
 board-y += gpio.c
+board-y += interrupts.c
 
 EC=ite
 CONFIG_EC_ITE_IT8587E=y

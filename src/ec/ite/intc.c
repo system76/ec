@@ -35,6 +35,11 @@ static const struct IrqGroup Irqs[] = {
     IRQ_GROUP(16),
     IRQ_GROUP(17),
     IRQ_GROUP(18),
+#if CONFIG_EC_ITE_IT5570E
+    IRQ_GROUP(19),
+    IRQ_GROUP(20),
+    IRQ_GROUP(21),
+#endif
 };
 
 void interrupt_enable(uint8_t nr) {
@@ -58,4 +63,3 @@ void interrupt_clear(uint8_t nr) {
 
     *(Irqs[group].status) = BIT(bit);
 }
-

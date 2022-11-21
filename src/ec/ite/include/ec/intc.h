@@ -115,7 +115,7 @@ volatile uint8_t __xdata __at(0x114D) IER18;
 volatile uint8_t __xdata __at(0x114E) IELMR18;
 volatile uint8_t __xdata __at(0x114F) IPOLR18;
 
-#ifdef it5570e
+#if CONFIG_EC_ITE_IT5570E
 volatile uint8_t __xdata __at(0x1150) ISR19;
 volatile uint8_t __xdata __at(0x1151) IER19;
 volatile uint8_t __xdata __at(0x1152) IELMR19;
