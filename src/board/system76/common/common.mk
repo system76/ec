@@ -5,7 +5,7 @@ board-common-y += battery.c
 board-common-y += config.c
 board-common-y += dgpu.c
 board-common-y += ecpm.c
-board-common-y += espi.c
+board-common-$(CONFIG_BUS_ESPI) += espi.c
 board-common-y += fan.c
 board-common-y += gctrl.c
 board-common-y += kbc.c
@@ -44,6 +44,10 @@ CFLAGS+=-DLEVEL=4
 
 # Set external programmer
 PROGRAMMER=$(wildcard /dev/serial/by-id/usb-Arduino*)
+
+ifeq ($(CONFIG_BUS_ESPI),y)
+CFLAGS += -DCONFIG_BUS_ESPI=1
+endif
 
 # Include system76 common source
 SYSTEM76_COMMON_DIR=src/board/system76/common

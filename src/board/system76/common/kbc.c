@@ -11,7 +11,7 @@
 void kbc_init(void) {
     // Disable interrupts
     *(KBC.control) = 0;
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
     // Set IRQ mode to edge-triggered, 1-cycle pulse width
     *(KBC.irq) = BIT(3);
 #else

@@ -2,8 +2,6 @@
 
 #include <board/espi.h>
 
-#if EC_ESPI
-
 #include <arch/delay.h>
 #include <board/power.h>
 #include <common/debug.h>
@@ -197,5 +195,3 @@ void espi_event(void) {
     // Detect when I/O mode changes
     DEBUG_CHANGED(ESGCTRL3);
 }
-
-#endif // EC_ESPI
