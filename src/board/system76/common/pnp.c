@@ -50,18 +50,18 @@ void pnp_enable() {
 
     // Enable KBC keyboard
     pnp_write(0x07, 0x06);
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
     // When using eSPI, IRQ must be inverted and edge-triggered
     pnp_write(0x71, 0x02);
-#endif // EC_ESPI
+#endif // CONFIG_BUS_ESPI
     pnp_write(0x30, 0x01);
 
     // Enable KBC mouse
     pnp_write(0x07, 0x05);
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
     // When using eSPI, IRQ must be inverted and edge-triggered
     pnp_write(0x71, 0x02);
-#endif // EC_ESPI
+#endif // CONFIG_BUS_ESPI
     pnp_write(0x30, 0x01);
 
     // Enable SMFI

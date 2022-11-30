@@ -7,7 +7,7 @@ EC=ite
 CONFIG_EC_ITE_IT5570E=y
 
 # Enable eSPI
-CFLAGS+=-DEC_ESPI=1
+CONFIG_BUS_ESPI=y
 
 # FIXME: Use S3 instead of S0ix
 CFLAGS+=-DUSE_S0IX=1

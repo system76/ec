@@ -31,7 +31,7 @@ enum PmcState {
 static uint8_t pmc_sci_queue = 0;
 
 static void pmc_sci_interrupt(void) {
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
     // Start SCI interrupt
     vw_set(&VW_SCI_N, VWS_LOW);
 
@@ -43,7 +43,7 @@ static void pmc_sci_interrupt(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#else // EC_ESPI
+#else // CONFIG_BUS_ESPI
     // Start SCI interrupt
     gpio_set(&SCI_N, false);
     *(SCI_N.control) = GPIO_OUT;
@@ -57,7 +57,7 @@ static void pmc_sci_interrupt(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#endif // EC_ESPI
+#endif // CONFIG_BUS_ESPI
 }
 
 bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
@@ -77,7 +77,7 @@ bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
 }
 
 void pmc_swi(void) {
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
     // Start PME interrupt
     vw_set(&VW_PME_N, VWS_LOW);
 
@@ -89,7 +89,7 @@ void pmc_swi(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#else // EC_ESPI
+#else // CONFIG_BUS_ESPI
     // Start SWI interrupt
     gpio_set(&SWI_N, false);
 
@@ -101,7 +101,7 @@ void pmc_swi(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#endif // EC_ESPI
+#endif // CONFIG_BUS_ESPI
 }
 
 static enum PmcState state = PMC_STATE_DEFAULT;

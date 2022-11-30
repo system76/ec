@@ -7,7 +7,7 @@ EC=ite
 CONFIG_EC_ITE_IT5570E=y
 
 # Enable eSPI
-CFLAGS+=-DEC_ESPI=1
+CONFIG_BUS_ESPI=y
 
 # Include keyboard
 KEYBOARD=15in_102
