@@ -280,7 +280,7 @@ uint16_t keymap_translate(uint16_t key);
 #define K_INT_1 (0x61)
 #define K_INT_2 (0x5D)
 
-// XXX: Custom keys
+// Custom keys
 
 #define KF_CUSTOM (0x0200)
 #define K_FNLOCK (KF_CUSTOM | 0x01)
