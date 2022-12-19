@@ -19,7 +19,7 @@ required-features = ["std", "hidapi", "clap"]
 clap = { version = "3.2", optional = true }
 libc = { version = "0.2", optional = true }
 hidapi = { version = "1.4", default-features = false, features = ["linux-shared-hidraw"], optional = true }
-redox_hwio = { version = "0.1.6", optional = true }
+redox_hwio = { version = "0.1.6", default-features = false, optional = true }
 downcast-rs = { version = "1.2.0", default-features = false }
 
 [features]
