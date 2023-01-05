@@ -145,9 +145,9 @@ void gpio_init(void) {
     // PWR_BTN#
     GPCRD5 = GPIO_OUT;
     // CPU_FANSEN
-    GPCRD6 = GPIO_IN | GPIO_DOWN;
+    GPCRD6 = GPIO_ALT;
     // VGA_FANSEN
-    GPCRD7 = GPIO_IN | GPIO_DOWN;
+    GPCRD7 = GPIO_ALT;
     // SMC_BAT
     GPCRE0 = GPIO_ALT | GPIO_UP;
     // AC_PRESENT
