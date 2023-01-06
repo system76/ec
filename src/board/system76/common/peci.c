@@ -11,19 +11,19 @@
 #include <ec/pwm.h>
 
 #ifndef USE_S0IX
-    #define USE_S0IX 0
+#define USE_S0IX 0
 #endif
 
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_HEATUP
-    #define BOARD_HEATUP 4
+#define BOARD_HEATUP 4
 #endif
 
 static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
 #ifndef BOARD_COOLDOWN
-    #define BOARD_COOLDOWN 10
+#define BOARD_COOLDOWN 10
 #endif
 
 static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
@@ -36,7 +36,9 @@ int16_t peci_temp = 0;
 
 #define PECI_TEMP(X) ((int16_t)(X))
 
+// clang-format off
 #define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
+// clang-format on
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static struct FanPoint __code FAN_POINTS[] = {

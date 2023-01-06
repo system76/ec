@@ -8,6 +8,8 @@
 #include <common/macro.h>
 #include <common/debug.h>
 
+// clang-format off
+
 // Registers
 #define REG_CHARGE_CURRENT 0x14
 #define REG_CHARGE_VOLTAGE 0x15
@@ -39,7 +41,6 @@
 #define SBC_RSENSE_RATIO_1_2    (0b10 << 12)
 // Battery depletion threshold
 #define SBC_BAT_DEPL_VTH    (0b11 << 14)
-
 
 // Bits 0-5 are ignored. Bits 13-15 must be 0.
 #define CHARGE_CURRENT_MASK 0x1FC0
@@ -85,35 +86,38 @@
     #error Invalid adapter:battery RSENSE ratio
 #endif
 
+// clang-format on
+
 // XXX: Assumption: ac_last is initialized high.
 static bool charger_enabled = false;
 
 int16_t battery_charger_disable(void) {
     int16_t res = 0;
 
-    if (!charger_enabled) return 0;
+    if (!charger_enabled)
+        return 0;
 
     // Set charge option 0 with 175s watchdog
     res = smbus_write(
         CHARGER_ADDRESS,
         REG_CHARGE_OPTION_0,
-        SBC_EN_LWPWR |
-        SBC_WDTMR_ADJ_175S |
-        SBC_PWM_FREQ_800KHZ |
-        SBC_IDCHC_GAIN
+        SBC_EN_LWPWR | SBC_WDTMR_ADJ_175S | SBC_PWM_FREQ_800KHZ | SBC_IDCHC_GAIN
     );
 
     // Disable charge current
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, 0);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Disable charge voltage
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_VOLTAGE, 0);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Disable input current
     res = smbus_write(CHARGER_ADDRESS, REG_INPUT_CURRENT, 0);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     DEBUG("Charger disabled\n");
     charger_enabled = false;
@@ -123,40 +127,40 @@ int16_t battery_charger_disable(void) {
 int16_t battery_charger_enable(void) {
     int16_t res = 0;
 
-    if (charger_enabled) return 0;
+    if (charger_enabled)
+        return 0;
 
     res = battery_charger_disable();
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set charge current in mA
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, CHARGE_CURRENT);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set charge voltage in mV
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_VOLTAGE, CHARGE_VOLTAGE);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set input current in mA
     res = smbus_write(CHARGER_ADDRESS, REG_INPUT_CURRENT, INPUT_CURRENT);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set charge option 0 with watchdog disabled
     res = smbus_write(
         CHARGER_ADDRESS,
         REG_CHARGE_OPTION_0,
-        SBC_EN_LWPWR |
-        SBC_PWM_FREQ_800KHZ |
-        SBC_IDCHC_GAIN
+        SBC_EN_LWPWR | SBC_PWM_FREQ_800KHZ | SBC_IDCHC_GAIN
     );
 
     // Set the RSENSE ratio
     res = smbus_write(
         CHARGER_ADDRESS,
         REG_CHARGE_OPTION_1,
-        SBC_CMP_DEG_1US |
-        SBC_PMON_RATIO |
-        RSENSE_RATIO |
-        SBC_BAT_DEPL_VTH
+        SBC_CMP_DEG_1US | SBC_PMON_RATIO | RSENSE_RATIO | SBC_BAT_DEPL_VTH
     );
 
     DEBUG("Charger enabled\n");
@@ -172,7 +176,8 @@ void battery_debug(void) {
     uint16_t data = 0;
     int16_t res = 0;
 
-    #define command(N, A, V) { \
+#define command(N, A, V) \
+    { \
         DEBUG("  " #N ": "); \
         res = smbus_read(A, V, &data); \
         if (res < 0) { \
@@ -202,5 +207,5 @@ void battery_debug(void) {
     command(ProchotOption1, CHARGER_ADDRESS, 0x3D);
     command(ProchotStatus, CHARGER_ADDRESS, 0x3A);
 
-    #undef command
+#undef command
 }

@@ -10,13 +10,13 @@
 
 struct Pmc {
     // Status register
-    volatile uint8_t * status;
+    volatile uint8_t *status;
     // Data out register
-    volatile uint8_t * data_out;
+    volatile uint8_t *data_out;
     // Data in register
-    volatile uint8_t * data_in;
+    volatile uint8_t *data_in;
     // Control register
-    volatile uint8_t * control;
+    volatile uint8_t *control;
 };
 
 extern struct Pmc __code PMC_1;
@@ -29,10 +29,10 @@ extern struct Pmc __code PMC_5;
 #define PMC_STS_IBF BIT(1)
 #define PMC_STS_CMD BIT(3)
 
-uint8_t pmc_status(struct Pmc * pmc);
-void pmc_set_status(struct Pmc * pmc, uint8_t status);
-uint8_t pmc_read(struct Pmc * pmc);
-void pmc_write(struct Pmc * pmc, uint8_t data);
+uint8_t pmc_status(struct Pmc *pmc);
+void pmc_set_status(struct Pmc *pmc, uint8_t status);
+uint8_t pmc_read(struct Pmc *pmc);
+void pmc_write(struct Pmc *pmc, uint8_t data);
 
 volatile uint8_t __xdata __at(0x1500) PM1STS;
 volatile uint8_t __xdata __at(0x1501) PM1DO;

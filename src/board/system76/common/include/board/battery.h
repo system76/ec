@@ -9,11 +9,11 @@
 #include <stdint.h>
 
 #ifndef BATTERY_ADDRESS
-    #define BATTERY_ADDRESS 0x0B
+#define BATTERY_ADDRESS 0x0B
 #endif
 
 #ifndef CHARGER_ADDRESS
-    #define CHARGER_ADDRESS 0x09
+#define CHARGER_ADDRESS 0x09
 #endif
 
 #define BATTERY_INITIALIZED BIT(7)

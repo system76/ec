@@ -14,37 +14,37 @@
 
 // This is the user-configurable log level
 #ifndef LEVEL
-    #define LEVEL LEVEL_INFO
+#define LEVEL LEVEL_INFO
 #endif
 
 #if LEVEL >= LEVEL_TRACE
-    #define TRACE(...) printf(__VA_ARGS__)
+#define TRACE(...) printf(__VA_ARGS__)
 #else
-    #define TRACE(...)
+#define TRACE(...)
 #endif
 
 #if LEVEL >= LEVEL_DEBUG
-    #define DEBUG(...) printf(__VA_ARGS__)
+#define DEBUG(...) printf(__VA_ARGS__)
 #else
-    #define DEBUG(...)
+#define DEBUG(...)
 #endif
 
 #if LEVEL >= LEVEL_INFO
-    #define INFO(...) printf(__VA_ARGS__)
+#define INFO(...) printf(__VA_ARGS__)
 #else
-    #define INFO(...)
+#define INFO(...)
 #endif
 
 #if LEVEL >= LEVEL_WARN
-    #define WARN(...) printf(__VA_ARGS__)
+#define WARN(...) printf(__VA_ARGS__)
 #else
-    #define WARN(...)
+#define WARN(...)
 #endif
 
 #if LEVEL >= LEVEL_ERROR
-    #define ERROR(...) printf(__VA_ARGS__)
+#define ERROR(...) printf(__VA_ARGS__)
 #else
-    #define ERROR(...)
+#define ERROR(...)
 #endif
 
 #endif // _COMMON_DEBUG_H

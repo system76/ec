@@ -4,7 +4,7 @@
 
 #include <common/i2c.h>
 
-int16_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
+int16_t smbus_read(uint8_t address, uint8_t command, uint16_t *data) {
     return i2c_get(NULL, address, command, (uint8_t *)data, 2);
 }
 
@@ -16,7 +16,8 @@ void battery_debug(void) {
     uint16_t data = 0;
     int16_t res = 0;
 
-    #define command(N, A, V) { \
+#define command(N, A, V) \
+    { \
         printf(#N ": "); \
         res = smbus_read(A, V, &data); \
         if (res < 0) { \
@@ -45,5 +46,5 @@ void battery_debug(void) {
     command(ProchotOption1, 0x09, 0x3D);
     command(ProchotStatus, 0x09, 0x3A);
 
-    #undef command
+#undef command
 }

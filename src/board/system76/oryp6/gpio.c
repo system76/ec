@@ -245,13 +245,13 @@ void gpio_init() {
 
 #if GPIO_DEBUG
 void gpio_debug_bank(
-    char * bank,
+    char *bank,
     uint8_t data,
     uint8_t mirror,
     uint8_t pot,
-    volatile uint8_t * control
+    volatile uint8_t *control
 ) {
-    for(char i = 0; i < 8; i++) {
+    for (char i = 0; i < 8; i++) {
         DEBUG(
             "%s%d:\n\tdata %d\n\tmirror %d\n\tpot %d\n\tcontrol %02X\n",
             bank,
@@ -265,7 +265,7 @@ void gpio_debug_bank(
 }
 
 void gpio_debug(void) {
-    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCR ## BANK ## 0)
+#define bank(BANK) gpio_debug_bank(#BANK, GPDR##BANK, GPDMR##BANK, GPOT##BANK, &GPCR##BANK##0)
     bank(A);
     bank(B);
     bank(C);
@@ -276,6 +276,6 @@ void gpio_debug(void) {
     bank(H);
     bank(I);
     bank(J);
-    #undef bank
+#undef bank
 }
 #endif

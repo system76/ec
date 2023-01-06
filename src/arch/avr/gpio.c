@@ -2,7 +2,7 @@
 
 #include <arch/gpio.h>
 
-bool gpio_get_dir(struct Gpio * gpio) {
+bool gpio_get_dir(struct Gpio *gpio) {
     if (*gpio->ddr & gpio->value) {
         return true;
     } else {
@@ -10,7 +10,7 @@ bool gpio_get_dir(struct Gpio * gpio) {
     }
 }
 
-void gpio_set_dir(struct Gpio * gpio, bool value) {
+void gpio_set_dir(struct Gpio *gpio, bool value) {
     if (value) {
         *gpio->ddr |= gpio->value;
     } else {
@@ -18,7 +18,7 @@ void gpio_set_dir(struct Gpio * gpio, bool value) {
     }
 }
 
-bool gpio_get(struct Gpio * gpio) {
+bool gpio_get(struct Gpio *gpio) {
     if (*gpio->pin & gpio->value) {
         return true;
     } else {
@@ -26,7 +26,7 @@ bool gpio_get(struct Gpio * gpio) {
     }
 }
 
-void gpio_set(struct Gpio * gpio, bool value) {
+void gpio_set(struct Gpio *gpio, bool value) {
     if (value) {
         *gpio->port |= gpio->value;
     } else {

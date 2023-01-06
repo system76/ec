@@ -15,10 +15,10 @@
 
 // International keys
 #ifndef KI1
-    #define KI1 K_INT_1
+#define KI1 K_INT_1
 #endif
 #ifndef KI2
-    #define KI2 K_INT_2
+#define KI2 K_INT_2
 #endif
 
 // clang-format off
@@ -53,11 +53,11 @@
 // clang-format on
 
 // Position of physical Esc key in the matrix
-#define MATRIX_ESC_INPUT    7
-#define MATRIX_ESC_OUTPUT   7
+#define MATRIX_ESC_INPUT 7
+#define MATRIX_ESC_OUTPUT 7
 
 // Position of physical Fn key in the matrix
-#define MATRIX_FN_INPUT     3
-#define MATRIX_FN_OUTPUT    17
+#define MATRIX_FN_INPUT 3
+#define MATRIX_FN_OUTPUT 17
 
 #endif // _BOARD_KEYMAP_H

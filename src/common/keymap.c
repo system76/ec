@@ -5,7 +5,7 @@
 // Prevent failures to compile on AVR
 //TODO: move to a driver included only on platforms needing it
 #ifndef __SDCC
-    #define __code
+#define __code
 #endif
 
 // https://www.win.tue.nl/~aeb/linux/kbd/scancodes-10.html#ss10.3

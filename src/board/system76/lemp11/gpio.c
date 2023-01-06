@@ -36,7 +36,7 @@ struct Gpio __code VA_EC_EN =       GPIO(J, 4);
 struct Gpio __code WLAN_EN =        GPIO(G, 1);
 struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
-// clange-format on
+// clang-format on
 
 void gpio_init(void) {
     // Not documented
@@ -262,13 +262,13 @@ void gpio_init(void) {
 
 #if GPIO_DEBUG
 void gpio_debug_bank(
-    char * bank,
+    char *bank,
     uint8_t data,
     uint8_t mirror,
     uint8_t pot,
-    volatile uint8_t * control
+    volatile uint8_t *control
 ) {
-    for(char i = 0; i < 8; i++) {
+    for (char i = 0; i < 8; i++) {
         DEBUG(
             "%s%d: data %d mirror %d pot %d control %02X\n",
             bank,
@@ -282,7 +282,7 @@ void gpio_debug_bank(
 }
 
 void gpio_debug(void) {
-    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCR ## BANK ## 0)
+#define bank(BANK) gpio_debug_bank(#BANK, GPDR##BANK, GPDMR##BANK, GPOT##BANK, &GPCR##BANK##0)
     bank(A);
     bank(B);
     bank(C);
@@ -293,9 +293,9 @@ void gpio_debug(void) {
     bank(H);
     bank(I);
     bank(J);
-    #define GPOTM 0
+#define GPOTM 0
     bank(M);
-    #undef GPOTM
-    #undef bank
+#undef GPOTM
+#undef bank
 }
 #endif

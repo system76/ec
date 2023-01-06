@@ -9,11 +9,11 @@
 #define I2C_TIMEOUT 10000
 
 struct I2C {
-    volatile uint8_t * hosta;
-    volatile uint8_t * hoctl;
-    volatile uint8_t * hoctl2;
-    volatile uint8_t * hobdb;
-    volatile uint8_t * trasla;
+    volatile uint8_t *hosta;
+    volatile uint8_t *hoctl;
+    volatile uint8_t *hoctl2;
+    volatile uint8_t *hobdb;
+    volatile uint8_t *trasla;
 };
 
 struct I2C __code I2C_0 = {
@@ -42,10 +42,11 @@ struct I2C __code I2C_4 = {
 };
 #endif
 
-void i2c_reset(struct I2C * i2c, bool kill) {
+void i2c_reset(struct I2C *i2c, bool kill) {
     if (*(i2c->hosta) & HOSTA_BUSY) {
         // Set kill bit
-        if (kill) *(i2c->hoctl) |= BIT(1);
+        if (kill)
+            *(i2c->hoctl) |= BIT(1);
         // Wait for host to finish
         while (*(i2c->hosta) & HOSTA_BUSY) {}
     }
@@ -57,7 +58,7 @@ void i2c_reset(struct I2C * i2c, bool kill) {
     *(i2c->hoctl2) = 0;
 }
 
-int16_t i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
+int16_t i2c_start(struct I2C *i2c, uint8_t addr, bool read) __reentrant {
     // If we are already in a transaction
     if (*(i2c->hosta) & HOSTA_BYTE_DONE) {
         // If we are switching direction
@@ -85,7 +86,7 @@ int16_t i2c_start(struct I2C * i2c, uint8_t addr, bool read) __reentrant {
     return 0;
 }
 
-void i2c_stop(struct I2C * i2c) {
+void i2c_stop(struct I2C *i2c) {
     // Disable i2c compatibility
     *(i2c->hoctl2) &= ~BIT(1);
     // Clear status
@@ -94,7 +95,7 @@ void i2c_stop(struct I2C * i2c) {
     i2c_reset(i2c, false);
 }
 
-static int16_t i2c_transaction(struct I2C * i2c, uint8_t * data, uint16_t length, bool read) {
+static int16_t i2c_transaction(struct I2C *i2c, uint8_t *data, uint16_t length, bool read) {
     uint16_t i;
     for (i = 0; i < length; i++) {
         if (read) {
@@ -126,17 +127,17 @@ static int16_t i2c_transaction(struct I2C * i2c, uint8_t * data, uint16_t length
         // Wait for byte done, timeout, or error
         uint8_t status;
         uint32_t timeout = I2C_TIMEOUT;
-        for(timeout = I2C_TIMEOUT; timeout > 0; timeout--) {
+        for (timeout = I2C_TIMEOUT; timeout > 0; timeout--) {
             status = *(i2c->hosta);
             // If error occured, kill transaction and return error
             if (status & HOSTA_ERR) {
                 i2c_reset(i2c, true);
                 return -(int16_t)(status);
             } else
-            // If byte done, break
-            if (status & HOSTA_BYTE_DONE) {
-                break;
-            }
+                // If byte done, break
+                if (status & HOSTA_BYTE_DONE) {
+                    break;
+                }
         }
         // If timeout occured, kill transaction and return error
         if (timeout == 0) {
@@ -153,10 +154,10 @@ static int16_t i2c_transaction(struct I2C * i2c, uint8_t * data, uint16_t length
     return i;
 }
 
-int16_t i2c_read(struct I2C * i2c, uint8_t * data, uint16_t length) __reentrant {
+int16_t i2c_read(struct I2C *i2c, uint8_t *data, uint16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, true);
 }
 
-int16_t i2c_write(struct I2C * i2c, uint8_t * data, uint16_t length) __reentrant {
+int16_t i2c_write(struct I2C *i2c, uint8_t *data, uint16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, false);
 }

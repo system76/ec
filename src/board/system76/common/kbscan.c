@@ -165,125 +165,129 @@ static bool kbscan_has_ghost_in_row(uint8_t row, uint8_t rowdata) {
 
 static void hardware_hotkey(uint16_t key) {
     switch (key) {
-        case K_DISPLAY_TOGGLE:
-            gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
-            break;
-        case K_CAMERA_TOGGLE:
-            gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
-            break;
-        case K_FAN_TOGGLE:
-            fan_max = !fan_max;
-            break;
-        case K_KBD_BKL:
-            kbled_set(kbled_get() + 1);
-            break;
-        case K_KBD_COLOR:
-            if (acpi_ecos != EC_OS_FULL) kbled_hotkey_color();
-            break;
-        case K_KBD_DOWN:
-            if (acpi_ecos != EC_OS_FULL) kbled_hotkey_down();
-            break;
-        case K_KBD_UP:
-            if (acpi_ecos != EC_OS_FULL) kbled_hotkey_up();
-            break;
-        case K_KBD_TOGGLE:
-            if (acpi_ecos != EC_OS_FULL) kbled_hotkey_toggle();
-            break;
+    case K_DISPLAY_TOGGLE:
+        gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
+        break;
+    case K_CAMERA_TOGGLE:
+        gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
+        break;
+    case K_FAN_TOGGLE:
+        fan_max = !fan_max;
+        break;
+    case K_KBD_BKL:
+        kbled_set(kbled_get() + 1);
+        break;
+    case K_KBD_COLOR:
+        if (acpi_ecos != EC_OS_FULL)
+            kbled_hotkey_color();
+        break;
+    case K_KBD_DOWN:
+        if (acpi_ecos != EC_OS_FULL)
+            kbled_hotkey_down();
+        break;
+    case K_KBD_UP:
+        if (acpi_ecos != EC_OS_FULL)
+            kbled_hotkey_up();
+        break;
+    case K_KBD_TOGGLE:
+        if (acpi_ecos != EC_OS_FULL)
+            kbled_hotkey_toggle();
+        break;
     }
 }
 
-bool kbscan_press(uint16_t key, bool pressed, uint8_t * layer) {
+bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
     // Wake from sleep on keypress
-    if (pressed &&
-        lid_state &&
-        (power_state == POWER_STATE_S3)) {
+    if (pressed && lid_state && (power_state == POWER_STATE_S3)) {
         pmc_swi();
     }
 
     switch (key & KT_MASK) {
-        case (KT_NORMAL):
+    case (KT_NORMAL):
+        if (kbscan_enabled) {
+            kbc_scancode(key, pressed);
+        }
+        break;
+    case (KT_FN):
+        if (layer != NULL) {
+            if (pressed)
+                *layer = 1;
+            else
+                *layer = 0;
+        } else {
+            // In the case no layer can be set, reset bit
+            return false;
+        }
+        break;
+    case (KT_COMBO):
+        switch (key & 0xFF) {
+        case COMBO_DISPLAY_MODE:
             if (kbscan_enabled) {
-                kbc_scancode(key, pressed);
-            }
-            break;
-        case (KT_FN):
-            if (layer != NULL) {
-                if (pressed) *layer = 1;
-                else *layer = 0;
-            } else {
-                // In the case no layer can be set, reset bit
-                return false;
-            }
-            break;
-        case (KT_COMBO):
-            switch (key & 0xFF) {
-                case COMBO_DISPLAY_MODE:
-                    if (kbscan_enabled) {
-                        if (pressed) {
-                            kbc_scancode(K_LEFT_SUPER, true);
-                            kbc_scancode(K_P, true);
-                            kbc_scancode(K_P, false);
-                        } else {
-                            kbc_scancode(K_LEFT_SUPER, false);
-                        }
-                    }
-                    break;
-                case COMBO_PRINT_SCREEN:
-                    if (kbscan_enabled) {
-                        if (pressed) {
-                            kbc_scancode(KF_E0 | 0x12, true);
-                            kbc_scancode(KF_E0 | 0x7C, true);
-                        } else {
-                            kbc_scancode(KF_E0 | 0x7C, false);
-                            kbc_scancode(KF_E0 | 0x12, false);
-                        }
-                    }
-                    break;
-                case COMBO_PAUSE:
-                    if (kbscan_enabled) {
-                        if (pressed) {
-                            kbc_scancode(0xE1, true);
-                            kbc_scancode(0x14, true);
-                            kbc_scancode(0x77, true);
-                            kbc_scancode(0xE1, true);
-                            kbc_scancode(0x14, false);
-                            kbc_scancode(0x77, false);
-                        }
-                    }
-                    break;
-            }
-            break;
-        case (KT_SCI):
-            if (pressed) {
-                // Send SCI if ACPI OS is loaded
-                if (acpi_ecos != EC_OS_NONE) {
-                    uint8_t sci = (uint8_t)(key & 0xFF);
-                    if (!pmc_sci(&PMC_1, sci)) {
-                        // In the case of ignored SCI, reset bit
-                        return false;
-                    }
+                if (pressed) {
+                    kbc_scancode(K_LEFT_SUPER, true);
+                    kbc_scancode(K_P, true);
+                    kbc_scancode(K_P, false);
+                } else {
+                    kbc_scancode(K_LEFT_SUPER, false);
                 }
-
-                // Handle hardware hotkeys
-                hardware_hotkey(key);
             }
             break;
-        case (KT_SCI_EXTRA):
-            if (pressed) {
-                // Send SCI if ACPI OS is loaded
-                if (acpi_ecos != EC_OS_NONE) {
-                    uint8_t sci = SCI_EXTRA;
-                    sci_extra = (uint8_t)(key & 0xFF);
-                    if (!pmc_sci(&PMC_1, sci)) {
-                        // In the case of ignored SCI, reset bit
-                        return false;
-                    }
+        case COMBO_PRINT_SCREEN:
+            if (kbscan_enabled) {
+                if (pressed) {
+                    kbc_scancode(KF_E0 | 0x12, true);
+                    kbc_scancode(KF_E0 | 0x7C, true);
+                } else {
+                    kbc_scancode(KF_E0 | 0x7C, false);
+                    kbc_scancode(KF_E0 | 0x12, false);
                 }
-
-                // Handle hardware hotkeys
-                hardware_hotkey(key);
             }
             break;
+        case COMBO_PAUSE:
+            if (kbscan_enabled) {
+                if (pressed) {
+                    kbc_scancode(0xE1, true);
+                    kbc_scancode(0x14, true);
+                    kbc_scancode(0x77, true);
+                    kbc_scancode(0xE1, true);
+                    kbc_scancode(0x14, false);
+                    kbc_scancode(0x77, false);
+                }
+            }
+            break;
+        }
+        break;
+    case (KT_SCI):
+        if (pressed) {
+            // Send SCI if ACPI OS is loaded
+            if (acpi_ecos != EC_OS_NONE) {
+                uint8_t sci = (uint8_t)(key & 0xFF);
+                if (!pmc_sci(&PMC_1, sci)) {
+                    // In the case of ignored SCI, reset bit
+                    return false;
+                }
+            }
+
+            // Handle hardware hotkeys
+            hardware_hotkey(key);
+        }
+        break;
+    case (KT_SCI_EXTRA):
+        if (pressed) {
+            // Send SCI if ACPI OS is loaded
+            if (acpi_ecos != EC_OS_NONE) {
+                uint8_t sci = SCI_EXTRA;
+                sci_extra = (uint8_t)(key & 0xFF);
+                if (!pmc_sci(&PMC_1, sci)) {
+                    // In the case of ignored SCI, reset bit
+                    return false;
+                }
+            }
+
+            // Handle hardware hotkeys
+            hardware_hotkey(key);
+        }
+        break;
     }
     return true;
 }
@@ -344,8 +348,10 @@ void kbscan_event(void) {
 
             // A key was pressed or released
             for (uint8_t j = 0; j < KM_IN; j++) {
+                // clang-format off
                 bool new_b = new & BIT(j);
                 bool last_b = last & BIT(j);
+                // clang-format on
                 if (new_b != last_b) {
                     bool reset = false;
 
@@ -374,7 +380,7 @@ void kbscan_event(void) {
                         keymap_get(key_layer, i, j, &key);
                         if (key) {
                             DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
-                            if(!kbscan_press(key, new_b, &layer)){
+                            if (!kbscan_press(key, new_b, &layer)) {
                                 // In the case of ignored key press/release, reset bit
                                 reset = true;
                             }
@@ -406,7 +412,7 @@ void kbscan_event(void) {
             }
 
             kbscan_matrix[i] = new;
-        } else if (new && repeat_key != 0 && key_should_repeat(repeat_key)) {
+        } else if (new &&repeat_key != 0 && key_should_repeat(repeat_key)) {
             // A key is being pressed
             uint32_t time = time_get();
             static uint32_t repeat_start = 0;

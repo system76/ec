@@ -4,7 +4,7 @@
 #define _COMMON_MACRO_H
 
 #define xconcat(a, b) concat(a, b)
-#define concat(a, b) a ## b
+#define concat(a, b) a##b
 
 #define xstr(s) str(s)
 #define str(s) #s

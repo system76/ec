@@ -7,6 +7,6 @@
 
 void i2c_init(uint32_t baud) {
     TWAR = 0;
-    TWBR = (uint8_t)(((F_CPU / baud) - 16 ) / 2);
+    TWBR = (uint8_t)(((F_CPU / baud) - 16) / 2);
     TWCR = 0;
 }

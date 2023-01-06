@@ -8,6 +8,8 @@
 #include <common/debug.h>
 #include <common/macro.h>
 
+// clang-format off
+
 // Registers
 #define REG_CHARGE_CURRENT 0x14
 #define REG_CHARGE_VOLTAGE 0x15
@@ -54,6 +56,8 @@
     #error Invalid adapter RSENSE value
 #endif
 
+// clang-format on
+
 // Sense resistor values in milliohms.
 enum sense_resistor {
     RSENSE_10 = 0,
@@ -67,7 +71,8 @@ static bool charger_enabled = false;
 int16_t battery_charger_disable(void) {
     int16_t res = 0;
 
-    if (!charger_enabled) return 0;
+    if (!charger_enabled)
+        return 0;
 
     // Set charge option 1 to converter frequency 600 KHz
     //TODO: needed when charging disabled?
@@ -76,29 +81,30 @@ int16_t battery_charger_disable(void) {
         REG_CHARGE_OPTION_1,
         CHARGE_OPTION_1_600KHZ | ADAPTER_RSENSE | BATTERY_RSENSE
     );
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set charge option 2 to PSYS enable
     //TODO: needed when charging disabled?
-    res = smbus_write(
-        CHARGER_ADDRESS,
-        REG_CHARGE_OPTION_2,
-        CHARGE_OPTION_2_PSYS_EN
-    );
-    if (res < 0) return res;
+    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN);
+    if (res < 0)
+        return res;
 
     // Disable charge current
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, 0);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Disable charge voltage
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_VOLTAGE, 0);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set input current in mA
     //TODO: needed when charging disabled?
     res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     DEBUG("Charger disabled\n");
     charger_enabled = false;
@@ -108,10 +114,12 @@ int16_t battery_charger_disable(void) {
 int16_t battery_charger_enable(void) {
     int16_t res = 0;
 
-    if (charger_enabled) return 0;
+    if (charger_enabled)
+        return 0;
 
     res = battery_charger_disable();
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set charge option 1 to converter frequency 600 KHz
     res = smbus_write(
@@ -119,27 +127,28 @@ int16_t battery_charger_enable(void) {
         REG_CHARGE_OPTION_1,
         CHARGE_OPTION_1_600KHZ | ADAPTER_RSENSE | BATTERY_RSENSE
     );
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set charge option 2 to PSYS enable
-    res = smbus_write(
-        CHARGER_ADDRESS,
-        REG_CHARGE_OPTION_2,
-        CHARGE_OPTION_2_PSYS_EN
-    );
-    if (res < 0) return res;
+    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN);
+    if (res < 0)
+        return res;
 
     // Set charge current in mA
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, CHARGE_CURRENT);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set charge voltage in mV
     res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_VOLTAGE, CHARGE_VOLTAGE);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     // Set input current in mA
     res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     DEBUG("Charger enabled\n");
     charger_enabled = true;
@@ -158,7 +167,8 @@ void battery_debug(void) {
     uint16_t data = 0;
     int16_t res = 0;
 
-    #define command(N, A, V) { \
+#define command(N, A, V) \
+    { \
         DEBUG("  " #N ": "); \
         res = smbus_read(A, V, &data); \
         if (res < 0) { \
@@ -182,5 +192,5 @@ void battery_debug(void) {
     command(ChargeOption_2, CHARGER_ADDRESS, REG_CHARGE_OPTION_2);
     command(AdapterCurrent, CHARGER_ADDRESS, REG_ADAPTER_CURRENT);
 
-    #undef command
+#undef command
 }
