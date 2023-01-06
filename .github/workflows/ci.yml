@@ -6,7 +6,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - name: Check SPDX identifiers
@@ -25,7 +25,7 @@ jobs:
           - features:
           - features: --no-default-features --features="redox_hwio"
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
 
@@ -36,7 +36,7 @@ jobs:
         run: cargo build ${{ matrix.features }} --release --manifest-path tool/Cargo.toml
 
   ec:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         # TODO: Generate matrix from directory?
