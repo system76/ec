@@ -4,13 +4,13 @@
 #include <board/wireless.h>
 
 #ifndef HAVE_BT_EN
-    #define HAVE_BT_EN 1
+#define HAVE_BT_EN 1
 #endif
 #ifndef HAVE_WLAN_EN
-    #define HAVE_WLAN_EN 1
+#define HAVE_WLAN_EN 1
 #endif
 #ifndef HAVE_WLAN_PWR_EN
-    #define HAVE_WLAN_PWR_EN 1
+#define HAVE_WLAN_PWR_EN 1
 #endif
 
 /**

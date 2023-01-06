@@ -6,11 +6,11 @@
 #include <stdint.h>
 
 #ifndef HAVE_DGPU
-    #define HAVE_DGPU 0
+#define HAVE_DGPU 0
 #endif
 
 #if HAVE_DGPU
-    extern int16_t dgpu_temp;
+extern int16_t dgpu_temp;
 #endif // HAVE_DGPU
 
 void dgpu_init(void);

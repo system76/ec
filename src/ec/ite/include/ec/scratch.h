@@ -17,13 +17,13 @@ volatile uint8_t __xdata __at(0x1045) SCAR1H;
 #endif
 
 #if CONFIG_EC_ITE_IT8587E
-    #define SCARL SCAR1L
-    #define SCARM SCAR1M
-    #define SCARH SCAR1H
+#define SCARL SCAR1L
+#define SCARM SCAR1M
+#define SCARH SCAR1H
 #else
-    #define SCARL SCAR0L
-    #define SCARM SCAR0M
-    #define SCARH SCAR0H
+#define SCARL SCAR0L
+#define SCARM SCAR0M
+#define SCARH SCAR0H
 #endif
 
 #endif // _EC_SCRATCH_H

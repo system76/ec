@@ -36,6 +36,7 @@ static bool kbc_translate = true;
 // LED state
 uint8_t kbc_leds = 0;
 
+// clang-format off
 // Values from linux/drivers/input/keyboard/atkbd.c
 static const uint16_t kbc_typematic_period[32] = {
     33,     // 30.0 cps = ~33.33ms
@@ -71,12 +72,13 @@ static const uint16_t kbc_typematic_period[32] = {
     470,    //  2.1 cps = ~478.19ms
     500,    //  2.0 cps = 500ms
 };
+// clang-format on
 
 static uint8_t kbc_buffer[16] = { 0 };
 static uint8_t kbc_buffer_head = 0;
 static uint8_t kbc_buffer_tail = 0;
 
-static bool kbc_buffer_pop(uint8_t * scancode) {
+static bool kbc_buffer_pop(uint8_t *scancode) {
     if (kbc_buffer_head == kbc_buffer_tail) {
         return false;
     }
@@ -85,7 +87,7 @@ static bool kbc_buffer_pop(uint8_t * scancode) {
     return true;
 }
 
-static bool kbc_buffer_push(uint8_t * scancodes, uint8_t len) {
+static bool kbc_buffer_push(uint8_t *scancodes, uint8_t len) {
     //TODO: make this test more efficient
     for (uint8_t i = 0; i < len; i++) {
         if ((kbc_buffer_tail + i + 1U) % ARRAY_SIZE(kbc_buffer) == kbc_buffer_head) {
@@ -101,29 +103,31 @@ static bool kbc_buffer_push(uint8_t * scancodes, uint8_t len) {
 }
 
 bool kbc_scancode(uint16_t key, bool pressed) {
-    if (!kbc_first) return true;
+    if (!kbc_first)
+        return true;
     if (kbc_translate) {
         key = keymap_translate(key);
     }
-    if (!key) return true;
+    if (!key)
+        return true;
 
-    uint8_t scancodes[3] = {0, 0, 0};
+    uint8_t scancodes[3] = { 0, 0, 0 };
     uint8_t scancodes_len = 0;
     switch (key & 0xFF00) {
-        case KF_E0:
-            scancodes[scancodes_len++] = 0xE0;
-            key &= 0xFF;
-            // Fall through
-        case 0x00:
-            if (!pressed) {
-                if (kbc_translate) {
-                    key |= 0x80;
-                } else {
-                    scancodes[scancodes_len++] = 0xF0;
-                }
+    case KF_E0:
+        scancodes[scancodes_len++] = 0xE0;
+        key &= 0xFF;
+        // Fall through
+    case 0x00:
+        if (!pressed) {
+            if (kbc_translate) {
+                key |= 0x80;
+            } else {
+                scancodes[scancodes_len++] = 0xF0;
             }
-            scancodes[scancodes_len++] = (uint8_t)key;
-            break;
+        }
+        scancodes[scancodes_len++] = (uint8_t)key;
+        break;
     }
 
     return kbc_buffer_push(scancodes, scancodes_len);
@@ -156,293 +160,293 @@ static uint8_t state_data = 0;
 static enum KbcState state_next = KBC_STATE_NORMAL;
 
 // Clear output buffer
-static void kbc_clear_output(struct Kbc * kbc) {
+static void kbc_clear_output(struct Kbc *kbc) {
     *(kbc->control) |= BIT(5);
     *(kbc->control) |= BIT(6);
     *(kbc->control) &= ~BIT(5);
 }
 
-static void kbc_on_input_command(struct Kbc * kbc, uint8_t data) {
+static void kbc_on_input_command(struct Kbc *kbc, uint8_t data) {
     TRACE("kbc cmd: %02X\n", data);
     // Controller commands always reset the state
     state = KBC_STATE_NORMAL;
     // Controller commands clear the output buffer
     kbc_clear_output(kbc);
     switch (data) {
-        case 0x20:
-            TRACE("  read configuration byte\n");
-            state = KBC_STATE_KEYBOARD;
-            // Interrupt enable flags
-            state_data = *kbc->control & 0x03;
-            // System flag
-            if (*kbc->status & BIT(2)) {
-                state_data |= BIT(2);
-            }
-            if (!kbc_first) {
-                state_data |= BIT(4);
-            }
-            if (!kbc_second) {
-                state_data |= BIT(5);
-            }
-            if (kbc_translate) {
-                state_data |= BIT(6);
-            }
-            break;
-        case 0x60:
-            TRACE("  write configuration byte\n");
-            state = KBC_STATE_WRITE_CONFIG;
-            break;
-        case 0xA7:
-            TRACE("  disable second port\n");
-            kbc_second = false;
-            break;
-        case 0xA8:
-            TRACE("  enable second port\n");
-            kbc_second = true;
-            break;
-        case 0xA9:
-            TRACE("  test second port\n");
-            // TODO: communicate with touchpad?
-            state = KBC_STATE_KEYBOARD;
-            state_data = 0x00;
-            break;
-        case 0xAA:
-            TRACE("  test controller\n");
-            // Why not pass the test?
-            state = KBC_STATE_KEYBOARD;
-            state_data = 0x55;
-            break;
-        case 0xAB:
-            TRACE("  test first port\n");
-            // We _ARE_ the keyboard, so everything is good.
-            state = KBC_STATE_KEYBOARD;
-            state_data = 0x00;
-            break;
-        case 0xAD:
-            TRACE("  disable first port\n");
-            kbc_first = false;
-            break;
-        case 0xAE:
-            TRACE("  enable first port\n");
-            kbc_first = true;
-            break;
-        case 0xD1:
-            TRACE("  write port byte\n");
-            state = KBC_STATE_WRITE_PORT;
-            break;
-        case 0xD2:
-            TRACE("  write first port output\n");
-            state = KBC_STATE_FIRST_PORT_OUTPUT;
-            break;
-        case 0xD3:
-            TRACE("  write second port output\n");
-            state = KBC_STATE_SECOND_PORT_OUTPUT;
-            break;
-        case 0xD4:
-            TRACE("  write second port input\n");
-            state = KBC_STATE_SECOND_PORT_INPUT;
-            break;
+    case 0x20:
+        TRACE("  read configuration byte\n");
+        state = KBC_STATE_KEYBOARD;
+        // Interrupt enable flags
+        state_data = *kbc->control & 0x03;
+        // System flag
+        if (*kbc->status & BIT(2)) {
+            state_data |= BIT(2);
+        }
+        if (!kbc_first) {
+            state_data |= BIT(4);
+        }
+        if (!kbc_second) {
+            state_data |= BIT(5);
+        }
+        if (kbc_translate) {
+            state_data |= BIT(6);
+        }
+        break;
+    case 0x60:
+        TRACE("  write configuration byte\n");
+        state = KBC_STATE_WRITE_CONFIG;
+        break;
+    case 0xA7:
+        TRACE("  disable second port\n");
+        kbc_second = false;
+        break;
+    case 0xA8:
+        TRACE("  enable second port\n");
+        kbc_second = true;
+        break;
+    case 0xA9:
+        TRACE("  test second port\n");
+        // TODO: communicate with touchpad?
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0x00;
+        break;
+    case 0xAA:
+        TRACE("  test controller\n");
+        // Why not pass the test?
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0x55;
+        break;
+    case 0xAB:
+        TRACE("  test first port\n");
+        // We _ARE_ the keyboard, so everything is good.
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0x00;
+        break;
+    case 0xAD:
+        TRACE("  disable first port\n");
+        kbc_first = false;
+        break;
+    case 0xAE:
+        TRACE("  enable first port\n");
+        kbc_first = true;
+        break;
+    case 0xD1:
+        TRACE("  write port byte\n");
+        state = KBC_STATE_WRITE_PORT;
+        break;
+    case 0xD2:
+        TRACE("  write first port output\n");
+        state = KBC_STATE_FIRST_PORT_OUTPUT;
+        break;
+    case 0xD3:
+        TRACE("  write second port output\n");
+        state = KBC_STATE_SECOND_PORT_OUTPUT;
+        break;
+    case 0xD4:
+        TRACE("  write second port input\n");
+        state = KBC_STATE_SECOND_PORT_INPUT;
+        break;
     }
 }
 
-static void kbc_on_input_data(struct Kbc * kbc, uint8_t data) {
+static void kbc_on_input_data(struct Kbc *kbc, uint8_t data) {
     TRACE("kbc data: %02X\n", data);
     switch (state) {
-        case KBC_STATE_TOUCHPAD:
-            // Interrupt touchpad command
-            state = KBC_STATE_NORMAL;
-            // Fall through
-        case KBC_STATE_NORMAL:
-            TRACE("  keyboard command\n");
-            // Keyboard commands clear output buffer
-            kbc_clear_output(kbc);
-            switch (data) {
-                case 0xED:
-                    TRACE("    set leds\n");
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    state_next = KBC_STATE_SET_LEDS;
-                    break;
-                case 0xEE:
-                    TRACE("    echo\n");
-                    // Hey, this is easy. I like easy commands
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xEE;
-                    break;
-                case 0xF0:
-                    TRACE("    get/set scancode\n");
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    state_next = KBC_STATE_SCANCODE;
-                    break;
-                case 0xF2:
-                    TRACE("    identify keyboard\n");
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    state_next = KBC_STATE_IDENTIFY_0;
-                    break;
-                case 0xF3:
-                    TRACE("    set typematic rate/delay\n");
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    state_next = KBC_STATE_TYPEMATIC;
-                    break;
-                case 0xF4:
-                    TRACE("    enable scanning\n");
-                    kbscan_enabled = true;
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    break;
-                case 0xF5:
-                    TRACE("    disable scanning\n");
-                    kbscan_enabled = false;
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    break;
-                case 0xF6:
-                    TRACE("    set default parameters\n");
-                    kbc_leds = 0;
-                    kbscan_repeat_period = 91;
-                    kbscan_repeat_delay = 500;
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    break;
-                case 0xFF:
-                    TRACE("    self test\n");
-                    state = KBC_STATE_KEYBOARD;
-                    state_data = 0xFA;
-                    state_next = KBC_STATE_SELF_TEST;
-                    break;
-            }
+    case KBC_STATE_TOUCHPAD:
+        // Interrupt touchpad command
+        state = KBC_STATE_NORMAL;
+        // Fall through
+    case KBC_STATE_NORMAL:
+        TRACE("  keyboard command\n");
+        // Keyboard commands clear output buffer
+        kbc_clear_output(kbc);
+        switch (data) {
+        case 0xED:
+            TRACE("    set leds\n");
+            state = KBC_STATE_KEYBOARD;
+            state_data = 0xFA;
+            state_next = KBC_STATE_SET_LEDS;
             break;
-        case KBC_STATE_WRITE_CONFIG:
-            TRACE("  write configuration byte\n");
-            state = KBC_STATE_NORMAL;
-            // Enable keyboard interrupt
-            if (data & BIT(0)) {
-                *kbc->control |= BIT(0);
-            } else {
-                *kbc->control &= ~BIT(0);
-            }
-            // Enable mouse interrupt
-            if (data & BIT(1)) {
-                *kbc->control |= BIT(1);
-            } else {
-                *kbc->control &= ~BIT(1);
-            }
-            // System flag
-            if (data & BIT(2)) {
-                *kbc->status |= BIT(2);
-            } else {
-                *kbc->status &= ~BIT(2);
-            }
-            kbc_first = (bool)(!(data & BIT(4)));
-            kbc_second = (bool)(!(data & BIT(5)));
-            kbc_translate = (bool)(data & BIT(6));
+        case 0xEE:
+            TRACE("    echo\n");
+            // Hey, this is easy. I like easy commands
+            state = KBC_STATE_KEYBOARD;
+            state_data = 0xEE;
             break;
-        case KBC_STATE_SET_LEDS:
-            TRACE("  set leds\n");
-            kbc_leds = data;
+        case 0xF0:
+            TRACE("    get/set scancode\n");
+            state = KBC_STATE_KEYBOARD;
+            state_data = 0xFA;
+            state_next = KBC_STATE_SCANCODE;
+            break;
+        case 0xF2:
+            TRACE("    identify keyboard\n");
+            state = KBC_STATE_KEYBOARD;
+            state_data = 0xFA;
+            state_next = KBC_STATE_IDENTIFY_0;
+            break;
+        case 0xF3:
+            TRACE("    set typematic rate/delay\n");
+            state = KBC_STATE_KEYBOARD;
+            state_data = 0xFA;
+            state_next = KBC_STATE_TYPEMATIC;
+            break;
+        case 0xF4:
+            TRACE("    enable scanning\n");
+            kbscan_enabled = true;
             state = KBC_STATE_KEYBOARD;
             state_data = 0xFA;
             break;
-        case KBC_STATE_SCANCODE:
-            TRACE("  get/set scancode\n");
-            #if LEVEL >= LEVEL_TRACE
-                switch (data) {
-                    case 0x02:
-                        TRACE("    set scancode set 2\n");
-                        break;
-                }
-            #endif
+        case 0xF5:
+            TRACE("    disable scanning\n");
+            kbscan_enabled = false;
             state = KBC_STATE_KEYBOARD;
             state_data = 0xFA;
             break;
-        case KBC_STATE_TYPEMATIC:
-            TRACE("  set typematic rate/delay\n");
-            {
-                // Rate: bits 0-4
-                uint16_t period = kbc_typematic_period[data & 0x1F];
-                kbscan_repeat_period = period;
+        case 0xF6:
+            TRACE("    set default parameters\n");
+            kbc_leds = 0;
+            kbscan_repeat_period = 91;
+            kbscan_repeat_delay = 500;
+            state = KBC_STATE_KEYBOARD;
+            state_data = 0xFA;
+            break;
+        case 0xFF:
+            TRACE("    self test\n");
+            state = KBC_STATE_KEYBOARD;
+            state_data = 0xFA;
+            state_next = KBC_STATE_SELF_TEST;
+            break;
+        }
+        break;
+    case KBC_STATE_WRITE_CONFIG:
+        TRACE("  write configuration byte\n");
+        state = KBC_STATE_NORMAL;
+        // Enable keyboard interrupt
+        if (data & BIT(0)) {
+            *kbc->control |= BIT(0);
+        } else {
+            *kbc->control &= ~BIT(0);
+        }
+        // Enable mouse interrupt
+        if (data & BIT(1)) {
+            *kbc->control |= BIT(1);
+        } else {
+            *kbc->control &= ~BIT(1);
+        }
+        // System flag
+        if (data & BIT(2)) {
+            *kbc->status |= BIT(2);
+        } else {
+            *kbc->status &= ~BIT(2);
+        }
+        kbc_first = (bool)(!(data & BIT(4)));
+        kbc_second = (bool)(!(data & BIT(5)));
+        kbc_translate = (bool)(data & BIT(6));
+        break;
+    case KBC_STATE_SET_LEDS:
+        TRACE("  set leds\n");
+        kbc_leds = data;
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0xFA;
+        break;
+    case KBC_STATE_SCANCODE:
+        TRACE("  get/set scancode\n");
+#if LEVEL >= LEVEL_TRACE
+        switch (data) {
+        case 0x02:
+            TRACE("    set scancode set 2\n");
+            break;
+        }
+#endif
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0xFA;
+        break;
+    case KBC_STATE_TYPEMATIC:
+        TRACE("  set typematic rate/delay\n");
+        {
+            // Rate: bits 0-4
+            uint16_t period = kbc_typematic_period[data & 0x1F];
+            kbscan_repeat_period = period;
 
-                // Delay: bits 5-6
-                static const uint16_t delay[4] = {250, 500, 750, 1000};
-                uint8_t idx = (data & 0x60) >> 5;
-                kbscan_repeat_delay = delay[idx];
-            }
-            state = KBC_STATE_KEYBOARD;
-            state_data = 0xFA;
-            break;
-        case KBC_STATE_WRITE_PORT:
-            TRACE("  write port byte\n");
-            state = KBC_STATE_NORMAL;
-            break;
-        case KBC_STATE_FIRST_PORT_OUTPUT:
-            TRACE("  write first port output\n");
-            state = KBC_STATE_KEYBOARD;
-            state_data = data;
-            break;
-        case KBC_STATE_SECOND_PORT_OUTPUT:
-            TRACE("  write second port output\n");
-            state = KBC_STATE_MOUSE;
-            state_data = data;
-            break;
-        case KBC_STATE_SECOND_PORT_INPUT:
-            TRACE("  write second port input\n");
-            state = KBC_STATE_NORMAL;
-            // Begin write
-            *(PS2_TOUCHPAD.control) = 0x0D;
-            *(PS2_TOUCHPAD.data) = data;
-            // Pull data line low
-            *(PS2_TOUCHPAD.control) = 0x0C;
-            // Pull clock line high
-            *(PS2_TOUCHPAD.control) = 0x0E;
-            // Set wait timeout of 100 cycles
-            kbc_second_wait = 100;
-            break;
+            // Delay: bits 5-6
+            static const uint16_t delay[4] = { 250, 500, 750, 1000 };
+            uint8_t idx = (data & 0x60) >> 5;
+            kbscan_repeat_delay = delay[idx];
+        }
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0xFA;
+        break;
+    case KBC_STATE_WRITE_PORT:
+        TRACE("  write port byte\n");
+        state = KBC_STATE_NORMAL;
+        break;
+    case KBC_STATE_FIRST_PORT_OUTPUT:
+        TRACE("  write first port output\n");
+        state = KBC_STATE_KEYBOARD;
+        state_data = data;
+        break;
+    case KBC_STATE_SECOND_PORT_OUTPUT:
+        TRACE("  write second port output\n");
+        state = KBC_STATE_MOUSE;
+        state_data = data;
+        break;
+    case KBC_STATE_SECOND_PORT_INPUT:
+        TRACE("  write second port input\n");
+        state = KBC_STATE_NORMAL;
+        // Begin write
+        *(PS2_TOUCHPAD.control) = 0x0D;
+        *(PS2_TOUCHPAD.data) = data;
+        // Pull data line low
+        *(PS2_TOUCHPAD.control) = 0x0C;
+        // Pull clock line high
+        *(PS2_TOUCHPAD.control) = 0x0E;
+        // Set wait timeout of 100 cycles
+        kbc_second_wait = 100;
+        break;
     }
 }
 
-static void kbc_on_output_empty(struct Kbc * kbc) {
+static void kbc_on_output_empty(struct Kbc *kbc) {
     switch (state) {
-        case KBC_STATE_KEYBOARD:
-            TRACE("kbc keyboard: %02X\n", state_data);
-            if (kbc_keyboard(kbc, state_data, KBC_TIMEOUT)) {
-                state = state_next;
-                state_next = KBC_STATE_NORMAL;
-            }
-            break;
-        case KBC_STATE_TOUCHPAD:
-            state_data = *(PS2_TOUCHPAD.data);
-            // Fall through
-        case KBC_STATE_MOUSE:
-            TRACE("kbc mouse: %02X\n", state_data);
-            if (kbc_mouse(kbc, state_data, KBC_TIMEOUT)) {
-                state = state_next;
-                state_next = KBC_STATE_NORMAL;
-            }
-            break;
+    case KBC_STATE_KEYBOARD:
+        TRACE("kbc keyboard: %02X\n", state_data);
+        if (kbc_keyboard(kbc, state_data, KBC_TIMEOUT)) {
+            state = state_next;
+            state_next = KBC_STATE_NORMAL;
+        }
+        break;
+    case KBC_STATE_TOUCHPAD:
+        state_data = *(PS2_TOUCHPAD.data);
+        // Fall through
+    case KBC_STATE_MOUSE:
+        TRACE("kbc mouse: %02X\n", state_data);
+        if (kbc_mouse(kbc, state_data, KBC_TIMEOUT)) {
+            state = state_next;
+            state_next = KBC_STATE_NORMAL;
+        }
+        break;
     }
 
     switch (state) {
-        case KBC_STATE_IDENTIFY_0:
-            state = KBC_STATE_KEYBOARD;
-            state_data = 0xAB;
-            state_next = KBC_STATE_IDENTIFY_1;
-            break;
-        case KBC_STATE_IDENTIFY_1:
-            state = KBC_STATE_KEYBOARD;
-            state_data = 0x83;
-            break;
-        case KBC_STATE_SELF_TEST:
-            // Yep, everything is still good, I promise
-            state = KBC_STATE_KEYBOARD;
-            state_data = 0xAA;
-            break;
+    case KBC_STATE_IDENTIFY_0:
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0xAB;
+        state_next = KBC_STATE_IDENTIFY_1;
+        break;
+    case KBC_STATE_IDENTIFY_1:
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0x83;
+        break;
+    case KBC_STATE_SELF_TEST:
+        // Yep, everything is still good, I promise
+        state = KBC_STATE_KEYBOARD;
+        state_data = 0xAA;
+        break;
     }
 }
 
-void kbc_event(struct Kbc * kbc) {
+void kbc_event(struct Kbc *kbc) {
     uint8_t sts;
 
     // Read from scancode buffer when possible

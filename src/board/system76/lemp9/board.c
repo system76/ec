@@ -18,6 +18,9 @@ void board_init(void) {
     gpio_set(&SWI_N, true);
 }
 
-void board_on_ac(bool ac) { /* Fix unused variable */ ac = ac; }
+void board_on_ac(bool ac) {
+    /* Fix unused variable */
+    ac = ac;
+}
 
 void board_event(void) {}

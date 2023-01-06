@@ -18,73 +18,74 @@
 #include <common/debug.h>
 
 #if CONFIG_BUS_ESPI
-    #include <ec/espi.h>
-    #include <board/espi.h>
+#include <ec/espi.h>
+#include <board/espi.h>
 #endif
 
 #ifndef USE_S0IX
-    #define USE_S0IX 0
+#define USE_S0IX 0
 #endif
 
-#define GPIO_SET_DEBUG(G, V) { \
-    DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
-    gpio_set(&G, V); \
-}
+#define GPIO_SET_DEBUG(G, V) \
+    { \
+        DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
+        gpio_set(&G, V); \
+    }
 
 #ifndef HAVE_EC_EN
-    #define HAVE_EC_EN 1
+#define HAVE_EC_EN 1
 #endif
 
 #ifndef HAVE_LAN_WAKEUP_N
-    #define HAVE_LAN_WAKEUP_N 1
+#define HAVE_LAN_WAKEUP_N 1
 #endif
 
 #ifndef HAVE_LED_BAT_CHG
-    #define HAVE_LED_BAT_CHG 1
+#define HAVE_LED_BAT_CHG 1
 #endif
 
 #ifndef HAVE_LED_BAT_FULL
-    #define HAVE_LED_BAT_FULL 1
+#define HAVE_LED_BAT_FULL 1
 #endif
 
 #ifndef HAVE_PCH_DPWROK_EC
-    #define HAVE_PCH_DPWROK_EC 1
+#define HAVE_PCH_DPWROK_EC 1
 #endif
 
 #ifndef HAVE_PCH_PWROK_EC
-    #define HAVE_PCH_PWROK_EC 1
+#define HAVE_PCH_PWROK_EC 1
 #endif
 
 #ifndef HAVE_PM_PWROK
-    #define HAVE_PM_PWROK 1
+#define HAVE_PM_PWROK 1
 #endif
 
 #ifndef HAVE_SLP_SUS_N
-    #define HAVE_SLP_SUS_N 1
+#define HAVE_SLP_SUS_N 1
 #endif
 
 #ifndef HAVE_XLP_OUT
-    #define HAVE_XLP_OUT 1
+#define HAVE_XLP_OUT 1
 #endif
 #ifndef HAVE_SUSWARN_N
-    #define HAVE_SUSWARN_N 1
+#define HAVE_SUSWARN_N 1
 #endif
 
 #ifndef HAVE_SUS_PWR_ACK
-    #define HAVE_SUS_PWR_ACK 1
+#define HAVE_SUS_PWR_ACK 1
 #endif
 
 #ifndef HAVE_VA_EC_EN
-    #define HAVE_VA_EC_EN 1
+#define HAVE_VA_EC_EN 1
 #endif
 
 // Only galp6 has this, so disable by default.
 #ifndef HAVE_PD_EN
-    #define HAVE_PD_EN 0
+#define HAVE_PD_EN 0
 #endif
 
 #ifndef HAVE_XLP_OUT
-    #define HAVE_XLP_OUT 1
+#define HAVE_XLP_OUT 1
 #endif
 
 extern uint8_t main_cycle;
@@ -150,22 +151,22 @@ void update_power_state(void) {
     if (power_state != new_power_state) {
         power_state = new_power_state;
 
-    #if LEVEL >= LEVEL_DEBUG
+#if LEVEL >= LEVEL_DEBUG
         switch (power_state) {
-            case POWER_STATE_OFF:
-                DEBUG("POWER_STATE_OFF\n");
-                break;
-            case POWER_STATE_S5:
-                DEBUG("POWER_STATE_S5\n");
-                break;
-            case POWER_STATE_S3:
-                DEBUG("POWER_STATE_S3\n");
-                break;
-            case POWER_STATE_S0:
-                DEBUG("POWER_STATE_S0\n");
-                break;
+        case POWER_STATE_OFF:
+            DEBUG("POWER_STATE_OFF\n");
+            break;
+        case POWER_STATE_S5:
+            DEBUG("POWER_STATE_S5\n");
+            break;
+        case POWER_STATE_S3:
+            DEBUG("POWER_STATE_S3\n");
+            break;
+        case POWER_STATE_S0:
+            DEBUG("POWER_STATE_S0\n");
+            break;
         }
-    #endif
+#endif
     }
 }
 
@@ -243,10 +244,10 @@ void power_on(void) {
             break;
         }
 
+#if CONFIG_BUS_ESPI
         // Check for VW changes
-        #if CONFIG_BUS_ESPI
-            espi_event();
-        #endif // CONFIG_BUS_ESPI
+        espi_event();
+#endif // CONFIG_BUS_ESPI
 
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
@@ -434,11 +435,11 @@ void power_event(void) {
             }
         }
     }
-    #if LEVEL >= LEVEL_DEBUG
-        else if (ps_new && !ps_last) {
-            DEBUG("%02X: Power switch release\n", main_cycle);
-        }
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    else if (ps_new && !ps_last) {
+        DEBUG("%02X: Power switch release\n", main_cycle);
+    }
+#endif
     ps_last = ps_new;
 
     // Send power signal to PCH
@@ -467,7 +468,7 @@ void power_event(void) {
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
         GPIO_SET_DEBUG(PCH_PWROK_EC, true);
 #endif // HAVE_PCH_PWROK_EC
-    } else if(!pg_new && pg_last) {
+    } else if (!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
 #if HAVE_PCH_PWROK_EC
@@ -482,14 +483,15 @@ void power_event(void) {
     }
     pg_last = pg_new;
 
+    // clang-format off
     static bool rst_last = false;
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
-    #if LEVEL >= LEVEL_DEBUG
-        if (!rst_new && rst_last) {
-            DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
-        } else
-    #endif
-    if(rst_new && !rst_last) {
+#if LEVEL >= LEVEL_DEBUG
+    if (!rst_new && rst_last) {
+        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
+    } else
+#endif
+    if (rst_new && !rst_last) {
         DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
 #if CONFIG_BUS_ESPI
         espi_reset();
@@ -498,18 +500,19 @@ void power_event(void) {
 #endif // CONFIG_BUS_ESPI
     }
     rst_last = rst_new;
+    // clang-format on
 
 #if HAVE_SLP_SUS_N
-    #if LEVEL >= LEVEL_DEBUG
-        static bool sus_last = true;
-        bool sus_new = gpio_get(&SLP_SUS_N);
-        if (!sus_new && sus_last) {
-            DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
-        } else if (sus_new && !sus_last) {
-            DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
-        }
-        sus_last = sus_new;
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    static bool sus_last = true;
+    bool sus_new = gpio_get(&SLP_SUS_N);
+    if (!sus_new && sus_last) {
+        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
+    } else if (sus_new && !sus_last) {
+        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
+    }
+    sus_last = sus_new;
+#endif
 #endif // HAVE_SLP_SUS_N
 
 #if CONFIG_BUS_ESPI
@@ -519,13 +522,13 @@ void power_event(void) {
     // state is S3
     static bool ack_last = false;
     bool ack_new = gpio_get(&SUSWARN_N);
-    #if LEVEL >= LEVEL_DEBUG
-        if (ack_new && !ack_last) {
-            DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
-        } else if (!ack_new && ack_last) {
-            DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
-        }
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    if (ack_new && !ack_last) {
+        DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
+    } else if (!ack_new && ack_last) {
+        DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
+    }
+#endif
     ack_last = ack_new;
 
     if (ack_new)
@@ -547,11 +550,11 @@ void power_event(void) {
             power_on();
         }
     }
-    #if LEVEL >= LEVEL_DEBUG
-        else if (wake_new && !wake_last) {
-            DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
-        }
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    else if (wake_new && !wake_last) {
+        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
+    }
+#endif
     wake_last = wake_new;
 #endif // HAVE_LAN_WAKEUP_N
 

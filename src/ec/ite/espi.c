@@ -35,30 +35,30 @@ struct VirtualWire __code VW_SUS_ACK_N = VIRTUAL_WIRE(40, 0);
 struct VirtualWire __code VW_SUS_WARN_N = VIRTUAL_WIRE(41, 0);
 struct VirtualWire __code VW_SUS_PWRDN_ACK = VIRTUAL_WIRE(41, 1);
 
-enum VirtualWireState vw_get(struct VirtualWire * vw) __critical {
+enum VirtualWireState vw_get(struct VirtualWire *vw) __critical {
     uint8_t index = *vw->index;
     switch ((index >> vw->shift) & VWS_HIGH) {
-        case VWS_LOW:
-            return VWS_LOW;
-        case VWS_HIGH:
-            return VWS_HIGH;
-        default:
-            return VWS_INVALID;
+    case VWS_LOW:
+        return VWS_LOW;
+    case VWS_HIGH:
+        return VWS_HIGH;
+    default:
+        return VWS_INVALID;
     }
 }
 
-void vw_set(struct VirtualWire * vw, enum VirtualWireState state) __critical {
+void vw_set(struct VirtualWire *vw, enum VirtualWireState state) __critical {
     uint8_t index = *vw->index;
     index &= ~(VWS_HIGH << vw->shift);
     switch (state) {
-        case VWS_LOW:
-            index |= VWS_LOW << vw->shift;
-            break;
-        case VWS_HIGH:
-            index |= VWS_HIGH << vw->shift;
-            break;
-        default:
-            break;
+    case VWS_LOW:
+        index |= VWS_LOW << vw->shift;
+        break;
+    case VWS_HIGH:
+        index |= VWS_HIGH << vw->shift;
+        break;
+    default:
+        break;
     }
     *vw->index = index;
 }

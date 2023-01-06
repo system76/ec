@@ -6,7 +6,6 @@
 #include <board/gpio.h>
 #include <ec/ec.h>
 
-
 void board_init(void) {
     espi_init();
 

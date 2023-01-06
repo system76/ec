@@ -89,7 +89,6 @@ static struct Gpio GPIOS[24] = {
     GPIO(A, 0), GPIO(A, 1),
 };
 #endif // !defined(FLIP)
-// clang-format on
 
 enum ParallelState {
     PARALLEL_STATE_UNKNOWN,
@@ -101,47 +100,51 @@ enum ParallelState {
 // Parallel struct definition
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm
 struct Parallel {
-    #define PIN(N, P) struct Gpio * N;
+#define PIN(N, P) struct Gpio *N;
     PINS
-    #undef PIN
+#undef PIN
     enum ParallelState state;
 };
 
 // Parallel struct instance
 static struct Parallel PORT = {
-    #define PIN(N, P) .N = &GPIOS[P - 1],
+#define PIN(N, P) .N = &GPIOS[P - 1],
     PINS
-    #undef PIN
+#undef PIN
     .state = PARALLEL_STATE_UNKNOWN,
 };
 
+// clang-format on
+
 // Set port to all high-impedance inputs
-void parallel_hiz(struct Parallel * port) {
-    #define PIN(N, P) \
-        gpio_set_dir(port->N, false); \
-        gpio_set(port->N, false);
+void parallel_hiz(struct Parallel *port) {
+#define PIN(N, P) \
+    gpio_set_dir(port->N, false); \
+    gpio_set(port->N, false);
     PINS
-    #undef PIN
+#undef PIN
 }
 
 // Place all data lines in high or low impendance state
-void parallel_data_dir(struct Parallel * port, bool dir) {
-    #define DATA_BIT(B) gpio_set_dir(port->d ## B, dir);
+void parallel_data_dir(struct Parallel *port, bool dir) {
+#define DATA_BIT(B) gpio_set_dir(port->d##B, dir);
     DATA_BITS
-    #undef DATA_BIT
+#undef DATA_BIT
 }
 #define parallel_data_forward(P) parallel_data_dir(P, true)
 #define parallel_data_reverse(P) parallel_data_dir(P, false)
 
-void parallel_data_set_high(struct Parallel * port, uint8_t byte) {
+void parallel_data_set_high(struct Parallel *port, uint8_t byte) {
     // By convention all lines are high, so only set the ones needed
-    #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, true);
+#define DATA_BIT(B) \
+    if (!(byte & (1 << B))) \
+        gpio_set(port->d##B, true);
     DATA_BITS
-    #undef DATA_BIT
+#undef DATA_BIT
 }
 
 // Set port to initial state required before being able to perform cycles
-void parallel_reset(struct Parallel * port, bool host) {
+void parallel_reset(struct Parallel *port, bool host) {
     parallel_hiz(port);
 
     // nRESET: output on host, input on peripherals
@@ -166,9 +169,9 @@ void parallel_reset(struct Parallel * port, bool host) {
     gpio_set_dir(port->wait_n, !host);
 
     // Pull up data lines on host, leave floating on peripherals
-    #define DATA_BIT(B) gpio_set(port->d ## B, host);
+#define DATA_BIT(B) gpio_set(port->d##B, host);
     DATA_BITS
-    #undef DATA_BIT
+#undef DATA_BIT
 
     //TODO: something with straps
 
@@ -180,42 +183,53 @@ void parallel_reset(struct Parallel * port, bool host) {
     }
 }
 
-void parallel_state(struct Parallel * port, enum ParallelState state) {
+void parallel_state(struct Parallel *port, enum ParallelState state) {
     if (port->state != state) {
         switch (state) {
-            case PARALLEL_STATE_UNKNOWN:
-                return;
-            case PARALLEL_STATE_HIZ:
-                parallel_hiz(port);
-                break;
-            case PARALLEL_STATE_HOST:
-                parallel_reset(port, true);
-                break;
-            case PARALLEL_STATE_PERIPHERAL:
-                parallel_reset(port, false);
-                break;
+        case PARALLEL_STATE_UNKNOWN:
+            return;
+        case PARALLEL_STATE_HIZ:
+            parallel_hiz(port);
+            break;
+        case PARALLEL_STATE_HOST:
+            parallel_reset(port, true);
+            break;
+        case PARALLEL_STATE_PERIPHERAL:
+            parallel_reset(port, false);
+            break;
         }
         port->state = state;
     }
 }
 
-uint8_t parallel_read_data(struct Parallel * port) {
+uint8_t parallel_read_data(struct Parallel *port) {
     uint8_t byte = 0;
-    #define DATA_BIT(B) if (gpio_get(port->d ## B)) byte |= (1 << B);
+#define DATA_BIT(B) \
+    if (gpio_get(port->d##B)) \
+        byte |= (1 << B);
     DATA_BITS
-    #undef DATA_BIT
+#undef DATA_BIT
     return byte;
 }
 
-void parallel_write_data(struct Parallel * port, uint8_t byte) {
+void parallel_write_data(struct Parallel *port, uint8_t byte) {
     // By convention all lines are high, so only set the ones needed
-    #define DATA_BIT(B) if (!(byte & (1 << B))) gpio_set(port->d ## B, false);
+
+#define DATA_BIT(B) \
+    if (!(byte & (1 << B))) \
+        gpio_set(port->d##B, false);
     DATA_BITS
-    #undef DATA_BIT
+#undef DATA_BIT
 }
 
 //TODO: timeout
-int16_t parallel_transaction(struct Parallel * port, uint8_t * data, int16_t length, bool read, bool addr) {
+int16_t parallel_transaction(
+    struct Parallel *port,
+    uint8_t *data,
+    int16_t length,
+    bool read,
+    bool addr
+) {
     if (!read) {
         // Set write line low
         gpio_set(port->write_n, false);
@@ -285,7 +299,7 @@ int16_t parallel_transaction(struct Parallel * port, uint8_t * data, int16_t len
 
 // host write -> peripheral read
 // host read -> peripheral write
-bool parallel_peripheral_cycle(struct Parallel * port, uint8_t * data, bool * read, bool * addr) {
+bool parallel_peripheral_cycle(struct Parallel *port, uint8_t *data, bool *read, bool *addr) {
     if (!gpio_get(port->reset_n)) {
         // XXX: Give host some time to get ready
         _delay_ms(1);
@@ -337,23 +351,28 @@ static uint8_t ZERO = 0x00;
 static uint8_t SPI_ENABLE = 0xFE;
 static uint8_t SPI_DATA = 0xFD;
 
-int16_t parallel_ecms_read(struct Parallel *port, uint16_t addr, uint8_t * data, int16_t length) {
+int16_t parallel_ecms_read(struct Parallel *port, uint16_t addr, uint8_t *data, int16_t length) {
     int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_ECMSADDR1, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_write(port, ((uint8_t *)&addr) + 1, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_set_address(port, &ADDRESS_ECMSADDR0, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_write(port, (uint8_t *)&addr, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_set_address(port, &ADDRESS_ECMSDATA, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     return parallel_read(port, data, length);
 }
@@ -363,29 +382,35 @@ int16_t parallel_spi_reset(struct Parallel *port) {
     int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_write(port, &SPI_ENABLE, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_set_address(port, &ADDRESS_INDDR, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     return parallel_write(port, &ZERO, 1);
 }
 
 // Enable chip and read or write data
-int16_t parallel_spi_transaction(struct Parallel *port, uint8_t * data, int16_t length, bool read) {
+int16_t parallel_spi_transaction(struct Parallel *port, uint8_t *data, int16_t length, bool read) {
     int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_write(port, &SPI_DATA, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     res = parallel_set_address(port, &ADDRESS_INDDR, 1);
-    if (res < 0) return res;
+    if (res < 0)
+        return res;
 
     return parallel_transaction(port, data, length, read, false);
 }
@@ -394,16 +419,22 @@ int16_t parallel_spi_transaction(struct Parallel *port, uint8_t * data, int16_t 
 #define parallel_spi_write(P, D, L) parallel_spi_transaction(P, D, L, false)
 
 // "Hardware" accelerated SPI programming, requires ECINDARs to be set
-int16_t parallel_spi_program(struct Parallel * port, uint8_t * data, int16_t length, bool initialized) {
+int16_t parallel_spi_program(
+    struct Parallel *port,
+    uint8_t *data,
+    int16_t length,
+    bool initialized
+) {
     static uint8_t aai[6] = { 0xAD, 0, 0, 0, 0, 0 };
     int16_t res;
     int16_t i;
     uint8_t status;
 
-    for(i = 0; (i + 1) < length; i+=2) {
+    for (i = 0; (i + 1) < length; i += 2) {
         // Disable chip to begin command
         res = parallel_spi_reset(port);
-        if (res < 0) return res;
+        if (res < 0)
+            return res;
 
         if (!initialized) {
             // If not initialized, the start address must be sent
@@ -415,7 +446,8 @@ int16_t parallel_spi_program(struct Parallel * port, uint8_t * data, int16_t len
             aai[5] = data[i + 1];
 
             res = parallel_spi_write(port, aai, 6);
-            if (res < 0) return res;
+            if (res < 0)
+                return res;
 
             initialized = true;
         } else {
@@ -423,30 +455,35 @@ int16_t parallel_spi_program(struct Parallel * port, uint8_t * data, int16_t len
             aai[2] = data[i + 1];
 
             res = parallel_spi_write(port, aai, 3);
-            if (res < 0) return res;
+            if (res < 0)
+                return res;
         }
 
         // Wait for SPI busy flag to clear
         for (;;) {
             // Disable chip to begin command
             res = parallel_spi_reset(port);
-            if (res < 0) return res;
+            if (res < 0)
+                return res;
 
             status = 0x05;
             res = parallel_spi_write(port, &status, 1);
-            if (res < 0) return res;
+            if (res < 0)
+                return res;
 
             res = parallel_spi_read(port, &status, 1);
-            if (res < 0) return res;
+            if (res < 0)
+                return res;
 
-            if (!(status & 1)) break;
+            if (!(status & 1))
+                break;
         }
     }
 
     return i;
 }
 
-int16_t serial_transaction(uint8_t * data, int16_t length, bool read) {
+int16_t serial_transaction(uint8_t *data, int16_t length, bool read) {
     int16_t i;
     for (i = 0; i < length; i++) {
         if (read) {
@@ -465,7 +502,7 @@ int16_t serial_transaction(uint8_t * data, int16_t length, bool read) {
 int parallel_main(void) {
     int16_t res = 0;
 
-    struct Parallel * port = &PORT;
+    struct Parallel *port = &PORT;
     parallel_state(port, PARALLEL_STATE_HIZ);
 
     static uint8_t data[128];
@@ -481,7 +518,8 @@ int parallel_main(void) {
     for (;;) {
         // Read command and length
         res = serial_read(data, 2);
-        if (res < 0) goto err;
+        if (res < 0)
+            goto err;
         // Command is a character
         command = (char)data[0];
 
@@ -499,164 +537,183 @@ int parallel_main(void) {
         // Length is received data + 1
         length = ((int16_t)data[1]) + 1;
         // Truncate length to size of data
-        if (length > sizeof(data)) length = sizeof(data);
+        if (length > sizeof(data))
+            length = sizeof(data);
 
         switch (command) {
-            // Buffer size
-            case 'B':
-                // Fill buffer size - 1
-                for (i = 0; i < length; i++) {
-                    if (i == 0) {
-                        data[i] = (uint8_t)(sizeof(data) - 1);
-                    } else {
-                        data[i] = 0;
+        // Buffer size
+        case 'B':
+            // Fill buffer size - 1
+            for (i = 0; i < length; i++) {
+                if (i == 0) {
+                    data[i] = (uint8_t)(sizeof(data) - 1);
+                } else {
+                    data[i] = 0;
+                }
+            }
+
+            // Write data to serial
+            res = serial_write(data, length);
+            if (res < 0)
+                goto err;
+
+            break;
+
+        // Debug console
+        case 'C':
+            // Set parallel lines to peripheral mode
+            parallel_state(port, PARALLEL_STATE_PERIPHERAL);
+
+            // Tell the user the console is ready
+            serial_write(console_msg, sizeof(console_msg));
+            for (;;) {
+                bool read = false;
+                bool addr = false;
+                if (parallel_peripheral_cycle(port, data, &read, &addr)) {
+                    if (!read && !addr) {
+                        res = serial_write(data, 1);
+                        if (res < 0)
+                            goto err;
                     }
                 }
+            }
 
-                // Write data to serial
-                res = serial_write(data, length);
-                if (res < 0) goto err;
+            break;
 
-                break;
+        // Echo
+        case 'E':
+            // Read data from serial
+            res = serial_read(data, length);
+            if (res < 0)
+                goto err;
 
-            // Debug console
-            case 'C':
-                // Set parallel lines to peripheral mode
-                parallel_state(port, PARALLEL_STATE_PERIPHERAL);
+            // Write data to serial
+            res = serial_write(data, length);
+            if (res < 0)
+                goto err;
 
-                // Tell the user the console is ready
-                serial_write(console_msg, sizeof(console_msg));
-                for (;;) {
-                    bool read = false;
-                    bool addr = false;
-                    if (parallel_peripheral_cycle(port, data, &read, &addr)) {
-                        if (!read && !addr) {
-                            res = serial_write(data, 1);
-                            if (res < 0) goto err;
-                        }
-                    }
+            break;
+
+        // Forced debug console (can be used on all firmware but may miss bytes)
+        case 'F':
+            serial_write(console_msg, sizeof(console_msg));
+
+            // We must be in host mode
+            parallel_state(port, PARALLEL_STATE_HOST);
+
+            uint16_t head = 0;
+            for (;;) {
+                // Read current position
+                res = parallel_ecms_read(port, 0xF00, data, 1);
+                if (res < 0)
+                    goto err;
+
+                uint16_t tail = (uint16_t)data[0];
+                if (tail == 0 || head == tail) {
+                    // No new data
+                    continue;
                 }
 
-                break;
-
-            // Echo
-            case 'E':
-                // Read data from serial
-                res = serial_read(data, length);
-                if (res < 0) goto err;
-
-                // Write data to serial
-                res = serial_write(data, length);
-                if (res < 0) goto err;
-
-                break;
-
-            // Forced debug console (can be used on all firmware but may miss bytes)
-            case 'F':
-                serial_write(console_msg, sizeof(console_msg));
-
-                // We must be in host mode
-                parallel_state(port, PARALLEL_STATE_HOST);
-
-                uint16_t head = 0;
-                for (;;) {
-                    // Read current position
-                    res = parallel_ecms_read(port, 0xF00, data, 1);
-                    if (res < 0) goto err;
-
-                    uint16_t tail = (uint16_t)data[0];
-                    if (tail == 0 || head == tail) {
-                        // No new data
-                        continue;
-                    }
-
-                    if (head == 0) {
-                        // Set head if necessary
-                        head = tail;
-                        continue;
-                    }
-
-                    while (head != tail) {
-                        head += 1;
-                        if (head >= 256) { head = 1; }
-
-                        // Read byte at head
-                        res = parallel_ecms_read(port, 0xF00 + head, data, 1);
-                        if (res < 0) goto err;
-
-                        // Print read byte
-                        serial_write(data, 1);
-                    }
+                if (head == 0) {
+                    // Set head if necessary
+                    head = tail;
+                    continue;
                 }
 
-                break;
+                while (head != tail) {
+                    head += 1;
+                    if (head >= 256) {
+                        head = 1;
+                    }
 
-            // Read data
-            case 'R':
-                parallel_state(port, PARALLEL_STATE_HOST);
+                    // Read byte at head
+                    res = parallel_ecms_read(port, 0xF00 + head, data, 1);
+                    if (res < 0)
+                        goto err;
 
-                // Update parallel address if necessary
-                if (set_address) {
-                    res = parallel_set_address(port, &address, 1);
-                    if (res < 0) goto err;
-                    set_address = false;
+                    // Print read byte
+                    serial_write(data, 1);
                 }
+            }
 
-                // Read data from parallel
-                res = parallel_read(port, data, length);
-                if (res < 0) goto err;
+            break;
 
-                // Write data to serial
-                res = serial_write(data, length);
-                if (res < 0) goto err;
+        // Read data
+        case 'R':
+            parallel_state(port, PARALLEL_STATE_HOST);
 
-                break;
+            // Update parallel address if necessary
+            if (set_address) {
+                res = parallel_set_address(port, &address, 1);
+                if (res < 0)
+                    goto err;
+                set_address = false;
+            }
 
-            // Accelerated program function
-            case 'P':
-                parallel_state(port, PARALLEL_STATE_HOST);
+            // Read data from parallel
+            res = parallel_read(port, data, length);
+            if (res < 0)
+                goto err;
 
-                // Read data from serial
-                res = serial_read(data, length);
-                if (res < 0) goto err;
+            // Write data to serial
+            res = serial_write(data, length);
+            if (res < 0)
+                goto err;
 
-                // Run accelerated programming function
-                res = parallel_spi_program(port, data, length, program_aai);
-                if (res < 0) goto err;
-                program_aai = true;
+            break;
 
-                // Send ACK of data length
-                data[0] = (uint8_t)(length - 1);
-                res = serial_write(data, 1);
-                if (res < 0) goto err;
+        // Accelerated program function
+        case 'P':
+            parallel_state(port, PARALLEL_STATE_HOST);
 
-                break;
+            // Read data from serial
+            res = serial_read(data, length);
+            if (res < 0)
+                goto err;
 
-            // Write data
-            case 'W':
-                parallel_state(port, PARALLEL_STATE_HOST);
+            // Run accelerated programming function
+            res = parallel_spi_program(port, data, length, program_aai);
+            if (res < 0)
+                goto err;
+            program_aai = true;
 
-                // Read data from serial
-                res = serial_read(data, length);
-                if (res < 0) goto err;
+            // Send ACK of data length
+            data[0] = (uint8_t)(length - 1);
+            res = serial_write(data, 1);
+            if (res < 0)
+                goto err;
 
-                // Update parallel address if necessary
-                if (set_address) {
-                    res = parallel_set_address(port, &address, 1);
-                    if (res < 0) goto err;
-                    set_address = false;
-                }
+            break;
 
-                // Write data to parallel
-                res = parallel_write(port, data, length);
-                if (res < 0) goto err;
+        // Write data
+        case 'W':
+            parallel_state(port, PARALLEL_STATE_HOST);
 
-                // Send ACK of data length
-                data[0] = (uint8_t)(length - 1);
-                res = serial_write(data, 1);
-                if (res < 0) goto err;
+            // Read data from serial
+            res = serial_read(data, length);
+            if (res < 0)
+                goto err;
 
-                break;
+            // Update parallel address if necessary
+            if (set_address) {
+                res = parallel_set_address(port, &address, 1);
+                if (res < 0)
+                    goto err;
+                set_address = false;
+            }
+
+            // Write data to parallel
+            res = parallel_write(port, data, length);
+            if (res < 0)
+                goto err;
+
+            // Send ACK of data length
+            data[0] = (uint8_t)(length - 1);
+            res = serial_write(data, 1);
+            if (res < 0)
+                goto err;
+
+            break;
         }
     }
 

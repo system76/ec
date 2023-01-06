@@ -22,7 +22,7 @@ void smbus_init(void) {
     i2c_reset(&I2C_SMBUS, true);
 }
 
-int16_t smbus_read(uint8_t address, uint8_t command, uint16_t * data) {
+int16_t smbus_read(uint8_t address, uint8_t command, uint16_t *data) {
     return i2c_get(&I2C_SMBUS, address, command, (uint8_t *)data, 2);
 }
 

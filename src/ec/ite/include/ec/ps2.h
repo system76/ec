@@ -12,17 +12,17 @@
 #define PSSTS_DONE BIT(3)
 
 struct Ps2 {
-    volatile uint8_t * control;
-    volatile uint8_t * interrupt;
-    volatile uint8_t * status;
-    volatile uint8_t * data;
+    volatile uint8_t *control;
+    volatile uint8_t *interrupt;
+    volatile uint8_t *status;
+    volatile uint8_t *data;
 };
 
 extern struct Ps2 __code PS2_1;
 extern struct Ps2 __code PS2_2;
 extern struct Ps2 __code PS2_3;
 
-void ps2_reset(struct Ps2 * ps2);
+void ps2_reset(struct Ps2 *ps2);
 
 volatile uint8_t __xdata __at(0x1700) PSCTL1;
 volatile uint8_t __xdata __at(0x1701) PSCTL2;

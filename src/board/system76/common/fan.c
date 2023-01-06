@@ -25,9 +25,9 @@ void fan_reset(void) {
 
 // Get duty cycle based on temperature, adapted from
 // https://github.com/pop-os/system76-power/blob/master/src/fan.rs
-uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
+uint8_t fan_duty(const struct Fan *fan, int16_t temp) __reentrant {
     for (uint8_t i = 0; i < fan->points_size; i++) {
-        const struct FanPoint * cur = &fan->points[i];
+        const struct FanPoint *cur = &fan->points[i];
 
         // If exactly the current temp, return the current duty
         if (temp == cur->temp) {
@@ -37,17 +37,19 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
             if (i == 0) {
                 return MIN_FAN_SPEED;
             } else {
-                const struct FanPoint * prev = &fan->points[i - 1];
+                const struct FanPoint *prev = &fan->points[i - 1];
 
                 if (fan->interpolate) {
                     // If in between current temp and previous temp, interpolate
                     if (temp > prev->temp) {
                         int16_t dtemp = (cur->temp - prev->temp);
                         int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
+                        // clang-format off
                         return (uint8_t)(
                             ((int16_t)prev->duty) +
                             ((temp - prev->temp) * dduty) / dtemp
                         );
+                        // clang-format on
                     }
                 } else {
                     return prev->duty;
@@ -61,10 +63,10 @@ uint8_t fan_duty(const struct Fan * fan, int16_t temp) __reentrant {
 }
 
 void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
-    #if SYNC_FANS != 0
-        peci_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
-        dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
-    #endif
+#if SYNC_FANS != 0
+    peci_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
+    dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
+#endif
 
     // set PECI fan duty
     if (peci_fan_duty != DCR2) {
@@ -83,7 +85,7 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
     }
 }
 
-uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant {
+uint8_t fan_heatup(const struct Fan *fan, uint8_t duty) __reentrant {
     uint8_t lowest = duty;
 
     uint8_t i;
@@ -99,7 +101,7 @@ uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant {
     return lowest;
 }
 
-uint8_t fan_cooldown(const struct Fan * fan, uint8_t duty) __reentrant {
+uint8_t fan_cooldown(const struct Fan *fan, uint8_t duty) __reentrant {
     uint8_t highest = duty;
 
     uint8_t i;
@@ -121,9 +123,11 @@ uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
     // ramping down
     if (duty < last_duty) {
         // out of bounds (lower) safeguard
+        // clang-format off
         uint8_t smoothed = last_duty < MIN_FAN_SPEED + MAX_JUMP_DOWN
             ? MIN_FAN_SPEED
             : last_duty - MAX_JUMP_DOWN;
+        // clang-format on
 
         // use smoothed value if above min and if smoothed is closer than raw
         if (last_duty > MIN_SPEED_TO_SMOOTH && smoothed > duty) {
@@ -134,9 +138,11 @@ uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
     // ramping up
     if (duty > last_duty) {
         // out of bounds (higher) safeguard
+        // clang-format off
         uint8_t smoothed = last_duty > MAX_FAN_SPEED - MAX_JUMP_UP
             ? MAX_FAN_SPEED
             : last_duty + MAX_JUMP_UP;
+        // clang-format on
 
         // use smoothed value if above min and if smoothed is closer than raw
         if (duty > MIN_SPEED_TO_SMOOTH && smoothed < duty) {

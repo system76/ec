@@ -12,17 +12,17 @@ void kbc_init(void);
 
 struct Kbc {
     // Control register
-    volatile uint8_t * control;
+    volatile uint8_t *control;
     // Interrupt control register
-    volatile uint8_t * irq;
+    volatile uint8_t *irq;
     // Status register
-    volatile uint8_t * status;
+    volatile uint8_t *status;
     // Keyboard out register
-    volatile uint8_t * keyboard_out;
+    volatile uint8_t *keyboard_out;
     // Mouse out register
-    volatile uint8_t * mouse_out;
+    volatile uint8_t *mouse_out;
     // Data in register
-    volatile uint8_t * data_in;
+    volatile uint8_t *data_in;
 };
 
 extern struct Kbc __code KBC;
@@ -31,10 +31,10 @@ extern struct Kbc __code KBC;
 #define KBC_STS_IBF BIT(1)
 #define KBC_STS_CMD BIT(3)
 
-uint8_t kbc_status(struct Kbc * kbc);
-uint8_t kbc_read(struct Kbc * kbc);
-bool kbc_keyboard(struct Kbc * kbc, uint8_t data, uint16_t timeout);
-bool kbc_mouse(struct Kbc * kbc, uint8_t data, uint16_t timeout);
+uint8_t kbc_status(struct Kbc *kbc);
+uint8_t kbc_read(struct Kbc *kbc);
+bool kbc_keyboard(struct Kbc *kbc, uint8_t data, uint16_t timeout);
+bool kbc_mouse(struct Kbc *kbc, uint8_t data, uint16_t timeout);
 
 volatile uint8_t __xdata __at(0x1300) KBHICR;
 volatile uint8_t __xdata __at(0x1302) KBIRQR;

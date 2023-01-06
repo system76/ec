@@ -7,11 +7,11 @@
 
 enum EcOs {
     // No ACPI or driver support
-    EC_OS_NONE=0,
+    EC_OS_NONE = 0,
     // ACPI, but no driver support
-    EC_OS_ACPI=1,
+    EC_OS_ACPI = 1,
     // ACPI with driver, full support
-    EC_OS_FULL=2,
+    EC_OS_FULL = 2,
 };
 extern enum EcOs acpi_ecos;
 

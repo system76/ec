@@ -5,7 +5,7 @@
 #include <ec/dac.h>
 
 #if !defined(KBLED_DAC)
-    #error "KBLED_DAC must be defined"
+#error "KBLED_DAC must be defined"
 #endif
 
 #define KBLED_DACDAT xconcat(DACDAT, KBLED_DAC)
@@ -54,6 +54,12 @@ void kbled_set(uint8_t level) {
     KBLED_DACDAT = raw;
 }
 
-uint32_t kbled_get_color(void) { /* Always white */ return 0xFFFFFF; }
+uint32_t kbled_get_color(void) {
+    /* Always white */
+    return 0xFFFFFF;
+}
 
-void kbled_set_color(uint32_t color) { /*Fix unused variable*/ color = color; }
+void kbled_set_color(uint32_t color) {
+    /* Fix unused variable */
+    color = color;
+}

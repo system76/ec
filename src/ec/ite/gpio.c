@@ -2,7 +2,7 @@
 
 #include <ec/gpio.h>
 
-bool gpio_get(struct Gpio * gpio) {
+bool gpio_get(struct Gpio *gpio) {
     if (*(gpio->data) & gpio->value) {
         return true;
     } else {
@@ -10,7 +10,7 @@ bool gpio_get(struct Gpio * gpio) {
     }
 }
 
-void gpio_set(struct Gpio * gpio, bool value) {
+void gpio_set(struct Gpio *gpio, bool value) {
     if (value) {
         *(gpio->data) |= gpio->value;
     } else {

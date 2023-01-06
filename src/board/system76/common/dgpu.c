@@ -15,14 +15,14 @@
 
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_DGPU_HEATUP
-    #define BOARD_DGPU_HEATUP 4
+#define BOARD_DGPU_HEATUP 4
 #endif
 
 static uint8_t FAN_HEATUP[BOARD_DGPU_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
 #ifndef BOARD_DGPU_COOLDOWN
-    #define BOARD_DGPU_COOLDOWN 10
+#define BOARD_DGPU_COOLDOWN 10
 #endif
 
 static uint8_t FAN_COOLDOWN[BOARD_DGPU_COOLDOWN] = { 0 };
@@ -31,7 +31,8 @@ int16_t dgpu_temp = 0;
 
 #define DGPU_TEMP(X) ((int16_t)(X))
 
-#define FAN_POINT(T, D) { .temp = DGPU_TEMP(T), .duty = PWM_DUTY(D) }
+#define FAN_POINT(T, D) \
+    { .temp = DGPU_TEMP(T), .duty = PWM_DUTY(D) }
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static struct FanPoint __code FAN_POINTS[] = {
@@ -100,7 +101,7 @@ uint8_t dgpu_get_fan_duty(void) {
 void dgpu_init(void) {}
 
 uint8_t dgpu_get_fan_duty(void) {
-  return PWM_DUTY(0);
+    return PWM_DUTY(0);
 }
 
 #endif // HAVE_DGPU

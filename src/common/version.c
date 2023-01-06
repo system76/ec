@@ -4,7 +4,7 @@
 
 // Prevent failures to compile on AVR
 #ifndef __SDCC
-    #define __code
+#define __code
 #endif
 
 // clang-format off
@@ -17,10 +17,10 @@ static const char __code VERSION[] =
     xstr(__FIRMWARE_VERSION__);
 // clang-format on
 
-const char * board() {
+const char *board() {
     return &BOARD[11];
 }
 
-const char * version() {
+const char *version() {
     return &VERSION[13];
 }

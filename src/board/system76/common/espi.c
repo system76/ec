@@ -13,36 +13,32 @@
 #include <8051.h>
 #include <stdint.h>
 
-#define DEBUG_SET(REG, MASK, BITS) { \
-    DEBUG("%s: %X", #REG, REG); \
-    REG = ((REG) & ~(MASK)) | (BITS); \
-    DEBUG(" set to %X\n", REG); \
-}
+#define DEBUG_SET(REG, MASK, BITS) \
+    { \
+        DEBUG("%s: %X", #REG, REG); \
+        REG = ((REG) & ~(MASK)) | (BITS); \
+        DEBUG(" set to %X\n", REG); \
+    }
 
-#define DEBUG_ON(REG, BITS) \
-    DEBUG_SET(REG, BITS, BITS)
+#define DEBUG_ON(REG, BITS) DEBUG_SET(REG, BITS, BITS)
 
-#define DEBUG_OFF(REG, BITS) \
-    DEBUG_SET(REG, BITS, 0)
+#define DEBUG_OFF(REG, BITS) DEBUG_SET(REG, BITS, 0)
 
-#define DEBUG_CHANGED(REG) { \
-    static uint8_t last_ ## REG = 0; \
-    uint8_t new_ ## REG = REG; \
-    if (new_ ## REG != last_ ## REG) { \
-        DEBUG( \
-            "%S: %X changed to %X\n", \
-            #REG, \
-            last_ ## REG, \
-            new_ ## REG \
-        ); \
-        last_ ## REG = new_ ## REG; \
-    } \
-}
+#define DEBUG_CHANGED(REG) \
+    { \
+        static uint8_t last_##REG = 0; \
+        uint8_t new_##REG = REG; \
+        if (new_##REG != last_##REG) { \
+            DEBUG("%S: %X changed to %X\n", #REG, last_##REG, new_##REG); \
+            last_##REG = new_##REG; \
+        } \
+    }
 
-#define VW_SET_DEBUG(W, V) { \
-    DEBUG("%s = %X\n", #W, V); \
-    vw_set(&W, V); \
-}
+#define VW_SET_DEBUG(W, V) \
+    { \
+        DEBUG("%s = %X\n", #W, V); \
+        vw_set(&W, V); \
+    }
 
 void espi_init(void) {
     if (PLLFREQ != 0b0111) {
