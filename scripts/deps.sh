@@ -66,6 +66,9 @@ fi
 msg "Initializing submodules"
 git submodule update --init --recursive
 
+msg "Installing git hooks"
+make git-config
+
 RUSTUP_NEW_INSTALL=0
 if which rustup &> /dev/null; then
     msg "Updating rustup"
