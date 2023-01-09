@@ -8,15 +8,13 @@ jobs:
   lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
-      - name: Check SPDX identifiers
-        run: ./scripts/lint/spdx.sh
-      - name: Check indentation
-        run: ./scripts/lint/indent.sh
+      - uses: actions/checkout@v3
+
+      - name:  Check SPDX tags
+        run: ./scripts/lint/01-spdx-tags.sh
 
       - name: Check formatting
-        run: ./scripts/clang-format.sh
-        continue-on-error: true
+        run: ./scripts/lint/02-clang-format.sh
 
   tool:
     strategy:
@@ -27,7 +25,7 @@ jobs:
 
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: ./scripts/deps.sh
@@ -90,7 +88,7 @@ jobs:
             board: oryp9
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: ./scripts/deps.sh
