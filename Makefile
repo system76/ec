@@ -76,3 +76,8 @@ clean:
 .PHONY: lint
 lint:
 	./scripts/lint/lint.sh
+
+.PHONY: git-config
+git-config:
+	$(eval HOOKS = "$(shell git rev-parse --git-dir)/hooks")
+	ln -sfrv scripts/hooks/pre-commit.sh "$(HOOKS)/pre-commit"
