@@ -69,6 +69,10 @@ include $(ARCH_DIR)/toolchain.mk
 # The architecture defines build targets, no more is required
 endif
 
-# Target to remove build artifacts
+.PHONY: clean
 clean:
 	rm -rf $(obj)
+
+.PHONY: lint
+lint:
+	./scripts/lint/lint.sh
