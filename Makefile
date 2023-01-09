@@ -13,10 +13,7 @@ endif
 # Parameter for current board
 ifeq ($(BOARD),)
 all:
-	@echo "Please set BOARD to one of the following:"
-	@cd src/board && for board in */*/board.mk; do \
-		echo "  $$(dirname "$$board")"; \
-	done
+	@echo -e "\x1B[31mBOARD must be specified\x1B[0m"
 	@exit 1
 else
 # Calculate version
@@ -73,11 +70,32 @@ endif
 clean:
 	rm -rf $(obj)
 
+.PHONY: fmt
+fmt:
+	./scripts/clang-format.sh apply
+
 .PHONY: lint
 lint:
 	./scripts/lint/lint.sh
 
+.PHONY: list-boards
+list-boards:
+	@cd src/board && for board in */*/board.mk; do \
+		echo "$$(dirname "$$board")"; \
+	done
+
+# This target is run during setup, and is not shown in the help text.
 .PHONY: git-config
 git-config:
 	$(eval HOOKS = "$(shell git rev-parse --git-dir)/hooks")
 	ln -sfrv scripts/hooks/pre-commit.sh "$(HOOKS)/pre-commit"
+
+.PHONY: help
+help:
+	@echo "System76 EC build targets"
+	@echo "    [all] BOARD=<B>      Build the specified board"
+	@echo "    list-boards          List available target boards"
+	@echo "    clean                Remove build artifacts"
+	@echo "    fmt                  Format the source code"
+	@echo "    lint                 Run lint checks"
+	@echo "    help                 Print this message"
