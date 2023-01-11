@@ -1,7 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-CC=avr-gcc -mmcu=$(EC_VARIANT)
-CFLAGS+=-Os -fstack-usage -Wall -Werror -Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
+CC = avr-gcc -mmcu=$(EC_VARIANT)
+CFLAGS += -MMD -Os -fstack-usage -Wall -Werror \
+	-Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
 
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
 ifneq ($(findstring 12.,$(shell avr-gcc --version 2>/dev/null)),)
@@ -35,3 +36,7 @@ $(BUILD)/ec.elf: $(OBJ)
 $(BUILD)/%.o: src/%.c $(INCLUDE)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
+
+# Add dependency rules
+DEP = $(OBJ:%.o=%.d)
+-include $(DEP)

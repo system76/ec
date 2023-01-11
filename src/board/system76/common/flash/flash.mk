@@ -14,7 +14,7 @@ FLASH_CFLAGS=$(CFLAGS)
 # Include flash source.
 FLASH_DIR=$(SYSTEM76_COMMON_DIR)/flash
 # Note: main.c *must* be first to ensure that flash_start is at the correct address
-FLASH_INCLUDE+=$(wildcard $(FLASH_DIR)/include/flash/*.h) $(FLASH_DIR)/flash.mk
+FLASH_INCLUDE += $(FLASH_DIR)/flash.mk
 FLASH_CFLAGS+=-I$(FLASH_DIR)/include -D__FLASH__
 FLASH_SRC += $(foreach src, $(flash-y), $(FLASH_DIR)/$(src))
 
@@ -23,6 +23,7 @@ FLASH_OBJ=$(sort $(patsubst src/%.c,$(FLASH_BUILD)/%.rel,$(FLASH_SRC)))
 FLASH_CC=\
 	sdcc \
 	-mmcs51 \
+	-MMD \
 	--model-large \
 	--opt-code-size \
 	--acall-ajmp \

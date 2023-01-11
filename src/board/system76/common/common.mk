@@ -51,7 +51,7 @@ endif
 
 # Include system76 common source
 SYSTEM76_COMMON_DIR=src/board/system76/common
-INCLUDE+=$(wildcard $(SYSTEM76_COMMON_DIR)/include/board/*.h) $(SYSTEM76_COMMON_DIR)/common.mk
+INCLUDE += $(SYSTEM76_COMMON_DIR)/common.mk
 CFLAGS+=-I$(SYSTEM76_COMMON_DIR)/include
 
 # Set battery charging thresholds
