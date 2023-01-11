@@ -1,7 +1,20 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-CC=sdcc -mmcs51 --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
-OBJ=$(sort $(patsubst src/%.c,$(BUILD)/%.rel,$(SRC)))
+CC = sdcc -mmcs51 --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
+
+AS = sdas8051
+ASFLAGS = -plosgff
+
+# NOTE: sdas *must* be used for assembly files as sdcc cannot compile them
+# itself. They must use an extension of `.asm` so they can be filtered here.
+
+ASM_SRC = $(filter %.asm, $(SRC))
+ASM_OBJ = $(sort $(patsubst src/%.asm, $(BUILD)/%.rel, $(ASM_SRC)))
+
+C_SRC = $(filter %.c, $(SRC))
+C_OBJ = $(sort $(patsubst src/%.c, $(BUILD)/%.rel, $(C_SRC)))
+
+OBJ = $(sort $(ASM_OBJ) $(C_OBJ))
 
 # Run EC rom in simulator
 sim: $(BUILD)/ec.rom
@@ -21,7 +34,12 @@ $(BUILD)/ec.ihx: $(OBJ)
 	@mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -o $@ $^
 
+# Compile ASM files into object files
+$(ASM_OBJ): $(BUILD)/%.rel: src/%.asm
+	@mkdir -p $(@D)
+	$(AS) $(ASFLAGS) $@ $<
+
 # Compile C files into object files
-$(OBJ): $(BUILD)/%.rel: src/%.c $(INCLUDE)
+$(C_OBJ): $(BUILD)/%.rel: src/%.c $(INCLUDE)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
