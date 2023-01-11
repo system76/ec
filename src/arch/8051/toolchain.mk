@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-CC = sdcc -mmcs51 --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
+CC = sdcc -mmcs51 -MMD --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
 
 AS = sdas8051
 ASFLAGS = -plosgff
@@ -48,3 +48,7 @@ $(ASM_OBJ): $(BUILD)/%.rel: src/%.asm
 $(C_OBJ): $(BUILD)/%.rel: src/%.c $(INCLUDE)
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
+
+# Add dependency rules
+DEP = $(OBJ:%.rel=%.d)
+-include $(DEP)
