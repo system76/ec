@@ -40,7 +40,7 @@ int16_t i2c_start(struct I2C *i2c, uint8_t addr, bool read) {
         return -1;
 
     // check if the device has acknowledged the READ / WRITE mode
-    uint8_t twst = TW_STATUS & 0xF8;
+    uint8_t twst = TW_STATUS;
     if ((twst != TW_MT_SLA_ACK) && (twst != TW_MR_SLA_ACK))
         return -1;
 
