@@ -10,6 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Install dependencies
+        run: ./scripts/deps.sh
+
       - name:  Check SPDX tags
         run: ./scripts/lint/01-spdx-tags.sh
 
