@@ -32,22 +32,26 @@ SCRATCH_CC=\
 
 # Convert from binary file to C header
 $(BUILD)/include/scratch.h: $(SCRATCH_BUILD)/scratch.rom
-	@mkdir -p $(@D)
+	@echo "  XXD       $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	xxd -include < $< > $@
 
 # Convert from Intel Hex file to binary file
 $(SCRATCH_BUILD)/scratch.rom: $(SCRATCH_BUILD)/scratch.ihx
-	@mkdir -p $(@D)
+	@echo "  OBJCOPY   $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	objcopy -I ihex -O binary $< $@
 
 # Link object files into Intel Hex file
 $(SCRATCH_BUILD)/scratch.ihx: $(SCRATCH_OBJ)
-	@mkdir -p $(@D)
+	@echo "  LINK      $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	$(SCRATCH_CC) -o $@ $^
 
 # Compile C files into object files
 $(SCRATCH_OBJ): $(SCRATCH_BUILD)/%.rel: src/%.c $(SCRATCH_INCLUDE)
-	@mkdir -p $(@D)
+	@echo "  CC        $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	$(SCRATCH_CC) $(SCRATCH_CFLAGS) -o $@ -c $<
 
 # Include scratch header in main firmware

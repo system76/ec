@@ -96,4 +96,4 @@ jobs:
         run: ./scripts/deps.sh
 
       - name: Build firmware
-        run: make BOARD=${{ matrix.vendor}}/${{ matrix.board }}
+        run: make BOARD=${{ matrix.vendor}}/${{ matrix.board }} VERBOSE=1

@@ -5,6 +5,11 @@
 # Disable built-in rules and variables
 MAKEFLAGS += -rR
 
+# Default to silent builds
+ifneq ($(VERBOSE),1)
+MAKEFLAGS += -s
+endif
+
 # Parameter for current board
 ifeq ($(BOARD),)
 all:
@@ -20,11 +25,12 @@ REV=$(shell git describe --abbrev=7 --always --dirty)
 VERSION?=$(DATE)_$(REV)
 
 # Set build directory
-BUILD=build/$(BOARD)/$(VERSION)
+obj = build
+BUILD = $(obj)/$(BOARD)/$(VERSION)
 
 # Default target - build the board's EC firmware
 all: $(BUILD)/ec.rom
-	$(info Built '$(VERSION)' for '$(BOARD)')
+	$(info Built $(VERSION) for $(BOARD))
 
 # Include common source
 COMMON_DIR=src/common
@@ -65,4 +71,4 @@ endif
 
 # Target to remove build artifacts
 clean:
-	rm -rf build
+	rm -rf $(obj)
