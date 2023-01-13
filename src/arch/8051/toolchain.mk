@@ -31,22 +31,26 @@ sim: $(BUILD)/ec.rom
 
 # Convert from Intel Hex file to binary file
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx
-	@mkdir -p $(@D)
+	@echo "  OBJCOPY   $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	objcopy -I ihex -O binary --gap-fill=0xFF $< $@
 
 # Link object files into Intel Hex file
 $(BUILD)/ec.ihx: $(OBJ)
-	@mkdir -p $(@D)
+	@echo "  LINK      $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 # Compile ASM files into object files
 $(ASM_OBJ): $(BUILD)/%.rel: src/%.asm
-	@mkdir -p $(@D)
+	@echo "  AS        $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	$(AS) $(ASFLAGS) $@ $<
 
 # Compile C files into object files
 $(C_OBJ): $(BUILD)/%.rel: src/%.c $(INCLUDE)
-	@mkdir -p $(@D)
+	@echo "  CC        $(subst $(obj)/,,$@)"
+	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
 # Add dependency rules
