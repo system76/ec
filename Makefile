@@ -2,6 +2,9 @@
 
 -include config.mk
 
+# Disable built-in rules and variables
+MAKEFLAGS += -rR
+
 # Parameter for current board
 ifeq ($(BOARD),)
 all:
