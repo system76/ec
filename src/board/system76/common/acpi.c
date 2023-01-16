@@ -26,15 +26,16 @@ static uint8_t fdat = 0;
 static uint8_t fbuf[4] = { 0, 0, 0, 0 };
 
 void fcommand(void) {
+    uint32_t color;
     switch (fcmd) {
         // Keyboard backlight
         case 0xCA:
             switch (fdat) {
-                // Set white LED brightness
+                // Set LED brightness
                 case 0x00:
                     kbled_set(fbuf[0]);
                     break;
-                // Get white LED brightness
+                // Get LED brightness
                 case 0x01:
                     fbuf[0] = kbled_get();
                     break;
@@ -45,6 +46,13 @@ void fcommand(void) {
                         ((uint32_t)fbuf[1] << 16) |
                         ((uint32_t)fbuf[2] << 8)
                     );
+                    break;
+                // Get LED color
+                case 0x04:
+                    color = kbled_get_color();
+                    fbuf[0] = color & 0x0000ff;
+                    fbuf[1] = (color & 0xff0000) >> 16;
+                    fbuf[2] = (color & 0x00ff00) >> 8;
                     break;
                 // Set LED brightness
                 case 0x06:
