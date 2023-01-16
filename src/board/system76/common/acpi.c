@@ -55,19 +55,11 @@ void fcommand(void) {
             break;
         // Get color
         case 4:
-            {
-                uint32_t color = kbled_get_color();
-                fbuf[0] = color & 0xFF;
-                fbuf[1] = (color >> 16) & 0xFF;
-                fbuf[2] = (color >> 8) & 0xFF;
-            }
+            uint32_t color = kbled_get_color();
+            fbuf[0] = color & 0xFF;
+            fbuf[1] = (color >> 16) & 0xFF;
+            fbuf[2] = (color >> 8) & 0xFF;
             break;
-        // DUPLICATE: Set brightness
-        case 6:
-            kbled_set(fbuf[0]);
-            break;
-        }
-        break;
     }
 }
 
