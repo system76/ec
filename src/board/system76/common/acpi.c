@@ -54,10 +54,6 @@ void fcommand(void) {
                     fbuf[1] = (color & 0xff0000) >> 16;
                     fbuf[2] = (color & 0x00ff00) >> 8;
                     break;
-                // Set LED brightness
-                case 0x06:
-                    kbled_set(fbuf[0]);
-                    break;
             }
             break;
     }
