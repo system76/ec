@@ -26,6 +26,7 @@ static uint8_t fdat = 0;
 static uint8_t fbuf[4] = { 0, 0, 0, 0 };
 
 void fcommand(void) {
+    uint32_t color;
     switch (fcmd) {
     // Keyboard backlight
     case 0xCA:
