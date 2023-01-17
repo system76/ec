@@ -178,8 +178,7 @@ static void hardware_hotkey(uint16_t key) {
         kbled_hotkey_step();
         break;
     case K_KBD_COLOR:
-        if (acpi_ecos != EC_OS_FULL)
-            kbled_hotkey_color();
+        kbled_hotkey_color();
         break;
     case K_KBD_DOWN:
         if (acpi_ecos != EC_OS_FULL)
