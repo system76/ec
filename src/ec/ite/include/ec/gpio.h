@@ -35,6 +35,10 @@ struct Gpio {
 bool gpio_get(struct Gpio *gpio);
 void gpio_set(struct Gpio *gpio, bool value);
 
+#ifdef GPIO_DEBUG
+void gpio_debug(void);
+#endif
+
 volatile uint8_t __xdata __at(0x1600) GCR;
 volatile uint8_t __xdata __at(0x16F0) GCR1;
 volatile uint8_t __xdata __at(0x16F1) GCR2;

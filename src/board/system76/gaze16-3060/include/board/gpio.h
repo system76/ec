@@ -6,7 +6,6 @@
 #include <ec/gpio.h>
 
 void gpio_init(void);
-void gpio_debug(void);
 
 extern struct Gpio __code ACIN_N;
 extern struct Gpio __code AC_PRESENT;
