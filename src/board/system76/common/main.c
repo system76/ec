@@ -90,7 +90,7 @@ void main(void) {
 
     INFO("\n");
 
-#if GPIO_DEBUG
+#ifdef GPIO_DEBUG
     gpio_debug();
 #endif
 

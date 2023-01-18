@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/gpio.h>
-#include <common/debug.h>
+#include <common/macro.h>
 
 // clang-format off
 struct Gpio __code ACIN_N =         GPIO(B, 0);
@@ -243,40 +243,3 @@ void gpio_init() {
     // ESPI_ALRT0#
     GPCRM6 = GPIO_IN | GPIO_UP;
 }
-
-#if GPIO_DEBUG
-void gpio_debug_bank(
-    char *bank,
-    uint8_t data,
-    uint8_t mirror,
-    uint8_t pot,
-    volatile uint8_t *control
-) {
-    for (char i = 0; i < 8; i++) {
-        DEBUG(
-            "%s%d:\n\tdata %d\n\tmirror %d\n\tpot %d\n\tcontrol %02X\n",
-            bank,
-            i,
-            (data >> i) & 1,
-            (mirror >> i) & 1,
-            (pot >> i) & 1,
-            *(control + i)
-        );
-    }
-}
-
-void gpio_debug(void) {
-#define bank(BANK) gpio_debug_bank(#BANK, GPDR##BANK, GPDMR##BANK, GPOT##BANK, &GPCR##BANK##0)
-    bank(A);
-    bank(B);
-    bank(C);
-    bank(D);
-    bank(E);
-    bank(F);
-    bank(G);
-    bank(H);
-    bank(I);
-    bank(J);
-#undef bank
-}
-#endif

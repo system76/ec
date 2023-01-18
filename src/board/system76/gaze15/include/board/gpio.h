@@ -6,7 +6,6 @@
 #include <ec/gpio.h>
 
 void gpio_init(void);
-void gpio_debug(void);
 
 // clang-format off
 extern struct Gpio __code ACIN_N;
