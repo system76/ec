@@ -19,8 +19,6 @@ extern uint8_t sci_extra;
 
 enum EcOs acpi_ecos = EC_OS_NONE;
 
-extern bool pmc_s0_hack;
-
 static uint8_t fcmd = 0;
 static uint8_t fdat = 0;
 static uint8_t fbuf[4] = { 0, 0, 0, 0 };
@@ -136,8 +134,6 @@ uint8_t acpi_read(uint8_t addr) {
 
         case 0x68:
             data = acpi_ecos;
-            // HACK: Kick PMC to fix suspend on lemp11
-            pmc_s0_hack = true;
             break;
 
         case 0xBC:
