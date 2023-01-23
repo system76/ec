@@ -21,6 +21,9 @@
 #include <board/scratch.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
+#include <board/peci.h>
+#include <board/dgpu.h>
+#include <board/fan.h>
 
 #if CONFIG_SECURITY
 #include <board/security.h>
@@ -264,6 +267,27 @@ static enum Result cmd_security_set(void) {
 }
 #endif // CONFIG_SECURITY
 
+// Command structure: [fan] [temp0] [duty0] ... [temp3] [duty3]
+static enum Result cmd_fan_curve_set(void) {
+    struct FanPoint points[4];
+
+    for (int i = 0; i < 4; ++i) {
+        points[i].temp = smfi_cmd[2 * i + SMFI_CMD_DATA + 1];
+        points[i].duty = smfi_cmd[2 * i + SMFI_CMD_DATA + 2] * 255 / 100;
+    }
+
+    switch (smfi_cmd[SMFI_CMD_DATA]) {
+        case 0:
+            peci_set_fan_curve(4, points);
+            break;
+        case 1:
+            dgpu_set_fan_curve(4, points);
+            break;
+        default:
+            return RES_ERR;
+    }
+    return RES_OK;
+}
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -411,7 +435,9 @@ void smfi_event(void) {
         case CMD_MATRIX_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_matrix_get();
             break;
-
+        case CMD_FAN_CURVE_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_curve_set();
+            break;
 #if CONFIG_SECURITY
         case CMD_SECURITY_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_security_get();

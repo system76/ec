@@ -37,7 +37,7 @@ struct FanPoint {
 };
 
 struct Fan {
-    const struct FanPoint *points;
+    struct FanPoint * points;
     uint8_t points_size;
     uint8_t *heatup;
     uint8_t heatup_size;
