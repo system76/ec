@@ -35,7 +35,7 @@ int16_t peci_temp = 0;
 #define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
 
 // Fan curve with temperature in degrees C, duty cycle in percent
-static struct FanPoint __code FAN_POINTS[] = {
+static struct FanPoint FAN_POINTS[] = {
 #ifdef BOARD_FAN_POINTS
     BOARD_FAN_POINTS
 #else
@@ -46,7 +46,7 @@ static struct FanPoint __code FAN_POINTS[] = {
 #endif
 };
 
-static struct Fan __code FAN = {
+static struct Fan FAN = {
     .points = FAN_POINTS,
     .points_size = ARRAY_SIZE(FAN_POINTS),
     .heatup = FAN_HEATUP,
@@ -55,6 +55,22 @@ static struct Fan __code FAN = {
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
     .interpolate = SMOOTH_FANS != 0,
 };
+
+int16_t peci_set_fan_curve(uint8_t count, struct FanPoint * points) {
+    if (count != FAN.points_size) {
+        TRACE("PECI: Incorrect number of fan points: %d, expected %d\n",
+            count, FAN.points_size);
+        return -1;
+    }
+
+    // TODO: check for curve validity? Or assume BIOS / user are sane?
+    for (int i = 0; i < count; ++i) {
+        TRACE("PECI: fan curve t%d: %d, d%d: %d\n", i, points[i].temp, i, points[i].duty);
+        FAN.points[i] = points[i];
+    }
+
+    return 0;
+}
 
 void peci_init(void) {
     // Allow PECI pin to be used

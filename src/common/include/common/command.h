@@ -46,6 +46,8 @@ enum Command {
     CMD_LED_SAVE = 18,
     // Enable/disable no input mode
     CMD_SET_NO_INPUT = 19,
+    // Set fan curve
+    CMD_FAN_CURVE_SET = 20,
     //TODO
 };
 
