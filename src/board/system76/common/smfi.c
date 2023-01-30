@@ -263,9 +263,11 @@ static enum Result cmd_fan_curve_set(void) {
         case 0:
             peci_set_fan_curve(4, points);
             break;
+#if HAVE_DGPU
         case 1:
             dgpu_set_fan_curve(4, points);
             break;
+#endif
         default:
             return RES_ERR;
     }
