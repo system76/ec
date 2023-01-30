@@ -63,7 +63,6 @@ int16_t peci_set_fan_curve(uint8_t count, struct FanPoint * points) {
         return -1;
     }
 
-    // TODO: check for curve validity? Or assume BIOS / user are sane?
     for (int i = 0; i < count; ++i) {
         TRACE("PECI: fan curve t%d: %d, d%d: %d\n", i, points[i].temp, i, points[i].duty);
         FAN.points[i] = points[i];
