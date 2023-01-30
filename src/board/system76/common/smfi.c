@@ -276,6 +276,9 @@ static enum Result cmd_fan_curve_set(void) {
         points[i].duty = smfi_cmd[2 * i + SMFI_CMD_DATA + 2] * 255 / 100;
     }
 
+    if (!fan_points_are_valid(4, points))
+        return RES_ERR;
+
     switch (smfi_cmd[SMFI_CMD_DATA]) {
         case 0:
             peci_set_fan_curve(4, points);
