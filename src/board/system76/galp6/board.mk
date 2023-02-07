@@ -5,9 +5,6 @@ EC=it5570e
 # Enable eSPI
 CFLAGS+=-DEC_ESPI=1
 
-# Use S0ix
-CFLAGS+=-DUSE_S0IX=1
-
 # Include keyboard
 KEYBOARD=14in_83
 
