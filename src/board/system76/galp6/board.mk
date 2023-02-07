@@ -12,9 +12,6 @@ CONFIG_BUS_ESPI=y
 # Enable firmware security
 CONFIG_SECURITY=y
 
-# Use S0ix
-CFLAGS+=-DUSE_S0IX=1
-
 # Include keyboard
 KEYBOARD=14in_83
 
