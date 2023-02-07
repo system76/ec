@@ -23,7 +23,6 @@
 #include <board/espi.h>
 #endif
 
-<<<<<<< HEAD
 #if CONFIG_SECURITY
 #include <board/security.h>
 #endif // CONFIG_SECURITY
@@ -33,16 +32,10 @@
         DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
         gpio_set(&G, V); \
     }
-=======
+
 #ifndef USE_S0IX
     #define USE_S0IX 0
 #endif
-
-#define GPIO_SET_DEBUG(G, V) { \
-    DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
-    gpio_set(&G, V); \
-}
->>>>>>> 43ba4be (Add config for using S0ix)
 
 #ifndef HAVE_EC_EN
 #define HAVE_EC_EN 1
@@ -609,18 +602,8 @@ void power_event(void) {
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-#if CONFIG_BUS_ESPI
-        if (!gpio_get(&SLP_S0_N)) {
-=======
-#if EC_ESPI
-        if (in_s0ix) {
->>>>>>> f5b9517 (Allow sub-500 ms wakeups while in s0ix)
-=======
 #if USE_S0IX
-        if (!gpio_get(&CPU_C10_GATE_N)) {
->>>>>>> 43ba4be (Add config for using S0ix)
+        if (in_s0ix) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
