@@ -9,6 +9,8 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
+#define MAYBE_UNUSED(x) ((void)(x))
+
 #define ARRAY_SIZE(X) (sizeof(X) / sizeof((X)[0]))
 
 #define BIT(X) (1UL << (X))
