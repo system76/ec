@@ -142,7 +142,7 @@ uint8_t peci_get_fan_duty(void) {
 
 #if USE_S0IX
     // Use PECI if platform is not in CS
-    peci_on = gpio_get(&SLP_S0_N);
+    peci_on = !in_s0ix;
 #else // USE_S0IX
     // Use PECI if in S0 state
     peci_on = power_state == POWER_STATE_S0;
