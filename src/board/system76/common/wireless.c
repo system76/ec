@@ -17,6 +17,8 @@
  * Set the WLAN card power state.
  */
 void wireless_power(bool enable) {
+    MAYBE_UNUSED(enable);
+
 #if HAVE_BT_EN
     gpio_set(&BT_EN, enable);
 #endif
