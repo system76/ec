@@ -21,6 +21,9 @@
     #include <board/scratch.h>
     #include <board/kbled.h>
     #include <board/kbscan.h>
+    #include <board/peci.h>
+    #include <board/dgpu.h>
+    #include <board/fan.h>
 #endif
 #include <board/smfi.h>
 #include <common/command.h>
@@ -243,6 +246,33 @@ static enum Result cmd_matrix_get(void) {
     }
     return RES_OK;
 }
+
+// Command structure: [fan] [temp0] [duty0] ... [temp3] [duty3]
+static enum Result cmd_fan_curve_set(void) {
+    struct FanPoint points[4];
+
+    for (int i = 0; i < 4; ++i) {
+        points[i].temp = smfi_cmd[2 * i + SMFI_CMD_DATA + 1];
+        points[i].duty = smfi_cmd[2 * i + SMFI_CMD_DATA + 2] * 255 / 100;
+    }
+
+    if (!fan_points_are_valid(4, points))
+        return RES_ERR;
+
+    switch (smfi_cmd[SMFI_CMD_DATA]) {
+        case 0:
+            peci_set_fan_curve(4, points);
+            break;
+#if HAVE_DGPU
+        case 1:
+            dgpu_set_fan_curve(4, points);
+            break;
+#endif
+        default:
+            return RES_ERR;
+    }
+    return RES_OK;
+}
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -370,6 +400,9 @@ void smfi_event(void) {
                 break;
             case CMD_MATRIX_GET:
                 smfi_cmd[SMFI_CMD_RES] = cmd_matrix_get();
+                break;
+            case CMD_FAN_CURVE_SET:
+                smfi_cmd[SMFI_CMD_RES] = cmd_fan_curve_set();
                 break;
 #endif // !defined(__SCRATCH__)
             case CMD_SPI:

@@ -37,7 +37,7 @@ struct FanPoint {
 };
 
 struct Fan {
-    const struct FanPoint * points;
+    struct FanPoint * points;
     uint8_t points_size;
     uint8_t * heatup;
     uint8_t heatup_size;
@@ -55,5 +55,6 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant;
 uint8_t fan_heatup(const struct Fan * fan, uint8_t duty) __reentrant;
 uint8_t fan_cooldown(const struct Fan * fan, uint8_t duty) __reentrant;
 uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant;
+uint8_t fan_points_are_valid(uint8_t count, struct FanPoint * points);
 
 #endif // _BOARD_FAN_H
