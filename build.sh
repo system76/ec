@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+
 #!/usr/bin/env bash
 
 ROOT_DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
