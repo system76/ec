@@ -47,7 +47,7 @@ EC_BUILD_DIR="build/${EC_BOARD_VENDOR}/${EC_BOARD_MODEL}/${EC_GIT_DATE}_${EC_GIT
 EC_ROM="${EC_BUILD_DIR}/ec.rom"
 EC_ARTIFACT="${EC_BOARD_VENDOR}_${EC_BOARD_MODEL}_ec.rom"
 
-docker run --rm -it -v "$PWD":"$PWD" -w "$PWD" \
+docker run --rm -v "$PWD":"$PWD" -w "$PWD" \
   ghcr.io/dasharo/ec-sdk make BOARD=${EC_BOARD_VENDOR}/${EC_BOARD_MODEL}
 errorCheck "Failed to build EC fimware"
 
