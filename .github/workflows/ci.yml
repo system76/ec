@@ -10,11 +10,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install dependencies
-        run: ./scripts/deps.sh
+      - name: Check SPDX identifiers
+        run: ./scripts/lint/spdx.sh
 
-      - name:  Check SPDX tags
-        run: ./scripts/lint/01-spdx-tags.sh
+      - name: Check indentation
+        run: ./scripts/lint/indent.sh
 
       - name: Check formatting
         run: ./scripts/lint/02-clang-format.sh
@@ -40,7 +40,7 @@ jobs:
         run: cargo build ${{ matrix.features }} --release --manifest-path tool/Cargo.toml
 
   ec:
-    runs-on: docker pull ghcr.io/dasharo/ec-sdk:main
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
