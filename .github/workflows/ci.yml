@@ -24,13 +24,13 @@ jobs:
       matrix:
         include:
           - vendor: novacustom
-            board: nv4x_tgl
+            model: nv4x_tgl
           - vendor: novacustom
-            board: ns5x_tgl
+            model: ns5x_tgl
           - vendor: novacustom
-            board: nv4x_adl
+            model: nv4x_adl
           - vendor: novacustom
-            board: ns5x_adl
+            model: ns5x_adl
 
     steps:
       - uses: actions/checkout@v3
