@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [master]
+    branches: [master, ci]
   pull_request:
 
 jobs:
@@ -18,82 +18,22 @@ jobs:
         run: ./scripts/clang-format.sh
         continue-on-error: true
 
-  tool:
-    strategy:
-      matrix:
-        include:
-          - features:
-          - features: --no-default-features --features="redox_hwio"
-
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: ./scripts/deps.sh
-
-      - name: Build tool
-        run: cargo build ${{ matrix.features }} --release --manifest-path tool/Cargo.toml
-
   ec:
-    runs-on: ubuntu-20.04
+    runs-on: docker pull ghcr.io/dasharo/ec-sdk:main
     strategy:
       matrix:
-        # TODO: Generate matrix from directory?
-        # TODO: Conditionally build based on files changed?
         include:
-          - vendor: arduino
-            board: mega2560
-          - vendor: system76
-            board: addw1
-          - vendor: system76
-            board: addw2
-          - vendor: system76
-            board: bonw14
-          - vendor: system76
-            board: darp5
-          - vendor: system76
-            board: darp7
-          - vendor: system76
-            board: darp8
-          - vendor: system76
-            board: galp3-c
-          - vendor: system76
-            board: galp5
-          - vendor: system76
-            board: galp6
-          - vendor: system76
-            board: gaze15
-          - vendor: system76
-            board: gaze16-3050
-          - vendor: system76
-            board: gaze16-3060
-          - vendor: system76
-            board: gaze17-3050
-          - vendor: system76
-            board: gaze17-3060-b
-          - vendor: system76
-            board: lemp9
-          - vendor: system76
-            board: lemp10
-          - vendor: system76
-            board: lemp11
-          - vendor: system76
-            board: oryp5
-          - vendor: system76
-            board: oryp6
-          - vendor: system76
-            board: oryp7
-          - vendor: system76
-            board: oryp8
-          - vendor: system76
-            board: oryp9
+          - vendor: novacustom
+            board: nv4x_tgl
+          - vendor: novacustom
+            board: ns5x_tgl
+          - vendor: novacustom
+            board: nv4x_adl
+          - vendor: novacustom
+            board: ns5x_adl
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Install dependencies
-        run: ./scripts/deps.sh
 
       - name: Build firmware
-        run: make BOARD=${{ matrix.vendor}}/${{ matrix.board }}
+        run: EC_BOARD_VENDOR=${{ matrix.vendor }} EC_BOARD_MODEL=${{ matrix.model }} ./build.sh
