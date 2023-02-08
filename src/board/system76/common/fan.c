@@ -149,13 +149,13 @@ uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
 
 uint8_t fan_points_are_valid(uint8_t count, struct FanPoint * points) {
     /*
-	 * Fan curve speeds have to be non-decreasing.
-	 * Fan curve temperatures have to be increasing.
-	 */
-	for (int i = 1; i < count; i++) {
-		if (points[i].temp <= points[i - 1].temp ||
-		    points[i].duty <  points[i - 1].duty)
-			return false;
-	}
-	return true;
+ * Fan curve speeds have to be non-decreasing.
+ * Fan curve temperatures have to be increasing.
+ */
+    for (int i = 1; i < count; i++) {
+        if (points[i].temp <= points[i - 1].temp ||
+            points[i].duty <  points[i - 1].duty)
+            return false;
+    }
+    return true;
 }
