@@ -6,9 +6,9 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check SPDX identifiers
         run: ./scripts/lint/spdx.sh
       - name: Check indentation
@@ -19,7 +19,7 @@ jobs:
         continue-on-error: true
 
   ec:
-    runs-on: docker pull ghcr.io/dasharo/ec-sdk:main
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
@@ -33,7 +33,7 @@ jobs:
             board: ns5x_adl
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Build firmware
         run: EC_BOARD_VENDOR=${{ matrix.vendor }} EC_BOARD_MODEL=${{ matrix.model }} ./build.sh
