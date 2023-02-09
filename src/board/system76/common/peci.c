@@ -72,7 +72,8 @@ int16_t peci_set_fan_curve(uint8_t count, struct FanPoint * points) {
 
     for (int i = 0; i < count; ++i) {
         TRACE("PECI: fan curve t%d: %d, d%d: %d\n", i, points[i].temp, i, points[i].duty);
-        FAN.points[i] = points[i];
+        FAN.points[i].temp = points[i].temp;
+        FAN.points[i].duty = points[i].duty;
     }
 
     return 0;
