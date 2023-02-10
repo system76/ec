@@ -64,7 +64,8 @@ void gpio_init() {
     GPDRC = 0;
     // PLVDD_RST_EC
     GPDRD = BIT(4);
-    GPDRE = 0;
+    // USB_PWR_EN
+    GPDRE = BIT(3);
     // PCH_DPWROK_EC
     GPDRF = BIT(3);
     GPDRG = 0;
@@ -169,9 +170,9 @@ void gpio_init() {
     // PCH_DPWROK_EC
     GPCRF3 = GPIO_OUT;
     // TP_CLK
-    GPCRF4 = GPIO_ALT | GPIO_DOWN;
+    GPCRF4 = GPIO_ALT | GPIO_UP;
     // TP_DATA
-    GPCRF5 = GPIO_ALT | GPIO_DOWN;
+    GPCRF5 = GPIO_ALT | GPIO_UP;
     // H_PECI
     GPCRF6 = GPIO_ALT;
     // SINK_CTRL
@@ -231,7 +232,7 @@ void gpio_init() {
     // DGPU_PWR_EN
     GPCRJ2 = GPIO_IN;
     // GC6_FB_EN_PCH
-    GPCRJ3 = GPIO_IN | GPIO_DOWN;
+    GPCRJ3 = GPIO_IN;
     // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
