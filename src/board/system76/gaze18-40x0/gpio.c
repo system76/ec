@@ -59,10 +59,11 @@ void gpio_init() {
 
     // Set GPIO data
     GPDRA = 0;
-    // XLP_OUT
-    GPDRB = BIT(4);
+    // BL_PWM_EN_EC, XLP_OUT
+    GPDRB = BIT(5) | BIT(4);
     GPDRC = 0;
-    GPDRD = 0;
+    // PLVDD_RST_EC
+    GPDRD = BIT(4);
     GPDRE = 0;
     // PCH_DPWROK_EC
     GPDRF = BIT(3);
@@ -86,7 +87,7 @@ void gpio_init() {
     // CPU_FAN
     GPCRA2 = GPIO_ALT;
     // DDS_EC_PWM
-    GPCRA3 = GPIO_ALT;
+    GPCRA3 = GPIO_IN;
     // VGA_FAN
     GPCRA4 = GPIO_ALT;
     // EC_PWM_LEDKB_R
