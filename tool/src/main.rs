@@ -137,7 +137,7 @@ unsafe fn flash_inner(ec: &mut Ec<Box<dyn Access>>, firmware: &Firmware, target:
     Ok(())
 }
 
-unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> Result<(), Error> {
+unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget, force: bool) -> Result<(), Error> {
     let scratch = true;
 
     //TODO: remove unwraps
@@ -155,7 +155,7 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
         let ec_board = &data[..size];
         println!("ec board: {:?}", str::from_utf8(ec_board));
 
-        assert!(ec_board == firmware.board, "file board does not match ec board");
+        assert!(force || ec_board == firmware.board, "file board does not match ec board");
     }
 
     {
@@ -316,11 +316,17 @@ fn main() {
             .arg(Arg::with_name("path")
                 .required(true)
             )
+            .arg(Arg::with_name("force")
+                .long("force")
+                .help("Bypass board compatibility check. This option will force firmware flash even if target board does not match. Use with caution."))
         )
         .subcommand(SubCommand::with_name("flash_backup")
             .arg(Arg::with_name("path")
                 .required(true)
             )
+            .arg(Arg::with_name("force")
+                .long("force")
+                .help("Bypass board compatibility check. This option will force firmware flash even if target board does not match. Use with caution."))
         )
         .subcommand(SubCommand::with_name("info"))
         .subcommand(SubCommand::with_name("keymap")
@@ -454,7 +460,9 @@ fn main() {
         },
         ("flash", Some(sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&mut ec, path, SpiTarget::Main) } {
+            let force = sub_m.is_present("force");
+            println!("force = {}", force);
+            match unsafe { flash(&mut ec, path, SpiTarget::Main, force) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
@@ -464,7 +472,8 @@ fn main() {
         },
         ("flash_backup", Some(sub_m)) => {
             let path = sub_m.value_of("path").unwrap();
-            match unsafe { flash(&mut ec, path, SpiTarget::Backup) } {
+            let force = sub_m.is_present("force");
+            match unsafe { flash(&mut ec, path, SpiTarget::Backup, force) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
