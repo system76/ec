@@ -28,3 +28,6 @@ std = ["libc", "downcast-rs/std"]
 
 [package.metadata.docs.rs]
 all-features = true
+
+[registries.crates-io]
+protocol = "sparse"
