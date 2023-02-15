@@ -9,6 +9,9 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
+# Use S0ix
+CFLAGS+=-DUSE_S0IX=1
+
 # Include keyboard
 KEYBOARD=14in_83
 
