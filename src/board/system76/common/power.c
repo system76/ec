@@ -306,7 +306,7 @@ void power_off(void) {
 
 #ifdef HAVE_DGPU
 static bool power_peci_limit(bool ac) {
-    uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
+    uint16_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
     // Set PL4 using PECI
     int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
     DEBUG("power_peci_limit %d = %d\n", watts, res);
