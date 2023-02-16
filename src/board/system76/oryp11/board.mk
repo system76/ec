@@ -36,7 +36,7 @@ CFLAGS+=\
 
 # Set CPU power limits in watts
 CFLAGS+=\
-	-DPOWER_LIMIT_AC=180 \
+	-DPOWER_LIMIT_AC=280 \
 	-DPOWER_LIMIT_DC=28
 
 # Disable syncing fan speeds
