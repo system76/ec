@@ -68,7 +68,8 @@ void gpio_init() {
     GPDRE = BIT(3);
     // PCH_DPWROK_EC
     GPDRF = BIT(3);
-    GPDRG = 0;
+    // H_PROCHOT_EC
+    GPDRG = BIT(6);
     GPDRH = 0;
     GPDRI = 0;
     GPDRJ = 0;
