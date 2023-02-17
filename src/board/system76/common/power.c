@@ -318,15 +318,7 @@ static bool power_peci_limit(bool ac) {
     // Set PL4 using PECI
     int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
     DEBUG("power_peci_limit %d = %d\n", watts, res);
-    if (res == 0x40) {
-        return true;
-    } else if (res < 0) {
-        ERROR("power_peci_limit failed: 0x%02X\n", -res);
-        return false;
-    } else {
-        ERROR("power_peci_limit unknown response: 0x%02X\n", res);
-        return false;
-    }
+    return res == 0x40;
 }
 
 // Set the power draw limit depending on if on AC or DC power
