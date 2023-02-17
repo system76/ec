@@ -277,8 +277,8 @@ bool peci_available(void) {
 
 // Returns true on success, false on error
 bool peci_get_temp(int16_t *data) {
-    // Wait for completion
-    while (HOSTAR & 1) {}
+    // Wait for any in-progress transaction to complete
+    while (HOSTAR & BIT(0)) {}
     // Clear status
     HOSTAR = HOSTAR;
 
@@ -299,22 +299,23 @@ bool peci_get_temp(int16_t *data) {
     while (HOSTAR & 1) {}
 
     uint8_t status = HOSTAR;
-    if (status & BIT(1)) {
+    if (status & 0xEC) {
+        ERROR("peci_get_temp: hardware error: 0x%02X\n", status);
+        return false;
+    } else {
         // Read two byte temperature data if finished successfully
         uint8_t low = HORDDR;
         uint8_t high = HORDDR;
         *data = (((int16_t)high << 8) | (int16_t)low);
         return true;
-    } else {
-        return false;
     }
 }
 
 // Returns positive completion code on success, negative completion code or
 // negative (0x1000 | status register) on PECI hardware error
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
-    // Wait for completion
-    while (HOSTAR & 1) {}
+    // Wait for any in-progress transaction to complete
+    while (HOSTAR & BIT(0)) {}
     // Clear status
     HOSTAR = HOSTAR;
 
@@ -348,17 +349,21 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Wait for completion
     while (HOSTAR & 1) {}
 
-    int16_t status = (int16_t)HOSTAR;
-    if (status & BIT(1)) {
-        int16_t cc = (int16_t)HORDDR;
-        if (cc & 0x80) {
-            return -cc;
-        } else {
-            return cc;
-        }
-    } else {
+    uint8_t status = HOSTAR;
+    if (status & 0xEC) {
+        ERROR("peci_wr_pkg_config: hardware error: 0x%02X\n", status);
         return -(0x1000 | status);
     }
+
+    uint8_t cc = HORDDR;
+
+    if (cc == 0x40) {
+        TRACE("peci_wr_pkg_config: command successful\n");
+        return cc;
+    }
+
+    ERROR("peci_wr_pkg_config: command error: 0x%02X\n", cc);
+    return -((int16_t)cc);
 }
 
 #endif // CONFIG_BUS_ESPI
