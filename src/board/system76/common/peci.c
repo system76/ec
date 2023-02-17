@@ -295,8 +295,8 @@ bool peci_get_temp(int16_t *data) {
     // Start transaction
     HOCTLR |= 1;
 
-    // Wait for completion
-    while (HOSTAR & 1) {}
+    // Wait for command completion
+    while (!(HOSTAR & BIT(1))) {}
 
     uint8_t status = HOSTAR;
     if (status & 0xEC) {
@@ -346,8 +346,8 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Start transaction
     HOCTLR |= 1;
 
-    // Wait for completion
-    while (HOSTAR & 1) {}
+    // Wait for command completion
+    while (!(HOSTAR & BIT(1))) {}
 
     uint8_t status = HOSTAR;
     if (status & 0xEC) {
