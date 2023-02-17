@@ -301,12 +301,17 @@ bool peci_get_temp(int16_t *data) {
     uint8_t status = HOSTAR;
     if (status & 0xEC) {
         ERROR("peci_get_temp: hardware error: 0x%02X\n", status);
+        // Clear status
+        HOSTAR = HOSTAR;
         return false;
     } else {
         // Read two byte temperature data if finished successfully
         uint8_t low = HORDDR;
         uint8_t high = HORDDR;
         *data = (((int16_t)high << 8) | (int16_t)low);
+
+        // Clear status
+        HOSTAR = HOSTAR;
         return true;
     }
 }
@@ -352,10 +357,15 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     uint8_t status = HOSTAR;
     if (status & 0xEC) {
         ERROR("peci_wr_pkg_config: hardware error: 0x%02X\n", status);
+        // Clear status
+        HOSTAR = HOSTAR;
         return -(0x1000 | status);
     }
 
     uint8_t cc = HORDDR;
+
+    // Clear status
+    HOSTAR = HOSTAR;
 
     if (cc == 0x40) {
         TRACE("peci_wr_pkg_config: command successful\n");
