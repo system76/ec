@@ -202,7 +202,7 @@ static enum Result cmd_led_get_value(void) {
 static enum Result cmd_led_set_value(void) {
     uint8_t index = smfi_cmd[SMFI_CMD_DATA];
     if (index == CMD_LED_INDEX_ALL) {
-        kbled_set(smfi_cmd[SMFI_CMD_DATA + 1]);
+        kbled_set_brightness(smfi_cmd[SMFI_CMD_DATA + 1]);
         return RES_OK;
     } else {
         return RES_ERR;

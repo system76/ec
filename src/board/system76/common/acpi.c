@@ -33,11 +33,15 @@ void fcommand(void) {
             switch (fdat) {
                 // Set LED brightness
                 case 0x00:
-                    kbled_set(fbuf[0]);
+                    kbled_set_brightness(fbuf[0]);
                     break;
                 // Get LED brightness
                 case 0x01:
                     fbuf[0] = kbled_get();
+                    break;
+                // Enable / disable LED
+                case 0x02:
+                    kbled_enable(!!fbuf[0]);
                     break;
                 // Set LED color
                 case 0x03:

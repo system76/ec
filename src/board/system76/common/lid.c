@@ -3,6 +3,7 @@
 #include <arch/delay.h>
 #include <board/acpi.h>
 #include <board/gpio.h>
+#include <board/kbled.h>
 #include <board/lid.h>
 #include <board/pmc.h>
 #include <common/debug.h>
@@ -25,8 +26,12 @@ void lid_event(void) {
                 pmc_swi();
                 lid_wake = false;
             }
+
+            kbled_enable(true);
         } else {
             DEBUG("closed\n");
+
+            kbled_enable(false);
         }
 
         // Send SCI if ACPI OS is loaded
