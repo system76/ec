@@ -357,7 +357,7 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
-#if EC_ESPI
+#if USE_S0IX
 static void update_s0ix_state()
 {
     uint32_t time = time_get();
@@ -377,7 +377,7 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
 
-    #if EC_ESPI
+    #if USE_S0IX
     update_s0ix_state();
     #endif
 
