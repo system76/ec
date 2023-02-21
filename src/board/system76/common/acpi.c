@@ -28,37 +28,37 @@ static uint8_t fbuf[4] = { 0, 0, 0, 0 };
 void fcommand(void) {
     uint32_t color;
     switch (fcmd) {
-    // Keyboard backlight
-    case 0xCA:
-        switch (fdat) {
-        // Set brightness
-        case 0:
-            kbled_set(fbuf[0]);
-            break;
-        // Get brightness
-        case 1:
-            fbuf[0] = kbled_get();
-            break;
-        // Get type
-        case 2:
-            fbuf[0] = kbled_kind;
-            break;
-        // Set color
-        case 3:
-            // clang-format off
-            kbled_set_color(
-                ((uint32_t)fbuf[0]) |
-                ((uint32_t)fbuf[1] << 16) |
-                ((uint32_t)fbuf[2] << 8)
-            );
-            // clang-format on
-            break;
-        // Get color
-        case 4:
-            uint32_t color = kbled_get_color();
-            fbuf[0] = color & 0xFF;
-            fbuf[1] = (color >> 16) & 0xFF;
-            fbuf[2] = (color >> 8) & 0xFF;
+        // Keyboard backlight
+        case 0xCA:
+            switch (fdat) {
+                // Set LED brightness
+                case 0x00:
+                    kbled_set_brightness(fbuf[0]);
+                    break;
+                // Get LED brightness
+                case 0x01:
+                    fbuf[0] = kbled_get();
+                    break;
+                // Enable / disable LED
+                case 0x02:
+                    kbled_enable(!!fbuf[0]);
+                    break;
+                // Set LED color
+                case 0x03:
+                    kbled_set_color(
+                        ((uint32_t)fbuf[0]) |
+                        ((uint32_t)fbuf[1] << 16) |
+                        ((uint32_t)fbuf[2] << 8)
+                    );
+                    break;
+                // Get LED color
+                case 0x04:
+                    color = kbled_get_color();
+                    fbuf[0] = color & 0x0000ff;
+                    fbuf[1] = (color & 0xff0000) >> 16;
+                    fbuf[2] = (color & 0x00ff00) >> 8;
+                    break;
+            }
             break;
     }
 }

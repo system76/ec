@@ -3,6 +3,7 @@
 #ifndef _BOARD_KBLED_H
 #define _BOARD_KBLED_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 enum KbledKind {
@@ -22,6 +23,8 @@ uint32_t kbled_get_color(void);
 void kbled_set_color(uint32_t color);
 
 // Provided by common code
+void kbled_enable(bool enabled);
+void kbled_set_brightness(uint8_t value);
 void kbled_hotkey_color(void);
 void kbled_hotkey_down(void);
 void kbled_hotkey_up(void);
