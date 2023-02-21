@@ -10,6 +10,7 @@ struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
 struct Gpio __code BKL_EN =         GPIO(C, 7);
 struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2); // renamed to ESPI_RESET_N
 struct Gpio __code CCD_EN =         GPIO(D, 1);
+struct Gpio __code CPU_C10_GATE_N = GPIO(C, 6);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code DGPU_PWR_EN =    GPIO(J, 2);
 struct Gpio __code EC_EN =          GPIO(B, 6); // renamed to SUSBC_EN#
@@ -22,7 +23,7 @@ struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(H, 4);
-//struct Gpio __code PM_PWROK =       GPIO(C, 6);
+struct Gpio __code PCH_PWROK_EC =   GPIO(F, 3);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code SLP_SUS_N =      GPIO(J, 4);
@@ -44,8 +45,6 @@ void gpio_init() {
     GCR8 = BIT(4);
     // Enable LPC reset on GPD2
     GCR = 0b10 << 1;
-
-    GCR1 = 0x00;
     // Disable UARTs
     GCR6 = 0;
     // Enable SMBus channel 4
