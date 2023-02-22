@@ -10,6 +10,10 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
+#ifndef USE_PECI_OVER_ESPI
+#define USE_PECI_OVER_ESPI 0
+#endif
+
 #ifndef USE_S0IX
 #define USE_S0IX 0
 #endif
@@ -63,6 +67,12 @@ static struct Fan __code FAN = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
+#if USE_PECI_OVER_ESPI
+
+//TODO
+
+#else // USE_PECI_OVER_ESPI
+
 void peci_init(void) {
     // Allow PECI pin to be used
     GCR2 |= BIT(4);
@@ -71,6 +81,39 @@ void peci_init(void) {
     HOCTL2R = 0x01;
     // Set VTT to 1V
     PADCTLR = 0x02;
+}
+
+// Returns status register, caller must check for success
+uint8_t peci_get_temp(int16_t * data) {
+    // Wait for completion
+    while (HOSTAR & 1) {}
+    // Clear status
+    HOSTAR = HOSTAR;
+
+    // Enable PECI, clearing data fifo's
+    HOCTLR = BIT(5) | BIT(3);
+    // Set address to default
+    HOTRADDR = 0x30;
+    // Set write length
+    HOWRLR = 1;
+    // Set read length
+    HORDLR = 2;
+    // Set command
+    HOCMDR = 1;
+    // Start transaction
+    HOCTLR |= 1;
+
+    // Wait for completion
+    while (HOSTAR & 1) {}
+
+    uint8_t status = HOSTAR;
+    if (status & BIT(1)) {
+        // Read two byte temperature data if finished successfully
+        uint8_t low = HORDDR;
+        uint8_t high = HORDDR;
+        *data = (((int16_t)high << 8) | (int16_t)low) >> 6;
+    }
+    return status;
 }
 
 // Returns positive completion code on success, negative completion code or
@@ -124,6 +167,8 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     }
 }
 
+#endif // USE_PECI_OVER_ESPI
+
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
@@ -137,34 +182,11 @@ uint8_t peci_get_fan_duty(void) {
 #endif // USE_S0IX
 
     if (peci_on) {
-        // Wait for completion
-        while (HOSTAR & 1) {}
-        // Clear status
-        HOSTAR = HOSTAR;
-
-        // Enable PECI, clearing data fifo's
-        HOCTLR = BIT(5) | BIT(3);
-        // Set address to default
-        HOTRADDR = 0x30;
-        // Set write length
-        HOWRLR = 1;
-        // Set read length
-        HORDLR = 2;
-        // Set command
-        HOCMDR = 1;
-        // Start transaction
-        HOCTLR |= 1;
-
-        // Wait for completion
-        while (HOSTAR & 1) {}
-
-        if (HOSTAR & BIT(1)) {
+        int16_t peci_offset = 0;
+        uint8_t status = peci_get_temp(&peci_offset);
+        if (status & BIT(1)) {
             // Use result if finished successfully
-            uint8_t low = HORDDR;
-            uint8_t high = HORDDR;
-            uint16_t peci_offset = (((int16_t)high << 8) | (int16_t)low) >> 6;
-
-            peci_temp = PECI_TEMP(T_JUNCTION) + peci_offset;
+            peci_temp = PECI_TEMP(T_JUNCTION) + (peci_offset >> 6);
             duty = fan_duty(&FAN, peci_temp);
         } else {
             // Default to 50% if there is an error
