@@ -64,9 +64,14 @@
 #define HAVE_SLP_SUS_N 1
 #endif
 
-#ifndef HAVE_XLP_OUT
-#define HAVE_XLP_OUT 1
+#ifndef HAVE_SUSB_N_PCH
+#define HAVE_SUSB_N_PCH 1
 #endif
+
+#ifndef HAVE_SUSC_N_PCH
+#define HAVE_SUSC_N_PCH 1
+#endif
+
 #ifndef HAVE_SUSWARN_N
 #define HAVE_SUSWARN_N 1
 #endif
@@ -128,15 +133,31 @@ enum PowerState power_state = POWER_STATE_OFF;
 enum PowerState calculate_power_state(void) {
     //TODO: Deep Sx states using SLP_SUS#
 
+#if HAVE_SUSB_N_PCH
     if (gpio_get(&SUSB_N_PCH)) {
         // S3, S4, and S5 planes powered
         return POWER_STATE_S0;
     }
+#else
+    // Use eSPI virtual wire if there is no dedicated GPIO
+    if (vw_get(&VW_SLP_S3_N)) {
+        // S3, S4, and S5 planes powered
+        return POWER_STATE_S0;
+    }
+#endif
 
+#if HAVE_SUSC_N_PCH
     if (gpio_get(&SUSC_N_PCH)) {
         // S4 and S5 planes powered
         return POWER_STATE_S3;
     }
+#else
+    // Use eSPI virtual wire if there is no dedicated GPIO
+    if (vw_get(&VW_SLP_S4_N)) {
+        // S4 and S5 planes powered
+        return POWER_STATE_S3;
+    }
+#endif
 
     if (gpio_get(&EC_RSMRST_N)) {
         // S5 plane powered
