@@ -245,7 +245,7 @@ uint8_t peci_get_fan_duty(void) {
 #if CONFIG_BUS_ESPI
     // Use PECI if CPU is not in C10 sleep state
     // HOST_C10 virtual wire is high when CPU is in C10 sleep state
-    peci_on = !vw_get(&VW_HOST_C10);
+    peci_on = vw_get(&VW_HOST_C10) == VWS_LOW;
 #else // CONFIG_BUS_ESPI
     // Use PECI if in S0 state
     peci_on = power_state == POWER_STATE_S0;

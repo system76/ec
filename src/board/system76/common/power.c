@@ -124,17 +124,17 @@ enum PowerState calculate_power_state(void) {
 #if CONFIG_BUS_ESPI
     // Use eSPI virtual wires if available
 
-    if (vw_get(&VW_SLP_S3_N)) {
+    if (vw_get(&VW_SLP_S3_N) == VWS_HIGH) {
         // S3, S4, and S5 planes powered
         return POWER_STATE_S0;
     }
 
-    if (vw_get(&VW_SLP_S4_N)) {
+    if (vw_get(&VW_SLP_S4_N) == VWS_HIGH) {
         // S4 and S5 planes powered
         return POWER_STATE_S3;
     }
 
-    if (vw_get(&VW_SLP_S5_N)) {
+    if (vw_get(&VW_SLP_S5_N) == VWS_HIGH) {
         // S5 plane powered
         return POWER_STATE_S5;
     }
@@ -341,7 +341,7 @@ void power_set_limit(void) {
     // We don't use power_state because the latency needs to be low
 #if CONFIG_BUS_ESPI
     // HOST_C10 virtual wire is high when CPU is in C10 sleep state
-    if (!vw_get(&VW_HOST_C10)) {
+    if (vw_get(&VW_HOST_C10) == VWS_LOW) {
 #else // CONFIG_BUS_ESPI
     if (gpio_get(&BUF_PLT_RST_N)) {
 #endif // CONFIG_BUS_ESPI
@@ -578,7 +578,7 @@ void power_event(void) {
     if (power_state == POWER_STATE_S0) {
 #if CONFIG_BUS_ESPI
         // HOST_C10 virtual wire is high when CPU is in C10 sleep state
-        if (vw_get(&VW_HOST_C10)) {
+        if (vw_get(&VW_HOST_C10) == VWS_HIGH) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
