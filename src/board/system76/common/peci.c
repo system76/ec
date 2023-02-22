@@ -14,10 +14,6 @@
 #define USE_PECI_OVER_ESPI 0
 #endif
 
-#ifndef USE_S0IX
-#define USE_S0IX 0
-#endif
-
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_HEATUP
 #define BOARD_HEATUP 4
@@ -246,13 +242,14 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
 
-#if USE_S0IX
-    // Use PECI if platform is not in CS
-    peci_on = gpio_get(&SLP_S0_N);
-#else // USE_S0IX
+#if CONFIG_BUS_ESPI
+    // Use PECI if CPU is not in C10 sleep state
+    // HOST_C10 virtual wire is high when CPU is in C10 sleep state
+    peci_on = !vw_get(&VW_HOST_C10);
+#else // CONFIG_BUS_ESPI
     // Use PECI if in S0 state
     peci_on = power_state == POWER_STATE_S0;
-#endif // USE_S0IX
+#endif // CONFIG_BUS_ESPI
 
     if (peci_on) {
         int16_t peci_offset = 0;

@@ -35,8 +35,6 @@ extern struct Gpio __code PWR_SW_N;
 extern struct Gpio __code SLP_SUS_N;
 #define HAVE_SUSWARN_N 0
 #define HAVE_SUS_PWR_ACK 0
-extern struct Gpio __code SUSB_N_PCH;
-extern struct Gpio __code SUSC_N_PCH;
 extern struct Gpio __code SWI_N;
 extern struct Gpio __code USB_PWR_EN_N;
 extern struct Gpio __code VA_EC_EN;

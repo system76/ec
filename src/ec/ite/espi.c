@@ -34,6 +34,8 @@ struct VirtualWire __code VW_SUS_ACK_N = VIRTUAL_WIRE(40, 0);
 // Index 41 - AP to EC (platform specific)
 struct VirtualWire __code VW_SUS_WARN_N = VIRTUAL_WIRE(41, 0);
 struct VirtualWire __code VW_SUS_PWRDN_ACK = VIRTUAL_WIRE(41, 1);
+// Index 47 - AP to EC (platform specific)
+struct VirtualWire __code VW_HOST_C10 = VIRTUAL_WIRE(47, 0);
 
 enum VirtualWireState vw_get(struct VirtualWire *vw) __critical {
     uint8_t index = *vw->index;
