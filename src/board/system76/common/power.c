@@ -338,13 +338,7 @@ static bool power_peci_limit(bool ac) {
 // Set the power draw limit depending on if on AC or DC power
 void power_set_limit(void) {
     static bool last_power_limit_ac = true;
-    // We don't use power_state because the latency needs to be low
-#if CONFIG_BUS_ESPI
-    // HOST_C10 virtual wire is high when CPU is in C10 sleep state
-    if (vw_get(&VW_HOST_C10) == VWS_LOW) {
-#else // CONFIG_BUS_ESPI
-    if (gpio_get(&BUF_PLT_RST_N)) {
-#endif // CONFIG_BUS_ESPI
+    if (peci_available()) {
         bool ac = !gpio_get(&ACIN_N);
         if (last_power_limit_ac != ac) {
             if (power_peci_limit(ac)) {
