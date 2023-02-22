@@ -26,6 +26,26 @@ static const uint32_t __code COLORS[] = {
 };
 // clang-format on
 
+static bool enabled = false;
+static uint8_t brightness = 0;
+
+void kbled_enable(bool enable) {
+    enabled = enable;
+
+    if (enabled) {
+        kbled_set(brightness);
+    } else {
+        kbled_set(0);
+    }
+}
+
+void kbled_set_brightness(uint8_t value) {
+    brightness = value;
+    if (enabled) {
+        kbled_set(brightness);
+    }
+}
+
 void kbled_hotkey_color(void) {
     if (COLOR_I < (ARRAY_SIZE(COLORS) - 1)) {
         COLOR_I += 1;
@@ -39,20 +59,20 @@ void kbled_hotkey_down(void) {
     if (LEVEL_I > 0) {
         LEVEL_I -= 1;
     }
-    kbled_set(LEVELS[LEVEL_I]);
+    kbled_set_brightness(LEVELS[LEVEL_I]);
 }
 
 void kbled_hotkey_up(void) {
     if (LEVEL_I < (ARRAY_SIZE(LEVELS) - 1)) {
         LEVEL_I += 1;
     }
-    kbled_set(LEVELS[LEVEL_I]);
+    kbled_set_brightness(LEVELS[LEVEL_I]);
 }
 
 void kbled_hotkey_toggle(void) {
     if (kbled_get() == 0) {
-        kbled_set(LEVELS[LEVEL_I]);
+        kbled_set_brightness(LEVELS[LEVEL_I]);
     } else {
-        kbled_set(0);
+        kbled_set_brightness(0);
     }
 }
