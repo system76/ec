@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#include <common/macro.h>
+
 struct VirtualWire {
     volatile uint8_t __xdata *index;
     uint8_t shift;
@@ -105,17 +107,38 @@ volatile uint8_t __xdata __at(0x31A2) ESGCTRL2;
 volatile uint8_t __xdata __at(0x31A3) ESGCTRL3;
 
 // eSPI upstream control
+
+// Upstream flags
 volatile uint8_t __xdata __at(0x31B0) ESUCTRL0;
+    #define ESUCTRL0_ENABLE BIT(7)
+    #define ESUCTRL0_GO BIT(6)
+    #define ESUCTRL0_DONE BIT(1)
+    #define ESUCTRL0_BUSY BIT(0)
+
+// Upstream cycle type
 volatile uint8_t __xdata __at(0x31B1) ESUCTRL1;
+    // OOB message
+    #define ESUCTRL1_OOB 0x07
+
+// Upstream tag @ [7:4], upstream length [11:8] @ [3:0]
 volatile uint8_t __xdata __at(0x31B2) ESUCTRL2;
+
+// Upstream length [7:0]
 volatile uint8_t __xdata __at(0x31B3) ESUCTRL3;
+
 volatile uint8_t __xdata __at(0x31B6) ESUCTRL6;
 volatile uint8_t __xdata __at(0x31B7) ESUCTRL7;
 volatile uint8_t __xdata __at(0x31B8) ESUCTRL8;
 
 // eSPI OOB control
+
+// PUT_OOB status
 volatile uint8_t __xdata __at(0x31C0) ESOCTRL0;
+    #define ESOCTRL0_STATUS BIT(7)
+
 volatile uint8_t __xdata __at(0x31C1) ESOCTRL1;
+
+// PUT_OOB length
 volatile uint8_t __xdata __at(0x31C4) ESOCTRL4;
 
 // Virtual wires
