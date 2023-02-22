@@ -10,10 +10,6 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
-#ifndef USE_PECI_OVER_ESPI
-#define USE_PECI_OVER_ESPI 0
-#endif
-
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_HEATUP
 #define BOARD_HEATUP 4
@@ -63,9 +59,17 @@ static struct Fan __code FAN = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
-#if USE_PECI_OVER_ESPI
+#if CONFIG_BUS_ESPI
 
 void peci_init(void) {}
+
+// Returns true if peci is available
+bool peci_available(void) {
+    // PECI is available if PLTRST_N is high
+    // Do not wake CPU from C10 if HOST_C10 virtual wire is high
+    //TODO: wake CPU every 8 seconds following Intel recommendation?
+    return (vw_get(&VW_PLTRST_N) == VWS_HIGH) && (vw_get(&VW_HOST_C10) != VWS_HIGH);
+}
 
 // Returns true on success, false on error
 bool peci_get_temp(int16_t * data) {
@@ -130,15 +134,80 @@ bool peci_get_temp(int16_t * data) {
 // Returns positive completion code on success, negative completion code or
 // negative (0x1000 | status register) on PECI hardware error
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
-    //TODO: IMPLEMENT THIS STUB
-    DEBUG("peci_wr_pkg_config %02X, %04X, %08X\n", index, param, data);
-    index = index;
-    param = param;
-    data = data;
-    return 0;
+    //TODO: Wait for completion?
+    // Clear upstream status
+    ESUCTRL0 = ESUCTRL0;
+    // Clear OOB status
+    ESOCTRL0 = ESOCTRL0;
+
+    // Set upstream cycle type
+    ESUCTRL1 = ESUCTRL1_OOB;
+    // Set upstream tag / length[11:8]
+    ESUCTRL2 = 0;
+    // Set upstream length [7:0] (size of PECI data plus 3)
+    ESUCTRL3 = 16;
+
+    // Destination address (0x10 is PCH, left shifted by one)
+    UDB[0] = 0x10 << 1;
+    // Command code (0x01 is PECI)
+    UDB[1] = 0x01;
+    // Set byte count
+    UDB[2] = 13;
+    // Set source address (0x0F is EC, left shifted by one, or with 1)
+    UDB[3] = (0x0F << 1) | 1;
+    // PECI target address (0x30 is default)
+    UDB[4] = 0x30;
+    // PECI write length
+    UDB[5] = 10;
+    // PECI read length
+    UDB[6] = 1;
+    // PECI command (0xA5 = WrPkgConfig)
+    UDB[7] = 0xA5;
+
+    // Write host ID
+    UDB[8] = 0;
+    // Write index
+    UDB[9] = index;
+    // Write param
+    UDB[10] = (uint8_t)param;
+    UDB[11] = (uint8_t)(param >> 8);
+    // Write data
+    UDB[12] = (uint8_t)data;
+    UDB[13] = (uint8_t)(data >> 8);
+    UDB[14] = (uint8_t)(data >> 16);
+    UDB[15] = (uint8_t)(data >> 24);
+
+    // Set upstream enable
+    ESUCTRL0 |= ESUCTRL0_ENABLE;
+    // Set upstream go
+    ESUCTRL0 |= ESUCTRL0_GO;
+
+    // Wait until upstream done
+    while (!(ESUCTRL0 & ESUCTRL0_DONE)) {}
+
+    // Wait for response
+    //TODO: do this asynchronously to avoid delays?
+    while (!(ESOCTRL0 & ESOCTRL0_STATUS)) {}
+
+    // Read response length
+    uint8_t len = ESOCTRL4;
+    if (len >= 6) {
+        //TODO: verify packet type, handle PECI status
+
+        // Received enough data for status code
+        int16_t cc = (int16_t)PUTOOBDB[5];
+        if (cc & 0x80) {
+            return -cc;
+        } else {
+            return cc;
+        }
+    } else {
+        // Did not receive enough data
+        return -0x1000;
+    }
 }
 
-#else // USE_PECI_OVER_ESPI
+#else // CONFIG_BUS_ESPI
 
 void peci_init(void) {
     // Allow PECI pin to be used
@@ -148,6 +217,12 @@ void peci_init(void) {
     HOCTL2R = 0x01;
     // Set VTT to 1V
     PADCTLR = 0x02;
+}
+
+// Returns true if peci is available
+bool peci_available(void) {
+    // PECI is available if PLTRST# is high
+    return gpio_get(&BUF_PLT_RST_N);
 }
 
 // Returns true on success, false on error
@@ -236,21 +311,13 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     }
 }
 
-#endif // USE_PECI_OVER_ESPI
+#endif // CONFIG_BUS_ESPI
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
 
-#if CONFIG_BUS_ESPI
-    // Use PECI if CPU is not in C10 sleep state
-    // HOST_C10 virtual wire is high when CPU is in C10 sleep state
-    peci_on = vw_get(&VW_HOST_C10) == VWS_LOW;
-#else // CONFIG_BUS_ESPI
-    // Use PECI if in S0 state
-    peci_on = power_state == POWER_STATE_S0;
-#endif // CONFIG_BUS_ESPI
-
+    peci_on = peci_available();
     if (peci_on) {
         int16_t peci_offset = 0;
         if (peci_get_temp(&peci_offset)) {

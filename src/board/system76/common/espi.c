@@ -183,6 +183,9 @@ void espi_event(void) {
                 VW_SET_DEBUG(VW_SUS_ACK_N, wire);
             }
         }
+        if (value & BIT(7)) {
+            DEBUG("VWIDX47 %X\n", VWIDX47);
+        }
     }
 
     // Detect when frequency changes
