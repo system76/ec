@@ -69,7 +69,85 @@ static struct Fan __code FAN = {
 
 #if USE_PECI_OVER_ESPI
 
-//TODO
+void peci_init(void) {}
+
+// Returns true on success, false on error
+bool peci_get_temp(int16_t * data) {
+    // Wait for completion
+    while (ESUCTRL0 & ESUCTRL0_BUSY) {}
+    // Clear upstream status
+    ESUCTRL0 = ESUCTRL0;
+    // Clear OOB status
+    ESOCTRL0 = ESOCTRL0;
+
+    // Set upstream cycle type
+    ESUCTRL1 = ESUCTRL1_OOB;
+    // Set upstream tag / length[11:8]
+    ESUCTRL2 = 0;
+    // Set upstream length [7:0] (size of PECI data plus 3)
+    ESUCTRL3 = 8;
+
+    // Destination address (0x10 is PCH, left shifted by one)
+    UDB[0] = 0x10 << 1;
+    // Command code (0x01 is PECI)
+    UDB[1] = 0x01;
+    // Set byte count
+    UDB[2] = 5;
+    // Set source address (0x0F is EC, left shifted by one, or with 1)
+    UDB[3] = (0x0F << 1) | 1;
+    // PECI target address (0x30 is default)
+    UDB[4] = 0x30;
+    // PECI write length
+    UDB[5] = 1;
+    // PECI read length
+    UDB[6] = 2;
+    // PECI command (0x01 = GetTemp)
+    UDB[7] = 0x01;
+
+    // Set upstream enable
+    ESUCTRL0 |= ESUCTRL0_ENABLE;
+    // Set upstream go
+    ESUCTRL0 |= ESUCTRL0_GO;
+
+    // Wait while upstream busy
+    while (ESUCTRL0 & ESUCTRL0_BUSY) {}
+
+    uint8_t status = ESUCTRL0;
+    if (status & ESUCTRL0_DONE) {
+        // Upstream is done
+    } else {
+        //TODO: Upstream not done, how do we get error message?
+    }
+
+    // Wait for response
+    //TODO: do this asynchronously to avoid delays
+    while (!(ESOCTRL0 & ESOCTRL0_STATUS)) {}
+
+    // Read response length
+    uint8_t len = ESOCTRL4;
+    if (len >= 7) {
+        //TODO: verify packet type, handle PECI status
+
+        // Received enough data for temperature
+        uint8_t low = PUTOOBDB[5];
+        uint8_t high = PUTOOBDB[6];
+        *data = (((int16_t)high << 8) | (int16_t)low);
+        return true;
+    } else {
+        // Did not receive enough data
+        return false;
+    }
+}
+
+// Returns positive completion code on success, negative completion code or
+// negative (0x1000 | status register) on PECI hardware error
+int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
+    //TODO: IMPLEMENT THIS STUB
+    index = index;
+    param = param;
+    data = data;
+    return 0;
+}
 
 #else // USE_PECI_OVER_ESPI
 
@@ -83,8 +161,8 @@ void peci_init(void) {
     PADCTLR = 0x02;
 }
 
-// Returns status register, caller must check for success
-uint8_t peci_get_temp(int16_t * data) {
+// Returns true on success, false on error
+bool peci_get_temp(int16_t * data) {
     // Wait for completion
     while (HOSTAR & 1) {}
     // Clear status
@@ -112,8 +190,10 @@ uint8_t peci_get_temp(int16_t * data) {
         uint8_t low = HORDDR;
         uint8_t high = HORDDR;
         *data = (((int16_t)high << 8) | (int16_t)low);
+        return true;
+    } else {
+        return false;
     }
-    return status;
 }
 
 // Returns positive completion code on success, negative completion code or
@@ -183,8 +263,7 @@ uint8_t peci_get_fan_duty(void) {
 
     if (peci_on) {
         int16_t peci_offset = 0;
-        uint8_t status = peci_get_temp(&peci_offset);
-        if (status & BIT(1)) {
+        if (peci_get_temp(&peci_offset)) {
             // Use result if finished successfully
             peci_temp = PECI_TEMP(T_JUNCTION) + (peci_offset >> 6);
             duty = fan_duty(&FAN, peci_temp);
