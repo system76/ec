@@ -111,7 +111,7 @@ uint8_t peci_get_temp(int16_t * data) {
         // Read two byte temperature data if finished successfully
         uint8_t low = HORDDR;
         uint8_t high = HORDDR;
-        *data = (((int16_t)high << 8) | (int16_t)low) >> 6;
+        *data = (((int16_t)high << 8) | (int16_t)low);
     }
     return status;
 }
