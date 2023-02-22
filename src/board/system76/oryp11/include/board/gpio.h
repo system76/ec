@@ -34,8 +34,6 @@ extern struct Gpio __code PWR_BTN_N;
 extern struct Gpio __code PWR_SW_N;
 extern struct Gpio __code SLP_SUS_N;
 #define HAVE_SUS_PWR_ACK 0
-#define HAVE_SUSB_N_PCH 0
-#define HAVE_SUSC_N_PCH 0
 extern struct Gpio __code VA_EC_EN;
 #define HAVE_WLAN_EN 0
 extern struct Gpio __code WLAN_PWR_EN;

@@ -22,10 +22,6 @@
 #include <board/espi.h>
 #endif
 
-#ifndef USE_S0IX
-#define USE_S0IX 0
-#endif
-
 #define GPIO_SET_DEBUG(G, V) \
     { \
         DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
@@ -62,14 +58,6 @@
 
 #ifndef HAVE_SLP_SUS_N
 #define HAVE_SLP_SUS_N 1
-#endif
-
-#ifndef HAVE_SUSB_N_PCH
-#define HAVE_SUSB_N_PCH 1
-#endif
-
-#ifndef HAVE_SUSC_N_PCH
-#define HAVE_SUSC_N_PCH 1
 #endif
 
 #ifndef HAVE_SUSWARN_N
@@ -133,36 +121,41 @@ enum PowerState power_state = POWER_STATE_OFF;
 enum PowerState calculate_power_state(void) {
     //TODO: Deep Sx states using SLP_SUS#
 
-#if HAVE_SUSB_N_PCH
-    if (gpio_get(&SUSB_N_PCH)) {
-        // S3, S4, and S5 planes powered
-        return POWER_STATE_S0;
-    }
-#else
-    // Use eSPI virtual wire if there is no dedicated GPIO
+#if CONFIG_BUS_ESPI
+    // Use eSPI virtual wires if available
+
     if (vw_get(&VW_SLP_S3_N)) {
         // S3, S4, and S5 planes powered
         return POWER_STATE_S0;
     }
-#endif
 
-#if HAVE_SUSC_N_PCH
-    if (gpio_get(&SUSC_N_PCH)) {
-        // S4 and S5 planes powered
-        return POWER_STATE_S3;
-    }
-#else
-    // Use eSPI virtual wire if there is no dedicated GPIO
     if (vw_get(&VW_SLP_S4_N)) {
         // S4 and S5 planes powered
         return POWER_STATE_S3;
     }
-#endif
+
+    if (vw_get(&VW_SLP_S5_N)) {
+        // S5 plane powered
+        return POWER_STATE_S5;
+    }
+#else // CONFIG_BUS_ESPI
+    // Use dedicated GPIOs if not using ESPI
+
+    if (gpio_get(&SUSB_N_PCH)) {
+        // S3, S4, and S5 planes powered
+        return POWER_STATE_S0;
+    }
+
+    if (gpio_get(&SUSC_N_PCH)) {
+        // S4 and S5 planes powered
+        return POWER_STATE_S3;
+    }
 
     if (gpio_get(&EC_RSMRST_N)) {
         // S5 plane powered
         return POWER_STATE_S5;
     }
+#endif // CONFIG_BUS_ESPI
 
     return POWER_STATE_OFF;
 }
@@ -346,11 +339,12 @@ static bool power_peci_limit(bool ac) {
 void power_set_limit(void) {
     static bool last_power_limit_ac = true;
     // We don't use power_state because the latency needs to be low
-#if USE_S0IX
-    if (gpio_get(&SLP_S0_N)) {
-#else
+#if CONFIG_BUS_ESPI
+    // HOST_C10 virtual wire is high when CPU is in C10 sleep state
+    if (!vw_get(&VW_HOST_C10)) {
+#else // CONFIG_BUS_ESPI
     if (gpio_get(&BUF_PLT_RST_N)) {
-#endif
+#endif // CONFIG_BUS_ESPI
         bool ac = !gpio_get(&ACIN_N);
         if (last_power_limit_ac != ac) {
             if (power_peci_limit(ac)) {
@@ -361,7 +355,7 @@ void power_set_limit(void) {
         last_power_limit_ac = true;
     }
 }
-#else
+#else // HAVE_DGPU
 void power_set_limit(void) {}
 #endif // HAVE_DGPU
 
@@ -582,8 +576,9 @@ void power_event(void) {
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
-#if USE_S0IX
-        if (!gpio_get(&SLP_S0_N)) {
+#if CONFIG_BUS_ESPI
+        // HOST_C10 virtual wire is high when CPU is in C10 sleep state
+        if (vw_get(&VW_HOST_C10)) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));

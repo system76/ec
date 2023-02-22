@@ -59,6 +59,8 @@ extern struct VirtualWire __code VW_SUS_ACK_N;
 // Index 41 - AP to EC (platform specific)
 extern struct VirtualWire __code VW_SUS_WARN_N;
 extern struct VirtualWire __code VW_SUS_PWRDN_ACK;
+// Index 47 - AP to EC (platform specific)
+extern struct VirtualWire __code VW_HOST_C10;
 
 // General capabilities and configurations
 volatile uint8_t __xdata __at(0x3107) ESGCAC0;
@@ -154,6 +156,7 @@ volatile uint8_t __xdata __at(0x3207) VWIDX7;
 volatile uint8_t __xdata __at(0x3240) VWIDX40;
 volatile uint8_t __xdata __at(0x3241) VWIDX41;
 volatile uint8_t __xdata __at(0x3242) VWIDX42;
+volatile uint8_t __xdata __at(0x3247) VWIDX47;
 
 // Virtual wire control
 volatile uint8_t __xdata __at(0x3290) VWCTRL0;
