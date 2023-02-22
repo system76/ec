@@ -73,8 +73,7 @@ void peci_init(void) {}
 
 // Returns true on success, false on error
 bool peci_get_temp(int16_t * data) {
-    // Wait for completion
-    while (ESUCTRL0 & ESUCTRL0_BUSY) {}
+    //TODO: Wait for completion?
     // Clear upstream status
     ESUCTRL0 = ESUCTRL0;
     // Clear OOB status
@@ -109,18 +108,11 @@ bool peci_get_temp(int16_t * data) {
     // Set upstream go
     ESUCTRL0 |= ESUCTRL0_GO;
 
-    // Wait while upstream busy
-    while (ESUCTRL0 & ESUCTRL0_BUSY) {}
-
-    uint8_t status = ESUCTRL0;
-    if (status & ESUCTRL0_DONE) {
-        // Upstream is done
-    } else {
-        //TODO: Upstream not done, how do we get error message?
-    }
+    // Wait until upstream done
+    while (!(ESUCTRL0 & ESUCTRL0_DONE)) {}
 
     // Wait for response
-    //TODO: do this asynchronously to avoid delays
+    //TODO: do this asynchronously to avoid delays?
     while (!(ESOCTRL0 & ESOCTRL0_STATUS)) {}
 
     // Read response length
@@ -143,6 +135,7 @@ bool peci_get_temp(int16_t * data) {
 // negative (0x1000 | status register) on PECI hardware error
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     //TODO: IMPLEMENT THIS STUB
+    DEBUG("peci_wr_pkg_config %02X, %04X, %08X\n", index, param, data);
     index = index;
     param = param;
     data = data;
