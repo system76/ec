@@ -79,6 +79,7 @@ void gpio_init() {
     GPOTJ = 0;
 
     // Set GPIO control
+
     // EC_PWM_PIN_24
     GPCRA0 = GPIO_ALT;
     // KBC_BEEP
@@ -95,6 +96,7 @@ void gpio_init() {
     GPCRA6 = GPIO_ALT;
     // EC_PWM_LEDKB_B
     GPCRA7 = GPIO_ALT;
+
     // AC_IN#
     GPCRB0 = GPIO_IN | GPIO_UP;
     // LID_SW#
@@ -111,6 +113,7 @@ void gpio_init() {
     GPCRB6 = GPIO_OUT | GPIO_UP;
     // Not connected
     GPCRB7 = GPIO_IN;
+
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // SMC_VGA_THERM
@@ -118,31 +121,33 @@ void gpio_init() {
     // SMD_VGA_THERM
     GPCRC2 = GPIO_ALT | GPIO_UP;
     // KB_SO16
-    GPCRC3 = GPIO_ALT | GPIO_UP;
+    GPCRC3 = GPIO_IN;
     // CNVI_DET#
     GPCRC4 = GPIO_IN | GPIO_UP;
     // KB_SO17
-    GPCRC5 = GPIO_ALT | GPIO_UP;
+    GPCRC5 = GPIO_IN;
     // SYS_PWROK_EC
     GPCRC6 = GPIO_OUT;
     // BKL_EN
     GPCRC7 = GPIO_OUT | GPIO_UP;
+
     // LED_PWR
     GPCRD0 = GPIO_OUT | GPIO_UP;
     // CCD_EN
-    GPCRD1 = GPIO_IN;
+    GPCRD1 = GPIO_OUT;
     // ESPI_RESET#
     GPCRD2 = GPIO_ALT;
     // WLAN_PWR_EN
-    GPCRD3 = GPIO_OUT | GPIO_UP;
+    GPCRD3 = GPIO_OUT;
     // PLVDD_RST_EC
     GPCRD4 = GPIO_OUT;
     // PWR_BTN#
     GPCRD5 = GPIO_OUT | GPIO_UP;
     // CPU_FANSEN
-    GPCRD6 = GPIO_IN | GPIO_DOWN;
+    GPCRD6 = GPIO_ALT;
     // VGA_FANSEN
-    GPCRD7 = GPIO_IN | GPIO_DOWN;
+    GPCRD7 = GPIO_ALT;
+
     // SMC_BAT
     GPCRE0 = GPIO_ALT | GPIO_UP;
     // AC_PRESENT
@@ -159,6 +164,7 @@ void gpio_init() {
     GPCRE6 = GPIO_IN;
     // SMD_BAT
     GPCRE7 = GPIO_ALT | GPIO_UP;
+
     // 80CLK
     GPCRF0 = GPIO_IN;
     // USB_CHARGE_EN
@@ -168,13 +174,14 @@ void gpio_init() {
     // PCH_DPWROK_EC
     GPCRF3 = GPIO_OUT;
     // TP_CLK
-    GPCRF4 = GPIO_OUT;
+    GPCRF4 = GPIO_ALT | GPIO_UP;
     // TP_DATA
-    GPCRF5 = GPIO_OUT;
+    GPCRF5 = GPIO_ALT | GPIO_UP;
     // PD_POWER_EN
     GPCRF6 = GPIO_OUT;
     // CC_EN
     GPCRF7 = GPIO_OUT | GPIO_UP;
+
     // dGPU_OVERT_EC
     GPCRG0 = GPIO_IN;
     // JACK_IN#_EC
@@ -191,6 +198,7 @@ void gpio_init() {
     GPCRG6 = GPIO_OUT | GPIO_UP;
     // ALSPI_SCLK_L
     GPCRG7 = GPIO_ALT;
+
     // ME_WE
     GPCRH0 = GPIO_OUT;
     // SINK_CTRL
@@ -207,6 +215,7 @@ void gpio_init() {
     GPCRH6 = GPIO_IN;
     // SLP_SUS#
     GPCRH7 = GPIO_IN;
+
     // BAT_DET
     GPCRI0 = GPIO_ALT;
     // BAT_VOLT
@@ -223,6 +232,7 @@ void gpio_init() {
     GPCRI6 = GPIO_ALT;
     // MODEL_ID
     GPCRI7 = GPIO_IN;
+
     // LED_BAT_FULL
     GPCRJ0 = GPIO_OUT | GPIO_UP;
     // KBC_MUTE#
@@ -230,7 +240,7 @@ void gpio_init() {
     // EC_AMP_EN
     GPCRJ2 = GPIO_OUT;
     // GC6_FB_EN_PCH
-    GPCRJ3 = GPIO_IN | GPIO_DOWN;
+    GPCRJ3 = GPIO_IN;
     // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
@@ -239,6 +249,7 @@ void gpio_init() {
     GPCRJ6 = GPIO_IN;
     // PERKB_DET#
     GPCRJ7 = GPIO_IN | GPIO_UP;
+
     // ESPI_IO0_EC
     GPCRM0 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
     // ESPI_IO1_EC
