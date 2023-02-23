@@ -18,7 +18,7 @@ all:
 else
 # Calculate version
 DATE=$(shell git show --format="%cd" --date="format:%Y-%m-%d" --no-patch --no-show-signature)
-REV=$(shell git describe --abbrev=7 --always --dirty)
+REV=$(shell git rev-parse --short HEAD)
 VERSION?=$(DATE)_$(REV)
 
 # Set build directory
