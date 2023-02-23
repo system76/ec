@@ -72,7 +72,7 @@ bool peci_available(void) {
 }
 
 // Returns true on success, false on error
-bool peci_get_temp(int16_t * data) {
+bool peci_get_temp(int16_t *data) {
     //TODO: Wait for completion?
     // Clear upstream status
     ESUCTRL0 = ESUCTRL0;
@@ -226,7 +226,7 @@ bool peci_available(void) {
 }
 
 // Returns true on success, false on error
-bool peci_get_temp(int16_t * data) {
+bool peci_get_temp(int16_t *data) {
     // Wait for completion
     while (HOSTAR & 1) {}
     // Clear status
