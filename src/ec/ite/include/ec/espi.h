@@ -112,15 +112,15 @@ volatile uint8_t __xdata __at(0x31A3) ESGCTRL3;
 
 // Upstream flags
 volatile uint8_t __xdata __at(0x31B0) ESUCTRL0;
-    #define ESUCTRL0_ENABLE BIT(7)
-    #define ESUCTRL0_GO BIT(6)
-    #define ESUCTRL0_DONE BIT(1)
-    #define ESUCTRL0_BUSY BIT(0)
+#define ESUCTRL0_ENABLE BIT(7)
+#define ESUCTRL0_GO BIT(6)
+#define ESUCTRL0_DONE BIT(1)
+#define ESUCTRL0_BUSY BIT(0)
 
 // Upstream cycle type
 volatile uint8_t __xdata __at(0x31B1) ESUCTRL1;
-    // OOB message
-    #define ESUCTRL1_OOB 0x07
+// OOB message
+#define ESUCTRL1_OOB 0x07
 
 // Upstream tag @ [7:4], upstream length [11:8] @ [3:0]
 volatile uint8_t __xdata __at(0x31B2) ESUCTRL2;
@@ -136,7 +136,7 @@ volatile uint8_t __xdata __at(0x31B8) ESUCTRL8;
 
 // PUT_OOB status
 volatile uint8_t __xdata __at(0x31C0) ESOCTRL0;
-    #define ESOCTRL0_STATUS BIT(7)
+#define ESOCTRL0_STATUS BIT(7)
 
 volatile uint8_t __xdata __at(0x31C1) ESOCTRL1;
 
