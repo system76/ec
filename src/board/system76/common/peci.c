@@ -65,9 +65,8 @@ void peci_init(void) {}
 
 // Returns true if peci is available
 bool peci_available(void) {
-    // If ESPI_RESET# (named BUF_PLT_RST_N) is low, PECI is not available
-    // This is because no ESPI transactions will be possible
-    if (!gpio_get(&BUF_PLT_RST_N)) return false;
+    // Power state must be S0 for PECI to be useful
+    if (power_state != POWER_STATE_S0) return false;
 
     // If VW_PLTRST_N virtual wire is not VWS_HIGH, PECI is not available
     // This is because the CPU has not yet exited reset
@@ -228,6 +227,9 @@ void peci_init(void) {
 
 // Returns true if peci is available
 bool peci_available(void) {
+    // Power state must be S0 for PECI to be useful
+    if (power_state != POWER_STATE_S0) return false;
+
     // PECI is available if PLTRST# is high
     return gpio_get(&BUF_PLT_RST_N);
 }
