@@ -119,8 +119,6 @@ extern uint8_t main_cycle;
 enum PowerState power_state = POWER_STATE_OFF;
 
 enum PowerState calculate_power_state(void) {
-    //TODO: Deep Sx states using SLP_SUS#
-
 #if CONFIG_BUS_ESPI
     // Use eSPI virtual wires if available
 
@@ -132,11 +130,6 @@ enum PowerState calculate_power_state(void) {
     if (vw_get(&VW_SLP_S4_N) == VWS_HIGH) {
         // S4 and S5 planes powered
         return POWER_STATE_S3;
-    }
-
-    if (vw_get(&VW_SLP_S5_N) == VWS_HIGH) {
-        // S5 plane powered
-        return POWER_STATE_S5;
     }
 #else // CONFIG_BUS_ESPI
     // Use dedicated GPIOs if not using ESPI
@@ -150,12 +143,12 @@ enum PowerState calculate_power_state(void) {
         // S4 and S5 planes powered
         return POWER_STATE_S3;
     }
+#endif // CONFIG_BUS_ESPI
 
     if (gpio_get(&EC_RSMRST_N)) {
         // S5 plane powered
         return POWER_STATE_S5;
     }
-#endif // CONFIG_BUS_ESPI
 
     return POWER_STATE_OFF;
 }
