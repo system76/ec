@@ -119,38 +119,39 @@ extern uint8_t main_cycle;
 enum PowerState power_state = POWER_STATE_OFF;
 
 enum PowerState calculate_power_state(void) {
+    if (!gpio_get(&EC_RSMRST_N)) {
+        // S5 plane not powered
+        return POWER_STATE_OFF;
+    }
+
 #if CONFIG_BUS_ESPI
     // Use eSPI virtual wires if available
 
-    if (vw_get(&VW_SLP_S3_N) == VWS_HIGH) {
-        // S3, S4, and S5 planes powered
-        return POWER_STATE_S0;
+    if (vw_get(&VW_SLP_S4_N) != VWS_HIGH) {
+        // S4 plane not powered
+        return POWER_STATE_S5;
     }
 
-    if (vw_get(&VW_SLP_S4_N) == VWS_HIGH) {
-        // S4 and S5 planes powered
+    if (vw_get(&VW_SLP_S3_N) != VWS_HIGH) {
+        // S3 plane not powered
         return POWER_STATE_S3;
     }
 #else // CONFIG_BUS_ESPI
     // Use dedicated GPIOs if not using ESPI
 
-    if (gpio_get(&SUSB_N_PCH)) {
-        // S3, S4, and S5 planes powered
-        return POWER_STATE_S0;
+    if (!gpio_get(&SUSC_N_PCH)) {
+        // S4 plane not powered
+        return POWER_STATE_S5;
     }
 
-    if (gpio_get(&SUSC_N_PCH)) {
-        // S4 and S5 planes powered
+    if (!gpio_get(&SUSB_N_PCH)) {
+        // S3 plane not powered
         return POWER_STATE_S3;
     }
 #endif // CONFIG_BUS_ESPI
 
-    if (gpio_get(&EC_RSMRST_N)) {
-        // S5 plane powered
-        return POWER_STATE_S5;
-    }
-
-    return POWER_STATE_OFF;
+    // All planes are powered
+    return POWER_STATE_S0;
 }
 
 void update_power_state(void) {
