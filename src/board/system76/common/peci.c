@@ -65,10 +65,17 @@ void peci_init(void) {}
 
 // Returns true if peci is available
 bool peci_available(void) {
-    // PECI is available if PLTRST_N is high
-    // Do not wake CPU from C10 if HOST_C10 virtual wire is high
+    // If ESPI_RESET# (named BUF_PLT_RST_N) is low, PECI is not available
+    // This is because no ESPI transactions will be possible
+    if (!gpio_get(&BUF_PLT_RST_N)) return false;
+
+    // If VW_PLTRST_N virtual wire is not VWS_HIGH, PECI is not available
+    // This is because the CPU has not yet exited reset
+    if (vw_get(&VW_PLTRST_N) != VWS_HIGH) return false;
+
+    // If VW_HOST_C10 virtual wire is VWS_HIGH, PECI will wake the CPU
     //TODO: wake CPU every 8 seconds following Intel recommendation?
-    return (vw_get(&VW_PLTRST_N) == VWS_HIGH) && (vw_get(&VW_HOST_C10) != VWS_HIGH);
+    return (vw_get(&VW_HOST_C10) != VWS_HIGH);
 }
 
 // Returns true on success, false on error
