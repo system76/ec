@@ -9,13 +9,15 @@
 
 struct VirtualWire {
     volatile uint8_t __xdata *index;
-    uint8_t shift;
+    uint8_t data_mask;
+    uint8_t valid_mask;
 };
 
 // clang-format off
 #define VIRTUAL_WIRE(INDEX, SHIFT) { \
     .index = &VWIDX ## INDEX, \
-    .shift = SHIFT, \
+    .data_mask = BIT(SHIFT), \
+    .valid_mask = BIT(SHIFT + 4), \
 }
 // clang-format on
 
