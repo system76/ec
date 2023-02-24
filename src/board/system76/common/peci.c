@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <arch/time.h>
 #include <board/fan.h>
 #include <board/gpio.h>
 #include <board/peci.h>
@@ -61,6 +62,9 @@ static struct Fan __code FAN = {
 
 #if CONFIG_BUS_ESPI
 
+// Maximum OOB channel response time in ms
+#define PECI_ESPI_TIMEOUT 10
+
 void peci_init(void) {}
 
 // Returns true if peci is available
@@ -115,11 +119,23 @@ bool peci_get_temp(int16_t *data) {
     ESUCTRL0 |= ESUCTRL0_GO;
 
     // Wait until upstream done
-    while (!(ESUCTRL0 & ESUCTRL0_DONE)) {}
+    uint32_t start = time_get();
+    while (!(ESUCTRL0 & ESUCTRL0_DONE)) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("peci_get_temp: upstream timeout\n");
+            return false;
+        }
+    }
 
     // Wait for response
     //TODO: do this asynchronously to avoid delays?
-    while (!(ESOCTRL0 & ESOCTRL0_STATUS)) {}
+    start = time_get();
+    while (!(ESOCTRL0 & ESOCTRL0_STATUS)) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("peci_get_temp: response timeout\n");
+            return false;
+        }
+    }
 
     // Read response length
     uint8_t len = ESOCTRL4;
@@ -133,6 +149,7 @@ bool peci_get_temp(int16_t *data) {
         return true;
     } else {
         // Did not receive enough data
+        DEBUG("peci_get_temp: len %d < 7\n", len);
         return false;
     }
 }
@@ -189,11 +206,25 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     ESUCTRL0 |= ESUCTRL0_GO;
 
     // Wait until upstream done
-    while (!(ESUCTRL0 & ESUCTRL0_DONE)) {}
+    uint32_t start = time_get();
+    while (!(ESUCTRL0 & ESUCTRL0_DONE)) {
+        DEBUG("peci_wr_pkg_config: wait upstream\n");
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("peci_wr_pkg_config: upstream timeout\n");
+            return false;
+        }
+    }
 
     // Wait for response
     //TODO: do this asynchronously to avoid delays?
-    while (!(ESOCTRL0 & ESOCTRL0_STATUS)) {}
+    start = time_get();
+    while (!(ESOCTRL0 & ESOCTRL0_STATUS)) {
+        DEBUG("peci_wr_pkg_config: wait response\n");
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("peci_wr_pkg_config: response timeout\n");
+            return false;
+        }
+    }
 
     // Read response length
     uint8_t len = ESOCTRL4;
@@ -209,6 +240,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
         }
     } else {
         // Did not receive enough data
+        DEBUG("peci_wr_pkg_config: len %d < 6\n", len);
         return -0x1000;
     }
 }
