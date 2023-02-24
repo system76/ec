@@ -69,6 +69,9 @@ void peci_init(void) {}
 
 // Returns true if peci is available
 bool peci_available(void) {
+    // Ensure power state is up to date
+    update_power_state();
+
     // Power state must be S0 for PECI to be useful
     if (power_state != POWER_STATE_S0) return false;
 
@@ -259,6 +262,9 @@ void peci_init(void) {
 
 // Returns true if peci is available
 bool peci_available(void) {
+    // Ensure power state is up to date
+    update_power_state();
+
     // Power state must be S0 for PECI to be useful
     if (power_state != POWER_STATE_S0) return false;
 
