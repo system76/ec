@@ -39,27 +39,30 @@ struct VirtualWire __code VW_HOST_C10 = VIRTUAL_WIRE(47, 0);
 
 enum VirtualWireState vw_get(struct VirtualWire *vw) __critical {
     uint8_t index = *vw->index;
-    switch ((index >> vw->shift) & VWS_HIGH) {
-    case VWS_LOW:
-        return VWS_LOW;
-    case VWS_HIGH:
-        return VWS_HIGH;
-    default:
+    if (index & vw->valid_mask) {
+        if (index & vw->data_mask) {
+            return VWS_HIGH;
+        } else {
+            return VWS_LOW;
+        }
+    } else {
         return VWS_INVALID;
     }
 }
 
 void vw_set(struct VirtualWire *vw, enum VirtualWireState state) __critical {
     uint8_t index = *vw->index;
-    index &= ~(VWS_HIGH << vw->shift);
     switch (state) {
     case VWS_LOW:
-        index |= VWS_LOW << vw->shift;
+        index &= ~vw->data_mask;
+        index |= vw->valid_mask;
         break;
     case VWS_HIGH:
-        index |= VWS_HIGH << vw->shift;
+        index |= vw->data_mask;
+        index |= vw->valid_mask;
         break;
     default:
+        index &= ~vw->valid_mask;
         break;
     }
     *vw->index = index;
