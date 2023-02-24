@@ -11,6 +11,7 @@ enum PowerState {
 };
 
 extern enum PowerState power_state;
+void update_power_state(void);
 
 void power_init(void);
 void power_on(void);
