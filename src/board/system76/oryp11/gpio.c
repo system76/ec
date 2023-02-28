@@ -70,7 +70,8 @@ void gpio_init() {
     GPDRH = 0;
     // LAN_PWR_EN
     GPDRI = BIT(2);
-    GPDRJ = 0;
+    // EC_AMP_EN
+    GPDRJ = BIT(2);
     GPOTA = 0;
     GPOTB = 0;
     GPOTD = 0;
