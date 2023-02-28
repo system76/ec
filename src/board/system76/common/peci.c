@@ -73,11 +73,13 @@ bool peci_available(void) {
     update_power_state();
 
     // Power state must be S0 for PECI to be useful
-    if (power_state != POWER_STATE_S0) return false;
+    if (power_state != POWER_STATE_S0)
+        return false;
 
     // If VW_PLTRST_N virtual wire is not VWS_HIGH, PECI is not available
     // This is because the CPU has not yet exited reset
-    if (vw_get(&VW_PLTRST_N) != VWS_HIGH) return false;
+    if (vw_get(&VW_PLTRST_N) != VWS_HIGH)
+        return false;
 
     // If VW_HOST_C10 virtual wire is VWS_HIGH, PECI will wake the CPU
     //TODO: wake CPU every 8 seconds following Intel recommendation?
@@ -266,7 +268,8 @@ bool peci_available(void) {
     update_power_state();
 
     // Power state must be S0 for PECI to be useful
-    if (power_state != POWER_STATE_S0) return false;
+    if (power_state != POWER_STATE_S0)
+        return false;
 
     // PECI is available if PLTRST# is high
     return gpio_get(&BUF_PLT_RST_N);
