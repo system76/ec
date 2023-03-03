@@ -70,7 +70,8 @@ void gpio_init() {
     GPDRG = BIT(6);
     GPDRH = 0;
     GPDRI = 0;
-    GPDRJ = 0;
+    // CC_EN
+    GPDRJ = BIT(7);
     GPOTA = 0;
     GPOTB = 0;
     GPOTD = 0;
@@ -249,7 +250,7 @@ void gpio_init() {
     // EC_GPIO
     GPCRJ6 = GPIO_IN;
     // CC_EN
-    GPCRJ7 = GPIO_IN;
+    GPCRJ7 = GPIO_OUT;
 
     // ESPI_IO0_EC
     GPCRM0 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
