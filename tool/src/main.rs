@@ -9,6 +9,7 @@ use ectool::{
     Ec,
     Error,
     Firmware,
+    SecurityState,
     StdTimeout,
     Spi,
     SpiRom,
@@ -276,6 +277,19 @@ unsafe fn keymap_set(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input:
     ec.keymap_set(layer, output, input, value)
 }
 
+unsafe fn security_get(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
+    println!("{:?}", ec.security_get()?);
+
+    Ok(())
+}
+
+unsafe fn security_set(ec: &mut Ec<Box<dyn Access>>, state: SecurityState) -> Result<(), Error> {
+    ec.security_set(state)?;
+    println!("Shut down the system for the security state to take effect");
+
+    Ok(())
+}
+
 fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
     let r = u8::from_str_radix(&s[0..2], 16);
     let g = u8::from_str_radix(&s[2..4], 16);
@@ -373,6 +387,11 @@ fn main() {
             .arg(Arg::with_name("value")
                 .possible_values(&["true", "false"])
                 .required(true)
+            )
+        )
+        .subcommand(SubCommand::with_name("security")
+            .arg(Arg::with_name("state")
+                .possible_values(&["lock", "unlock"])
             )
         )
         .get_matches();
@@ -609,7 +628,35 @@ fn main() {
                     process::exit(1);
                 }
             }
-        }
+        },
+        Some(("security", sub_m)) => {
+            match sub_m.value_of("state") {
+                Some(value) => {
+                    let state = match value {
+                        "lock" => SecurityState::PrepareLock,
+                        "unlock" => SecurityState::PrepareUnlock,
+                        _ => {
+                            eprintln!("invalid security state '{}': must be 'lock' or 'unlock'", value);
+                            process::exit(1);
+                        }
+                    };
+                    match unsafe { security_set(&mut ec, state) } {
+                        Ok(()) => (),
+                        Err(err) => {
+                            eprintln!("failed to set security state to '{}': {:X?}", value, err);
+                            process::exit(1);
+                        },
+                    }
+                },
+                None => match unsafe { security_get(&mut ec) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to get security state: {:X?}", err);
+                        process::exit(1);
+                    },
+                },
+            }
+        },
         _ => unreachable!()
     }
 }
