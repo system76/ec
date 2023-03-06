@@ -18,6 +18,7 @@ struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
+struct Gpio __code ME_WE =          GPIO(I, 2);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(A, 7);
 struct Gpio __code PCH_PWROK_EC =   GPIO(A, 6);
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
@@ -215,7 +216,7 @@ void gpio_init(void) {
     GPCRI0 = GPIO_ALT;
     // BAT_VOLT
     GPCRI1 = GPIO_ALT;
-    // ME_WR
+    // ME_WE
     GPCRI2 = GPIO_OUT;
     // THERM_VOLT_CPU
     GPCRI3 = GPIO_ALT;
