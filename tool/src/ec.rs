@@ -5,6 +5,7 @@ use alloc::{
     boxed::Box,
     vec,
 };
+use core::convert::TryFrom;
 
 use crate::{
     Access,
@@ -36,12 +37,41 @@ enum Cmd {
     MatrixGet = 17,
     LedSave = 18,
     SetNoInput = 19,
+    SecurityGet = 20,
+    SecuritySet = 21,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
 const CMD_SPI_FLAG_DISABLE: u8 = 1 << 1;
 const CMD_SPI_FLAG_SCRATCH: u8 = 1 << 2;
 const CMD_SPI_FLAG_BACKUP: u8 = 1 << 3;
+
+#[derive(Clone, Copy, Debug)]
+#[repr(u8)]
+pub enum SecurityState {
+    // Default value, flashing is prevented, cannot be set with security_set
+    Lock = 0,
+    // Flashing is allowed, cannot be set with security_set
+    Unlock = 1,
+    // Flashing will be prevented on the next reboot
+    PrepareLock = 2,
+    // Flashing will be allowed on the next reboot
+    PrepareUnlock = 3,
+}
+
+impl TryFrom<u8> for SecurityState {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Lock),
+            1 => Ok(Self::Unlock),
+            2 => Ok(Self::PrepareLock),
+            3 => Ok(Self::PrepareUnlock),
+            _ => Err(Error::Verify),
+        }
+    }
+}
 
 /// Run EC commands using a provided access method
 pub struct Ec<A: Access> {
@@ -282,6 +312,19 @@ impl<A: Access> Ec<A> {
 
     pub unsafe fn set_no_input(&mut self, no_input: bool) -> Result<(), Error> {
         self.command(Cmd::SetNoInput, &mut [no_input as u8])
+    }
+
+    /// Get security state
+    pub unsafe fn security_get(&mut self) -> Result<SecurityState, Error> {
+       let mut data = [0];
+       self.command(Cmd::SecurityGet, &mut data)?;
+       SecurityState::try_from(data[0])
+    }
+
+    /// Set security state
+    pub unsafe fn security_set(&mut self, state: SecurityState) -> Result<(), Error> {
+       let mut data = [state as u8];
+       self.command(Cmd::SecuritySet, &mut data)
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>

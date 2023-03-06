@@ -25,7 +25,7 @@ extern crate alloc;
 pub use self::access::*;
 mod access;
 
-pub use self::ec::Ec;
+pub use self::ec::{Ec, SecurityState};
 mod ec;
 
 pub use self::error::Error;
