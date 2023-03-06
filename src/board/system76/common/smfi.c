@@ -17,11 +17,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef __SCRATCH__
+#if !defined(__SCRATCH__)
 #include <board/scratch.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
-#endif
+
+#if CONFIG_SECURITY
+#include <board/security.h>
+#endif // CONFIG_SECURITY
+
+#endif // !defined(__SCRATCH__)
 #include <board/smfi.h>
 #include <common/command.h>
 #include <common/macro.h>
@@ -242,6 +247,23 @@ static enum Result cmd_matrix_get(void) {
     }
     return RES_OK;
 }
+
+#if CONFIG_SECURITY
+static enum Result cmd_security_get(void) {
+    smfi_cmd[SMFI_CMD_DATA] = security_get();
+    return RES_OK;
+}
+
+static enum Result cmd_security_set(void) {
+    enum SecurityState state = smfi_cmd[SMFI_CMD_DATA];
+    if (security_set(state)) {
+        return RES_OK;
+    } else {
+        return RES_ERR;
+    }
+}
+#endif // CONFIG_SECURITY
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -286,6 +308,14 @@ static enum Result cmd_spi(void) {
 #if defined(__SCRATCH__)
     return cmd_spi_scratch();
 #else // defined(__SCRATCH__)
+
+#if CONFIG_SECURITY
+    if (security_get() != SECURITY_STATE_UNLOCK) {
+        // EC must be unlocked to allow flashing
+        return RES_ERR;
+    }
+#endif // CONFIG_SECURITY
+
     if (smfi_cmd[SMFI_CMD_DATA] & CMD_SPI_FLAG_SCRATCH) {
         scratch_trampoline();
     }
@@ -296,6 +326,17 @@ static enum Result cmd_spi(void) {
 }
 
 static enum Result cmd_reset(void) {
+#if !defined(__SCRATCH__)
+
+#if CONFIG_SECURITY
+    if (security_get() != SECURITY_STATE_UNLOCK) {
+        // EC must be unlocked to allow watchdog reset
+        return RES_ERR;
+    }
+#endif // CONFIG_SECURITY
+
+#endif // !defined(__SCRATCH__)
+
     // Attempt to trigger watchdog reset
     ETWCFG |= BIT(5);
     EWDKEYR = 0;
@@ -370,6 +411,16 @@ void smfi_event(void) {
         case CMD_MATRIX_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_matrix_get();
             break;
+
+#if CONFIG_SECURITY
+        case CMD_SECURITY_GET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_security_get();
+            break;
+        case CMD_SECURITY_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_security_set();
+            break;
+#endif // CONFIG_SECURITY
+
 #endif // !defined(__SCRATCH__)
         case CMD_SPI:
             smfi_cmd[SMFI_CMD_RES] = cmd_spi();

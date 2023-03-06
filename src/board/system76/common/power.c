@@ -22,6 +22,10 @@
 #include <board/espi.h>
 #endif
 
+#if CONFIG_SECURITY
+#include <board/security.h>
+#endif // CONFIG_SECURITY
+
 #define GPIO_SET_DEBUG(G, V) \
     { \
         DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
@@ -540,6 +544,13 @@ void power_event(void) {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
             power_off();
+
+#if CONFIG_SECURITY
+            // Handle security state changes if necessary
+            if (security_power()) {
+                power_on();
+            }
+#endif // CONFIG_SECURITY
         }
     }
 
