@@ -22,6 +22,7 @@ struct Gpio __code LED_BAT_CHG =    GPIO(H, 5);
 struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
+struct Gpio __code ME_WE =          GPIO(A, 0);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(C, 5);
 struct Gpio __code PCH_PWROK_EC =   GPIO(A, 6);
 struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0);

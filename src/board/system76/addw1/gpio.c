@@ -26,6 +26,7 @@ struct Gpio __code LED_NUM_N =      GPIO(J, 4);
 struct Gpio __code LED_PWR =        GPIO(H, 5);
 struct Gpio __code LED_SCROLL_N =   GPIO(J, 3);
 struct Gpio __code LID_SW_N =       GPIO(D, 1);
+struct Gpio __code ME_WE =          GPIO(I, 2);
 struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0); // renamed to ECCLKRUN#
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
