@@ -30,6 +30,7 @@ extern struct Gpio __code LED_NUM_N;
 extern struct Gpio __code LED_PWR;
 extern struct Gpio __code LED_SCROLL_N;
 extern struct Gpio __code LID_SW_N;
+extern struct Gpio __code ME_WE;
 #define HAVE_PCH_DPWROK_EC 0
 #define HAVE_PCH_PWROK_EC 0
 extern struct Gpio __code PM_CLKRUN_N; // renamed to ECCLKRUN#
