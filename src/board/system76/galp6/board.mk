@@ -14,6 +14,8 @@ CONFIG_SECURITY=y
 
 # Use S0ix
 CFLAGS+=-DUSE_S0IX=1
+# Apply PMC hack for S0ix
+CFLAGS+=-DPMC_S0IX_HACK=1
 
 # Include keyboard
 KEYBOARD=14in_83
