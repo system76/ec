@@ -76,7 +76,7 @@ void gpio_init() {
     // Set GPIO control
 
     // EC_PWM_PIN_24
-    GPCRA0 = GPIO_IN;
+    GPCRA0 = GPIO_ALT;
     // KBC_BEEP
     GPCRA1 = GPIO_ALT;
     // CPU_FAN
