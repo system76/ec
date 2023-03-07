@@ -9,8 +9,6 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
-# FIXME: Use S3 instead of S0ix
-CFLAGS+=-DUSE_S0IX=1
 # Apply PMC hack for S0ix
 CFLAGS+=-DPMC_S0IX_HACK=1
 
