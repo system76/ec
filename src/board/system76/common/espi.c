@@ -40,6 +40,8 @@
         vw_set(&W, V); \
     }
 
+bool espi_host_reset = false;
+
 void espi_init(void) {
     if (PLLFREQ != 0b0111) {
         // Workarounds to allow changing PLL
@@ -144,6 +146,9 @@ void espi_event(void) {
                     VW_SET_DEBUG(VW_RCIN_N, VWS_HIGH);
 
                     power_cpu_reset();
+
+                    // Host reset complete
+                    espi_host_reset = false;
                 }
                 last_pltrst_n = wire;
             }
@@ -154,6 +159,11 @@ void espi_event(void) {
             // Set HOST_RST_ACK to HOST_RST_WARN
             wire = vw_get(&VW_HOST_RST_WARN);
             if (wire != vw_get(&VW_HOST_RST_ACK)) {
+                if (wire == VWS_HIGH) {
+                    // Host reset started
+                    espi_host_reset = true;
+                }
+
                 VW_SET_DEBUG(VW_HOST_RST_ACK, wire);
             }
         }

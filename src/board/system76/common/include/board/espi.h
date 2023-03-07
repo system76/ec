@@ -3,7 +3,11 @@
 #ifndef _BOARD_ESPI_H
 #define _BOARD_ESPI_H
 
+#include <stdbool.h>
+
 #include <ec/espi.h>
+
+extern bool espi_host_reset;
 
 void espi_init(void);
 void espi_reset(void);

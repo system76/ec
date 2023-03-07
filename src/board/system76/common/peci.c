@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <arch/time.h>
+#include <board/espi.h>
 #include <board/fan.h>
 #include <board/gpio.h>
 #include <board/peci.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
-#include <ec/espi.h>
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
@@ -74,6 +74,10 @@ bool peci_available(void) {
 
     // Power state must be S0 for PECI to be useful
     if (power_state != POWER_STATE_S0)
+        return false;
+
+    // Currently waiting for host reset, PECI is not available
+    if (espi_host_reset)
         return false;
 
     // If VW_PLTRST_N virtual wire is not VWS_HIGH, PECI is not available
