@@ -145,10 +145,10 @@ void espi_event(void) {
                     VW_SET_DEBUG(VW_SMI_N, VWS_HIGH);
                     VW_SET_DEBUG(VW_RCIN_N, VWS_HIGH);
 
-                    power_cpu_reset();
-
                     // Host reset complete
                     espi_host_reset = false;
+
+                    power_cpu_reset();
                 }
                 last_pltrst_n = wire;
             }
