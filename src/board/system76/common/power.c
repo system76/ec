@@ -346,6 +346,8 @@ void power_cpu_reset(void) {
     fan_reset();
     //TODO: reset KBC and touchpad states
     kbled_reset();
+    // Set PL4
+    power_set_limit();
 }
 
 static bool power_button_disabled(void) {
