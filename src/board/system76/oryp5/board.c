@@ -2,7 +2,6 @@
 
 #include <board/board.h>
 #include <board/gpio.h>
-#include <board/power.h>
 #include <common/debug.h>
 
 void board_init(void) {
@@ -20,6 +19,4 @@ void board_init(void) {
     gpio_set(&SWI_N, true);
 }
 
-void board_event(void) {
-    power_set_limit();
-}
+void board_event(void) {}

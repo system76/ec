@@ -5,7 +5,6 @@
 #include <board/espi.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
-#include <board/power.h>
 #include <common/debug.h>
 #include <ec/ec.h>
 
@@ -29,10 +28,6 @@ void board_init(void) {
 }
 
 void board_event(void) {
-#if HAVE_DGPU
-    power_set_limit();
-#endif // HAVE_DGPU
-
     espi_event();
 
     ec_read_post_codes();
