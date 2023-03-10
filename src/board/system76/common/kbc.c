@@ -23,6 +23,11 @@ void kbc_init(void) {
     *(KBC.status) = BIT(4);
 }
 
+void kbc_clear_lock(void) {
+    // Set "key lock" to disabled
+    *(KBC.status) = BIT(4);
+}
+
 #define KBC_TIMEOUT 1000
 
 // Enable first port
