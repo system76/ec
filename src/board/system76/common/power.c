@@ -327,16 +327,9 @@ static bool power_peci_limit(bool ac) {
 
 // Set the power draw limit depending on if on AC or DC power
 void power_set_limit(void) {
-    static bool last_power_limit_ac = true;
     if (peci_available()) {
         bool ac = !gpio_get(&ACIN_N);
-        if (last_power_limit_ac != ac) {
-            if (power_peci_limit(ac)) {
-                last_power_limit_ac = ac;
-            }
-        }
-    } else {
-        last_power_limit_ac = true;
+        power_peci_limit(ac);
     }
 }
 #else // HAVE_DGPU
