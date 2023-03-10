@@ -14,6 +14,7 @@
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
+#include <board/ps2.h>
 #include <board/wireless.h>
 #include <board/usbpd.h>
 #include <common/debug.h>
@@ -272,6 +273,9 @@ void power_on(void) {
     if (power_state != POWER_STATE_S0) {
         DEBUG("failed to reach S0, powering off\n");
         power_off();
+    } else {
+        ps2_reset(&PS2_1);
+        ps2_reset(&PS2_TOUCHPAD);
     }
 }
 
@@ -341,7 +345,7 @@ void power_cpu_reset(void) {
     acpi_reset();
     // Reset fans
     fan_reset();
-    //TODO: reset KBC and touchpad states
+    // Reset KBC and touchpad states
     kbled_reset();
     // Set PL4
     //TODO: if this returns false, retry?
@@ -351,6 +355,8 @@ void power_cpu_reset(void) {
         // There is available current
         (battery_charger_input_current >= CHARGER_INPUT_CURRENT)
     );
+    ps2_reset(&PS2_1);
+    ps2_reset(&PS2_TOUCHPAD);
 }
 
 static bool power_button_disabled(void) {
