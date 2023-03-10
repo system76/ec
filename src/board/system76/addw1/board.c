@@ -3,7 +3,6 @@
 #include <board/board.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
-#include <board/power.h>
 #include <common/debug.h>
 
 extern uint8_t main_cycle;
@@ -24,8 +23,6 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    power_set_limit();
-
     if (main_cycle == 0) {
         // Set keyboard LEDs
         static uint8_t last_kbc_leds = 0;

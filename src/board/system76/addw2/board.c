@@ -4,7 +4,6 @@
 #include <board/gctrl.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
-#include <board/power.h>
 #include <common/debug.h>
 #include <ec/ec.h>
 
@@ -22,8 +21,6 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    power_set_limit();
-
     ec_read_post_codes();
 
     if (main_cycle == 0) {
