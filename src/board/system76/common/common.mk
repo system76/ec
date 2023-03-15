@@ -52,6 +52,11 @@ PROGRAMMER=$(wildcard /dev/serial/by-id/usb-Arduino*)
 
 ifeq ($(CONFIG_BUS_ESPI),y)
 CFLAGS += -DCONFIG_BUS_ESPI=1
+
+# TODO: Use PECI over eSPI on all boards using eSPI
+ifeq ($(CONFIG_PECI_OVER_ESPI),y)
+CFLAGS += -DCONFIG_PECI_OVER_ESPI=1
+endif
 endif
 
 # Include system76 common source
