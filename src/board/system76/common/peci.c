@@ -60,7 +60,7 @@ static struct Fan __code FAN = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
-#if CONFIG_BUS_ESPI
+#if CONFIG_PECI_OVER_ESPI
 
 // Maximum OOB channel response time in ms
 #define PECI_ESPI_TIMEOUT 10
@@ -254,7 +254,10 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     }
 }
 
-#else // CONFIG_BUS_ESPI
+#else // CONFIG_PECI_OVER_ESPI
+
+// Legacy PECI implementation; requires a dedicated PECI pin connected to the
+// PCH and EC (H_PECI).
 
 void peci_init(void) {
     // Allow PECI pin to be used
@@ -380,7 +383,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     return -((int16_t)cc);
 }
 
-#endif // CONFIG_BUS_ESPI
+#endif // CONFIG_PECI_OVER_ESPI
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 uint8_t peci_get_fan_duty(void) {
