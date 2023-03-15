@@ -8,6 +8,8 @@ CONFIG_EC_ITE_IT5570E=y
 
 # Enable eSPI
 CONFIG_BUS_ESPI=y
+# Use PECI over eSPI
+CONFIG_PECI_OVER_ESPI=y
 
 # Enable firmware security
 CONFIG_SECURITY=y
