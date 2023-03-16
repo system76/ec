@@ -25,6 +25,7 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
+#include <board/usbpd.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
@@ -77,6 +78,7 @@ void init(void) {
     pwm_init();
     smbus_init();
     smfi_init();
+    usbpd_init();
 
     //TODO: INTC
 
