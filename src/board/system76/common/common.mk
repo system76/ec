@@ -76,6 +76,10 @@ CFLAGS+=\
 CHARGER?=bq24780s
 board-common-y += charger/$(CHARGER).c
 
+# Add USB-PD
+USBPD?=none
+board-common-y += usbpd/$(USBPD).c
+
 # Add keyboard
 ifndef KEYBOARD
 $(error KEYBOARD is not set by the board)
