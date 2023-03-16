@@ -15,6 +15,7 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <board/wireless.h>
+#include <board/usbpd.h>
 #include <common/debug.h>
 
 #if CONFIG_BUS_ESPI
@@ -372,6 +373,7 @@ void power_event(void) {
             battery_charger_configure();
         }
         battery_debug();
+        usbpd_event();
 
         // Reset main loop cycle to force reading PECI and battery
         main_cycle = 0;
