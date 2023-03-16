@@ -10,6 +10,12 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
+// Replace PECI with alternative if using AMD CPU
+//TODO: replace with better abstraction
+#ifndef HAVE_AMD_CPU
+    #define HAVE_AMD_CPU 0
+#endif
+
 #ifndef USE_S0IX
 #define USE_S0IX 0
 #endif
@@ -62,6 +68,53 @@ static struct Fan __code FAN = {
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
     .interpolate = SMOOTH_FANS != 0,
 };
+
+#if HAVE_AMD_CPU
+#include <ec/i2c.h>
+
+void peci_init(void) {}
+
+// This uses SB-TSI, in AMD document 40821
+uint8_t peci_get_fan_duty(void) {
+    uint8_t duty;
+
+    peci_on = power_state == POWER_STATE_S0;
+
+    if (peci_on) {
+        // Use SB-TSI if in S0 state
+        // We only read the CPU temp high value, since a resolution of 1C is
+        // good enough
+        int8_t cpu_temp_high;
+        int res = i2c_get(&I2C_CPU, 0x4C, 0x01, &cpu_temp_high, 1);
+        if (res == 1) {
+            // Convert from AMD format
+            peci_temp = PECI_TEMP(cpu_temp_high);
+            duty = fan_duty(&FAN, peci_temp);
+        } else {
+            DEBUG("SB-TSI temp error: %d\n", res);
+            // Default to 50% if there is an error
+            peci_temp = 0;
+            duty = PWM_DUTY(50);
+        }
+    } else {
+        // Turn fan off if not in S0 state
+        peci_temp = 0;
+        duty = PWM_DUTY(0);
+    }
+
+    if (peci_on && fan_max) {
+        // Override duty if fans are manually set to maximum
+        duty = PWM_DUTY(100);
+    } else {
+        // Apply heatup and cooldown filters to duty
+        duty = fan_heatup(&FAN, duty);
+        duty = fan_cooldown(&FAN, duty);
+    }
+
+    TRACE("SB-TSI temp=%d\n", peci_temp);
+    return duty;
+}
+#else // HAVE_AMD_CPU
 
 void peci_init(void) {
     // Allow PECI pin to be used
@@ -189,3 +242,5 @@ uint8_t peci_get_fan_duty(void) {
     TRACE("PECI temp=%d\n", peci_temp);
     return duty;
 }
+
+#endif // HAVE_AMD_CPU
