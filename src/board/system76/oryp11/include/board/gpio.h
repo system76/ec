@@ -30,6 +30,8 @@ extern struct Gpio __code LID_SW_N;
 extern struct Gpio __code ME_WE;
 extern struct Gpio __code PCH_DPWROK_EC;
 extern struct Gpio __code PCH_PWROK_EC;
+#define HAVE_PD_EN 1
+extern struct Gpio __code PD_EN;
 #define HAVE_PM_PWROK 0
 extern struct Gpio __code PWR_BTN_N;
 extern struct Gpio __code PWR_SW_N;
