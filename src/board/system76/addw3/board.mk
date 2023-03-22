@@ -41,7 +41,7 @@ CFLAGS+=\
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=280 \
-	-DPOWER_LIMIT_DC=28
+	-DPOWER_LIMIT_DC=55
 
 # Custom fan curve
 CFLAGS+=-DBOARD_HEATUP=5
