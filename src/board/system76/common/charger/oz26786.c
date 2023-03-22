@@ -44,13 +44,13 @@
 #define INPUT_CURRENT_MASK 0x0F80
 
 #if CHARGER_ADAPTER_RSENSE == 5
-    #define INPUT_CURRENT (MIN((CHARGER_INPUT_CURRENT >> 2), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
+    #define INPUT_CURRENT(X) (MIN(((X) >> 2), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
     #define ADAPTER_RSENSE RSENSE_5
 #elif CHARGER_ADAPTER_RSENSE == 10
-    #define INPUT_CURRENT (MIN((CHARGER_INPUT_CURRENT >> 1), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
+    #define INPUT_CURRENT(X) (MIN(((X) >> 1), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
     #define ADAPTER_RSENSE RSENSE_10
 #elif CHARGER_ADAPTER_RSENSE == 20
-    #define INPUT_CURRENT (MIN(CHARGER_INPUT_CURRENT, INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
+    #define INPUT_CURRENT(X) (MIN((X), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
     #define ADAPTER_RSENSE RSENSE_20
 #else
     #error Invalid adapter RSENSE value
@@ -100,9 +100,8 @@ int16_t battery_charger_disable(void) {
     if (res < 0)
         return res;
 
-    // Set input current in mA
-    //TODO: needed when charging disabled?
-    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
+    // Disable input current
+    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, 0);
     if (res < 0)
         return res;
 
@@ -146,7 +145,7 @@ int16_t battery_charger_enable(void) {
         return res;
 
     // Set input current in mA
-    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
+    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT(CHARGER_INPUT_CURRENT));
     if (res < 0)
         return res;
 
