@@ -318,23 +318,24 @@ void power_off(void) {
 }
 
 #ifdef HAVE_DGPU
+// Set the CPU power limit appropriately
 static bool power_peci_limit(bool ac) {
-    uint16_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
-    // Set PL4 using PECI
-    int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
-    DEBUG("power_peci_limit %d = %d\n", watts, res);
-    return res == 0x40;
-}
-
-// Set the power draw limit depending on if on AC or DC power
-void power_set_limit(void) {
     if (peci_available()) {
-        bool ac = !gpio_get(&ACIN_N);
-        power_peci_limit(ac);
+        uint16_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
+        // Set PL4 using PECI
+        int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
+        DEBUG("power_peci_limit %d = %d\n", watts, res);
+        return res == 0x40;
+    } else {
+        return false;
     }
 }
 #else // HAVE_DGPU
-void power_set_limit(void) {}
+static bool power_peci_limit(bool ac) {
+    // Use unused argument
+    ac = ac;
+    return true;
+}
 #endif // HAVE_DGPU
 
 // This function is run when the CPU is reset
@@ -348,7 +349,14 @@ void power_cpu_reset(void) {
     //TODO: reset KBC and touchpad states
     kbled_reset();
     // Set PL4
-    power_set_limit();
+    //TODO: if this returns false, retry?
+    power_peci_limit(
+        // AC is connected
+        (!gpio_get(&ACIN_N))
+        &&
+        // There is available current
+        (battery_charger_input_current >= CHARGER_INPUT_CURRENT)
+    );
 }
 
 static bool power_button_disabled(void) {
@@ -362,8 +370,14 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        power_set_limit();
+        // Set CPU power limit to DC limit until we determine available current
+        //TODO: if this returns false, retry?
+        power_peci_limit(false);
 
+        // Check for USB-PD charger limit
+        usbpd_event();
+
+        // Configure smart charger
         DEBUG("Power adapter ");
         if (ac_new) {
             DEBUG("unplugged\n");
@@ -371,9 +385,14 @@ void power_event(void) {
         } else {
             DEBUG("plugged in\n");
             battery_charger_configure();
+
+            // Set CPU power limit to AC limit, if there is available current
+            //TODO: if this returns false, retry?
+            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
+                power_peci_limit(true);
+            }
         }
         battery_debug();
-        usbpd_event();
 
         // Reset main loop cycle to force reading PECI and battery
         main_cycle = 0;
