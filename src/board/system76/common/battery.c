@@ -6,6 +6,8 @@
 
 struct battery_info battery_info = { 0 };
 
+uint16_t battery_charger_input_current = CHARGER_INPUT_CURRENT;
+
 // Default values to disable battery charging thresholds
 #define BATTERY_START_DEFAULT 0
 #define BATTERY_END_DEFAULT 100

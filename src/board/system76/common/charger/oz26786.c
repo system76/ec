@@ -145,7 +145,7 @@ int16_t battery_charger_enable(void) {
         return res;
 
     // Set input current in mA
-    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT(CHARGER_INPUT_CURRENT));
+    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT(battery_charger_input_current));
     if (res < 0)
         return res;
 
