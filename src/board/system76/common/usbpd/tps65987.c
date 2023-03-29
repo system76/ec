@@ -158,7 +158,9 @@ void usbpd_event(void) {
         if (next_input_current != battery_charger_input_current) {
             battery_charger_input_current = next_input_current;
             DEBUG("CHARGER LIMIT %d mA\n", battery_charger_input_current);
-            //TODO: update smart charger
+
+            // Disable smart charger so it is reconfigured with the new limit
+            battery_charger_disable();
         }
     }
 
