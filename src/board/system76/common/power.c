@@ -244,6 +244,9 @@ void power_on(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
+    // Ensure USB-PD is disabled before turning on CPU
+    usbpd_disable_charging();
+
     GPIO_SET_DEBUG(PWR_BTN_N, false);
     delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
     GPIO_SET_DEBUG(PWR_BTN_N, true);
@@ -373,9 +376,6 @@ void power_event(void) {
         // Set CPU power limit to DC limit until we determine available current
         //TODO: if this returns false, retry?
         power_peci_limit(false);
-
-        // Check for USB-PD charger limit
-        usbpd_event();
 
         // Configure smart charger
         DEBUG("Power adapter ");
