@@ -26,7 +26,7 @@ jobs:
 
       - name: Generate board matrix
         id: board-matrix
-        run: ./scripts/boards.sh >> $GITHUB_OUTPUT
+        run: echo "boards=$(make list-boards | jq -sRc 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
 
   tool:
     strategy:
@@ -50,7 +50,7 @@ jobs:
     needs: lint
     strategy:
       matrix:
-        boards: ${{ fromJson(needs.lint.outputs.boards )}}
+        boards: ${{ fromJson(needs.lint.outputs.boards) }}
         # TODO: Conditionally build based on files changed?
 
     steps:
@@ -60,4 +60,4 @@ jobs:
         run: ./scripts/deps.sh
 
       - name: Build firmware
-        run: make BOARD=${{ matrix.boards.vendor}}/${{ matrix.boards.board }} VERBOSE=1
+        run: make BOARD=${{ matrix.boards }} VERBOSE=1
