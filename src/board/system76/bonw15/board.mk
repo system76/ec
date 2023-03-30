@@ -13,7 +13,7 @@ CONFIG_BUS_ESPI=y
 CONFIG_SECURITY=y
 
 # Include keyboard
-KEYBOARD=15in_102_nkey
+KEYBOARD=15in_102
 
 # Set keyboard LED mechanism
 KBLED=bonw14
