@@ -30,6 +30,7 @@ struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code SINK_CTRL =      GPIO(H, 0);
 struct Gpio __code SLP_SUS_N =      GPIO(H, 7);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4);
+struct Gpio __code WLAN_EN =        GPIO(G, 1);
 struct Gpio __code WLAN_PWR_EN =    GPIO(B, 5);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clang-format on
@@ -69,7 +70,8 @@ void gpio_init() {
     GPDRF = BIT(3);
     // H_PROCHOT#_EC
     GPDRG = BIT(6);
-    GPDRH = 0;
+    // EC_AMP_EN
+    GPDRH = BIT(6);
     GPDRI = 0;
     GPDRJ = 0;
 
@@ -247,7 +249,7 @@ void gpio_init() {
     // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
-    GPCRJ5 = GPIO_OUT;
+    GPCRJ5 = GPIO_IN;
     // EC_GPIO
     GPCRJ6 = GPIO_IN | GPIO_DOWN;
     // PERKB_DET#
