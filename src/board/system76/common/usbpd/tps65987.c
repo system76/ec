@@ -23,11 +23,8 @@ static int16_t usbpd_current_limit(void) {
     int16_t res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, REG_ACTIVE_CONTRACT_PDO, value, sizeof(value));
     if (res == 7) {
         if (value[0] == 6) {
-            uint32_t pdo =
-                ((uint32_t)value[1]) |
-                (((uint32_t)value[2]) << 8) |
-                (((uint32_t)value[3]) << 16) |
-                (((uint32_t)value[4]) << 24);
+            uint32_t pdo = ((uint32_t)value[1]) | (((uint32_t)value[2]) << 8) |
+                (((uint32_t)value[3]) << 16) | (((uint32_t)value[4]) << 24);
             DEBUG("USBPD PDO %08lX ", pdo);
             uint8_t kind = (uint8_t)((pdo >> 30) & 0b11);
             if (kind == 0b00) {
@@ -73,7 +70,7 @@ static int16_t usbpd_current_limit(void) {
 
 static void usbpd_dump(void) {
     /* Dump all registers for debugging */
-    for(uint8_t reg = 0x00; reg < 0x40; reg+=1) {
+    for (uint8_t reg = 0x00; reg < 0x40; reg += 1) {
         uint8_t value[65] = { 0 };
         int16_t res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, reg, value, sizeof(value));
         if (res < 0) {
