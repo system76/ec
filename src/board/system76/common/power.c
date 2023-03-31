@@ -355,8 +355,7 @@ void power_cpu_reset(void) {
     //TODO: if this returns false, retry?
     power_peci_limit(
         // AC is connected
-        (!gpio_get(&ACIN_N))
-        &&
+        (!gpio_get(&ACIN_N)) &&
         // There is available current
         (battery_charger_input_current >= CHARGER_INPUT_CURRENT)
     );
