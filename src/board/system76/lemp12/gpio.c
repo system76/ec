@@ -206,7 +206,7 @@ void gpio_init(void) {
     // 3G_EN
     GPCRH3 = GPIO_OUT | GPIO_UP;
     // PD_POWER_EN
-    GPCRH4 = GPIO_IN;
+    GPCRH4 = GPIO_OUT;
     // JACK_IN#_EC
     GPCRH5 = GPIO_IN;
     // SUSB#_PCH
