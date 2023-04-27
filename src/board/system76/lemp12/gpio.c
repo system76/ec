@@ -35,38 +35,39 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clang-format on
 
 void gpio_init(void) {
-    // Not documented
-    //GCR22 = BIT(7);
-
-    // PWRSW WDT 2 Enable 2
-    //GCR9 = BIT(5);
-    // PWRSW WDT 2 Enable 1
-    //GCR8 = BIT(4);
-
     // Enable LPC reset on GPD2
     GCR = 0b10 << 1;
     // Disable UARTs
     GCR6 = 0;
+    // PWRSW WDT 2 Enable 1
+    GCR8 = BIT(4);
+    // PWRSW WDT 2 Enable 2
+    GCR9 = BIT(5);
+    // PWRSW counter 12 seconds
+    GCR10 = BIT(1);
     // Enable SMBus channel 4
     GCR15 = BIT(4);
     // Set GPD2 to 1.8V
     GCR19 = BIT(0);
     // Set GPF2 and GPF3 to 3.3V
     GCR20 = 0;
-
-    // Not documented
-    //GCR22 = BIT(7);
     // Set GPM6 power domain to VCC
-    //GCR23 = BIT(0);
+    GCR23 = BIT(0);
+
+    //TODO: what do these do?
+    GCR1 = 0;
+    GCR2 = 0;
+    GCR21 = 0;
+    GCR22 = BIT(7);
 
     // Set GPIO data
     // PCH_DPWROK_EC
     GPDRA = BIT(7);
-    // XLP_OUT, PWR_SW#
-    GPDRB = BIT(4) | BIT(3);
+    // XLP_OUT
+    GPDRB = BIT(4);
     GPDRC = 0;
-    // PWR_BTN#, SMI#
-    GPDRD = BIT(5) | BIT(4);
+    // PWR_BTN#
+    GPDRD = BIT(5);
     // USB_PWR_EN
     GPDRE = BIT(3);
     // H_PECI
@@ -77,7 +78,13 @@ void gpio_init(void) {
     GPDRI = 0;
     // KBC_MUTE#
     GPDRJ = BIT(1);
-    GPDRM = 0;
+    GPOTA = 0;
+    GPOTB = 0;
+    GPOTD = 0;
+    GPOTE = 0;
+    GPOTF = 0;
+    GPOTH = 0;
+    GPOTJ = 0;
 
     // Set GPIO control
     // Not connected
@@ -87,11 +94,11 @@ void gpio_init(void) {
     // CPU_FAN
     GPCRA2 = GPIO_ALT;
     // WLAN_PWR_EN
-    GPCRA3 = GPIO_OUT | GPIO_UP;
+    GPCRA3 = GPIO_OUT;
     // Not connected
-    GPCRA4 = GPIO_IN | GPIO_UP;
+    GPCRA4 = GPIO_IN;
     // Not connected
-    GPCRA5 = GPIO_IN | GPIO_UP;
+    GPCRA5 = GPIO_IN;
     // PCH_PWROK_EC
     GPCRA6 = GPIO_OUT;
     // PCH_DPWROK_EC
@@ -107,7 +114,7 @@ void gpio_init(void) {
     // XLP_OUT
     GPCRB4 = GPIO_OUT;
     // SWI#
-    GPCRB5 = GPIO_OUT | GPIO_UP;
+    GPCRB5 = GPIO_IN;
     // SUSBC_EC#
     GPCRB6 = GPIO_OUT | GPIO_UP;
     // Does not exist
@@ -129,9 +136,9 @@ void gpio_init(void) {
     // LED_ACIN
     GPCRC7 = GPIO_OUT | GPIO_UP;
     // LED_PWR
-    GPCRD0 = GPIO_OUT | GPIO_UP;
+    GPCRD0 = GPIO_OUT;
     // CCD_EN
-    GPCRD1 = GPIO_OUT | GPIO_UP;
+    GPCRD1 = GPIO_OUT;
     // ESPI_RESET#
     GPCRD2 = GPIO_ALT;
     // SCI#
@@ -139,7 +146,7 @@ void gpio_init(void) {
     // SMI#
     GPCRD4 = GPIO_IN;
     // PWR_BTN#
-    GPCRD5 = GPIO_OUT | GPIO_UP;
+    GPCRD5 = GPIO_OUT;
     // CPU_FANSEN
     GPCRD6 = GPIO_ALT | GPIO_DOWN;
     // SINK_CTRL_EC
@@ -151,9 +158,9 @@ void gpio_init(void) {
     // Not connected?
     GPCRE2 = GPIO_IN;
     // USB_PWR_EN
-    GPCRE3 = GPIO_OUT;
+    GPCRE3 = GPIO_OUT | GPIO_UP;
     // DD_ON
-    GPCRE4 = GPIO_OUT | GPIO_DOWN;
+    GPCRE4 = GPIO_OUT;
     // EC_RSMRST#
     GPCRE5 = GPIO_OUT;
     // SB_KBCRST#
@@ -161,13 +168,13 @@ void gpio_init(void) {
     // SMD_BAT
     GPCRE7 = GPIO_ALT | GPIO_UP;
     // 80CLK
-    GPCRF0 = GPIO_OUT | GPIO_UP;
+    GPCRF0 = GPIO_IN;
     // USB_CHARGE_EN
     GPCRF1 = GPIO_OUT;
     // 3IN1
-    GPCRF2 = GPIO_OUT | GPIO_UP;
+    GPCRF2 = GPIO_IN | GPIO_UP;
     // EC_BT_EN
-    GPCRF3 = GPIO_OUT | GPIO_UP;
+    GPCRF3 = GPIO_IN;
     // TP_CLK
     GPCRF4 = GPIO_ALT | GPIO_DOWN;
     // TP_DATA
@@ -175,11 +182,11 @@ void gpio_init(void) {
     // H_PECI
     GPCRF6 = GPIO_ALT;
     // CPU_C10_GATE#
-    GPCRF7 = GPIO_IN | GPIO_DOWN;
+    GPCRF7 = GPIO_IN;
     // VCCIN_AUX_PG
-    GPCRG0 = GPIO_OUT;
+    GPCRG0 = GPIO_IN;
     // WLAN_EN
-    GPCRG1 = GPIO_OUT | GPIO_UP;
+    GPCRG1 = GPIO_IN;
     // Pull up to VDD3
     GPCRG2 = GPIO_IN;
     // ALSPI_CE#
@@ -219,7 +226,7 @@ void gpio_init(void) {
     // TOTAL_CUR
     GPCRI4 = GPIO_ALT;
     // Not connected
-    GPCRI5 = GPIO_IN | GPIO_UP;
+    GPCRI5 = GPIO_IN;
     // PM_BATLOW#
     GPCRI6 = GPIO_IN;
     // MODEL_ID
@@ -237,7 +244,7 @@ void gpio_init(void) {
     // VBATT_BOOST#
     GPCRJ5 = GPIO_IN;
     // EC_GPIO
-    GPCRJ6 = GPIO_OUT | GPIO_UP;
+    GPCRJ6 = GPIO_IN | GPIO_DOWN;
     // LEDKB_DET#
     GPCRJ7 = GPIO_IN | GPIO_UP;
     // ESPI_IO0_EC
