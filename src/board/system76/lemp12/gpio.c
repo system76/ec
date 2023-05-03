@@ -66,8 +66,8 @@ void gpio_init(void) {
     // XLP_OUT
     GPDRB = BIT(4);
     GPDRC = 0;
-    // PWR_BTN#
-    GPDRD = BIT(5);
+    // PWR_BTN#, SMI#
+    GPDRD = BIT(5) | BIT(4);
     // USB_PWR_EN
     GPDRE = BIT(3);
     // H_PECI
@@ -138,13 +138,13 @@ void gpio_init(void) {
     // LED_PWR
     GPCRD0 = GPIO_OUT;
     // CCD_EN
-    GPCRD1 = GPIO_OUT;
+    GPCRD1 = GPIO_OUT | GPIO_UP;
     // ESPI_RESET#
     GPCRD2 = GPIO_ALT;
     // SCI#
     GPCRD3 = GPIO_IN;
     // SMI#
-    GPCRD4 = GPIO_IN;
+    GPCRD4 = GPIO_OUT;
     // PWR_BTN#
     GPCRD5 = GPIO_OUT;
     // CPU_FANSEN
@@ -168,7 +168,7 @@ void gpio_init(void) {
     // SMD_BAT
     GPCRE7 = GPIO_ALT | GPIO_UP;
     // 80CLK
-    GPCRF0 = GPIO_IN;
+    GPCRF0 = GPIO_IN | GPIO_UP;
     // USB_CHARGE_EN
     GPCRF1 = GPIO_OUT;
     // 3IN1
@@ -176,9 +176,9 @@ void gpio_init(void) {
     // EC_BT_EN
     GPCRF3 = GPIO_IN;
     // TP_CLK
-    GPCRF4 = GPIO_ALT | GPIO_DOWN;
+    GPCRF4 = GPIO_ALT | GPIO_UP;
     // TP_DATA
-    GPCRF5 = GPIO_ALT | GPIO_DOWN;
+    GPCRF5 = GPIO_ALT | GPIO_UP;
     // H_PECI
     GPCRF6 = GPIO_ALT;
     // CPU_C10_GATE#
@@ -230,7 +230,7 @@ void gpio_init(void) {
     // PM_BATLOW#
     GPCRI6 = GPIO_IN;
     // MODEL_ID
-    GPCRI7 = GPIO_IN;
+    GPCRI7 = GPIO_ALT;
     // SLP_S0#
     GPCRJ0 = GPIO_IN;
     // KBC_MUTE#
@@ -244,7 +244,7 @@ void gpio_init(void) {
     // VBATT_BOOST#
     GPCRJ5 = GPIO_IN;
     // EC_GPIO
-    GPCRJ6 = GPIO_IN | GPIO_DOWN;
+    GPCRJ6 = GPIO_OUT | GPIO_UP;
     // LEDKB_DET#
     GPCRJ7 = GPIO_IN | GPIO_UP;
     // ESPI_IO0_EC
