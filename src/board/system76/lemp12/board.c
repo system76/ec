@@ -12,10 +12,16 @@ void board_init(void) {
     // Make sure charger is in off state, also enables PSYS
     battery_charger_disable();
 
+    // Allow CPU to boot
+    gpio_set(&SB_KBCRST_N, true);
     // Allow backlight to be turned on
     gpio_set(&BKL_EN, true);
     // Enable camera
     gpio_set(&CCD_EN, true);
+    // Assert SMI#, SCI#, and SWI#
+    gpio_set(&SCI_N, true);
+    gpio_set(&SMI_N, true);
+    gpio_set(&SWI_N, true);
 }
 
 void board_event(void) {
