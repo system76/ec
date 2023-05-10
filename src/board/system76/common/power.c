@@ -371,6 +371,7 @@ void power_event(void) {
     static bool ac_send_sci = true;
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
+    bool is_mux_active = gpio_get(&MUX_CTRL_BIOS)
     if (ac_new != ac_last) {
         // Set CPU power limit to DC limit until we determine available current
         //TODO: if this returns false, retry?
@@ -595,9 +596,11 @@ void power_event(void) {
         } else
 #endif
         {
-            // CPU on, green light
-            gpio_set(&LED_PWR, true);
-            gpio_set(&LED_ACIN, false);
+            // CPU on,   mux off:green light mux on:orange light
+            gpio_set(&LED_PWR, !is_mux_active);
+            gpio_set(&LED_ACIN, is_mux_active);
+            // gpio_set(&LED_PWR, true);
+            // gpio_set(&LED_ACIN, false);
         }
     } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
@@ -606,10 +609,6 @@ void power_event(void) {
             last_time = time;
         }
         gpio_set(&LED_ACIN, false);
-    } else if (!ac_new) {
-        // AC plugged in, orange light
-        gpio_set(&LED_PWR, false);
-        gpio_set(&LED_ACIN, true);
     } else {
         // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
