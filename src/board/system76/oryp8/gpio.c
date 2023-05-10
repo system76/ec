@@ -13,6 +13,7 @@ struct Gpio __code CCD_EN =         GPIO(D, 1);
 struct Gpio __code CPU_C10_GATE_N = GPIO(J, 2);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code DGPU_PWR_EN =    GPIO(H, 3);
+struct Gpio __code MUX_CTRL_BIOS =  GPIO(I, 2);
 struct Gpio __code EC_EN =          GPIO(B, 6); // renamed to SUSBC_EC#
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code GC6_FB_EN =      GPIO(J, 3);
