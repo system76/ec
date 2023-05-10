@@ -165,11 +165,18 @@ uint16_t keymap_translate(uint16_t key);
 #define K_Y (0x35)
 #define K_Z (0x1A)
 #define K_SZ (04E)
+
+
+// German keys
 #define K_UE (0x50)
 #define K_AE (0x52)
 #define K_OE (0x4C)
+#define K_HASH (0x5D)
+#define K_BACKTICK (0x55)
+#define K_PLUS (0x5B)
+#define K_MINUS (0x4A)
+#define K_DOT (0x49)
 
-// Special keys
 
 // Escape key
 #define K_ESC (0x76)
