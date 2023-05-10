@@ -168,7 +168,7 @@ uint16_t keymap_translate(uint16_t key);
 
 
 // German keys
-#define K_SZ (04E)
+#define K_SZ (0x4E)
 #define K_UE (0x50)
 #define K_AE (0x52)
 #define K_OE (0x4C)
