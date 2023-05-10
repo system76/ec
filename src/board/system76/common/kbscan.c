@@ -300,6 +300,7 @@ static inline bool key_should_repeat(uint16_t key) {
     case K_TOUCHPAD:
     case K_AIRPLANE_MODE:
     case K_CAMERA_TOGGLE:
+    case K_MUX_TOGGLE:
     case K_DISPLAY_TOGGLE:
     case K_FAN_TOGGLE:
     case K_SUSPEND:
