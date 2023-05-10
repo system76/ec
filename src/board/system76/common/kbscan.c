@@ -165,6 +165,9 @@ static bool kbscan_has_ghost_in_row(uint8_t row, uint8_t rowdata) {
 
 static void hardware_hotkey(uint16_t key) {
     switch (key) {
+    case K_MUX_TOGGLE:
+        gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
+        break;
     case K_DISPLAY_TOGGLE:
         gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
         break;
