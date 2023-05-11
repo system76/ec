@@ -165,9 +165,6 @@ static bool kbscan_has_ghost_in_row(uint8_t row, uint8_t rowdata) {
 
 static void hardware_hotkey(uint16_t key) {
     switch (key) {
-    case K_MUX_TOGGLE:
-        gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
-        break;
     case K_DISPLAY_TOGGLE:
         gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
         break;
@@ -195,6 +192,9 @@ static void hardware_hotkey(uint16_t key) {
     case K_KBD_TOGGLE:
         if (acpi_ecos != EC_OS_FULL)
             kbled_hotkey_toggle();
+        break;
+    case K_MUX_TOGGLE:
+        gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
         break;
     }
 }
@@ -224,6 +224,7 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
         break;
     case (KT_COMBO):
         switch (key & 0xFF) {
+
         case COMBO_DISPLAY_MODE:
             if (kbscan_enabled) {
                 if (pressed) {
