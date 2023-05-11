@@ -256,7 +256,9 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
             }
             break;
         case COMBO_MUX:
-            gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
+            if (kbscan_enabled) {
+                gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
+            }
             break;
 
         }
