@@ -620,7 +620,7 @@ void power_event(void) {
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, true);
     }*/ else {
-        // CPU off and AC adapter unplugged, flashing orange light
+        // CPU off flashing orange light
         gpio_set(&LED_PWR, false);
         if ((time - last_time) >= 1000) {
             gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
