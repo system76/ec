@@ -224,7 +224,6 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
         break;
     case (KT_COMBO):
         switch (key & 0xFF) {
-
         case COMBO_DISPLAY_MODE:
             if (kbscan_enabled) {
                 if (pressed) {
