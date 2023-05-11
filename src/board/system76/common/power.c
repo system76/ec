@@ -371,7 +371,9 @@ void power_event(void) {
     static bool ac_send_sci = true;
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
-    bool is_mux_active = gpio_get(&MUX_CTRL_BIOS);
+    #if CONFIG_MUX_COMBO
+        bool is_mux_active = gpio_get(&MUX_CTRL_BIOS);
+    #endif
     if (ac_new != ac_last) {
         // Set CPU power limit to DC limit until we determine available current
         //TODO: if this returns false, retry?
@@ -596,16 +598,21 @@ void power_event(void) {
         } else
 #endif
         {
-            // CPU on,  mux on:orange light   mux off:green light 
-            if (is_mux_active) {
-                gpio_set(&LED_PWR, false;//green
-                gpio_set(&LED_ACIN, true);//orange
-            }
-            else
-            {
+            #if CONFIG_MUX_COMBO
+                // CPU on,  mux on:orange light   mux off:green light 
+                if (is_mux_active) {
+                    gpio_set(&LED_PWR, false;//green
+                    gpio_set(&LED_ACIN, true);//orange
+                }
+                else
+                {
+                    gpio_set(&LED_PWR, true);//green
+                    gpio_set(&LED_ACIN, false);//orange
+                }
+            #else
                 gpio_set(&LED_PWR, true);//green
-                gpio_set(&LED_ACIN, false);//orange
-            }
+                gpio_set(&LED_ACIN, false);//orange     
+            #endif
         }
     } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
@@ -614,12 +621,16 @@ void power_event(void) {
             last_time = time;
         }
         gpio_set(&LED_ACIN, false);
-    } /*else if (!ac_new) {        
-        //only on when Cable is connecte and notebook is off.... but the battery LED wouldnt be on if no AC cable is connected and on in any color if one is connected so its useless TODO: rename AC-LED to MUX-LED?
-        // AC plugged in, orange light
-        gpio_set(&LED_PWR, false);
-        gpio_set(&LED_ACIN, true);
-    }*/ else {
+    } 
+    #if !CONFIG_MUX_COMBO
+        else if (!ac_new) {        
+            //only on when Cable is connecte and notebook is off.... but the battery LED wouldnt be on if no AC cable is connected and on in any color if one is connected so its useless TODO: rename AC-LED to MUX-LED?
+            // AC plugged in, orange light
+            gpio_set(&LED_PWR, false);
+            gpio_set(&LED_ACIN, true);
+        }
+    #endif
+    else {
         // CPU off flashing orange light
         gpio_set(&LED_PWR, false);
         if ((time - last_time) >= 1000) {
