@@ -596,11 +596,16 @@ void power_event(void) {
         } else
 #endif
         {
-            // CPU on,   mux off:green light mux on:orange light
-            gpio_set(&LED_PWR, !is_mux_active);
-            gpio_set(&LED_ACIN, is_mux_active);
-            // gpio_set(&LED_PWR, true);
-            // gpio_set(&LED_ACIN, false);
+            // CPU on,  mux on:orange light   mux off:green light 
+            if (is_mux_active) {
+                gpio_set(&LED_PWR, false;//green
+                gpio_set(&LED_ACIN, true);//orange
+            }
+            else
+            {
+                gpio_set(&LED_PWR, true);//green
+                gpio_set(&LED_ACIN, false);//orange
+            }
         }
     } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
@@ -609,7 +614,8 @@ void power_event(void) {
             last_time = time;
         }
         gpio_set(&LED_ACIN, false);
-    } /*else if (!ac_new) {         //only on when Cable is connecte and notebook is off.... but the battery LED would be off if no AC cable is connected and on in any color if one is connected so its useless
+    } /*else if (!ac_new) {        
+        //only on when Cable is connecte and notebook is off.... but the battery LED wouldnt be on if no AC cable is connected and on in any color if one is connected so its useless TODO: rename AC-LED to MUX-LED?
         // AC plugged in, orange light
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, true);
