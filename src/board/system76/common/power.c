@@ -656,7 +656,7 @@ void power_event(void) {
         gpio_set(&LED_BAT_FULL, false);
     } else if (battery_info.current == 0) {
         // Fully charged
-        // TODO: turn off charger
+        // TODO: turn off charger     battery_charger_disable();  ?
         gpio_set(&LED_BAT_CHG, false);
         gpio_set(&LED_BAT_FULL, true);
     } else {
