@@ -61,6 +61,7 @@ uint16_t keymap_translate(uint16_t key);
     #define COMBO_MUX 3
     #define K_MUX_TOGGLE (KT_COMBO | COMBO_MUX)
 #endif
+
 // SCI
 #define KT_SCI (0x4000)
 
