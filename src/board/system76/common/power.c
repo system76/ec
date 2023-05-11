@@ -609,7 +609,11 @@ void power_event(void) {
             last_time = time;
         }
         gpio_set(&LED_ACIN, false);
-    } else {
+    } /*else if (!ac_new) {         //only on when Cable is connecte and notebook is off.... but the battery LED would be off if no AC cable is connected and on in any color if one is connected so its useless
+        // AC plugged in, orange light
+        gpio_set(&LED_PWR, false);
+        gpio_set(&LED_ACIN, true);
+    }*/ else {
         // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
         if ((time - last_time) >= 1000) {
