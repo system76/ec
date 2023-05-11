@@ -58,7 +58,7 @@ uint16_t keymap_translate(uint16_t key);
 #define COMBO_PAUSE 2
 #define K_PAUSE (KT_COMBO | COMBO_PAUSE)
 #define COMBO_MUX 3
-#define K_MUX_TOGGLE (K_MUX_TOGGLE | COMBO_MUX)
+#define K_MUX_TOGGLE (KT_COMBO | COMBO_MUX)
 
 // SCI
 #define KT_SCI (0x4000)
