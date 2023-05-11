@@ -255,12 +255,13 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
                 }
             }
             break;
-        case COMBO_MUX:
-            if (kbscan_enabled) {
-                gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
-            }
-            break;
-
+        #if CONFIG_MUX_COMBO
+            case COMBO_MUX:
+                if (kbscan_enabled) {
+                    gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
+                }
+                break;
+        #endif
         }
         break;
     case (KT_SCI):
@@ -303,7 +304,9 @@ static inline bool key_should_repeat(uint16_t key) {
     case K_TOUCHPAD:
     case K_AIRPLANE_MODE:
     case K_CAMERA_TOGGLE:
-    case K_MUX_TOGGLE:
+    #if CONFIG_MUX_COMBO
+        case K_MUX_TOGGLE:
+    #endif
     case K_DISPLAY_TOGGLE:
     case K_FAN_TOGGLE:
     case K_SUSPEND:
