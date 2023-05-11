@@ -189,9 +189,6 @@ static void hardware_hotkey(uint16_t key) {
         if (acpi_ecos != EC_OS_FULL)
             kbled_hotkey_up();
         break;
-    case K_MUX_TOGGLE:
-        gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
-        break;
     case K_KBD_TOGGLE:
         if (acpi_ecos != EC_OS_FULL)
             kbled_hotkey_toggle();
@@ -258,6 +255,10 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
                 }
             }
             break;
+        case COMBO_MUX:
+            gpio_set(&MUX_CTRL_BIOS, !gpio_get(&MUX_CTRL_BIOS));
+            break;
+
         }
         break;
     case (KT_SCI):
