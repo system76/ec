@@ -28,4 +28,15 @@ void board_event(void) {
     espi_event();
 
     ec_read_post_codes();
+
+    // Hack to drain LDO_3V3 capacitors
+    if (!gpio_get(&XLP_OUT)) {
+        // These are pulled up by LDO_3V3, pull them low
+        // SMB_CLK_EC
+        GPCRC1 = GPIO_OUT;
+        // SMB_DATA_EC
+        GPCRC2 = GPIO_OUT;
+        // SMB_CLK_EC, SMB_DATA_EC
+        GPDRC &= ~(BIT(1) | BIT(2));
+    }
 }
