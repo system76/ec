@@ -371,7 +371,7 @@ void power_event(void) {
     static bool ac_send_sci = true;
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
-    bool is_mux_active = gpio_get(&MUX_CTRL_BIOS)
+    bool is_mux_active = gpio_get(&MUX_CTRL_BIOS);
     if (ac_new != ac_last) {
         // Set CPU power limit to DC limit until we determine available current
         //TODO: if this returns false, retry?
