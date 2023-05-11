@@ -9,6 +9,9 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
+# Enable Mux Key Combo
+CONFIG_MUX_COMBO=y
+
 # Include keyboard
 KEYBOARD=15in_102
 
