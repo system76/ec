@@ -17,7 +17,9 @@ extern struct Gpio __code CCD_EN;
 extern struct Gpio __code CPU_C10_GATE_N;
 extern struct Gpio __code DD_ON;
 extern struct Gpio __code DGPU_PWR_EN;
-extern struct Gpio __code MUX_CTRL_BIOS;
+#if CONFIG_MUX_COMBO
+    extern struct Gpio __code MUX_CTRL_BIOS;
+#endif
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;
 extern struct Gpio __code GC6_FB_EN;
