@@ -175,7 +175,7 @@ uint16_t keymap_translate(uint16_t key);
 #define K_HASH (0x5D)
 #define K_BACKTICK (0x55)
 #define K_PLUS (0x5B)
-#define K_MINUS (0x4A)
+#define K_HYPHEN (0x4A)
 #define K_DOT (0x49)
 
 
