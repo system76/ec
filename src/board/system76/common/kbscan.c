@@ -262,6 +262,19 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
                 }
                 break;
         #endif
+        case COMBO_SHUTDOWN:
+            if (kbscan_enabled) {
+                power_off();
+            }
+            break;
+
+        case COMBO_RESET:
+            if (kbscan_enabled) {
+                power_off();
+                power_on();
+            }
+            break;
+
         }
         break;
     case (KT_SCI):
