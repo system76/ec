@@ -21,7 +21,7 @@ LAYOUT(
     #else
         K_DISPLAY_MODE
     #endif
-    , K_BRIGHTNESS_DOWN, K_BRIGHTNESS_UP, K_CAMERA_TOGGLE, K_AIRPLANE_MODE, K_SUSPEND, K_PRINT_SCREEN, K_SCROLL_LOCK, ___ /*K_DEL*/ , K_RESET, K_SHUTDOWN, K_PAUSE , K_PAUSE,
+    , K_BRIGHTNESS_DOWN, K_BRIGHTNESS_UP, K_CAMERA_TOGGLE, K_AIRPLANE_MODE, K_SUSPEND, ___ /*PRINT*/, K_SCROLL_LOCK, ___ /*K_DEL*/ , K_RESET, K_SHUTDOWN, K_PAUSE , K_PAUSE,
     K_PLAY_PAUSE, K_FAN_TOGGLE, ___ /*2*/ , ___ /*3*/ , ___ /*4*/ , ___ /*5*/ , ___ /*6*/ , ___ /*7*/ , ___ /*8*/ , ___ /*9*/ , ___ /*0*/ , ___ /*SZ*/ , ___ /*BACKTICK*/ , ___ /*BKSP*/ , ___ /*NUM_LOCK*/ , K_KBD_COLOR, K_KBD_TOGGLE, K_KBD_DOWN,
     ___ /*TAB*/ , ___ /*Q*/ , ___ /*W*/ , ___ /*E*/ , ___ /*R*/ , ___ /*T*/ , ___ /*Z*/ , ___ /*U*/ , ___ /*I*/ , ___ /*O*/ , ___ /*P*/ , ___ /*UE*/ , ___ /*PLUS*/ , ___ /*ENTER*/ , ___ /*7*/ , ___ /*8*/ , ___ /*9*/ , K_KBD_UP,
     ___ /*CAPS*/ , ___ /*A*/ , ___ /*S*/ , ___ /*D*/ , ___ /*F*/ , ___ /*G*/ , ___ /*H*/ , ___ /*J*/ , ___ /*K*/ , ___ /*L*/ , ___ /*OE*/ , ___ /*AE*/ , ___ /*HASH*/ , ___ /*4*/ , ___ /*5*/ , ___ /*6*/ ,
