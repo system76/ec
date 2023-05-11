@@ -610,8 +610,9 @@ void power_event(void) {
                     gpio_set(&LED_ACIN, false);//orange
                 }
             #else
+            // CPU on, green light
             gpio_set(&LED_PWR, true);
-            gpio_set(&LED_ACIN, false);   
+            gpio_set(&LED_ACIN, false);
             #endif
         }
     } else if (power_state == POWER_STATE_S3) {
