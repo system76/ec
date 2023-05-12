@@ -54,7 +54,7 @@ void kbled_hotkey_up(void) {
 
 void kbled_hotkey_toggle(void) {
     if (kbled_get() == 0) {
-        kbled_set(LEVELS[LEVEL_I]);
+        kbled_set(LEVEL_I*LEVEL_STEP);
     } else {
         kbled_set(0);
     }
