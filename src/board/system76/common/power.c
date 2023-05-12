@@ -653,24 +653,25 @@ void power_event(void) {
             gpio_set(&LED_BAT_CHG, !gpio_get(&LED_BAT_CHG));
             last_time = time;
         }
-    } else if (ac_new && battery_info.remaining_capacity =< 25) {
-        //only 25% battery remaining, flashing green
+    } else if (ac_new && (power_state != POWER_STATE_S0||battery_info.remaining_capacity > 25)) {
+        // Discharging (no AC adapter) and turned off or over 25% charged
         gpio_set(&LED_BAT_CHG, false);
-        if ((time - last_time) >= 1000) {
+        gpio_set(&LED_BAT_FULL, false);
+
+    } else if (ac_new && battery_info.remaining_capacity =< 25) {
+        //running and only 25% battery remaining, flashing green
+        gpio_set(&LED_BAT_CHG, false);
+        if ((time - last_time) >= (battery_info.remaining_capacity*100)+100) {
             gpio_set(&LED_BAT_FULL, !gpio_get(&LED_BAT_FULL));
             last_time = time;
         }
     } else if (ac_new && battery_info.remaining_capacity =< 10) {
-        //only 10% battery remaining, flashing organge
+        //running and only 10% battery remaining, flashing organge
         gpio_set(&LED_BAT_FULL, false);
-        if ((time - last_time) >= 1000) {
+        if ((time - last_time) >= (battery_info.remaining_capacity*100)+100) {
             gpio_set(&LED_BAT_CHG, !gpio_get(&LED_BAT_CHG));
             last_time = time;
         }
-    } else if (ac_new) {
-        // Discharging (no AC adapter)
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, false);
     } else if (battery_info.current == 0) {
         // Fully charged
         // TODO: turn off charger     battery_charger_disable();  ?
