@@ -56,6 +56,21 @@
     #error Invalid adapter RSENSE value
 #endif
 
+// PSYS gain in nA/W
+#ifndef CHARGER_PSYS_GAIN
+    #define CHARGER_PSYS_GAIN 1000
+#endif
+#if CHARGER_PSYS_GAIN == 1000
+    #define CHARGE_OPTION_2_PSYS_GAIN (0 << 8)
+#elif CHARGER_PSYS_GAIN == 500
+    #define CHARGE_OPTION_2_PSYS_GAIN (1 << 8)
+#elif CHARGER_PSYS_GAIN == 250
+    #define CHARGE_OPTION_2_PSYS_GAIN (2 << 8)
+#elif CHARGER_PSYS_GAIN == 2000
+    #define CHARGE_OPTION_2_PSYS_GAIN (3 << 8)
+#else
+    #error Invalid CHARGER_PSYS_GAIN value
+#endif
 // clang-format on
 
 // Sense resistor values in milliohms.
@@ -86,7 +101,7 @@ int16_t battery_charger_disable(void) {
 
     // Set charge option 2 to PSYS enable
     //TODO: needed when charging disabled?
-    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN);
+    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN);
     if (res < 0)
         return res;
 
@@ -130,7 +145,7 @@ int16_t battery_charger_enable(void) {
         return res;
 
     // Set charge option 2 to PSYS enable
-    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN);
+    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN);
     if (res < 0)
         return res;
 
