@@ -653,6 +653,20 @@ void power_event(void) {
             gpio_set(&LED_BAT_CHG, !gpio_get(&LED_BAT_CHG));
             last_time = time;
         }
+    } else if (ac_new && battery_info.remaining_capacity =< 25) {
+        //only 25% battery remaining, flashing green
+        gpio_set(&LED_BAT_CHG, false);
+        if ((time - last_time) >= 1000) {
+            gpio_set(&LED_BAT_FULL, !gpio_get(&LED_BAT_FULL));
+            last_time = time;
+        }
+    } else if (ac_new && battery_info.remaining_capacity =< 10) {
+        //only 10% battery remaining, flashing organge
+        gpio_set(&LED_BAT_FULL, false);
+        if ((time - last_time) >= 1000) {
+            gpio_set(&LED_BAT_CHG, !gpio_get(&LED_BAT_CHG));
+            last_time = time;
+        }
     } else if (ac_new) {
         // Discharging (no AC adapter)
         gpio_set(&LED_BAT_CHG, false);
