@@ -647,9 +647,12 @@ void power_event(void) {
 //TODO: do not require both LEDs
 #if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
     if (!(battery_info.status & BATTERY_INITIALIZED)) {
-        // No battery connected
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, false);
+        // No battery connected, flashing green/orange light
+        if ((time - last_time) >= 1000) {
+            gpio_set(&LED_BAT_FULL, gpio_get(&LED_BAT_CHG));
+            gpio_set(&LED_BAT_CHG, !gpio_get(&LED_BAT_CHG));
+            last_time = time;
+        }
     } else if (ac_new) {
         // Discharging (no AC adapter)
         gpio_set(&LED_BAT_CHG, false);
