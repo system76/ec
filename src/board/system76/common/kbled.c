@@ -5,8 +5,8 @@
 
 // clang-format off
 static uint8_t LEVEL_I = 1;
-static uint8_t LEVEL_STEP = 5;
-static uint8_t LEVEL_MAX = 255;
+#define LEVEL_STEP 5
+#define LEVEL_MAX 255
 
 /*static const uint8_t __code LEVELS[] = {
     48,
