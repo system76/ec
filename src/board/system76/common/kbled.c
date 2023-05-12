@@ -5,14 +5,17 @@
 
 // clang-format off
 static uint8_t LEVEL_I = 1;
-static const uint8_t __code LEVELS[] = {
+static uint8_t LEVEL_STEP = 5;
+static uint8_t LEVEL_MAX = 255;
+
+/*static const uint8_t __code LEVELS[] = {
     48,
     72,
     96,
     144,
     192,
     255
-};
+};*/
 
 static uint8_t COLOR_I = 0;
 static const uint32_t __code COLORS[] = {
@@ -39,14 +42,14 @@ void kbled_hotkey_down(void) {
     if (LEVEL_I > 0) {
         LEVEL_I -= 1;
     }
-    kbled_set(LEVELS[LEVEL_I]);
+    kbled_set(LEVEL_I*LEVEL_STEP);
 }
 
 void kbled_hotkey_up(void) {
-    if (LEVEL_I < (ARRAY_SIZE(LEVELS) - 1)) {
+    if (LEVEL_I < (LEVEL_MAX/LEVEL_STEP)) {
         LEVEL_I += 1;
     }
-    kbled_set(LEVELS[LEVEL_I]);
+    kbled_set(LEVEL_I*LEVEL_STEP);
 }
 
 void kbled_hotkey_toggle(void) {
