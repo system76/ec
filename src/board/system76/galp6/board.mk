@@ -9,6 +9,9 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
+# Enable firmware security
+CONFIG_SECURITY=y
+
 # Include keyboard
 KEYBOARD=14in_83
 
