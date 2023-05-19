@@ -175,7 +175,7 @@ static void hardware_hotkey(uint16_t key) {
         fan_max = !fan_max;
         break;
     case K_KBD_BKL:
-        kbled_set(kbled_get() + 1);
+        kbled_hotkey_step();
         break;
     case K_KBD_COLOR:
         if (acpi_ecos != EC_OS_FULL)

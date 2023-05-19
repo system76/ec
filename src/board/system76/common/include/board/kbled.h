@@ -19,5 +19,6 @@ void kbled_hotkey_color(void);
 void kbled_hotkey_down(void);
 void kbled_hotkey_up(void);
 void kbled_hotkey_toggle(void);
+void kbled_hotkey_step(void);
 
 #endif // _BOARD_KBLED_H
