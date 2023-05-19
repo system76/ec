@@ -376,6 +376,7 @@ fn main() {
             )
         )
         .subcommand(SubCommand::with_name("led_save"))
+        .subcommand(SubCommand::with_name("reset"))
         .subcommand(SubCommand::with_name("matrix"))
         .subcommand(SubCommand::with_name("print")
             .arg(Arg::with_name("message")
@@ -598,6 +599,13 @@ fn main() {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to save LED settings: {:X?}", err);
+                process::exit(1);
+            },
+        },
+        Some(("reset", _sub_m)) => match unsafe { ec.reset() } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to reset device: {:X?}", err);
                 process::exit(1);
             },
         },
