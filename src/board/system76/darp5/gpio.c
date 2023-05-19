@@ -28,6 +28,7 @@ struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0);
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(D, 0);
+struct Gpio __code RGBKB_DET_N =    GPIO(H, 3);
 struct Gpio __code SB_KBCRST_N =    GPIO(E, 6);
 struct Gpio __code SCI_N =          GPIO(D, 4);
 struct Gpio __code SLP_SUS_N =      GPIO(I, 2);
@@ -183,8 +184,8 @@ void gpio_init() {
     GPCRH1 = GPIO_IN;
     // BKL_EN
     GPCRH2 = GPIO_OUT;
-    // NC
-    GPCRH3 = GPIO_OUT;
+    // RGBKB-DET#
+    GPCRH3 = GPIO_IN | GPIO_UP;
     // VR_ON
     GPCRH4 = GPIO_IN;
     // WLAN_EN

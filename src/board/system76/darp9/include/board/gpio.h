@@ -34,6 +34,7 @@ extern struct Gpio __code PD_EN;
 #define HAVE_PM_PWROK 0
 extern struct Gpio __code PWR_BTN_N;
 extern struct Gpio __code PWR_SW_N;
+extern struct Gpio __code RGBKB_DET_N;
 extern struct Gpio __code SB_KBCRST_N;
 extern struct Gpio __code SLP_S0_N;
 extern struct Gpio __code SLP_SUS_N;
