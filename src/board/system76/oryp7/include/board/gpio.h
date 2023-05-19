@@ -33,6 +33,7 @@ extern struct Gpio __code ME_WE;
 extern struct Gpio __code PM_PWROK;
 extern struct Gpio __code PWR_BTN_N;
 extern struct Gpio __code PWR_SW_N;
+extern struct Gpio __code RGBKB_DET_N;
 extern struct Gpio __code SB_KBCRST_N;
 extern struct Gpio __code SCI_N;
 #define HAVE_SLP_SUS_N 0
