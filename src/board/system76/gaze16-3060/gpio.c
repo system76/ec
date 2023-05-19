@@ -29,6 +29,7 @@ struct Gpio __code PCH_PWROK_EC =   GPIO(C, 6); // renamed to EC_SYS_PWROK
 struct Gpio __code PM_PWROK =       GPIO(H, 5); // actually VR_ON
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
+struct Gpio __code RGBKB_DET_N =    GPIO(E, 2);
 struct Gpio __code SLP_SUS_N =      GPIO(I, 6);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
