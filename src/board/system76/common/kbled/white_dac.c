@@ -10,17 +10,6 @@
 
 #define KBLED_DACDAT xconcat(DACDAT, KBLED_DAC)
 
-// clang-format off
-static uint8_t __code levels[] = {
-    0x00,
-    0x80,
-    0x90,
-    0xA8,
-    0xC0,
-    0xFF
-};
-// clang-format on
-
 void kbled_init(void) {
     kbled_kind = KBLED_WHITE;
 
@@ -34,26 +23,15 @@ void kbled_reset(void) {
 }
 
 uint8_t kbled_get(void) {
-    uint8_t level;
-    uint8_t raw = KBLED_DACDAT;
-    for (level = 0; level < ARRAY_SIZE(levels); level++) {
-        if (raw <= levels[level]) {
-            return level;
-        }
-    }
-    return 0;
+    return KBLED_DACDAT;
 }
 
 uint8_t kbled_max(void) {
-    return ARRAY_SIZE(levels) - 1;
+    return 0xFF;
 }
 
 void kbled_set(uint8_t level) {
-    uint8_t raw = 0;
-    if (level < ARRAY_SIZE(levels)) {
-        raw = levels[level];
-    }
-    KBLED_DACDAT = raw;
+    KBLED_DACDAT = level;
 }
 
 uint32_t kbled_get_color(void) {
