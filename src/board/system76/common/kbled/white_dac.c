@@ -22,6 +22,8 @@ static uint8_t __code levels[] = {
 // clang-format on
 
 void kbled_init(void) {
+    kbled_kind = KBLED_WHITE;
+
     // Enable DAC used for KBLIGHT_ADJ
     DACPDREG &= ~BIT(KBLED_DAC);
     kbled_reset();

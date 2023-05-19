@@ -3,6 +3,8 @@
 #include <board/kbled.h>
 #include <common/macro.h>
 
+enum KbledKind kbled_kind = KBLED_NONE;
+
 // clang-format off
 static uint8_t LEVEL_I = 1;
 static const uint8_t __code LEVELS[] = {

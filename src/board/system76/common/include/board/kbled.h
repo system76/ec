@@ -5,6 +5,13 @@
 
 #include <stdint.h>
 
+enum KbledKind {
+    KBLED_NONE = 0,
+    KBLED_WHITE = 1,
+    KBLED_RGB = 2,
+};
+extern enum KbledKind kbled_kind;
+
 // Must be specified by board
 void kbled_init(void);
 void kbled_reset(void);

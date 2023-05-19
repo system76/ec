@@ -7,6 +7,8 @@
 #include <ec/smbus.h>
 
 void kbled_init(void) {
+    kbled_kind = KBLED_RGB;
+
     i2c_reset(&I2C_DGPU, true);
 
     // Force SMBUS B design to 100kHZ
