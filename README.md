@@ -5,12 +5,12 @@ laptops.
 
 ## Documentation
 
-- [Supported embedded controllers](./doc/controllers.md)
-- [Flashing firmware](./doc/flashing.md)
-- [Debugging](./doc/debugging.md)
-- [Creating a custom keyboard layout](./doc/keyboard-layout-customization.md)
-- [Development environment](./doc/dev-env.md)
-- [Adding a new board](./doc/adding-a-new-board.md)
+- [Supported embedded controllers](./docs/controllers.md)
+- [Flashing firmware](./docs/flashing.md)
+- [Debugging](./docs/debugging.md)
+- [Creating a custom keyboard layout](./docs/keyboard-layout-customization.md)
+- [Development environment](./docs/dev-env.md)
+- [Adding a new board](./docs/adding-a-new-board.md)
 
 ## Quickstart
 
@@ -34,7 +34,7 @@ Then build the firmware for your laptop model.
 make BOARD=system76/<model>
 ```
 
-See [Flashing](./doc/flashing.md) for how to use the new firmware image.
+See [Flashing](./docs/flashing.md) for how to use the new firmware image.
 
 ## Releases
 
