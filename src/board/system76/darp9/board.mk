@@ -14,6 +14,7 @@ CONFIG_SECURITY=y
 
 # Include keyboard
 KEYBOARD=15in_102
+KEYMAP=darp9
 
 # Set keyboard LED mechanism
 KBLED=rgb_pwm
