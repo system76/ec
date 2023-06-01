@@ -28,5 +28,10 @@ CFLAGS+=\
 	-DCHARGER_CHARGE_VOLTAGE=13056 \
 	-DCHARGER_INPUT_CURRENT=2100
 
+# Set CPU power limits in watts
+CFLAGS+=\
+	-DPOWER_LIMIT_AC=40 \
+	-DPOWER_LIMIT_DC=28
+
 # Add system76 common code
 include src/board/system76/common/common.mk

@@ -25,6 +25,7 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
+#include <board/usbpd.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
@@ -77,6 +78,7 @@ void init(void) {
     pwm_init();
     smbus_init();
     smfi_init();
+    usbpd_init();
 
     //TODO: INTC
 
@@ -102,6 +104,9 @@ void main(void) {
     for (main_cycle = 0;; main_cycle++) {
         switch (main_cycle % 3U) {
         case 0:
+            // Handle USB-C events immediately before power states
+            usbpd_event();
+
             // Handle power states
             power_event();
             break;

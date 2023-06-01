@@ -22,6 +22,7 @@ board-common-y += power.c
 board-common-y += ps2.c
 board-common-y += pwm.c
 board-common-y += scratch.c
+board-common-$(CONFIG_SECURITY) += security.c
 board-common-y += smbus.c
 board-common-y += smfi.c
 board-common-y += stdio.c
@@ -42,11 +43,20 @@ CFLAGS+=-DLEVEL=4
 # Uncomment to enable I2C debug on 0x76
 #CFLAGS+=-DI2C_DEBUGGER=0x76
 
+ifeq ($(CONFIG_SECURITY),y)
+CFLAGS+=-DCONFIG_SECURITY=1
+endif
+
 # Set external programmer
 PROGRAMMER=$(wildcard /dev/serial/by-id/usb-Arduino*)
 
 ifeq ($(CONFIG_BUS_ESPI),y)
 CFLAGS += -DCONFIG_BUS_ESPI=1
+
+# TODO: Use PECI over eSPI on all boards using eSPI
+ifeq ($(CONFIG_PECI_OVER_ESPI),y)
+CFLAGS += -DCONFIG_PECI_OVER_ESPI=1
+endif
 endif
 
 # Include system76 common source
@@ -65,6 +75,10 @@ CFLAGS+=\
 # Add charger
 CHARGER?=bq24780s
 board-common-y += charger/$(CHARGER).c
+
+# Add USB-PD
+USBPD?=none
+board-common-y += usbpd/$(USBPD).c
 
 # Add keyboard
 ifndef KEYBOARD

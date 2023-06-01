@@ -9,9 +9,6 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
-# Use S0ix
-CFLAGS+=-DUSE_S0IX=1
-
 # Include keyboard
 KEYBOARD=15in_102
 
@@ -32,6 +29,11 @@ CFLAGS+=\
 	-DCHARGER_CHARGE_CURRENT=3072 \
 	-DCHARGER_CHARGE_VOLTAGE=8800 \
 	-DCHARGER_INPUT_CURRENT=4740
+
+# Set CPU power limits in watts
+CFLAGS+=\
+	-DPOWER_LIMIT_AC=65 \
+	-DPOWER_LIMIT_DC=45
 
 # Add system76 common code
 include src/board/system76/common/common.mk

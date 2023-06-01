@@ -40,6 +40,8 @@
         vw_set(&W, V); \
     }
 
+bool espi_host_reset = false;
+
 void espi_init(void) {
     if (PLLFREQ != 0b0111) {
         // Workarounds to allow changing PLL
@@ -109,27 +111,10 @@ void espi_event(void) {
         DEBUG("ESGCTRL0 %X\n", value);
 
         if (value & BIT(1)) {
-            DEBUG("VW EN\n");
-            // Set SUS_ACK# low
-            VW_SET_DEBUG(VW_SUS_ACK_N, VWS_LOW);
-        }
-        if (value & BIT(2)) {
-            DEBUG("OOB EN\n");
-            VW_SET_DEBUG(VW_OOB_RST_ACK, VWS_LOW);
-        }
-        if (value & BIT(3)) {
-            DEBUG("FLASH EN\n");
-            // Set boot load status and boot load done high
+            // Set boot load status and boot load done high, once VWs can be set
             VW_SET_DEBUG(VW_BOOT_LOAD_STATUS, VWS_HIGH);
             VW_SET_DEBUG(VW_BOOT_LOAD_DONE, VWS_HIGH);
         }
-    }
-
-    // Detect PUT_PC
-    value = ESPCTRL0;
-    if (value & BIT(7)) {
-        ESPCTRL0 = BIT(7);
-        DEBUG("ESPCTRL0 %X\n", value);
     }
 
     // Detect updated virtual wires
@@ -160,6 +145,9 @@ void espi_event(void) {
                     VW_SET_DEBUG(VW_SMI_N, VWS_HIGH);
                     VW_SET_DEBUG(VW_RCIN_N, VWS_HIGH);
 
+                    // Host reset complete
+                    espi_host_reset = false;
+
                     power_cpu_reset();
                 }
                 last_pltrst_n = wire;
@@ -171,6 +159,11 @@ void espi_event(void) {
             // Set HOST_RST_ACK to HOST_RST_WARN
             wire = vw_get(&VW_HOST_RST_WARN);
             if (wire != vw_get(&VW_HOST_RST_ACK)) {
+                if (wire == VWS_HIGH) {
+                    // Host reset started
+                    espi_host_reset = true;
+                }
+
                 VW_SET_DEBUG(VW_HOST_RST_ACK, wire);
             }
         }
@@ -183,11 +176,8 @@ void espi_event(void) {
                 VW_SET_DEBUG(VW_SUS_ACK_N, wire);
             }
         }
+        if (value & BIT(7)) {
+            DEBUG("VWIDX47 %X\n", VWIDX47);
+        }
     }
-
-    // Detect when frequency changes
-    DEBUG_CHANGED(ESGCTRL2);
-
-    // Detect when I/O mode changes
-    DEBUG_CHANGED(ESGCTRL3);
 }

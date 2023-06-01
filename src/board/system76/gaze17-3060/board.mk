@@ -9,9 +9,6 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
-# FIXME: Use S3 instead of S0ix
-CFLAGS+=-DUSE_S0IX=1
-
 # Include keyboard
 KEYBOARD=15in_102
 
@@ -41,7 +38,7 @@ CFLAGS+=\
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=180 \
-	-DPOWER_LIMIT_DC=28
+	-DPOWER_LIMIT_DC=45
 
 # Custom fan curve
 CFLAGS+=-DBOARD_HEATUP=5

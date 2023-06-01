@@ -18,6 +18,7 @@ struct Gpio __code EC_SMD_EN_N =    GPIO(I, 6);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
+struct Gpio __code ME_WE =          GPIO(I, 2);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(A, 7);
 struct Gpio __code PCH_PWROK_EC =   GPIO(A, 6);
 struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0);

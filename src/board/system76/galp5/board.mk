@@ -9,9 +9,6 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
-# Use S0ix
-CFLAGS+=-DUSE_S0IX=1
-
 # Include keyboard
 KEYBOARD=14in_83
 
@@ -41,7 +38,7 @@ CFLAGS+=\
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=65 \
-	-DPOWER_LIMIT_DC=28
+	-DPOWER_LIMIT_DC=45
 
 # Custom fan curve
 CFLAGS+=-DBOARD_FAN_POINTS="\

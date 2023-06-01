@@ -44,18 +44,33 @@
 #define INPUT_CURRENT_MASK 0x0F80
 
 #if CHARGER_ADAPTER_RSENSE == 5
-    #define INPUT_CURRENT (MIN((CHARGER_INPUT_CURRENT >> 2), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
+    #define INPUT_CURRENT(X) (MIN(((X) >> 2), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
     #define ADAPTER_RSENSE RSENSE_5
 #elif CHARGER_ADAPTER_RSENSE == 10
-    #define INPUT_CURRENT (MIN((CHARGER_INPUT_CURRENT >> 1), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
+    #define INPUT_CURRENT(X) (MIN(((X) >> 1), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
     #define ADAPTER_RSENSE RSENSE_10
 #elif CHARGER_ADAPTER_RSENSE == 20
-    #define INPUT_CURRENT (MIN(CHARGER_INPUT_CURRENT, INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
+    #define INPUT_CURRENT(X) (MIN((X), INPUT_CURRENT_MASK) & INPUT_CURRENT_MASK)
     #define ADAPTER_RSENSE RSENSE_20
 #else
     #error Invalid adapter RSENSE value
 #endif
 
+// PSYS gain in nA/W
+#ifndef CHARGER_PSYS_GAIN
+    #define CHARGER_PSYS_GAIN 1000
+#endif
+#if CHARGER_PSYS_GAIN == 1000
+    #define CHARGE_OPTION_2_PSYS_GAIN (0 << 8)
+#elif CHARGER_PSYS_GAIN == 500
+    #define CHARGE_OPTION_2_PSYS_GAIN (1 << 8)
+#elif CHARGER_PSYS_GAIN == 250
+    #define CHARGE_OPTION_2_PSYS_GAIN (2 << 8)
+#elif CHARGER_PSYS_GAIN == 2000
+    #define CHARGE_OPTION_2_PSYS_GAIN (3 << 8)
+#else
+    #error Invalid CHARGER_PSYS_GAIN value
+#endif
 // clang-format on
 
 // Sense resistor values in milliohms.
@@ -86,7 +101,11 @@ int16_t battery_charger_disable(void) {
 
     // Set charge option 2 to PSYS enable
     //TODO: needed when charging disabled?
-    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN);
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        REG_CHARGE_OPTION_2,
+        CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN
+    );
     if (res < 0)
         return res;
 
@@ -100,9 +119,8 @@ int16_t battery_charger_disable(void) {
     if (res < 0)
         return res;
 
-    // Set input current in mA
-    //TODO: needed when charging disabled?
-    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
+    // Disable input current
+    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, 0);
     if (res < 0)
         return res;
 
@@ -131,7 +149,11 @@ int16_t battery_charger_enable(void) {
         return res;
 
     // Set charge option 2 to PSYS enable
-    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN);
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        REG_CHARGE_OPTION_2,
+        CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN
+    );
     if (res < 0)
         return res;
 
@@ -146,7 +168,11 @@ int16_t battery_charger_enable(void) {
         return res;
 
     // Set input current in mA
-    res = smbus_write(CHARGER_ADDRESS, REG_ADAPTER_CURRENT, INPUT_CURRENT);
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        REG_ADAPTER_CURRENT,
+        INPUT_CURRENT(battery_charger_input_current)
+    );
     if (res < 0)
         return res;
 

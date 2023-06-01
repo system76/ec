@@ -15,6 +15,7 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <board/wireless.h>
+#include <board/usbpd.h>
 #include <common/debug.h>
 
 #if CONFIG_BUS_ESPI
@@ -22,9 +23,9 @@
 #include <board/espi.h>
 #endif
 
-#ifndef USE_S0IX
-#define USE_S0IX 0
-#endif
+#if CONFIG_SECURITY
+#include <board/security.h>
+#endif // CONFIG_SECURITY
 
 #define GPIO_SET_DEBUG(G, V) \
     { \
@@ -64,9 +65,6 @@
 #define HAVE_SLP_SUS_N 1
 #endif
 
-#ifndef HAVE_XLP_OUT
-#define HAVE_XLP_OUT 1
-#endif
 #ifndef HAVE_SUSWARN_N
 #define HAVE_SUSWARN_N 1
 #endif
@@ -126,24 +124,39 @@ extern uint8_t main_cycle;
 enum PowerState power_state = POWER_STATE_OFF;
 
 enum PowerState calculate_power_state(void) {
-    //TODO: Deep Sx states using SLP_SUS#
-
-    if (gpio_get(&SUSB_N_PCH)) {
-        // S3, S4, and S5 planes powered
-        return POWER_STATE_S0;
+    if (!gpio_get(&EC_RSMRST_N)) {
+        // S5 plane not powered
+        return POWER_STATE_OFF;
     }
 
-    if (gpio_get(&SUSC_N_PCH)) {
-        // S4 and S5 planes powered
-        return POWER_STATE_S3;
-    }
+#if CONFIG_BUS_ESPI
+    // Use eSPI virtual wires if available
 
-    if (gpio_get(&EC_RSMRST_N)) {
-        // S5 plane powered
+    if (vw_get(&VW_SLP_S4_N) != VWS_HIGH) {
+        // S4 plane not powered
         return POWER_STATE_S5;
     }
 
-    return POWER_STATE_OFF;
+    if (vw_get(&VW_SLP_S3_N) != VWS_HIGH) {
+        // S3 plane not powered
+        return POWER_STATE_S3;
+    }
+#else // CONFIG_BUS_ESPI
+    // Use dedicated GPIOs if not using ESPI
+
+    if (!gpio_get(&SUSC_N_PCH)) {
+        // S4 plane not powered
+        return POWER_STATE_S5;
+    }
+
+    if (!gpio_get(&SUSB_N_PCH)) {
+        // S3 plane not powered
+        return POWER_STATE_S3;
+    }
+#endif // CONFIG_BUS_ESPI
+
+    // All planes are powered
+    return POWER_STATE_S0;
 }
 
 void update_power_state(void) {
@@ -231,6 +244,9 @@ void power_on(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
+    // Ensure USB-PD is disabled before turning on CPU
+    usbpd_disable_charging();
+
     GPIO_SET_DEBUG(PWR_BTN_N, false);
     delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
     GPIO_SET_DEBUG(PWR_BTN_N, true);
@@ -304,45 +320,18 @@ void power_off(void) {
     update_power_state();
 }
 
-#ifdef HAVE_DGPU
+// Set the CPU power limit appropriately
 static bool power_peci_limit(bool ac) {
-    uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
-    // Set PL4 using PECI
-    int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
-    DEBUG("power_peci_limit %d = %d\n", watts, res);
-    if (res == 0x40) {
-        return true;
-    } else if (res < 0) {
-        ERROR("power_peci_limit failed: 0x%02X\n", -res);
-        return false;
+    if (peci_available()) {
+        uint16_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
+        // Set PL4 using PECI
+        int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
+        DEBUG("power_peci_limit %d = %d\n", watts, res);
+        return res == 0x40;
     } else {
-        ERROR("power_peci_limit unknown response: 0x%02X\n", res);
         return false;
     }
 }
-
-// Set the power draw limit depending on if on AC or DC power
-void power_set_limit(void) {
-    static bool last_power_limit_ac = true;
-    // We don't use power_state because the latency needs to be low
-#if USE_S0IX
-    if (gpio_get(&SLP_S0_N)) {
-#else
-    if (gpio_get(&BUF_PLT_RST_N)) {
-#endif
-        bool ac = !gpio_get(&ACIN_N);
-        if (last_power_limit_ac != ac) {
-            if (power_peci_limit(ac)) {
-                last_power_limit_ac = ac;
-            }
-        }
-    } else {
-        last_power_limit_ac = true;
-    }
-}
-#else
-void power_set_limit(void) {}
-#endif // HAVE_DGPU
 
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {
@@ -354,6 +343,14 @@ void power_cpu_reset(void) {
     fan_reset();
     //TODO: reset KBC and touchpad states
     kbled_reset();
+    // Set PL4
+    //TODO: if this returns false, retry?
+    power_peci_limit(
+        // AC is connected
+        (!gpio_get(&ACIN_N)) &&
+        // There is available current
+        (battery_charger_input_current >= CHARGER_INPUT_CURRENT)
+    );
 }
 
 static bool power_button_disabled(void) {
@@ -367,8 +364,11 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        power_set_limit();
+        // Set CPU power limit to DC limit until we determine available current
+        //TODO: if this returns false, retry?
+        power_peci_limit(false);
 
+        // Configure smart charger
         DEBUG("Power adapter ");
         if (ac_new) {
             DEBUG("unplugged\n");
@@ -376,6 +376,12 @@ void power_event(void) {
         } else {
             DEBUG("plugged in\n");
             battery_charger_configure();
+
+            // Set CPU power limit to AC limit, if there is available current
+            //TODO: if this returns false, retry?
+            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
+                power_peci_limit(true);
+            }
         }
         battery_debug();
 
@@ -516,7 +522,8 @@ void power_event(void) {
 #endif // HAVE_SLP_SUS_N
 
 #if CONFIG_BUS_ESPI
-    // ESPI systems, always power off if in S5 power state
+    // ESPI systems must keep S5 planes powered unless VW_SUS_PWRDN_ACK is high
+    if (vw_get(&VW_SUS_PWRDN_ACK) == VWS_HIGH)
 #elif HAVE_SUSWARN_N
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
@@ -537,6 +544,13 @@ void power_event(void) {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
             power_off();
+
+#if CONFIG_SECURITY
+            // Handle security state changes if necessary
+            if (security_power()) {
+                power_on();
+            }
+#endif // CONFIG_SECURITY
         }
     }
 
@@ -561,8 +575,9 @@ void power_event(void) {
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
-#if USE_S0IX
-        if (!gpio_get(&SLP_S0_N)) {
+#if CONFIG_BUS_ESPI
+        // HOST_C10 virtual wire is high when CPU is in C10 sleep state
+        if (vw_get(&VW_HOST_C10) == VWS_HIGH) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
