@@ -12,13 +12,16 @@ void kbled_init(void) {
     }
 
     //TODO: enable PWMs
+
     kbled_reset();
 }
 
 void kbled_reset(void) {
     // Set brightness and color
+    kbled_set_brightness(0);
+    if (gpio_get(&LID_SW_N))
+        kbled_enable(true);
     kbled_set_color(0xFFFFFF);
-    kbled_set(0x00);
 }
 
 uint8_t kbled_get(void) {

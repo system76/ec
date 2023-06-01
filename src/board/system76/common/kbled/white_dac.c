@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <board/gpio.h>
 #include <board/kbled.h>
 #include <common/macro.h>
 #include <ec/dac.h>
@@ -19,7 +20,9 @@ void kbled_init(void) {
 }
 
 void kbled_reset(void) {
-    kbled_set(0);
+    kbled_set_brightness(0);
+    if (gpio_get(&LID_SW_N))
+        kbled_enable(true);
 }
 
 uint8_t kbled_get(void) {
