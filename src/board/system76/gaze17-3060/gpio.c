@@ -118,11 +118,11 @@ void gpio_init() {
     // SMD_VGA_THERM
     GPCRC2 = GPIO_ALT | GPIO_UP;
     // KB_SO16
-    GPCRC3 = GPIO_IN;
+    GPCRC3 = GPIO_ALT | GPIO_UP;
     // CNVI_DET#
     GPCRC4 = GPIO_IN | GPIO_UP;
     // KB_SO17
-    GPCRC5 = GPIO_IN;
+    GPCRC5 = GPIO_ALT | GPIO_UP;
     // PCH_PWROK_EC
     GPCRC6 = GPIO_OUT;
     // BKL_EN
