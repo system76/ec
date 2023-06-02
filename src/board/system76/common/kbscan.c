@@ -19,6 +19,12 @@
 #define KM_NKEY 0
 #endif // KM_NKEY
 
+// Debounce time in milliseconds
+#define DEBOUNCE_DELAY 5
+
+// Deselect all columns for reading
+#define KBSCAN_MATRIX_NONE 0xFF
+
 bool kbscan_fn_held = false;
 bool kbscan_esc_held = false;
 
@@ -38,90 +44,58 @@ static inline bool matrix_position_is_fn(uint8_t row, uint8_t col) {
     return (row == MATRIX_FN_OUTPUT) && (col == MATRIX_FN_INPUT);
 }
 
+// Initialize the Keyboard Matrix Scan Controller in KBS (Normal) mode for
+// reading keyboard input.
 void kbscan_init(void) {
-    KSOCTRL = 0x05;
-    KSICTRLR = 0x04;
-
-    // Set all outputs to GPIO mode, low, and inputs
+    // KSO[15:0]: Enable pull-up, set to KBS mode, open-drain
+    // NOTE: KSO[17:16] ALT mode and pull-up configured by GPCRC
+    KSOCTRL = BIT(2) | BIT(0);
+    KSOHGCTRL = 0;
+    KSOLGCTRL = 0;
+    // XXX: Still set outputs low?
     KSOL = 0;
-    KSOLGCTRL = 0xFF;
-    KSOLGOEN = 0;
     KSOH1 = 0;
-    KSOHGCTRL = 0xFF;
-    KSOHGOEN = 0;
     KSOH2 = 0;
 
-    // Set all inputs to KBS mode, low, and inputs
+    // KSI[7:0]: Enable pull-up, set to KBS mode
+    KSICTRLR = BIT(2);
     KSIGCTRL = 0;
-    KSIGOEN = 0;
-    KSIGDAT = 0;
 }
 
-// Debounce time in milliseconds
-#define DEBOUNCE_DELAY 5
-
-static uint8_t kbscan_get_row(uint8_t i) {
+// Read the state of the row for the selected column.
+static inline uint8_t kbscan_get_row(void) {
     // Report all keys as released when lid is closed
     if (!lid_state) {
         return 0;
     }
 
-    // Set current line as output
-    if (i < 8) {
-        KSOLGOEN = BIT(i);
-        KSOHGOEN = 0;
-#if KM_OUT >= 17
-        GPCRC3 = GPIO_IN;
-#endif
-#if KM_OUT >= 18
-        GPCRC5 = GPIO_IN;
-#endif
-    } else if (i < 16) {
-        KSOLGOEN = 0;
-        KSOHGOEN = BIT((i - 8));
-#if KM_OUT >= 17
-        GPCRC3 = GPIO_IN;
-#endif
-#if KM_OUT >= 18
-        GPCRC5 = GPIO_IN;
-#endif
-    } else if (i == 16) {
-        KSOLGOEN = 0;
-        KSOHGOEN = 0;
-#if KM_OUT >= 17
-        GPCRC3 = GPIO_OUT;
-#endif
-#if KM_OUT >= 18
-        GPCRC5 = GPIO_IN;
-#endif
-    } else if (i == 17) {
-        KSOLGOEN = 0;
-        KSOHGOEN = 0;
-#if KM_OUT >= 17
-        GPCRC3 = GPIO_IN;
-#endif
-#if KM_OUT >= 18
-        GPCRC5 = GPIO_OUT;
-#endif
-    }
-#if KM_OUT >= 17
-    GPDRC &= ~BIT(3);
-#endif
-#if KM_OUT >= 18
-    GPDRC &= ~BIT(5);
-#endif
-
-    // TODO: figure out optimal delay
-    delay_ticks(20);
-
+    // Invert KSI for positive logic of pressed keys.
     return ~KSI;
 }
 
+// Assert the specified column for reading the row.
+static void kbscan_set_column(uint8_t col) {
+    if (col == KBSCAN_MATRIX_NONE) {
+        // Disable reading from all columns
+        KSOL = 0xFF;
+        KSOH1 = 0xFF;
+        KSOH2 = 0x3;
+    } else {
+        // Assert the specific bit corresponding to the column
+        uint32_t colbit = ~BIT(col);
+        KSOL = colbit & 0xFF;
+        KSOH1 = (colbit >> 8) & 0xFF;
+        KSOH2 = (colbit >> 16) & 0x03;
+    }
+
+    // Wait for matrix to stabilize
+    delay_ticks(20);
+}
+
 #if KM_NKEY
-static bool kbscan_has_ghost_in_row(uint8_t row, uint8_t rowdata) {
-    // Use arguments
-    row = row;
-    rowdata = rowdata;
+static bool kbscan_row_has_ghost(uint8_t *matrix, uint8_t col) {
+    (void)matrix;
+    (void)col;
     return false;
 }
 #else // KM_NKEY
@@ -143,8 +117,10 @@ static uint8_t kbscan_get_real_keys(uint8_t row, uint8_t rowdata) {
     return realdata;
 }
 
-static bool kbscan_has_ghost_in_row(uint8_t row, uint8_t rowdata) {
-    rowdata = kbscan_get_real_keys(row, rowdata);
+static bool kbscan_row_has_ghost(uint8_t *matrix, uint8_t col) {
+    uint8_t rowdata = matrix[col];
+
+    rowdata = kbscan_get_real_keys(col, matrix[col]);
 
     // No ghosts exist when  less than 2 keys in the row are active.
     if (!popcount_more_than_one(rowdata)) {
@@ -153,8 +129,13 @@ static bool kbscan_has_ghost_in_row(uint8_t row, uint8_t rowdata) {
 
     // Check against other rows to see if more than one column matches.
     for (uint8_t i = 0; i < KM_OUT; i++) {
-        uint8_t otherrow = kbscan_get_real_keys(i, kbscan_get_row(i));
-        if (i != row && popcount_more_than_one(otherrow & rowdata)) {
+        if (i == col) {
+            continue;
+        }
+
+        uint8_t otherrow = kbscan_get_real_keys(i, matrix[i]);
+        uint8_t common = rowdata & otherrow;
+        if (popcount_more_than_one(common)) {
             return true;
         }
     }
@@ -316,6 +297,7 @@ void kbscan_event(void) {
     uint8_t layer = kbscan_layer;
     static uint8_t kbscan_last_layer[KM_OUT][KM_IN] = { { 0 } };
     static bool kbscan_ghost[KM_OUT] = { false };
+    uint8_t matrix_curr[KM_OUT];
 
     static bool debounce = false;
     static uint32_t debounce_time = 0;
@@ -336,11 +318,19 @@ void kbscan_event(void) {
         }
     }
 
+    // Read the current state of the hardware matrix
     for (uint8_t i = 0; i < KM_OUT; i++) {
-        uint8_t new = kbscan_get_row(i);
+        kbscan_set_column(i);
+        matrix_curr[i] = kbscan_get_row();
+    }
+    // Disable reading any keys
+    kbscan_set_column(KBSCAN_MATRIX_NONE);
+
+    for (uint8_t i = 0; i < KM_OUT; i++) {
+        uint8_t new = matrix_curr[i];
         uint8_t last = kbscan_matrix[i];
         if (new != last) {
-            if (kbscan_has_ghost_in_row(i, new)) {
+            if (kbscan_row_has_ghost(matrix_curr, i)) {
                 continue;
             }
 
@@ -432,17 +422,4 @@ void kbscan_event(void) {
     }
 
     kbscan_layer = layer;
-
-    // Reset all lines to inputs
-    KSOLGOEN = 0;
-    KSOHGOEN = 0;
-#if KM_OUT >= 17
-    GPCRC3 = GPIO_IN;
-#endif
-#if KM_OUT >= 18
-    GPCRC5 = GPIO_IN;
-#endif
-
-    // TODO: figure out optimal delay
-    delay_ticks(10);
 }
