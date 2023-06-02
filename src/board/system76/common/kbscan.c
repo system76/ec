@@ -255,6 +255,18 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
                 }
             }
             break;
+        case COMBO_CALL_MUTE:
+            if (kbscan_enabled) {
+                if (pressed) {
+                    kbc_scancode(K_LEFT_SUPER, true);
+                    kbc_scancode(K_LEFT_ALT, true);
+                    kbc_scancode(K_K, true);
+                    kbc_scancode(K_LEFT_SUPER, false);
+                    kbc_scancode(K_LEFT_ALT, false);
+                    kbc_scancode(K_K, false);
+                }
+            }
+            break;
         }
         break;
     case (KT_SCI):
