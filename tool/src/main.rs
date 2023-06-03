@@ -269,6 +269,13 @@ unsafe fn fan_set(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Result<(
     ec.fan_set(index, duty)
 }
 
+unsafe fn fan_tach(ec: &mut Ec<Box<dyn Access>>, index: u8) -> Result<(), Error> {
+    let tach = ec.fan_tach(index)?;
+    println!("{}", tach);
+
+    Ok(())
+}
+
 unsafe fn keymap_get(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input: u8) -> Result<(), Error> {
     let value = ec.keymap_get(layer, output, input)?;
     println!("{:04X}", value);
@@ -311,6 +318,9 @@ enum SubCommand {
     Fan {
         index: u8,
         duty: Option<u8>,
+    },
+    FanTach {
+        index: u8,
     },
     Flash {
         path: String,
@@ -377,8 +387,6 @@ struct Args {
 }
 
 fn main() {
-    //.subcommand(Command::new("security").arg(Arg::new("state").value_parser(["lock", "unlock"])))
-
     let args = Args::parse();
 
     let get_ec = || -> Result<_, Error> {
@@ -404,7 +412,9 @@ fn main() {
                             // System76 launch_2
                             (0x3384, 0x0006, 1) |
                             // System76 launch_heavy_1
-                            (0x3384, 0x0007, 1) => {
+                            (0x3384, 0x0007, 1) |
+                            // System76 thelio_io_2
+                            (0x3384, 0x000B, 1) => {
                                 let device = info.open_device(&api)?;
                                 let access = AccessHid::new(device, 10, 100)?;
                                 return Ok(Ec::new(access)?.into_dyn());
@@ -448,6 +458,15 @@ fn main() {
                         eprintln!("failed to get fan {}: {:X?}", index, err);
                         process::exit(1);
                     },
+                },
+            }
+        },
+        SubCommand::FanTach { index } => {
+            match unsafe { fan_tach(&mut ec, index) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to get fan {} tachometer: {:X?}", index, err);
+                    process::exit(1);
                 },
             }
         },
