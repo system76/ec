@@ -103,26 +103,10 @@ static inline bool popcount_more_than_one(uint8_t rowdata) {
     return rowdata & (rowdata - 1);
 }
 
-static uint8_t kbscan_get_real_keys(uint8_t row, uint8_t rowdata) {
-    // Remove any "active" blanks from the matrix.
-    uint8_t realdata = 0;
-    for (uint8_t col = 0; col < KM_IN; col++) {
-        // This tests the default keymap intentionally, to avoid blanks in the
-        // dynamic keymap
-        if (KEYMAP[0][row][col] && (rowdata & BIT(col))) {
-            realdata |= BIT(col);
-        }
-    }
-
-    return realdata;
-}
-
 static bool kbscan_row_has_ghost(uint8_t *matrix, uint8_t col) {
     uint8_t rowdata = matrix[col];
 
-    rowdata = kbscan_get_real_keys(col, matrix[col]);
-
-    // No ghosts exist when  less than 2 keys in the row are active.
+    // No ghosts exist when less than 2 keys in the row are active.
     if (!popcount_more_than_one(rowdata)) {
         return false;
     }
@@ -133,8 +117,7 @@ static bool kbscan_row_has_ghost(uint8_t *matrix, uint8_t col) {
             continue;
         }
 
-        uint8_t otherrow = kbscan_get_real_keys(i, matrix[i]);
-        uint8_t common = rowdata & otherrow;
+        uint8_t common = rowdata & matrix[i];
         if (popcount_more_than_one(common)) {
             return true;
         }
