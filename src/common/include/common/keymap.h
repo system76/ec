@@ -57,9 +57,6 @@ uint16_t keymap_translate(uint16_t key);
 #define K_PRINT_SCREEN (KT_COMBO | COMBO_PRINT_SCREEN)
 #define COMBO_PAUSE 2
 #define K_PAUSE (KT_COMBO | COMBO_PAUSE)
-// Windows 11 22H2 "Call Mute" hotkey
-#define COMBO_CALL_MUTE 3
-#define K_CALL_MUTE (KT_COMBO | COMBO_CALL_MUTE)
 
 // SCI
 #define KT_SCI (0x4000)
@@ -110,6 +107,9 @@ uint16_t keymap_translate(uint16_t key);
 #define K_MEDIA_PREV (KF_E0 | 0x15)
 // Custom scancode
 #define K_TOUCHPAD (KF_E0 | 0x63)
+
+// Mic mute
+#define K_MIC_MUTE (0xC0)
 
 // Function keys
 
