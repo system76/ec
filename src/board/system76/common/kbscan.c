@@ -255,18 +255,6 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
                 }
             }
             break;
-        case COMBO_CALL_MUTE:
-            if (kbscan_enabled) {
-                if (pressed) {
-                    kbc_scancode(K_LEFT_SUPER, true);
-                    kbc_scancode(K_LEFT_ALT, true);
-                    kbc_scancode(K_K, true);
-                    kbc_scancode(K_LEFT_SUPER, false);
-                    kbc_scancode(K_LEFT_ALT, false);
-                    kbc_scancode(K_K, false);
-                }
-            }
-            break;
         }
         break;
     case (KT_SCI):
@@ -306,16 +294,17 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
 
 static inline bool key_should_repeat(uint16_t key) {
     switch (key) {
-    case K_TOUCHPAD:
     case K_AIRPLANE_MODE:
     case K_CAMERA_TOGGLE:
     case K_DISPLAY_TOGGLE:
     case K_FAN_TOGGLE:
-    case K_SUSPEND:
     case K_KBD_BKL:
     case K_KBD_COLOR:
     case K_KBD_TOGGLE:
+    case K_MIC_MUTE:
     case K_PAUSE:
+    case K_SUSPEND:
+    case K_TOUCHPAD:
         return false;
     }
 
