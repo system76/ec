@@ -109,7 +109,7 @@ uint16_t keymap_translate(uint16_t key);
 #define K_TOUCHPAD (KF_E0 | 0x63)
 
 // Mic mute
-#define K_MIC_MUTE (0xC0)
+#define K_MIC_MUTE (KF_E0 | 0x76)
 
 // Function keys
 
