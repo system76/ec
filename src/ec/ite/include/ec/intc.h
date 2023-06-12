@@ -134,4 +134,8 @@ static inline uint8_t intc_get_irq(void) {
     return IVCT - 0x10;
 }
 
+void intc_enable(uint8_t nr);
+void intc_disable(uint8_t nr);
+void intc_clear(uint8_t nr);
+
 #endif // _EC_INTC_H
