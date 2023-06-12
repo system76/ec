@@ -9,6 +9,7 @@ ec-y += kbc.c
 ec-y += pmc.c
 ec-y += ps2.c
 ec-y += signature.c
+ec-y += wuc.c
 
 ifeq ($(CONFIG_EC_ITE_IT8587E), y)
 CFLAGS+=-DCONFIG_EC_ITE_IT8587E=1
