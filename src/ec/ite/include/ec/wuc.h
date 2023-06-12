@@ -55,4 +55,14 @@ volatile uint8_t __xdata __at(0x1B2D) WUESR13;
 volatile uint8_t __xdata __at(0x1B30) WUEMR14;
 volatile uint8_t __xdata __at(0x1B31) WUESR14;
 
+enum WucEdgeMode {
+    EDGE_RISING,
+    EDGE_FALLING,
+    EDGE_BOTH,
+};
+
+void wuc_enable(uint8_t nr, enum WucEdgeMode detect);
+void wuc_disable(uint8_t nr);
+void wuc_clear(uint8_t nr);
+
 #endif // _EC_WUC_H
