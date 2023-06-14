@@ -3,16 +3,30 @@
 #include <board/kbled.h>
 #include <common/macro.h>
 
+enum KbledKind kbled_kind = KBLED_NONE;
+
 // clang-format off
 static uint8_t LEVEL_I = 1;
+#ifdef KBLED_DAC
+// XXX: DAC uses separate levels due to brightness being different.
+static const uint8_t __code LEVELS[] = {
+    0,
+    128,
+    144,
+    168,
+    192,
+    255,
+};
+#else
 static const uint8_t __code LEVELS[] = {
     48,
     72,
     96,
     144,
     192,
-    255
+    255,
 };
+#endif
 
 static uint8_t COLOR_I = 0;
 static const uint32_t __code COLORS[] = {
@@ -55,4 +69,14 @@ void kbled_hotkey_toggle(void) {
     } else {
         kbled_set(0);
     }
+}
+
+// Change the backlight level to the next value, cycling through "off".
+void kbled_hotkey_step(void) {
+    if (LEVEL_I < (ARRAY_SIZE(LEVELS) - 1)) {
+        LEVEL_I += 1;
+    } else {
+        LEVEL_I = 0;
+    }
+    kbled_set(LEVELS[LEVEL_I]);
 }

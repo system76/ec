@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <board/gpio.h>
 #include <board/kbled.h>
 #include <ec/pwm.h>
 
 void kbled_init(void) {
+    if (!gpio_get(&RGBKB_DET_N)) {
+        kbled_kind = KBLED_RGB;
+    } else {
+        kbled_kind = KBLED_WHITE;
+    }
+
     //TODO: enable PWMs
     kbled_reset();
 }
@@ -29,6 +36,9 @@ void kbled_set(uint8_t level) {
 }
 
 uint32_t kbled_get_color(void) {
+    if (kbled_kind == KBLED_WHITE)
+        return 0xFFFFFF;
+
     // Get PWM of blue component
     uint32_t color = (uint32_t)DCR7;
 
@@ -42,6 +52,9 @@ uint32_t kbled_get_color(void) {
 }
 
 void kbled_set_color(uint32_t color) {
+    if (kbled_kind == KBLED_WHITE)
+        color = 0xFFFFFF;
+
     // Set PWM for blue component
     DCR7 = (uint8_t)(color);
 

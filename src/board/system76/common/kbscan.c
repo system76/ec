@@ -175,7 +175,7 @@ static void hardware_hotkey(uint16_t key) {
         fan_max = !fan_max;
         break;
     case K_KBD_BKL:
-        kbled_set(kbled_get() + 1);
+        kbled_hotkey_step();
         break;
     case K_KBD_COLOR:
         if (acpi_ecos != EC_OS_FULL)
@@ -294,16 +294,17 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
 
 static inline bool key_should_repeat(uint16_t key) {
     switch (key) {
-    case K_TOUCHPAD:
     case K_AIRPLANE_MODE:
     case K_CAMERA_TOGGLE:
     case K_DISPLAY_TOGGLE:
     case K_FAN_TOGGLE:
-    case K_SUSPEND:
     case K_KBD_BKL:
     case K_KBD_COLOR:
     case K_KBD_TOGGLE:
+    case K_MIC_MUTE:
     case K_PAUSE:
+    case K_SUSPEND:
+    case K_TOUCHPAD:
         return false;
     }
 

@@ -32,7 +32,7 @@ CFLAGS+=\
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=180 \
-	-DPOWER_LIMIT_DC=28
+	-DPOWER_LIMIT_DC=45
 
 # Don't smooth fan speed changes below 25% to mitigate buzzing
 CFLAGS+=-DSMOOTH_FANS_MIN=25

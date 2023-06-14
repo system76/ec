@@ -101,7 +101,11 @@ int16_t battery_charger_disable(void) {
 
     // Set charge option 2 to PSYS enable
     //TODO: needed when charging disabled?
-    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN);
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        REG_CHARGE_OPTION_2,
+        CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN
+    );
     if (res < 0)
         return res;
 
@@ -145,7 +149,11 @@ int16_t battery_charger_enable(void) {
         return res;
 
     // Set charge option 2 to PSYS enable
-    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_2, CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN);
+    res = smbus_write(
+        CHARGER_ADDRESS,
+        REG_CHARGE_OPTION_2,
+        CHARGE_OPTION_2_PSYS_EN | CHARGE_OPTION_2_PSYS_GAIN
+    );
     if (res < 0)
         return res;
 

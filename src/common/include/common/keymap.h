@@ -108,6 +108,9 @@ uint16_t keymap_translate(uint16_t key);
 // Custom scancode
 #define K_TOUCHPAD (KF_E0 | 0x63)
 
+// Mic mute
+#define K_MIC_MUTE (KF_E0 | 0x76)
+
 // Function keys
 
 #define K_F1 (0x05)

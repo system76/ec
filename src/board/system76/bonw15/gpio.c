@@ -27,6 +27,7 @@ struct Gpio __code PCH_DPWROK_EC =  GPIO(F, 3);
 struct Gpio __code PCH_PWROK_EC =   GPIO(I, 5); // renamed to SYS_PWROK_EC
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
+struct Gpio __code RGBKB_DET_N =    GPIO(E, 2);
 struct Gpio __code SINK_CTRL =      GPIO(H, 0);
 struct Gpio __code SLP_SUS_N =      GPIO(H, 7);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4);
@@ -65,7 +66,8 @@ void gpio_init() {
     GPDRC = BIT(6);
     // BL_PWM_EN_EC
     GPDRD = BIT(3);
-    GPDRE = 0;
+    // USB_PWR_EN# (inverted)
+    GPDRE = BIT(3);
     // PCH_DPWROK_EC
     GPDRF = BIT(3);
     // H_PROCHOT#_EC

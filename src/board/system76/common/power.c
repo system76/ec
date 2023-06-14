@@ -320,7 +320,6 @@ void power_off(void) {
     update_power_state();
 }
 
-#ifdef HAVE_DGPU
 // Set the CPU power limit appropriately
 static bool power_peci_limit(bool ac) {
     if (peci_available()) {
@@ -333,13 +332,6 @@ static bool power_peci_limit(bool ac) {
         return false;
     }
 }
-#else // HAVE_DGPU
-static bool power_peci_limit(bool ac) {
-    // Use unused argument
-    ac = ac;
-    return true;
-}
-#endif // HAVE_DGPU
 
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {

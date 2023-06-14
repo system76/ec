@@ -9,6 +9,9 @@ CONFIG_EC_ITE_IT5570E=y
 # Enable eSPI
 CONFIG_BUS_ESPI=y
 
+# Enable firmware security
+CONFIG_SECURITY=y
+
 # Include keyboard
 KEYBOARD=15in_102
 
@@ -37,7 +40,7 @@ CFLAGS+=\
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=180 \
-	-DPOWER_LIMIT_DC=28
+	-DPOWER_LIMIT_DC=45
 
 # Disable syncing fan speeds
 #CFLAGS+=-DSYNC_FANS=0
