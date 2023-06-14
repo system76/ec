@@ -129,7 +129,7 @@ extern uint8_t main_cycle;
 
 enum PowerState power_state = POWER_STATE_OFF;
 
-#if EC_ESPI
+#if USE_S0IX
 bool in_s0ix = false;
 #endif
 

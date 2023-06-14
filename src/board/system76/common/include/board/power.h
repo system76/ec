@@ -15,7 +15,7 @@ enum PowerState {
 extern enum PowerState power_state;
 void update_power_state(void);
 
-#if EC_ESPI
+#if USE_S0IX
 extern bool in_s0ix;
 #endif
 
