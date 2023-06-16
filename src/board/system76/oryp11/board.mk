@@ -15,7 +15,7 @@ CONFIG_PECI_OVER_ESPI=y
 CONFIG_SECURITY=y
 
 # Include keyboard
-KEYBOARD=15in_102
+KEYBOARD=18H9LHA04
 
 # Set keyboard LED mechanism
 KBLED=rgb_pwm

@@ -13,8 +13,7 @@ CONFIG_BUS_ESPI=y
 CONFIG_SECURITY=y
 
 # Include keyboard
-KEYBOARD=15in_102
-KEYMAP=darp9
+KEYBOARD=18H9LHA05
 
 # Set keyboard LED mechanism
 KBLED=rgb_pwm
