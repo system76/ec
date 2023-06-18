@@ -68,7 +68,7 @@ CFLAGS+=-DBOARD_FAN_POINTS="\
     FAN_POINT(65, 81), \
     FAN_POINT(66, 85), \
     FAN_POINT(67, 89), \
-    FAN_POINT(68, 92), \
+    FAN_POINT(68, 93), \
     FAN_POINT(69, 96), \
     FAN_POINT(70, 100) \
 "
@@ -94,7 +94,7 @@ CFLAGS+=-DBOARD_DGPU_FAN_POINTS="\
     FAN_POINT(65, 81), \
     FAN_POINT(66, 85), \
     FAN_POINT(67, 89), \
-    FAN_POINT(68, 92), \
+    FAN_POINT(68, 93), \
     FAN_POINT(69, 96), \
     FAN_POINT(70, 100) \
 "
