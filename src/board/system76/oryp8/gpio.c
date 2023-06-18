@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/gpio.h>
-#include <common/debug.h>
+#include <common/macro.h>
 
+// clang-format off
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
@@ -21,15 +22,20 @@ struct Gpio __code LED_BAT_CHG =    GPIO(H, 5);
 struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
+struct Gpio __code ME_WE =          GPIO(H, 0);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(F, 3);
 struct Gpio __code PCH_PWROK_EC =   GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
+struct Gpio __code RGBKB_DET_N =    GPIO(J, 7);
 struct Gpio __code SLP_SUS_N =      GPIO(D, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4); // renamed to EC_SLP_SUS#
+struct Gpio __code WLAN_EN =        GPIO(G, 1);
+struct Gpio __code WLAN_PWR_EN =    GPIO(H, 4);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
+// clang-format on
 
 void gpio_init() {
     // Enable LPC reset on GPD2
@@ -46,7 +52,7 @@ void gpio_init() {
     GCR21 = BIT(2);
 
     // Set GPIO data
-    // WLAN_PWR_EN
+    // DDS_EC_PWM
     GPDRA = BIT(3);
     // SWI#, XLP_OUT, PWR_SW#
     GPDRB = BIT(5) | BIT(4) | BIT(3);
@@ -56,10 +62,9 @@ void gpio_init() {
     GPDRE = 0;
     // BL_PWM_EN_EC, PCH_DPWROK_EC
     GPDRF = BIT(7) | BIT(3);
-    // H_PROCHOT#_EC, WLAN_EN
-    GPDRG = BIT(6) | BIT(1);
-    // WLAN_PWR_EN
-    GPDRH = BIT(4);
+    // H_PROCHOT#_EC
+    GPDRG = BIT(6);
+    GPDRH = 0;
     // PLVDD_RST_EC, EC_AMP_EN
     GPDRI = BIT(6) | BIT(5);
     GPDRJ = 0;
@@ -240,40 +245,3 @@ void gpio_init() {
     // SERIRQ_ESPI_ALERT0
     GPCRM6 = GPIO_IN | GPIO_UP;
 }
-
-#if GPIO_DEBUG
-void gpio_debug_bank(
-    char * bank,
-    uint8_t data,
-    uint8_t mirror,
-    uint8_t pot,
-    volatile uint8_t * control
-) {
-    for(char i = 0; i < 8; i++) {
-        DEBUG(
-            "%s%d:\n\tdata %d\n\tmirror %d\n\tpot %d\n\tcontrol %02X\n",
-            bank,
-            i,
-            (data >> i) & 1,
-            (mirror >> i) & 1,
-            (pot >> i) & 1,
-            *(control + i)
-        );
-    }
-}
-
-void gpio_debug(void) {
-    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCR ## BANK ## 0)
-    bank(A);
-    bank(B);
-    bank(C);
-    bank(D);
-    bank(E);
-    bank(F);
-    bank(G);
-    bank(H);
-    bank(I);
-    bank(J);
-    #undef bank
-}
-#endif

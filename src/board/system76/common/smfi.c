@@ -17,11 +17,16 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifndef __SCRATCH__
-    #include <board/scratch.h>
-    #include <board/kbled.h>
-    #include <board/kbscan.h>
-#endif
+#if !defined(__SCRATCH__)
+#include <board/scratch.h>
+#include <board/kbled.h>
+#include <board/kbscan.h>
+
+#if CONFIG_SECURITY
+#include <board/security.h>
+#endif // CONFIG_SECURITY
+
+#endif // !defined(__SCRATCH__)
 #include <board/smfi.h>
 #include <common/command.h>
 #include <common/macro.h>
@@ -118,15 +123,15 @@ static enum Result cmd_print(void) {
 
 static enum Result cmd_fan_get(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
-        case 0:
-            // Get duty of fan 0
-            smfi_cmd[SMFI_CMD_DATA + 1] = DCR2;
-            return RES_OK;
-        case 1:
-            // Get duty of fan 1
-            //TODO: only allow on platforms like addw2
-            smfi_cmd[SMFI_CMD_DATA + 1] = DCR4;
-            return RES_OK;
+    case 0:
+        // Get duty of fan 0
+        smfi_cmd[SMFI_CMD_DATA + 1] = DCR2;
+        return RES_OK;
+    case 1:
+        // Get duty of fan 1
+        //TODO: only allow on platforms like addw2
+        smfi_cmd[SMFI_CMD_DATA + 1] = DCR4;
+        return RES_OK;
     }
 
     // Failed if fan not found
@@ -135,15 +140,15 @@ static enum Result cmd_fan_get(void) {
 
 static enum Result cmd_fan_set(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
-        case 0:
-            // Set duty cycle of fan 0
-            DCR2 = smfi_cmd[SMFI_CMD_DATA + 1];
-            return RES_OK;
-        case 1:
-            // Set duty cycle of fan 1
-            //TODO: only allow on platforms like addw2
-            DCR4 = smfi_cmd[SMFI_CMD_DATA + 1];
-            return RES_OK;
+    case 0:
+        // Set duty cycle of fan 0
+        DCR2 = smfi_cmd[SMFI_CMD_DATA + 1];
+        return RES_OK;
+    case 1:
+        // Set duty cycle of fan 1
+        //TODO: only allow on platforms like addw2
+        DCR4 = smfi_cmd[SMFI_CMD_DATA + 1];
+        return RES_OK;
     }
 
     // Failed if fan not found
@@ -168,8 +173,7 @@ static enum Result cmd_keymap_set(void) {
     int16_t layer = smfi_cmd[SMFI_CMD_DATA];
     int16_t output = smfi_cmd[SMFI_CMD_DATA + 1];
     int16_t input = smfi_cmd[SMFI_CMD_DATA + 2];
-    uint16_t key =
-        ((uint16_t)smfi_cmd[SMFI_CMD_DATA + 3]) |
+    uint16_t key = ((uint16_t)smfi_cmd[SMFI_CMD_DATA + 3]) |
         (((uint16_t)smfi_cmd[SMFI_CMD_DATA + 4]) << 8);
     //TODO: consider only setting if the key has changed
     if (keymap_set(layer, output, input, key)) {
@@ -243,6 +247,23 @@ static enum Result cmd_matrix_get(void) {
     }
     return RES_OK;
 }
+
+#if CONFIG_SECURITY
+static enum Result cmd_security_get(void) {
+    smfi_cmd[SMFI_CMD_DATA] = security_get();
+    return RES_OK;
+}
+
+static enum Result cmd_security_set(void) {
+    enum SecurityState state = smfi_cmd[SMFI_CMD_DATA];
+    if (security_set(state)) {
+        return RES_OK;
+    } else {
+        return RES_ERR;
+    }
+}
+#endif // CONFIG_SECURITY
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -287,6 +308,14 @@ static enum Result cmd_spi(void) {
 #if defined(__SCRATCH__)
     return cmd_spi_scratch();
 #else // defined(__SCRATCH__)
+
+#if CONFIG_SECURITY
+    if (security_get() != SECURITY_STATE_UNLOCK) {
+        // EC must be unlocked to allow flashing
+        return RES_ERR;
+    }
+#endif // CONFIG_SECURITY
+
     if (smfi_cmd[SMFI_CMD_DATA] & CMD_SPI_FLAG_SCRATCH) {
         scratch_trampoline();
     }
@@ -297,6 +326,17 @@ static enum Result cmd_spi(void) {
 }
 
 static enum Result cmd_reset(void) {
+#if !defined(__SCRATCH__)
+
+#if CONFIG_SECURITY
+    if (security_get() != SECURITY_STATE_UNLOCK) {
+        // EC must be unlocked to allow watchdog reset
+        return RES_ERR;
+    }
+#endif // CONFIG_SECURITY
+
+#endif // !defined(__SCRATCH__)
+
     // Attempt to trigger watchdog reset
     ETWCFG |= BIT(5);
     EWDKEYR = 0;
@@ -321,67 +361,77 @@ void smfi_event(void) {
 
         switch (smfi_cmd[SMFI_CMD_CMD]) {
 #if !defined(__SCRATCH__)
-            case CMD_PROBE:
-                // Signature
-                smfi_cmd[SMFI_CMD_DATA + 0] = 0x76;
-                smfi_cmd[SMFI_CMD_DATA + 1] = 0xEC;
-                // Version
-                smfi_cmd[SMFI_CMD_DATA + 2] = 0x01;
-                //TODO: bitmask of implemented commands?
-                // Always successful
-                smfi_cmd[SMFI_CMD_RES] = RES_OK;
-                break;
-            case CMD_BOARD:
-                strncpy(&smfi_cmd[SMFI_CMD_DATA], board(), ARRAY_SIZE(smfi_cmd) - SMFI_CMD_DATA);
-                // Always successful
-                smfi_cmd[SMFI_CMD_RES] = RES_OK;
-                break;
-            case CMD_VERSION:
-                strncpy(&smfi_cmd[SMFI_CMD_DATA], version(), ARRAY_SIZE(smfi_cmd) - SMFI_CMD_DATA);
-                // Always successful
-                smfi_cmd[SMFI_CMD_RES] = RES_OK;
-                break;
-            case CMD_PRINT:
-                smfi_cmd[SMFI_CMD_RES] = cmd_print();
-                break;
-            case CMD_FAN_GET:
-                smfi_cmd[SMFI_CMD_RES] = cmd_fan_get();
-                break;
-            case CMD_FAN_SET:
-                smfi_cmd[SMFI_CMD_RES] = cmd_fan_set();
-                break;
-            case CMD_KEYMAP_GET:
-                smfi_cmd[SMFI_CMD_RES] = cmd_keymap_get();
-                break;
-            case CMD_KEYMAP_SET:
-                smfi_cmd[SMFI_CMD_RES] = cmd_keymap_set();
-                break;
-            case CMD_LED_GET_VALUE:
-                smfi_cmd[SMFI_CMD_RES] = cmd_led_get_value();
-                break;
-            case CMD_LED_SET_VALUE:
-                smfi_cmd[SMFI_CMD_RES] = cmd_led_set_value();
-                break;
-            case CMD_LED_GET_COLOR:
-                smfi_cmd[SMFI_CMD_RES] = cmd_led_get_color();
-                break;
-            case CMD_LED_SET_COLOR:
-                smfi_cmd[SMFI_CMD_RES] = cmd_led_set_color();
-                break;
-            case CMD_MATRIX_GET:
-                smfi_cmd[SMFI_CMD_RES] = cmd_matrix_get();
-                break;
+        case CMD_PROBE:
+            // Signature
+            smfi_cmd[SMFI_CMD_DATA + 0] = 0x76;
+            smfi_cmd[SMFI_CMD_DATA + 1] = 0xEC;
+            // Version
+            smfi_cmd[SMFI_CMD_DATA + 2] = 0x01;
+            //TODO: bitmask of implemented commands?
+            // Always successful
+            smfi_cmd[SMFI_CMD_RES] = RES_OK;
+            break;
+        case CMD_BOARD:
+            strncpy(&smfi_cmd[SMFI_CMD_DATA], board(), ARRAY_SIZE(smfi_cmd) - SMFI_CMD_DATA);
+            // Always successful
+            smfi_cmd[SMFI_CMD_RES] = RES_OK;
+            break;
+        case CMD_VERSION:
+            strncpy(&smfi_cmd[SMFI_CMD_DATA], version(), ARRAY_SIZE(smfi_cmd) - SMFI_CMD_DATA);
+            // Always successful
+            smfi_cmd[SMFI_CMD_RES] = RES_OK;
+            break;
+        case CMD_PRINT:
+            smfi_cmd[SMFI_CMD_RES] = cmd_print();
+            break;
+        case CMD_FAN_GET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get();
+            break;
+        case CMD_FAN_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_set();
+            break;
+        case CMD_KEYMAP_GET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_keymap_get();
+            break;
+        case CMD_KEYMAP_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_keymap_set();
+            break;
+        case CMD_LED_GET_VALUE:
+            smfi_cmd[SMFI_CMD_RES] = cmd_led_get_value();
+            break;
+        case CMD_LED_SET_VALUE:
+            smfi_cmd[SMFI_CMD_RES] = cmd_led_set_value();
+            break;
+        case CMD_LED_GET_COLOR:
+            smfi_cmd[SMFI_CMD_RES] = cmd_led_get_color();
+            break;
+        case CMD_LED_SET_COLOR:
+            smfi_cmd[SMFI_CMD_RES] = cmd_led_set_color();
+            break;
+        case CMD_MATRIX_GET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_matrix_get();
+            break;
+
+#if CONFIG_SECURITY
+        case CMD_SECURITY_GET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_security_get();
+            break;
+        case CMD_SECURITY_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_security_set();
+            break;
+#endif // CONFIG_SECURITY
+
 #endif // !defined(__SCRATCH__)
-            case CMD_SPI:
-                smfi_cmd[SMFI_CMD_RES] = cmd_spi();
-                break;
-            case CMD_RESET:
-                smfi_cmd[SMFI_CMD_RES] = cmd_reset();
-                break;
-            default:
-                // Command not found
-                smfi_cmd[SMFI_CMD_RES] = RES_ERR;
-                break;
+        case CMD_SPI:
+            smfi_cmd[SMFI_CMD_RES] = cmd_spi();
+            break;
+        case CMD_RESET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_reset();
+            break;
+        default:
+            // Command not found
+            smfi_cmd[SMFI_CMD_RES] = RES_ERR;
+            break;
         }
 
         // Mark command as finished

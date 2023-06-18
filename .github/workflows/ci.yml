@@ -6,17 +6,27 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    outputs:
+      boards: ${{ steps.board-matrix.outputs.boards }}
     steps:
-      - uses: actions/checkout@v2
-      - name: Check SPDX identifiers
-        run: ./scripts/lint/spdx.sh
-      - name: Check indentation
-        run: ./scripts/lint/indent.sh
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: ./scripts/deps.sh
+
+      - name:  Check SPDX tags
+        run: ./scripts/lint/01-spdx-tags.sh
 
       - name: Check formatting
-        run: ./scripts/clang-format.sh
-        continue-on-error: true
+        run: ./scripts/lint/02-clang-format.sh
+
+      - name: Check shell scripts
+        run: ./scripts/lint/03-shellcheck.sh
+
+      - name: Generate board matrix
+        id: board-matrix
+        run: echo "boards=$(make list-boards | jq -sRc 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
 
   tool:
     strategy:
@@ -25,9 +35,9 @@ jobs:
           - features:
           - features: --no-default-features --features="redox_hwio"
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: ./scripts/deps.sh
@@ -36,54 +46,18 @@ jobs:
         run: cargo build ${{ matrix.features }} --release --manifest-path tool/Cargo.toml
 
   ec:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    needs: lint
     strategy:
       matrix:
-        # TODO: Generate matrix from directory?
+        boards: ${{ fromJson(needs.lint.outputs.boards) }}
         # TODO: Conditionally build based on files changed?
-        include:
-          - vendor: arduino
-            board: mega2560
-          - vendor: system76
-            board: addw1
-          - vendor: system76
-            board: addw2
-          - vendor: system76
-            board: bonw14
-          - vendor: system76
-            board: darp5
-          - vendor: system76
-            board: darp7
-          - vendor: system76
-            board: galp3-c
-          - vendor: system76
-            board: galp5
-          - vendor: system76
-            board: gaze15
-          - vendor: system76
-            board: gaze16-3050
-          - vendor: system76
-            board: gaze16-3060
-          - vendor: system76
-            board: gaze17-3060-b
-          - vendor: system76
-            board: lemp9
-          - vendor: system76
-            board: lemp10
-          - vendor: system76
-            board: oryp5
-          - vendor: system76
-            board: oryp6
-          - vendor: system76
-            board: oryp7
-          - vendor: system76
-            board: oryp8
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: ./scripts/deps.sh
 
       - name: Build firmware
-        run: make BOARD=${{ matrix.vendor}}/${{ matrix.board }}
+        run: make BOARD=${{ matrix.boards }} VERBOSE=1

@@ -9,11 +9,11 @@
 #include <stdint.h>
 
 #ifndef BATTERY_ADDRESS
-    #define BATTERY_ADDRESS 0x0B
+#define BATTERY_ADDRESS 0x0B
 #endif
 
 #ifndef CHARGER_ADDRESS
-    #define CHARGER_ADDRESS 0x09
+#define CHARGER_ADDRESS 0x09
 #endif
 
 #define BATTERY_INITIALIZED BIT(7)
@@ -31,6 +31,8 @@ struct battery_info {
     uint16_t design_voltage;
 };
 extern struct battery_info battery_info;
+
+extern uint16_t battery_charger_input_current;
 
 uint8_t battery_get_start_threshold(void);
 bool battery_set_start_threshold(uint8_t value);

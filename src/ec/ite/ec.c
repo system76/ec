@@ -6,7 +6,7 @@
 #include <common/macro.h>
 
 void ec_init(void) {
-#ifdef it8587e
+#if CONFIG_EC_ITE_IT8587E
     RSTS = (0b10U << 6) | BIT(2);
 #else
     RSTS = (0b01U << 6) | BIT(2);
@@ -17,7 +17,7 @@ void ec_init(void) {
 }
 
 void ec_read_post_codes(void) {
-#ifdef it5570e
+#if CONFIG_EC_ITE_IT5570E
     while (P80H81HS & 1) {
         uint8_t p80h = P80HD;
         uint8_t p81h = P81HD;

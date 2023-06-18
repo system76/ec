@@ -36,19 +36,29 @@ bool keymap_erase_config(void) {
 
 bool keymap_load_config(void) {
     // Check signature
-    if (flash_read_u16(CONFIG_ADDR) != CONFIG_SIGNATURE) return false;
+    if (flash_read_u16(CONFIG_ADDR) != CONFIG_SIGNATURE)
+        return false;
 
     // Read the keymap if signature is valid
-    flash_read(CONFIG_ADDR + sizeof(CONFIG_SIGNATURE), (uint8_t *)DYNAMIC_KEYMAP, sizeof(DYNAMIC_KEYMAP));
+    flash_read(
+        CONFIG_ADDR + sizeof(CONFIG_SIGNATURE),
+        (uint8_t *)DYNAMIC_KEYMAP,
+        sizeof(DYNAMIC_KEYMAP)
+    );
     return true;
 }
 
 bool keymap_save_config(void) {
     // Erase config region
-    if (!keymap_erase_config()) return false;
+    if (!keymap_erase_config())
+        return false;
 
     // Write the keymap
-    flash_write(CONFIG_ADDR + sizeof(CONFIG_SIGNATURE), (uint8_t *)DYNAMIC_KEYMAP, sizeof(DYNAMIC_KEYMAP));
+    flash_write(
+        CONFIG_ADDR + sizeof(CONFIG_SIGNATURE),
+        (uint8_t *)DYNAMIC_KEYMAP,
+        sizeof(DYNAMIC_KEYMAP)
+    );
 
     // Write the length of the keymap, as a signature
     flash_write_u16(CONFIG_ADDR, CONFIG_SIGNATURE);
@@ -57,7 +67,7 @@ bool keymap_save_config(void) {
     return flash_read_u16(CONFIG_ADDR) == CONFIG_SIGNATURE;
 }
 
-bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t * value) {
+bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t *value) {
     if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
         *value = DYNAMIC_KEYMAP[layer][output][input];
         return true;

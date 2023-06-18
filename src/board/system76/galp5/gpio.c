@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/gpio.h>
-#include <common/debug.h>
 #include <common/macro.h>
 
 // clang-format off
@@ -9,7 +8,6 @@ struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
 struct Gpio __code BKL_EN =         GPIO(H, 2);
-struct Gpio __code BT_EN =          GPIO(F, 3);
 struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2); // renamed to EC_ERST#
 struct Gpio __code CCD_EN =         GPIO(D, 1);
 struct Gpio __code CPU_C10_GATE_N = GPIO(D, 3);
@@ -24,6 +22,7 @@ struct Gpio __code LED_BAT_CHG =    GPIO(H, 5);
 struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
+struct Gpio __code ME_WE =          GPIO(A, 0);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(C, 5);
 struct Gpio __code PCH_PWROK_EC =   GPIO(A, 6);
 struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0);
@@ -162,7 +161,7 @@ void gpio_init() {
     GPCRF1 = GPIO_OUT | GPIO_UP;
     // 3IN1
     GPCRF2 = GPIO_IN | GPIO_UP;
-    // BT_EN
+    // BT_EN: Not connected
     GPCRF3 = GPIO_OUT | GPIO_UP;
     // TP_CLK
     GPCRF4 = GPIO_ALT | GPIO_UP;
@@ -251,43 +250,3 @@ void gpio_init() {
     // ALERT#
     GPCRM6 = GPIO_IN | GPIO_UP;
 }
-
-#if GPIO_DEBUG
-void gpio_debug_bank(
-    char * bank,
-    uint8_t data,
-    uint8_t mirror,
-    uint8_t pot,
-    volatile uint8_t * control
-) {
-    for(char i = 0; i < 8; i++) {
-        DEBUG(
-            "%s%d: data %d mirror %d pot %d control %02X\n",
-            bank,
-            i,
-            (data >> i) & 1,
-            (mirror >> i) & 1,
-            (pot >> i) & 1,
-            *(control + i)
-        );
-    }
-}
-
-void gpio_debug(void) {
-    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCR ## BANK ## 0)
-    bank(A);
-    bank(B);
-    bank(C);
-    bank(D);
-    bank(E);
-    bank(F);
-    bank(G);
-    bank(H);
-    bank(I);
-    bank(J);
-    #define GPOTM 0
-    bank(M);
-    #undef GPOTM
-    #undef bank
-}
-#endif

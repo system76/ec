@@ -29,6 +29,7 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         make \
         pkgconf \
         sdcc \
+        shellcheck \
         xxd
 elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
     sudo dnf install \
@@ -41,6 +42,7 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         gcc \
         make \
         sdcc \
+        ShellCheck \
         systemd-devel \
         vim-common
 elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
@@ -55,6 +57,7 @@ elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         make \
         pkgconf \
         sdcc \
+        shellcheck \
         systemd-libs \
         vim
 else
@@ -65,6 +68,9 @@ fi
 
 msg "Initializing submodules"
 git submodule update --init --recursive
+
+msg "Installing git hooks"
+make git-config
 
 RUSTUP_NEW_INSTALL=0
 if which rustup &> /dev/null; then

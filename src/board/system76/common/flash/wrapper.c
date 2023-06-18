@@ -12,10 +12,10 @@
 
 // Include flash ROM
 uint8_t __code __at(FLASH_OFFSET) flash_rom[] = {
-    #include <flash.h>
+#include <flash.h>
 };
 
-static void flash_api(uint32_t addr, uint8_t * data, uint32_t length, uint8_t command) {
+static void flash_api(uint32_t addr, uint8_t *data, uint32_t length, uint8_t command) {
     // Use DMA mapping to copy flash ROM to scratch ROM
     SCARH = 0x80;
     SCARL = (uint8_t)(FLASH_OFFSET);
@@ -29,7 +29,7 @@ static void flash_api(uint32_t addr, uint8_t * data, uint32_t length, uint8_t co
     SCARH = 0x07;
 }
 
-void flash_read(uint32_t addr, __xdata uint8_t * data, uint32_t length) {
+void flash_read(uint32_t addr, __xdata uint8_t *data, uint32_t length) {
     flash_api(addr, data, length, FLASH_COMMAND_READ);
 }
 

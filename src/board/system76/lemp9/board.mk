@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-EC=it5570e
+board-y += board.c
+board-y += gpio.c
+
+EC=ite
+CONFIG_EC_ITE_IT5570E=y
 
 # Include keyboard
 KEYBOARD=14in_83
@@ -16,11 +20,17 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
-#TODO: Find out why input current must by divided by two
 CFLAGS+=\
-	-DCHARGER_CHARGE_CURRENT=1536 \
+	-DCHARGER_ADAPTER_RSENSE=5 \
+	-DCHARGER_BATTERY_RSENSE=5 \
+	-DCHARGER_CHARGE_CURRENT=3072 \
 	-DCHARGER_CHARGE_VOLTAGE=8800 \
-	-DCHARGER_INPUT_CURRENT=1600
+	-DCHARGER_INPUT_CURRENT=3420
+
+# Set CPU power limits in watts
+CFLAGS+=\
+	-DPOWER_LIMIT_AC=65 \
+	-DPOWER_LIMIT_DC=45
 
 # Add system76 common code
 include src/board/system76/common/common.mk

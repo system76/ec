@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <arch/time.h>
 #include <arch/delay.h>
 #include <board/acpi.h>
 #include <board/gpio.h>
@@ -24,7 +25,7 @@ enum PmcState {
 static uint8_t pmc_sci_queue = 0;
 
 static void pmc_sci_interrupt(void) {
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
     // Start SCI interrupt
     vw_set(&VW_SCI_N, VWS_LOW);
 
@@ -36,7 +37,7 @@ static void pmc_sci_interrupt(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#else // EC_ESPI
+#else // CONFIG_BUS_ESPI
     // Start SCI interrupt
     gpio_set(&SCI_N, false);
     *(SCI_N.control) = GPIO_OUT;
@@ -50,10 +51,10 @@ static void pmc_sci_interrupt(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#endif // EC_ESPI
+#endif // CONFIG_BUS_ESPI
 }
 
-bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
+bool pmc_sci(struct Pmc *pmc, uint8_t sci) {
     // Set SCI pending bit
     pmc_set_status(pmc, pmc_status(pmc) | BIT(5));
 
@@ -70,7 +71,7 @@ bool pmc_sci(struct Pmc * pmc, uint8_t sci) {
 }
 
 void pmc_swi(void) {
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
     // Start PME interrupt
     vw_set(&VW_PME_N, VWS_LOW);
 
@@ -82,7 +83,7 @@ void pmc_swi(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#else // EC_ESPI
+#else // CONFIG_BUS_ESPI
     // Start SWI interrupt
     gpio_set(&SWI_N, false);
 
@@ -94,13 +95,13 @@ void pmc_swi(void) {
 
     // Delay T_HOLD (value assumed)
     delay_us(65);
-#endif // EC_ESPI
+#endif // CONFIG_BUS_ESPI
 }
 
 static enum PmcState state = PMC_STATE_DEFAULT;
 static uint8_t state_data = 0;
 
-static void pmc_on_input_command(struct Pmc * pmc, uint8_t data) {
+static void pmc_on_input_command(struct Pmc *pmc, uint8_t data) {
     TRACE("pmc cmd: %02X\n", data);
     state = PMC_STATE_DEFAULT;
     switch (data) {
@@ -168,19 +169,19 @@ static void pmc_on_input_data(uint8_t data) {
     }
 }
 
-static void pmc_on_output_empty(struct Pmc * pmc) {
+static void pmc_on_output_empty(struct Pmc *pmc) {
     switch (state) {
-        case PMC_STATE_WRITE:
-            TRACE("pmc write: %02X\n", state_data);
-            state = PMC_STATE_DEFAULT;
-            pmc_write(pmc, state_data);
-            // Send SCI for OBF=1
-            pmc_sci_interrupt();
-            break;
+    case PMC_STATE_WRITE:
+        TRACE("pmc write: %02X\n", state_data);
+        state = PMC_STATE_DEFAULT;
+        pmc_write(pmc, state_data);
+        // Send SCI for OBF=1
+        pmc_sci_interrupt();
+        break;
     }
 }
 
-void pmc_event(struct Pmc * pmc) {
+void pmc_event(struct Pmc *pmc) {
     uint8_t sts;
 
     // Read command/data if available

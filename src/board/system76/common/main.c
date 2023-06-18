@@ -25,13 +25,14 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
+#include <board/usbpd.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/ec.h>
 
 #ifdef PARALLEL_DEBUG
-    #include <board/parallel.h>
+#include <board/parallel.h>
 #endif // PARALLEL_DEBUG
 
 void external_0(void) __interrupt(0) {}
@@ -77,6 +78,7 @@ void init(void) {
     pwm_init();
     smbus_init();
     smfi_init();
+    usbpd_init();
 
     //TODO: INTC
 
@@ -90,7 +92,7 @@ void main(void) {
 
     INFO("\n");
 
-#if GPIO_DEBUG
+#ifdef GPIO_DEBUG
     gpio_debug();
 #endif
 
@@ -99,25 +101,28 @@ void main(void) {
     uint32_t last_time_battery = 0;
     uint32_t last_time_fan = 0;
 
-    for(main_cycle = 0; ; main_cycle++) {
+    for (main_cycle = 0;; main_cycle++) {
         switch (main_cycle % 3U) {
-            case 0:
-                // Handle power states
-                power_event();
-                break;
-            case 1:
+        case 0:
+            // Handle USB-C events immediately before power states
+            usbpd_event();
+
+            // Handle power states
+            power_event();
+            break;
+        case 1:
 #if PARALLEL_DEBUG
-                if (!parallel_debug)
+            if (!parallel_debug)
 #endif // PARALLEL_DEBUG
-                {
-                    // Scans keyboard and sends keyboard packets
-                    kbscan_event();
-                }
-                break;
-            case 2:
-                // Handle lid close/open
-                lid_event();
-                break;
+            {
+                // Scans keyboard and sends keyboard packets
+                kbscan_event();
+            }
+            break;
+        case 2:
+            // Handle lid close/open
+            lid_event();
+            break;
         }
 
         if (main_cycle == 0) {

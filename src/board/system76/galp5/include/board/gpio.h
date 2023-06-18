@@ -6,14 +6,13 @@
 #include <ec/gpio.h>
 
 void gpio_init(void);
-void gpio_debug(void);
 
 // clang-format off
 extern struct Gpio __code ACIN_N;
 extern struct Gpio __code AC_PRESENT;
 extern struct Gpio __code ALL_SYS_PWRGD;
 extern struct Gpio __code BKL_EN;
-extern struct Gpio __code BT_EN;
+#define HAVE_BT_EN 0
 extern struct Gpio __code BUF_PLT_RST_N;
 extern struct Gpio __code CCD_EN;
 extern struct Gpio __code CPU_C10_GATE_N;
@@ -29,6 +28,7 @@ extern struct Gpio __code LED_BAT_CHG;
 extern struct Gpio __code LED_BAT_FULL;
 extern struct Gpio __code LED_PWR;
 extern struct Gpio __code LID_SW_N;
+extern struct Gpio __code ME_WE;
 extern struct Gpio __code PCH_DPWROK_EC;
 extern struct Gpio __code PCH_PWROK_EC;
 extern struct Gpio __code PM_CLKRUN_N;

@@ -11,7 +11,7 @@
 
 // Include scratch ROM
 uint8_t __code __at(SCRATCH_OFFSET) scratch_rom[] = {
-    #include <scratch.h>
+#include <scratch.h>
 };
 
 // Enter or exit scratch ROM

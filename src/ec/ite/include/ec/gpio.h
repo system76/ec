@@ -8,16 +8,18 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+// clang-format off
 #define GPIO_ALT    (0b00U << 6)
 #define GPIO_IN     (0b10U << 6)
 #define GPIO_OUT    (0b01U << 6)
 #define GPIO_UP     BIT(2)
 #define GPIO_DOWN   BIT(1)
+// clang-format on
 
 struct Gpio {
-    volatile uint8_t __xdata * data;
-    volatile uint8_t __xdata * mirror;
-    volatile uint8_t __xdata * control;
+    volatile uint8_t __xdata *data;
+    volatile uint8_t __xdata *mirror;
+    volatile uint8_t __xdata *control;
     uint8_t value;
 };
 
@@ -30,8 +32,12 @@ struct Gpio {
 }
 // clang-format on
 
-bool gpio_get(struct Gpio * gpio);
-void gpio_set(struct Gpio * gpio, bool value);
+bool gpio_get(struct Gpio *gpio);
+void gpio_set(struct Gpio *gpio, bool value);
+
+#ifdef GPIO_DEBUG
+void gpio_debug(void);
+#endif
 
 volatile uint8_t __xdata __at(0x1600) GCR;
 volatile uint8_t __xdata __at(0x16F0) GCR1;
@@ -52,10 +58,12 @@ volatile uint8_t __xdata __at(0x16FE) GCR15;
 volatile uint8_t __xdata __at(0x16E0) GCR16;
 volatile uint8_t __xdata __at(0x16E1) GCR17;
 volatile uint8_t __xdata __at(0x16E2) GCR18;
-#ifdef it5570e
+#if CONFIG_EC_ITE_IT5570E
 volatile uint8_t __xdata __at(0x16E4) GCR19;
 volatile uint8_t __xdata __at(0x16E5) GCR20;
 volatile uint8_t __xdata __at(0x16E6) GCR21;
+volatile uint8_t __xdata __at(0x16E7) GCR22;
+volatile uint8_t __xdata __at(0x16E8) GCR23;
 #endif
 
 volatile uint8_t __xdata __at(0x1601) GPDRA;

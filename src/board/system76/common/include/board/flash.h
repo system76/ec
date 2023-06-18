@@ -12,9 +12,11 @@
 /** \cond INTERNAL
  * Internal defines
  */
+// clang-format off
 #define FLASH_COMMAND_READ      (0x0)
 #define FLASH_COMMAND_WRITE     (0x1)
 #define FLASH_COMMAND_ERASE_1K  (0x2)
+// clang-format on
 /** \endcond */
 
 /**
@@ -24,7 +26,7 @@
  * \param[out] data   The memory area to copy to.
  * \param[in]  length The number of bytes to copy.
  */
-void flash_read(uint32_t addr, __xdata uint8_t * data, uint32_t length);
+void flash_read(uint32_t addr, __xdata uint8_t *data, uint32_t length);
 
 /**
  * Read a single byte from flash.
@@ -60,7 +62,7 @@ uint32_t flash_read_u32(uint32_t addr);
  * \param[in] data   The memory area to copy from.
  * \param[in] length The number of bytes to copy.
  */
-void flash_write(uint32_t addr, __xdata uint8_t * data, uint32_t length);
+void flash_write(uint32_t addr, __xdata uint8_t *data, uint32_t length);
 
 /**
  * Write a single byte to flash.

@@ -1,6 +1,10 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-EC=it8587e
+board-y += board.c
+board-y += gpio.c
+
+EC=ite
+CONFIG_EC_ITE_IT8587E=y
 
 # Include keyboard
 KEYBOARD=15in_102
@@ -20,14 +24,16 @@ CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
 CFLAGS+=\
-	-DCHARGER_CHARGE_CURRENT=1536 \
+	-DCHARGER_ADAPTER_RSENSE=10 \
+	-DCHARGER_BATTERY_RSENSE=10 \
+	-DCHARGER_CHARGE_CURRENT=2048 \
 	-DCHARGER_CHARGE_VOLTAGE=17120 \
 	-DCHARGER_INPUT_CURRENT=9230
 
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=180 \
-	-DPOWER_LIMIT_DC=28
+	-DPOWER_LIMIT_DC=45
 
 # Custom fan curve
 CFLAGS+=-DBOARD_FAN_POINTS="\

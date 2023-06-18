@@ -5,15 +5,15 @@
 #include <board/smfi.h>
 
 #ifdef SERIAL_DEBUGGER
-    #include <mcs51/8051.h>
+#include <mcs51/8051.h>
 #endif
 
 #ifdef I2C_DEBUGGER
-    #include <ec/i2c.h>
+#include <ec/i2c.h>
 #endif
 
 #ifdef PARALLEL_DEBUG
-    #include <board/parallel.h>
+#include <board/parallel.h>
 #endif // PARALLEL_DEBUG
 
 int putchar(int c) {

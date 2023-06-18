@@ -14,67 +14,76 @@
 #include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
+#include <board/wireless.h>
+#include <board/usbpd.h>
 #include <common/debug.h>
 
+#if CONFIG_BUS_ESPI
 #include <ec/espi.h>
-#if EC_ESPI
-    #include <board/espi.h>
+#include <board/espi.h>
 #endif
 
-#define GPIO_SET_DEBUG(G, V) { \
-    DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
-    gpio_set(&G, V); \
-}
+#if CONFIG_SECURITY
+#include <board/security.h>
+#endif // CONFIG_SECURITY
+
+#define GPIO_SET_DEBUG(G, V) \
+    { \
+        DEBUG("%s = %s\n", #G, V ? "true" : "false"); \
+        gpio_set(&G, V); \
+    }
 
 #ifndef HAVE_EC_EN
-    #define HAVE_EC_EN 1
+#define HAVE_EC_EN 1
 #endif
 
 #ifndef HAVE_LAN_WAKEUP_N
-    #define HAVE_LAN_WAKEUP_N 1
+#define HAVE_LAN_WAKEUP_N 1
 #endif
 
 #ifndef HAVE_LED_BAT_CHG
-    #define HAVE_LED_BAT_CHG 1
+#define HAVE_LED_BAT_CHG 1
 #endif
 
 #ifndef HAVE_LED_BAT_FULL
-    #define HAVE_LED_BAT_FULL 1
+#define HAVE_LED_BAT_FULL 1
 #endif
 
 #ifndef HAVE_PCH_DPWROK_EC
-    #define HAVE_PCH_DPWROK_EC 1
+#define HAVE_PCH_DPWROK_EC 1
 #endif
 
 #ifndef HAVE_PCH_PWROK_EC
-    #define HAVE_PCH_PWROK_EC 1
+#define HAVE_PCH_PWROK_EC 1
 #endif
 
 #ifndef HAVE_PM_PWROK
-    #define HAVE_PM_PWROK 1
+#define HAVE_PM_PWROK 1
 #endif
 
 #ifndef HAVE_SLP_SUS_N
-    #define HAVE_SLP_SUS_N 1
+#define HAVE_SLP_SUS_N 1
 #endif
 
-#ifndef HAVE_XLP_OUT
-    #define HAVE_XLP_OUT 1
-#endif
 #ifndef HAVE_SUSWARN_N
-    #define HAVE_SUSWARN_N 1
+#define HAVE_SUSWARN_N 1
 #endif
 
 #ifndef HAVE_SUS_PWR_ACK
-    #define HAVE_SUS_PWR_ACK 1
+#define HAVE_SUS_PWR_ACK 1
 #endif
 
 #ifndef HAVE_VA_EC_EN
-    #define HAVE_VA_EC_EN 1
+#define HAVE_VA_EC_EN 1
+#endif
+
+// Only galp6 has this, so disable by default.
+#ifndef HAVE_PD_EN
+#define HAVE_PD_EN 0
 #endif
 
 #ifndef HAVE_XLP_OUT
-    #define HAVE_XLP_OUT 1
+#define HAVE_XLP_OUT 1
 #endif
 
 extern uint8_t main_cycle;
@@ -115,24 +124,39 @@ extern uint8_t main_cycle;
 enum PowerState power_state = POWER_STATE_OFF;
 
 enum PowerState calculate_power_state(void) {
-    //TODO: Deep Sx states using SLP_SUS#
-
-    if (gpio_get(&SUSB_N_PCH)) {
-        // S3, S4, and S5 planes powered
-        return POWER_STATE_S0;
+    if (!gpio_get(&EC_RSMRST_N)) {
+        // S5 plane not powered
+        return POWER_STATE_OFF;
     }
 
-    if (gpio_get(&SUSC_N_PCH)) {
-        // S4 and S5 planes powered
-        return POWER_STATE_S3;
-    }
+#if CONFIG_BUS_ESPI
+    // Use eSPI virtual wires if available
 
-    if (gpio_get(&EC_RSMRST_N)) {
-        // S5 plane powered
+    if (vw_get(&VW_SLP_S4_N) != VWS_HIGH) {
+        // S4 plane not powered
         return POWER_STATE_S5;
     }
 
-    return POWER_STATE_OFF;
+    if (vw_get(&VW_SLP_S3_N) != VWS_HIGH) {
+        // S3 plane not powered
+        return POWER_STATE_S3;
+    }
+#else // CONFIG_BUS_ESPI
+    // Use dedicated GPIOs if not using ESPI
+
+    if (!gpio_get(&SUSC_N_PCH)) {
+        // S4 plane not powered
+        return POWER_STATE_S5;
+    }
+
+    if (!gpio_get(&SUSB_N_PCH)) {
+        // S3 plane not powered
+        return POWER_STATE_S3;
+    }
+#endif // CONFIG_BUS_ESPI
+
+    // All planes are powered
+    return POWER_STATE_S0;
 }
 
 void update_power_state(void) {
@@ -140,22 +164,22 @@ void update_power_state(void) {
     if (power_state != new_power_state) {
         power_state = new_power_state;
 
-    #if LEVEL >= LEVEL_DEBUG
+#if LEVEL >= LEVEL_DEBUG
         switch (power_state) {
-            case POWER_STATE_OFF:
-                DEBUG("POWER_STATE_OFF\n");
-                break;
-            case POWER_STATE_S5:
-                DEBUG("POWER_STATE_S5\n");
-                break;
-            case POWER_STATE_S3:
-                DEBUG("POWER_STATE_S3\n");
-                break;
-            case POWER_STATE_S0:
-                DEBUG("POWER_STATE_S0\n");
-                break;
+        case POWER_STATE_OFF:
+            DEBUG("POWER_STATE_OFF\n");
+            break;
+        case POWER_STATE_S5:
+            DEBUG("POWER_STATE_S5\n");
+            break;
+        case POWER_STATE_S3:
+            DEBUG("POWER_STATE_S3\n");
+            break;
+        case POWER_STATE_S0:
+            DEBUG("POWER_STATE_S0\n");
+            break;
         }
-    #endif
+#endif
     }
 }
 
@@ -172,6 +196,9 @@ void power_init(void) {
 }
 
 void power_on(void) {
+    // Configure WLAN GPIOs before powering on
+    wireless_power(true);
+
     DEBUG("%02X: power_on\n", main_cycle);
 
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
@@ -184,6 +211,9 @@ void power_on(void) {
     // avoid leakage
     GPIO_SET_DEBUG(VA_EC_EN, true);
 #endif // HAVE_VA_EC_EN
+#if HAVE_PD_EN
+    GPIO_SET_DEBUG(PD_EN, true);
+#endif
     tPCH06;
 
     // Enable VDD5
@@ -214,6 +244,9 @@ void power_on(void) {
     // Wait for SUSPWRDNACK validity
     tPLT01;
 
+    // Ensure USB-PD is disabled before turning on CPU
+    usbpd_disable_charging();
+
     GPIO_SET_DEBUG(PWR_BTN_N, false);
     delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
     GPIO_SET_DEBUG(PWR_BTN_N, true);
@@ -227,10 +260,10 @@ void power_on(void) {
             break;
         }
 
+#if CONFIG_BUS_ESPI
         // Check for VW changes
-        #if EC_ESPI
-            espi_event();
-        #endif // EC_ESPI
+        espi_event();
+#endif // CONFIG_BUS_ESPI
 
         // Extra wait until SUSPWRDNACK is valid
         delay_ms(1);
@@ -267,6 +300,9 @@ void power_off(void) {
     GPIO_SET_DEBUG(DD_ON, false);
     tPCH12;
 
+#if HAVE_PD_EN
+    GPIO_SET_DEBUG(PD_EN, false);
+#endif
 #if HAVE_VA_EC_EN
     // Disable VCCPRIM_* planes
     GPIO_SET_DEBUG(VA_EC_EN, false);
@@ -278,48 +314,24 @@ void power_off(void) {
 #endif // HAVE_PCH_DPWROK_EC
     tPCH14;
 
+    // Configure WLAN GPIOs after powering off
+    wireless_power(false);
+
     update_power_state();
 }
 
-#ifdef HAVE_DGPU
+// Set the CPU power limit appropriately
 static bool power_peci_limit(bool ac) {
-    uint8_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
-    // Set PL4 using PECI
-    int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
-    DEBUG("power_peci_limit %d = %d\n", watts, res);
-    if (res == 0x40) {
-        return true;
-    } else if (res < 0) {
-        ERROR("power_peci_limit failed: 0x%02X\n", -res);
-        return false;
+    if (peci_available()) {
+        uint16_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
+        // Set PL4 using PECI
+        int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
+        DEBUG("power_peci_limit %d = %d\n", watts, res);
+        return res == 0x40;
     } else {
-        ERROR("power_peci_limit unknown response: 0x%02X\n", res);
         return false;
     }
 }
-
-// Set the power draw limit depending on if on AC or DC power
-void power_set_limit(void) {
-    static bool last_power_limit_ac = true;
-    // We don't use power_state because the latency needs to be low
-#if EC_ESPI
-    if (gpio_get(&CPU_C10_GATE_N)) {
-#else
-    if (gpio_get(&BUF_PLT_RST_N)) {
-#endif
-        bool ac = !gpio_get(&ACIN_N);
-        if (last_power_limit_ac != ac) {
-            if (power_peci_limit(ac)) {
-                last_power_limit_ac = ac;
-            }
-        }
-    } else {
-        last_power_limit_ac = true;
-    }
-}
-#else
-void power_set_limit(void) {}
-#endif // HAVE_DGPU
 
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {
@@ -331,6 +343,14 @@ void power_cpu_reset(void) {
     fan_reset();
     //TODO: reset KBC and touchpad states
     kbled_reset();
+    // Set PL4
+    //TODO: if this returns false, retry?
+    power_peci_limit(
+        // AC is connected
+        (!gpio_get(&ACIN_N)) &&
+        // There is available current
+        (battery_charger_input_current >= CHARGER_INPUT_CURRENT)
+    );
 }
 
 static bool power_button_disabled(void) {
@@ -344,8 +364,11 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
     if (ac_new != ac_last) {
-        power_set_limit();
+        // Set CPU power limit to DC limit until we determine available current
+        //TODO: if this returns false, retry?
+        power_peci_limit(false);
 
+        // Configure smart charger
         DEBUG("Power adapter ");
         if (ac_new) {
             DEBUG("unplugged\n");
@@ -353,6 +376,12 @@ void power_event(void) {
         } else {
             DEBUG("plugged in\n");
             battery_charger_configure();
+
+            // Set CPU power limit to AC limit, if there is available current
+            //TODO: if this returns false, retry?
+            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
+                power_peci_limit(true);
+            }
         }
         battery_debug();
 
@@ -412,11 +441,11 @@ void power_event(void) {
             }
         }
     }
-    #if LEVEL >= LEVEL_DEBUG
-        else if (ps_new && !ps_last) {
-            DEBUG("%02X: Power switch release\n", main_cycle);
-        }
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    else if (ps_new && !ps_last) {
+        DEBUG("%02X: Power switch release\n", main_cycle);
+    }
+#endif
     ps_last = ps_new;
 
     // Send power signal to PCH
@@ -445,7 +474,7 @@ void power_event(void) {
         // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
         GPIO_SET_DEBUG(PCH_PWROK_EC, true);
 #endif // HAVE_PCH_PWROK_EC
-    } else if(!pg_new && pg_last) {
+    } else if (!pg_new && pg_last) {
         DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
 
 #if HAVE_PCH_PWROK_EC
@@ -460,50 +489,53 @@ void power_event(void) {
     }
     pg_last = pg_new;
 
+    // clang-format off
     static bool rst_last = false;
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
-    #if LEVEL >= LEVEL_DEBUG
-        if (!rst_new && rst_last) {
-            DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
-        } else
-    #endif
-    if(rst_new && !rst_last) {
+#if LEVEL >= LEVEL_DEBUG
+    if (!rst_new && rst_last) {
+        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
+    } else
+#endif
+    if (rst_new && !rst_last) {
         DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
         espi_reset();
-#else // EC_ESPI
+#else // CONFIG_BUS_ESPI
         power_cpu_reset();
-#endif // EC_ESPI
+#endif // CONFIG_BUS_ESPI
     }
     rst_last = rst_new;
+    // clang-format on
 
 #if HAVE_SLP_SUS_N
-    #if LEVEL >= LEVEL_DEBUG
-        static bool sus_last = true;
-        bool sus_new = gpio_get(&SLP_SUS_N);
-        if (!sus_new && sus_last) {
-            DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
-        } else if (sus_new && !sus_last) {
-            DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
-        }
-        sus_last = sus_new;
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    static bool sus_last = true;
+    bool sus_new = gpio_get(&SLP_SUS_N);
+    if (!sus_new && sus_last) {
+        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
+    } else if (sus_new && !sus_last) {
+        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
+    }
+    sus_last = sus_new;
+#endif
 #endif // HAVE_SLP_SUS_N
 
-#if EC_ESPI
+#if CONFIG_BUS_ESPI
+    // ESPI systems must keep S5 planes powered unless VW_SUS_PWRDN_ACK is high
     if (vw_get(&VW_SUS_PWRDN_ACK) == VWS_HIGH)
 #elif HAVE_SUSWARN_N
     // EC must keep VccPRIM powered if SUSPWRDNACK is de-asserted low or system
     // state is S3
     static bool ack_last = false;
     bool ack_new = gpio_get(&SUSWARN_N);
-    #if LEVEL >= LEVEL_DEBUG
-        if (ack_new && !ack_last) {
-            DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
-        } else if (!ack_new && ack_last) {
-            DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
-        }
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    if (ack_new && !ack_last) {
+        DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
+    } else if (!ack_new && ack_last) {
+        DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
+    }
+#endif
     ack_last = ack_new;
 
     if (ack_new)
@@ -512,6 +544,13 @@ void power_event(void) {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
             power_off();
+
+#if CONFIG_SECURITY
+            // Handle security state changes if necessary
+            if (security_power()) {
+                power_on();
+            }
+#endif // CONFIG_SECURITY
         }
     }
 
@@ -525,19 +564,20 @@ void power_event(void) {
             power_on();
         }
     }
-    #if LEVEL >= LEVEL_DEBUG
-        else if (wake_new && !wake_last) {
-            DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
-        }
-    #endif
+#if LEVEL >= LEVEL_DEBUG
+    else if (wake_new && !wake_last) {
+        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
+    }
+#endif
     wake_last = wake_new;
 #endif // HAVE_LAN_WAKEUP_N
 
     static uint32_t last_time = 0;
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
-#if EC_ESPI
-        if (!gpio_get(&CPU_C10_GATE_N)) {
+#if CONFIG_BUS_ESPI
+        // HOST_C10 virtual wire is high when CPU is in C10 sleep state
+        if (vw_get(&VW_HOST_C10) == VWS_HIGH) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));

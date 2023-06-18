@@ -17,18 +17,18 @@ struct Pmc __code PMC_3 = PMC(3);
 struct Pmc __code PMC_4 = PMC(4);
 struct Pmc __code PMC_5 = PMC(5);
 
-uint8_t pmc_status(struct Pmc * pmc) {
+uint8_t pmc_status(struct Pmc *pmc) {
     return *(pmc->status);
 }
 
-void pmc_set_status(struct Pmc * pmc, uint8_t status) {
+void pmc_set_status(struct Pmc *pmc, uint8_t status) {
     *(pmc->status) = status;
 }
 
-uint8_t pmc_read(struct Pmc * pmc) {
+uint8_t pmc_read(struct Pmc *pmc) {
     return *(pmc->data_in);
 }
 
-void pmc_write(struct Pmc * pmc, uint8_t data) {
+void pmc_write(struct Pmc *pmc, uint8_t data) {
     *(pmc->data_out) = data;
 }

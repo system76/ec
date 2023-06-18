@@ -6,9 +6,11 @@
 
 struct battery_info battery_info = { 0 };
 
+uint16_t battery_charger_input_current = CHARGER_INPUT_CURRENT;
+
 // Default values to disable battery charging thresholds
-#define BATTERY_START_DEFAULT   0
-#define BATTERY_END_DEFAULT     100
+#define BATTERY_START_DEFAULT 0
+#define BATTERY_END_DEFAULT 100
 
 // Represents a battery percentage level, below which charging will begin.
 // Valid values are [0, 100]
@@ -57,16 +59,13 @@ int16_t battery_charger_configure(void) {
     if (battery_get_end_threshold() == BATTERY_END_DEFAULT) {
         // Stop threshold not configured: Always charge on AC.
         should_charge = true;
-    }
-    else if (battery_info.charge >= battery_get_end_threshold()) {
+    } else if (battery_info.charge > battery_get_end_threshold()) {
         // Stop threshold configured: Stop charging at threshold.
         should_charge = false;
-    }
-    else if (battery_get_start_threshold() == BATTERY_START_DEFAULT) {
+    } else if (battery_get_start_threshold() == BATTERY_START_DEFAULT) {
         // Start threshold not configured: Always charge up to stop threshold.
         should_charge = true;
-    }
-    else if (battery_info.charge <= battery_get_start_threshold()) {
+    } else if (battery_info.charge < battery_get_start_threshold()) {
         // Start threshold configured: Start charging at threshold.
         should_charge = true;
     }
@@ -79,7 +78,8 @@ int16_t battery_charger_configure(void) {
 void battery_event(void) {
     int16_t res = 0;
 
-    #define command(N, V) { \
+#define command(N, V) \
+    { \
         res = smbus_read(BATTERY_ADDRESS, V, &N); \
         if (res < 0) { \
             N = 0; \
@@ -97,7 +97,7 @@ void battery_event(void) {
     command(battery_info.design_capacity, 0x18);
     command(battery_info.design_voltage, 0x19);
 
-    #undef command
+#undef command
 
     TRACE("BAT %d mV %d mA\n", battery_info.voltage, battery_info.current);
 

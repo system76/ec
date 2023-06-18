@@ -3,7 +3,6 @@
 #include <board/board.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
-#include <board/power.h>
 #include <common/debug.h>
 
 extern uint8_t main_cycle;
@@ -15,10 +14,6 @@ void board_init(void) {
     gpio_set(&BKL_EN, true);
     // Enable camera
     gpio_set(&CCD_EN, true);
-    // Enable wireless
-    gpio_set(&BT_EN, true);
-    gpio_set(&WLAN_EN, true);
-    gpio_set(&WLAN_PWR_EN, true);
     // Enable right USB port
     gpio_set(&USB_PWR_EN_N, false);
     // Assert SMI#, SCI#, and SWI#
@@ -28,8 +23,6 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    power_set_limit();
-
     if (main_cycle == 0) {
         // Set keyboard LEDs
         static uint8_t last_kbc_leds = 0;

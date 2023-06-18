@@ -3,7 +3,6 @@
 #include <board/board.h>
 #include <board/gctrl.h>
 #include <board/gpio.h>
-#include <board/power.h>
 #include <common/debug.h>
 #include <ec/ec.h>
 
@@ -14,9 +13,6 @@ void board_init(void) {
     gpio_set(&BKL_EN, true);
     // Enable camera
     gpio_set(&CCD_EN, true);
-    // Enable wireless
-    gpio_set(&WLAN_EN, true);
-    gpio_set(&WLAN_PWR_EN, true);
     // Enable USB port power?
     gpio_set(&USB_PWR_EN_N, false);
     // Assert SMI#, SCI#, and SWI#
@@ -26,7 +22,5 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    power_set_limit();
-
     ec_read_post_codes();
 }

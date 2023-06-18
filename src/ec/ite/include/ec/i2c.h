@@ -7,10 +7,10 @@
 
 extern struct I2C __code I2C_0;
 extern struct I2C __code I2C_1;
-#ifdef it5570e
+#if CONFIG_EC_ITE_IT5570E
 extern struct I2C __code I2C_4;
 #endif
 
-void i2c_reset(struct I2C * i2c, bool kill);
+void i2c_reset(struct I2C *i2c, bool kill);
 
 #endif // _EC_I2C_H

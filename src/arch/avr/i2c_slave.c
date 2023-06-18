@@ -11,11 +11,16 @@
 #include <arch/i2c_slave.h>
 #include <common/macro.h>
 
-static void (* volatile i2c_slave_new_cb)() = NULL;
-static void (* volatile i2c_slave_recv_cb)(uint8_t) = NULL;
-static uint8_t (* volatile i2c_slave_send_cb)() = NULL;
+static void (*volatile i2c_slave_new_cb)() = NULL;
+static void (*volatile i2c_slave_recv_cb)(uint8_t) = NULL;
+static uint8_t (*volatile i2c_slave_send_cb)() = NULL;
 
-void i2c_slave_init(uint8_t address, void (*new_cb)(), void (*recv_cb)(uint8_t), uint8_t (*send_cb)()){
+void i2c_slave_init(
+    uint8_t address,
+    void (*new_cb)(),
+    void (*recv_cb)(uint8_t),
+    uint8_t (*send_cb)()
+) {
     // ensure correct behavior by stopping before changing callbacks or address
     i2c_slave_stop();
 
@@ -35,7 +40,7 @@ void i2c_slave_init(uint8_t address, void (*new_cb)(), void (*recv_cb)(uint8_t),
     sei();
 }
 
-void i2c_slave_stop(){
+void i2c_slave_stop() {
     // clear interrupts
     cli();
 
@@ -54,7 +59,7 @@ void i2c_slave_stop(){
 
 ISR(TWI_vect) {
     uint8_t status = TW_STATUS;
-    switch(status) {
+    switch (status) {
     case TW_SR_SLA_ACK:
         // master has started a new transaction, call the new callback
         if (i2c_slave_new_cb != NULL) {
@@ -64,7 +69,7 @@ ISR(TWI_vect) {
         break;
     case TW_SR_DATA_ACK:
         // received data from master, call the receive callback
-        if(i2c_slave_send_cb != NULL){
+        if (i2c_slave_send_cb != NULL) {
             i2c_slave_recv_cb(TWDR);
         }
         TWCR = BIT(TWIE) | BIT(TWINT) | BIT(TWEA) | BIT(TWEN);
@@ -72,7 +77,7 @@ ISR(TWI_vect) {
     case TW_ST_SLA_ACK:
     case TW_ST_DATA_ACK:
         // master is requesting data, call the send callback
-        if(i2c_slave_recv_cb != NULL) {
+        if (i2c_slave_recv_cb != NULL) {
             TWDR = i2c_slave_send_cb();
         }
         TWCR = BIT(TWIE) | BIT(TWINT) | BIT(TWEA) | BIT(TWEN);

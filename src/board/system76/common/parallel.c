@@ -19,12 +19,14 @@
  * nWAIT    = KSOH[1]
  */
 
+// clang-format off
 #define CTL_WRITE   BIT(0)
 #define CTL_DATA    BIT(1)
 #define CTL_RESET   BIT(2)
 #define CTL_ADDR    BIT(3)
 
 #define STS_WAIT    BIT(1)
+// clang-format on
 
 // Maximum peripheral response time in ms
 #define PARALLEL_TIMEOUT 10
@@ -82,7 +84,7 @@ bool parallel_init(void) {
     return parallel_wait_peripheral(STS_WAIT, 0);
 }
 
-int16_t parallel_write(uint8_t * data, uint16_t length) {
+int16_t parallel_write(uint8_t *data, uint16_t length) {
     // Assert nWRITE
     KSIGDAT &= ~CTL_WRITE;
 

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/gpio.h>
-#include <common/debug.h>
+#include <common/macro.h>
 
+// clang-format off
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
@@ -21,15 +22,21 @@ struct Gpio __code LED_BAT_CHG =    GPIO(H, 5);
 struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
+struct Gpio __code ME_WE =          GPIO(E, 6);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(H, 4);
 struct Gpio __code PCH_PWROK_EC =   GPIO(F, 3);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
+struct Gpio __code RGBKB_DET_N =    GPIO(E, 2);
+struct Gpio __code SLP_S0_N =       GPIO(C, 6); // XXX: Really CPU_C10_GATE#
 struct Gpio __code SLP_SUS_N =      GPIO(J, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code VA_EC_EN =       GPIO(H, 7);
+struct Gpio __code WLAN_EN =        GPIO(G, 1);
+struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
+// clang-format on
 
 void gpio_init() {
     // Enable LPC reset on GPD2
@@ -49,20 +56,16 @@ void gpio_init() {
     GPDRB = BIT(4);
     GPDRC = 0;
     GPDRD = 0;
-    GPDRE = 0;
-    GPDRF = 0;
+    // USB_PWR_EN
+    GPDRE = BIT(3);
+    // CC_EN
+    GPDRF = BIT(7);
     // H_PROCHOT#_EC
     GPDRG = BIT(6);
     GPDRH = 0;
     GPDRI = 0;
-    GPDRJ = 0;
-    GPOTA = 0;
-    GPOTB = 0;
-    GPOTD = 0;
-    GPOTE = 0;
-    GPOTF = 0;
-    GPOTH = 0;
-    GPOTJ = 0;
+    // KBC_MUTE#
+    GPDRJ = BIT(1);
 
     // Set GPIO control
     // EC_PWM_PIN_24
@@ -240,40 +243,3 @@ void gpio_init() {
     // ESPI_ALRT0#
     GPCRM6 = GPIO_IN | GPIO_UP;
 }
-
-#if GPIO_DEBUG
-void gpio_debug_bank(
-    char * bank,
-    uint8_t data,
-    uint8_t mirror,
-    uint8_t pot,
-    volatile uint8_t * control
-) {
-    for(char i = 0; i < 8; i++) {
-        DEBUG(
-            "%s%d:\n\tdata %d\n\tmirror %d\n\tpot %d\n\tcontrol %02X\n",
-            bank,
-            i,
-            (data >> i) & 1,
-            (mirror >> i) & 1,
-            (pot >> i) & 1,
-            *(control + i)
-        );
-    }
-}
-
-void gpio_debug(void) {
-    #define bank(BANK) gpio_debug_bank(#BANK, GPDR ## BANK, GPDMR ## BANK, GPOT ## BANK, &GPCR ## BANK ## 0)
-    bank(A);
-    bank(B);
-    bank(C);
-    bank(D);
-    bank(E);
-    bank(F);
-    bank(G);
-    bank(H);
-    bank(I);
-    bank(J);
-    #undef bank
-}
-#endif

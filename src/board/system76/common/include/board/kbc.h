@@ -11,6 +11,6 @@ extern uint8_t kbc_leds;
 
 void kbc_init(void);
 bool kbc_scancode(uint16_t key, bool pressed);
-void kbc_event(struct Kbc * kbc);
+void kbc_event(struct Kbc *kbc);
 
 #endif // _BOARD_KBC_H

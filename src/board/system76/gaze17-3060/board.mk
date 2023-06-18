@@ -1,9 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-EC=it5570e
+board-y += board.c
+board-y += gpio.c
+
+EC=ite
+CONFIG_EC_ITE_IT5570E=y
 
 # Enable eSPI
-CFLAGS+=-DEC_ESPI=1
+CONFIG_BUS_ESPI=y
 
 # Include keyboard
 KEYBOARD=15in_102
@@ -21,9 +25,12 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
-#TODO: actually bq24800
+# TODO: actually bq24800
+# FIXME: Verify parts and values.
 CHARGER=bq24780s
 CFLAGS+=\
+	-DCHARGER_ADAPTER_RSENSE=5 \
+	-DCHARGER_BATTERY_RSENSE=10 \
 	-DCHARGER_CHARGE_CURRENT=1536 \
 	-DCHARGER_CHARGE_VOLTAGE=17600 \
 	-DCHARGER_INPUT_CURRENT=7500
@@ -31,7 +38,7 @@ CFLAGS+=\
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=180 \
-	-DPOWER_LIMIT_DC=28
+	-DPOWER_LIMIT_DC=45
 
 # Custom fan curve
 CFLAGS+=-DBOARD_HEATUP=5
