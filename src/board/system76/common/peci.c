@@ -158,6 +158,8 @@ bool peci_get_temp(int16_t *data) {
             return false;
         }
     }
+    // Clear upstream done status
+    ESUCTRL0 = ESUCTRL0_DONE;
 
     // Wait for response
     //TODO: do this asynchronously to avoid delays?
@@ -178,10 +180,14 @@ bool peci_get_temp(int16_t *data) {
         uint8_t low = PUTOOBDB[5];
         uint8_t high = PUTOOBDB[6];
         *data = (((int16_t)high << 8) | (int16_t)low);
+        // Clear PUT_OOB status
+        ESOCTRL0 = ESOCTRL0_STATUS;
         return true;
     } else {
         // Did not receive enough data
         DEBUG("peci_get_temp: len %d < 7\n", len);
+        // Clear PUT_OOB status
+        ESOCTRL0 = ESOCTRL0_STATUS;
         return false;
     }
 }
@@ -246,6 +252,8 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
             return false;
         }
     }
+    // Clear upstream done status
+    ESUCTRL0 = ESUCTRL0_DONE;
 
     // Wait for response
     //TODO: do this asynchronously to avoid delays?
@@ -265,6 +273,10 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 
         // Received enough data for status code
         int16_t cc = (int16_t)PUTOOBDB[5];
+
+        // Clear PUT_OOB status
+        ESOCTRL0 = ESOCTRL0_STATUS;
+
         if (cc & 0x80) {
             return -cc;
         } else {
@@ -273,6 +285,8 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     } else {
         // Did not receive enough data
         DEBUG("peci_wr_pkg_config: len %d < 6\n", len);
+        // Clear PUT_OOB status
+        ESOCTRL0 = ESOCTRL0_STATUS;
         return -0x1000;
     }
 }
