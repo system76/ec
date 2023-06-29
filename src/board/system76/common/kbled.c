@@ -98,5 +98,5 @@ void kbled_hotkey_step(void) {
     } else {
         LEVEL_I = 0;
     }
-    kbled_set(LEVELS[LEVEL_I]);
+    kbled_set_brightness(LEVELS[LEVEL_I]);
 }

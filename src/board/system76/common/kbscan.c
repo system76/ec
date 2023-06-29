@@ -176,7 +176,7 @@ static void hardware_hotkey(uint16_t key) {
         fan_max = !fan_max;
         break;
     case K_KBD_BKL:
-        kbled_set_brightness(kbled_get() + 1);
+        kbled_hotkey_step();
         break;
     case K_KBD_COLOR:
         kbled_hotkey_color();
