@@ -17,7 +17,7 @@ all:
 	@exit 1
 else
 # Calculate version
-DATE=$(shell git show --format="%cd" --date="format:%Y-%m-%d" --no-patch --no-show-signature)
+DATE=$(shell git show --format="%cs" --no-patch --no-show-signature)
 REV=$(shell git describe --abbrev=7 --always --dirty)
 VERSION?=$(DATE)_$(REV)
 
