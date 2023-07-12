@@ -27,3 +27,6 @@ ARCH=8051
 
 # 64 KB is the max without banking
 CODE_SIZE=65536
+
+# Total flash size: 128 KiB
+CONFIG_EC_FLASH_SIZE = 131072
