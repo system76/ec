@@ -33,7 +33,7 @@ sim: $(BUILD)/ec.rom
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx
 	@echo "  OBJCOPY   $(subst $(obj)/,,$@)"
 	mkdir -p $(@D)
-	objcopy -I ihex -O binary --gap-fill=0xFF $< $@
+	objcopy -I ihex -O binary --gap-fill=0xFF --pad-to=$(CONFIG_EC_FLASH_SIZE) $< $@
 
 # Link object files into Intel Hex file
 $(BUILD)/ec.ihx: $(OBJ)
