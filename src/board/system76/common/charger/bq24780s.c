@@ -42,6 +42,10 @@
 // Battery depletion threshold
 #define SBC_BAT_DEPL_VTH    (0b11 << 14)
 
+// ChargeOption3 flags
+// Hybrid Power Boost Mode Enable
+#define SBC_EN_BOOST        BIT(2)
+
 // Bits 0-5 are ignored. Bits 13-15 must be 0.
 #define CHARGE_CURRENT_MASK 0x1FC0
 
@@ -126,6 +130,7 @@ int16_t battery_charger_disable(void) {
 
 int16_t battery_charger_enable(void) {
     int16_t res = 0;
+    uint16_t chargeoption3;
 
     if (charger_enabled)
         return 0;
@@ -166,6 +171,16 @@ int16_t battery_charger_enable(void) {
         REG_CHARGE_OPTION_1,
         SBC_CMP_DEG_1US | SBC_PMON_RATIO | RSENSE_RATIO | SBC_BAT_DEPL_VTH
     );
+
+    // Preserve current ChargeOption3
+    res = smbus_read(CHARGER_ADDRESS, REG_CHARGE_OPTION_3, &chargeoption3);
+    if (res < 0)
+        return res;
+
+    // Enable Hybrid Power Boost (HPB)
+    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_OPTION_3, chargeoption3 | SBC_EN_BOOST);
+    if (res < 0)
+        return res;
 
     DEBUG("Charger enabled\n");
     charger_enabled = true;
