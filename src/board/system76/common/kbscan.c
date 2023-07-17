@@ -58,7 +58,7 @@ void kbscan_init(void) {
 }
 
 // Debounce time in milliseconds
-#define DEBOUNCE_DELAY 15
+#define DEBOUNCE_DELAY 5
 
 static uint8_t kbscan_get_row(uint8_t i) {
     // Report all keys as released when lid is closed
