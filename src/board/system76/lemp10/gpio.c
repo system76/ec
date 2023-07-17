@@ -133,7 +133,7 @@ void gpio_init() {
     // PWR_BTN#
     GPCRD5 = GPIO_OUT | GPIO_UP;
     // CPU_FANSEN
-    GPCRD6 = GPIO_ALT | GPIO_DOWN;
+    GPCRD6 = GPIO_ALT;
     // NC
     GPCRD7 = GPIO_IN;
     // SMC_BAT
