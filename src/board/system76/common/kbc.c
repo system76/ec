@@ -18,6 +18,11 @@ void kbc_init(void) {
     // Set IRQ mode to level-triggered
     *(KBC.irq) = 0;
 #endif
+
+    kbc_reset();
+}
+
+void kbc_reset(void) {
     // Set "key lock" to disabled
     *(KBC.status) = BIT(4);
 }

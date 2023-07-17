@@ -8,8 +8,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-void kbc_init(void);
-
 struct Kbc {
     // Control register
     volatile uint8_t *control;
