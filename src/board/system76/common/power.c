@@ -8,6 +8,7 @@
 #include <board/config.h>
 #include <board/fan.h>
 #include <board/gpio.h>
+#include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/lid.h>
 #include <board/peci.h>
@@ -341,7 +342,8 @@ void power_cpu_reset(void) {
     acpi_reset();
     // Reset fans
     fan_reset();
-    //TODO: reset KBC and touchpad states
+    //TODO: reset touchpad states
+    kbc_reset();
     kbled_reset();
     // Set PL4
     //TODO: if this returns false, retry?
