@@ -15,7 +15,7 @@ extern int16_t dgpu_temp;
 #endif // HAVE_DGPU
 
 void dgpu_init(void);
-int16_t dgpu_set_fan_curve(uint8_t count, struct FanPoint * points);
+int16_t dgpu_set_fan_curve(uint8_t count, struct FanPoint *points);
 uint8_t dgpu_get_fan_duty(void);
 
 #endif // _BOARD_DGPU_H

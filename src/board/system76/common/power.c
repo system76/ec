@@ -36,7 +36,7 @@
     }
 
 #ifndef USE_S0IX
-    #define USE_S0IX 0
+#define USE_S0IX 0
 #endif
 
 #ifndef HAVE_EC_EN
@@ -376,8 +376,7 @@ static bool power_button_disabled(void) {
 }
 
 #if USE_S0IX
-static void update_s0ix_state()
-{
+static void update_s0ix_state() {
     uint32_t time = time_get();
     static uint32_t last_sleep_time = 0;
 
@@ -395,9 +394,9 @@ void power_event(void) {
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
 
-    #if USE_S0IX
+#if USE_S0IX
     update_s0ix_state();
-    #endif
+#endif
 
     if (ac_new != ac_last) {
         // Set CPU power limit to DC limit until we determine available current

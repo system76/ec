@@ -213,7 +213,7 @@ static void pmc_hack(void) {
 static void pmc_hack(void) {}
 #endif
 
-void pmc_event(struct Pmc * pmc) {
+void pmc_event(struct Pmc *pmc) {
     uint8_t sts;
 
     pmc_hack();

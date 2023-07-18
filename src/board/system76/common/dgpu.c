@@ -57,10 +57,9 @@ static struct Fan FAN = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
-int16_t dgpu_set_fan_curve(uint8_t count, struct FanPoint * points) {
+int16_t dgpu_set_fan_curve(uint8_t count, struct FanPoint *points) {
     if (count != FAN.points_size) {
-        TRACE("DGPU: Incorrect number of fan points: %d, expected %d\n",
-            count, FAN.points_size);
+        TRACE("DGPU: Incorrect number of fan points: %d, expected %d\n", count, FAN.points_size);
         return -1;
     }
 

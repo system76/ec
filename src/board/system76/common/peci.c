@@ -12,7 +12,7 @@
 #include <ec/pwm.h>
 
 #ifndef USE_S0IX
-    #define USE_S0IX 0
+#define USE_S0IX 0
 #endif
 
 // Fan speed is the lowest requested over HEATUP seconds
@@ -63,10 +63,9 @@ static struct Fan FAN = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
-int16_t peci_set_fan_curve(uint8_t count, struct FanPoint * points) {
+int16_t peci_set_fan_curve(uint8_t count, struct FanPoint *points) {
     if (count != FAN.points_size) {
-        TRACE("PECI: Incorrect number of fan points: %d, expected %d\n",
-            count, FAN.points_size);
+        TRACE("PECI: Incorrect number of fan points: %d, expected %d\n", count, FAN.points_size);
         return -1;
     }
 

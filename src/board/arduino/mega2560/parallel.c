@@ -85,7 +85,7 @@ struct Parallel {
 #define PIN(N, P) struct Gpio *N;
     PINS
 #undef PIN
-    enum ParallelState state;
+        enum ParallelState state;
 };
 
 // Parallel struct instance
@@ -93,7 +93,7 @@ static struct Parallel PORT = {
 #define PIN(N, P) .N = &GPIOS[P - 1],
     PINS
 #undef PIN
-    .state = PARALLEL_STATE_UNKNOWN,
+        .state = PARALLEL_STATE_UNKNOWN,
 };
 
 // clang-format on

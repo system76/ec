@@ -100,5 +100,4 @@ static inline bool keymap_is_f_key(uint8_t row, uint8_t col) {
     }
 }
 
-
 #endif // _BOARD_KEYMAP_H
