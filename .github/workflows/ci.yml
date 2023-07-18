@@ -11,10 +11,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Check SPDX identifiers
-        run: ./scripts/lint/spdx.sh
-
-      - name: Check indentation
-        run: ./scripts/lint/indent.sh
+        run: ./scripts/lint/01-spdx-tags.sh
 
       - name: Check formatting
         run: ./scripts/lint/02-clang-format.sh
