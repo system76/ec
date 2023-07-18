@@ -1,8 +1,5 @@
-# SPDX-License-Identifier: MIT
-
 #!/usr/bin/env bash
-
-ROOT_DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+# SPDX-License-Identifier: MIT
 
 errorExit() {
     errorMessage="$1"
@@ -19,14 +16,14 @@ errorCheck() {
 
 usage() {
 cat <<EOF
-Usage: ./$(basename ${0})
+Usage: ./$(basename "${0}")
 
   Environmental variables:
     EC_BOARD_VENDOR        name of the board vendor (required)
     EC_BOARD_MODEL         name of the board model (required)
 
 Example usage to build for NovaCustom NV40 series:
-    EC_BOARD_VENDOR=clevo EC_BOARD_MODEL=nv40mz ./$(basename $0)
+    EC_BOARD_VENDOR=clevo EC_BOARD_MODEL=nv40mz ./$(basename "$0")
 EOF
   exit 0
 }
@@ -73,12 +70,12 @@ if [ "$EC_BOARD_VENDOR" = "novacustom" ] ; then
   esac
 fi
 
-docker run --rm -v "$PWD":"$PWD" -w "$PWD" -u $(id -u) \
+docker run --rm -v "$PWD":"$PWD" -w "$PWD" -u "$(id -u)" \
   ghcr.io/dasharo/ec-sdk:main make BOARD=${EC_BOARD_VENDOR}/${EC_BOARD_MODEL}
 errorCheck "Failed to build EC fimware"
 
 cp "$EC_ROM" "$EC_ARTIFACT"
 errorCheck "Failed to rename EC firmware"
 
-dd if=/dev/zero of=$EC_ARTIFACT bs=1 seek=128k count=0
+dd if=/dev/zero of="$EC_ARTIFACT" bs=1 seek=128k count=0
 errorCheck "Failed to extend EC firmware"
