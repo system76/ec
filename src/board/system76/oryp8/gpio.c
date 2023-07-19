@@ -38,6 +38,11 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clang-format on
 
 void gpio_init() {
+    // PWRSW WDT 2 Enable 2
+    GCR9 = BIT(5);
+    // PWRSW WDT 2 Enable 1
+    GCR8 = BIT(4);
+
     // Enable LPC reset on GPD2
     GCR = 0x04;
     // Disable UARTs
