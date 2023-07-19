@@ -8,6 +8,8 @@
     .data_out = &PM ## NUM ## DO, \
     .data_in = &PM ## NUM ## DI, \
     .control = &PM ## NUM ## CTL, \
+    .interrupt_control = &PM ## NUM ## IC, \
+    .interrupt_enable = &PM ## NUM ## IE, \
 }
 // clang-format on
 
