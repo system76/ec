@@ -43,9 +43,9 @@ void gpio_init(void) {
     //GCR22 = BIT(7);
 
     // PWRSW WDT 2 Enable 2
-    //GCR9 = BIT(5);
+    GCR9 = BIT(5);
     // PWRSW WDT 2 Enable 1
-    //GCR8 = BIT(4);
+    GCR8 = BIT(4);
 
     // Enable LPC reset on GPD2
     GCR = 0b10 << 1;
