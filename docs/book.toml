@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
+[book]
+title = "System76 EC"
+description = "System76 EC documentation"
+language = "en"
+src = "."
+
+[build]
+build-dir = "../build/docs"
+create-missing = false
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "coal"
+no-section-label = true
+git-repository-url = "https://github.com/system76/ec"
+
+[output.html.print]
+enable = false
