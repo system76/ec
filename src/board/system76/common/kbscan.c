@@ -5,6 +5,7 @@
 #include <board/acpi.h>
 #include <board/fan.h>
 #include <board/gpio.h>
+#include <board/keymap.h>
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
@@ -166,6 +167,12 @@ bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
         pmc_swi();
     }
 
+    if (key == K_FNLOCK && pressed) {
+        DEBUG("Toggling FnLock\n");
+        keymap_fnlock ^= 1;
+        return true;
+    }
+
     switch (key & KT_MASK) {
     case (KT_NORMAL):
         if (kbscan_enabled) {
@@ -262,6 +269,7 @@ static inline bool key_should_repeat(uint16_t key) {
     case K_CAMERA_TOGGLE:
     case K_DISPLAY_TOGGLE:
     case K_FAN_TOGGLE:
+    case K_FNLOCK:
     case K_KBD_BKL:
     case K_KBD_COLOR:
     case K_KBD_TOGGLE:
