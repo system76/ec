@@ -360,6 +360,29 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
+#if HAVE_LAN_WAKEUP_N
+/**
+ * Check and handle LAN_WAKEUP# assertion.
+ */
+static void power_handle_wake_on_lan(void) {
+    static bool wake_last = true;
+    const bool wake_new = gpio_get(&LAN_WAKEUP_N);
+    if (!wake_new && wake_last) {
+        update_power_state();
+        DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
+        if (power_state == POWER_STATE_OFF) {
+            power_on();
+        }
+    }
+#if LEVEL >= LEVEL_DEBUG
+    else if (wake_new && !wake_last) {
+        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
+    }
+#endif
+    wake_last = wake_new;
+}
+#endif // HAVE_LAN_WAKEUP_N
+
 /**
  * Update power LEDs.
  */
@@ -635,21 +658,7 @@ void power_event(void) {
     }
 
 #if HAVE_LAN_WAKEUP_N
-    static bool wake_last = true;
-    bool wake_new = gpio_get(&LAN_WAKEUP_N);
-    if (!wake_new && wake_last) {
-        update_power_state();
-        DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
-        if (power_state == POWER_STATE_OFF) {
-            power_on();
-        }
-    }
-#if LEVEL >= LEVEL_DEBUG
-    else if (wake_new && !wake_last) {
-        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
-    }
-#endif
-    wake_last = wake_new;
+    power_handle_wake_on_lan();
 #endif // HAVE_LAN_WAKEUP_N
 
     power_update_power_leds(ac_new);
