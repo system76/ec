@@ -328,8 +328,11 @@ void kbscan_event(void) {
     if (debounce) {
         uint32_t time = time_get();
         if ((time - debounce_time) >= DEBOUNCE_DELAY) {
-            // Finish debounce
+            // Debounce time elapsed: Read new state
             debounce = false;
+        } else {
+            // If still debouncing, don't do anything.
+            return;
         }
     }
 
@@ -338,11 +341,11 @@ void kbscan_event(void) {
         uint8_t last = kbscan_matrix[i];
         if (new != last) {
             if (kbscan_has_ghost_in_row(i, new)) {
-                kbscan_ghost[i] = true;
                 continue;
-            } else if (kbscan_ghost[i]) {
-                kbscan_ghost[i] = false;
-                // Debounce to allow remaining ghosts to settle.
+            }
+
+            // Some key has changed state: Start debounce
+            if (!debounce) {
                 debounce = true;
                 debounce_time = time_get();
             }
@@ -356,49 +359,39 @@ void kbscan_event(void) {
                 if (new_b != last_b) {
                     bool reset = false;
 
-                    // If debouncing
-                    if (debounce) {
-                        // Debounce presses and releases
-                        reset = true;
-                    } else {
-                        // Begin debounce
-                        debounce = true;
-                        debounce_time = time_get();
+                    // Check keys used for config reset
+                    if (matrix_position_is_esc(i, j))
+                        kbscan_esc_held = new_b;
+                    if (matrix_position_is_fn(i, j))
+                        kbscan_fn_held = new_b;
 
-                        // Check keys used for config reset
-                        if (matrix_position_is_esc(i, j))
-                            kbscan_esc_held = new_b;
-                        if (matrix_position_is_fn(i, j))
-                            kbscan_fn_held = new_b;
+                    // Handle key press/release
+                    if (new_b) {
+                        // On a press, cache the layer the key was pressed on
+                        kbscan_last_layer[i][j] = kbscan_layer;
+                    }
+                    uint8_t key_layer = kbscan_last_layer[i][j];
+                    uint16_t key = 0;
+                    keymap_get(key_layer, i, j, &key);
+                    if (key) {
+                        DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
+                        if (!kbscan_press(key, new_b, &layer)) {
+                            // In the case of ignored key press/release, reset bit
+                            reset = true;
+                        }
 
-                        // Handle key press/release
                         if (new_b) {
-                            // On a press, cache the layer the key was pressed on
-                            kbscan_last_layer[i][j] = kbscan_layer;
+                            // New key pressed, update last key
+                            repeat_key = key;
+                            repeat_key_time = time_get();
+                            repeat = false;
+                        } else if (key == repeat_key) {
+                            // Repeat key was released
+                            repeat_key = 0;
+                            repeat = false;
                         }
-                        uint8_t key_layer = kbscan_last_layer[i][j];
-                        uint16_t key = 0;
-                        keymap_get(key_layer, i, j, &key);
-                        if (key) {
-                            DEBUG("KB %d, %d, %d = 0x%04X, %d\n", i, j, key_layer, key, new_b);
-                            if (!kbscan_press(key, new_b, &layer)) {
-                                // In the case of ignored key press/release, reset bit
-                                reset = true;
-                            }
-
-                            if (new_b) {
-                                // New key pressed, update last key
-                                repeat_key = key;
-                                repeat_key_time = time_get();
-                                repeat = false;
-                            } else if (key == repeat_key) {
-                                // Repeat key was released
-                                repeat_key = 0;
-                                repeat = false;
-                            }
-                        } else {
-                            WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
-                        }
+                    } else {
+                        WARN("KB %d, %d, %d missing\n", i, j, kbscan_layer);
                     }
 
                     // Reset bit to last state
