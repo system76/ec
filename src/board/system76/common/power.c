@@ -360,6 +360,32 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
+/**
+ * Check and handle PLT_RST# assertion.
+ */
+static void power_handle_buf_plt_rst_n(void) {
+    static bool rst_last = false;
+    const bool rst_new = gpio_get(&BUF_PLT_RST_N);
+
+    // clang-format off
+#if LEVEL >= LEVEL_DEBUG
+    if (!rst_new && rst_last) {
+        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
+    } else
+#endif
+    if (rst_new && !rst_last) {
+        DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
+#if CONFIG_BUS_ESPI
+        espi_reset();
+#else // CONFIG_BUS_ESPI
+        power_cpu_reset();
+#endif // CONFIG_BUS_ESPI
+    }
+    // clang-format on
+
+    rst_last = rst_new;
+}
+
 #if HAVE_LAN_WAKEUP_N
 /**
  * Check and handle LAN_WAKEUP# assertion.
@@ -592,24 +618,7 @@ void power_event(void) {
     }
     pg_last = pg_new;
 
-    // clang-format off
-    static bool rst_last = false;
-    bool rst_new = gpio_get(&BUF_PLT_RST_N);
-#if LEVEL >= LEVEL_DEBUG
-    if (!rst_new && rst_last) {
-        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
-    } else
-#endif
-    if (rst_new && !rst_last) {
-        DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
-#if CONFIG_BUS_ESPI
-        espi_reset();
-#else // CONFIG_BUS_ESPI
-        power_cpu_reset();
-#endif // CONFIG_BUS_ESPI
-    }
-    rst_last = rst_new;
-    // clang-format on
+    power_handle_buf_plt_rst_n();
 
 #if HAVE_SLP_SUS_N
 #if LEVEL >= LEVEL_DEBUG
