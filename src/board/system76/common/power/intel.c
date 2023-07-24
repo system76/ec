@@ -362,6 +362,51 @@ static bool power_button_disabled(void) {
 }
 
 /**
+ * Check and handle ACIN# assertion.
+ */
+static bool power_handle_acin_n(void) {
+    static bool ac_send_sci = true;
+    static bool ac_last = true;
+    const bool ac_new = gpio_get(&ACIN_N);
+    if (ac_new != ac_last) {
+        // Set CPU power limit to DC limit until we determine available current
+        //TODO: if this returns false, retry?
+        power_peci_limit(false);
+
+        // Configure smart charger
+        DEBUG("Power adapter ");
+        if (ac_new) {
+            DEBUG("unplugged\n");
+            battery_charger_disable();
+        } else {
+            DEBUG("plugged in\n");
+            battery_charger_configure();
+
+            // Set CPU power limit to AC limit, if there is available current
+            //TODO: if this returns false, retry?
+            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
+                power_peci_limit(true);
+            }
+        }
+        battery_debug();
+
+        // Send SCI to update AC and battery information
+        ac_send_sci = true;
+    }
+    if (ac_send_sci) {
+        // Send SCI 0x16 for AC detect event if ACPI OS is loaded
+        if (acpi_ecos != EC_OS_NONE) {
+            if (pmc_sci(&PMC_1, 0x16)) {
+                ac_send_sci = false;
+            }
+        }
+    }
+    ac_last = ac_new;
+
+    return ac_new;
+}
+
+/**
  * Check and handle ALL_SYS_PWRGD assertion.
  */
 static void power_handle_all_sys_pwrgd(void) {
@@ -448,45 +493,7 @@ static void power_handle_wake_on_lan(void) {
 #endif // HAVE_LAN_WAKEUP_N
 
 void power_event(void) {
-    // Check if the adapter line goes low
-    static bool ac_send_sci = true;
-    static bool ac_last = true;
-    bool ac_new = gpio_get(&ACIN_N);
-    if (ac_new != ac_last) {
-        // Set CPU power limit to DC limit until we determine available current
-        //TODO: if this returns false, retry?
-        power_peci_limit(false);
-
-        // Configure smart charger
-        DEBUG("Power adapter ");
-        if (ac_new) {
-            DEBUG("unplugged\n");
-            battery_charger_disable();
-        } else {
-            DEBUG("plugged in\n");
-            battery_charger_configure();
-
-            // Set CPU power limit to AC limit, if there is available current
-            //TODO: if this returns false, retry?
-            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
-                power_peci_limit(true);
-            }
-        }
-        battery_debug();
-
-        // Send SCI to update AC and battery information
-        ac_send_sci = true;
-    }
-    if (ac_send_sci) {
-        // Send SCI 0x16 for AC detect event if ACPI OS is loaded
-        if (acpi_ecos != EC_OS_NONE) {
-            if (pmc_sci(&PMC_1, 0x16)) {
-                ac_send_sci = false;
-            }
-        }
-    }
-    ac_last = ac_new;
-
+    const bool ac_new = power_handle_acin_n();
     gpio_set(&AC_PRESENT, !ac_new);
 
     // Configure charger based on charging thresholds when plugged in
