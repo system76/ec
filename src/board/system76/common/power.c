@@ -361,6 +361,45 @@ static bool power_button_disabled(void) {
 }
 
 /**
+ * Check and handle ALL_SYS_PWRGD assertion.
+ */
+static void power_handle_all_sys_pwrgd(void) {
+    static bool pg_last = false;
+    bool pg_new = gpio_get(&ALL_SYS_PWRGD);
+    if (pg_new && !pg_last) {
+        DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
+
+        //TODO: tPLT04;
+
+#if HAVE_PM_PWROK
+        // Allow H_VR_READY to set PCH_PWROK
+        GPIO_SET_DEBUG(PM_PWROK, true);
+#endif // HAVE_PM_PWROK
+
+        // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
+        delay_ms(10);
+
+#if HAVE_PCH_PWROK_EC
+        // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
+        GPIO_SET_DEBUG(PCH_PWROK_EC, true);
+#endif // HAVE_PCH_PWROK_EC
+    } else if (!pg_new && pg_last) {
+        DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
+
+#if HAVE_PCH_PWROK_EC
+        // De-assert SYS_PWROK
+        GPIO_SET_DEBUG(PCH_PWROK_EC, false);
+#endif // HAVE_PCH_PWROK_EC
+
+#if HAVE_PM_PWROK
+        // De-assert PCH_PWROK
+        GPIO_SET_DEBUG(PM_PWROK, false);
+#endif // HAVE_PM_PWROK
+    }
+    pg_last = pg_new;
+}
+
+/**
  * Check and handle PLT_RST# assertion.
  */
 static void power_handle_buf_plt_rst_n(void) {
@@ -583,40 +622,7 @@ void power_event(void) {
     // Update power state before determining actions
     update_power_state();
 
-    // If system power is good
-    static bool pg_last = false;
-    bool pg_new = gpio_get(&ALL_SYS_PWRGD);
-    if (pg_new && !pg_last) {
-        DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
-
-        //TODO: tPLT04;
-
-#if HAVE_PM_PWROK
-        // Allow H_VR_READY to set PCH_PWROK
-        GPIO_SET_DEBUG(PM_PWROK, true);
-#endif // HAVE_PM_PWROK
-
-        // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
-        delay_ms(10);
-
-#if HAVE_PCH_PWROK_EC
-        // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
-        GPIO_SET_DEBUG(PCH_PWROK_EC, true);
-#endif // HAVE_PCH_PWROK_EC
-    } else if (!pg_new && pg_last) {
-        DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
-
-#if HAVE_PCH_PWROK_EC
-        // De-assert SYS_PWROK
-        GPIO_SET_DEBUG(PCH_PWROK_EC, false);
-#endif // HAVE_PCH_PWROK_EC
-
-#if HAVE_PM_PWROK
-        // De-assert PCH_PWROK
-        GPIO_SET_DEBUG(PM_PWROK, false);
-#endif // HAVE_PM_PWROK
-    }
-    pg_last = pg_new;
+    power_handle_all_sys_pwrgd();
 
     power_handle_buf_plt_rst_n();
 
