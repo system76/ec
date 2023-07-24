@@ -361,6 +361,206 @@ static bool power_button_disabled(void) {
 }
 
 /**
+ * Check and handle ACIN# assertion.
+ */
+static bool power_handle_acin_n(void) {
+    static bool ac_send_sci = true;
+    static bool ac_last = true;
+    const bool ac_new = gpio_get(&ACIN_N);
+    if (ac_new != ac_last) {
+        // Set CPU power limit to DC limit until we determine available current
+        //TODO: if this returns false, retry?
+        power_peci_limit(false);
+
+        // Configure smart charger
+        DEBUG("Power adapter ");
+        if (ac_new) {
+            DEBUG("unplugged\n");
+            battery_charger_disable();
+        } else {
+            DEBUG("plugged in\n");
+            battery_charger_configure();
+
+            // Set CPU power limit to AC limit, if there is available current
+            //TODO: if this returns false, retry?
+            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
+                power_peci_limit(true);
+            }
+        }
+        battery_debug();
+
+        // Reset main loop cycle to force reading PECI and battery
+        main_cycle = 0;
+
+        // Send SCI to update AC and battery information
+        ac_send_sci = true;
+    }
+    if (ac_send_sci) {
+        // Send SCI 0x16 for AC detect event if ACPI OS is loaded
+        if (acpi_ecos != EC_OS_NONE) {
+            if (pmc_sci(&PMC_1, 0x16)) {
+                ac_send_sci = false;
+            }
+        }
+    }
+    ac_last = ac_new;
+
+    return ac_new;
+}
+
+/**
+ * Check and handle PWR_SW# assertion.
+ */
+static bool power_handle_pwr_sw_n(void) {
+    static bool ps_last = true;
+    bool ps_new = gpio_get(&PWR_SW_N);
+    if (!ps_new && ps_last) {
+        // Ensure press is not spurious
+        for (uint8_t i = 100; i != 0; i--) {
+            delay_ms(1);
+            if (gpio_get(&PWR_SW_N) != ps_new) {
+                DEBUG("%02X: Spurious press\n", main_cycle);
+                ps_new = ps_last;
+                break;
+            } else if (power_button_disabled()) {
+                // Ignore press when power button disabled
+                ps_new = ps_last;
+                break;
+            }
+        }
+
+        if (ps_new != ps_last) {
+            DEBUG("%02X: Power switch press\n", main_cycle);
+
+            // Enable S5 power if necessary, before sending PWR_BTN
+            update_power_state();
+            if (power_state == POWER_STATE_OFF) {
+                if (config_should_reset())
+                    config_reset();
+                power_on();
+
+                // After power on ensure there is no secondary press sent to PCH
+                ps_new = ps_last;
+            }
+        }
+    }
+#if LEVEL >= LEVEL_DEBUG
+    else if (ps_new && !ps_last) {
+        DEBUG("%02X: Power switch release\n", main_cycle);
+    }
+#endif
+    ps_last = ps_new;
+
+    return ps_new;
+}
+
+/**
+ * Check and handle ALL_SYS_PWRGD assertion.
+ */
+static void power_handle_all_sys_pwrgd(void) {
+    static bool pg_last = false;
+    bool pg_new = gpio_get(&ALL_SYS_PWRGD);
+    if (pg_new && !pg_last) {
+        DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
+
+        //TODO: tPLT04;
+
+#if HAVE_PM_PWROK
+        // Allow H_VR_READY to set PCH_PWROK
+        GPIO_SET_DEBUG(PM_PWROK, true);
+#endif // HAVE_PM_PWROK
+
+        // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
+        delay_ms(10);
+
+#if HAVE_PCH_PWROK_EC
+        // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
+        GPIO_SET_DEBUG(PCH_PWROK_EC, true);
+#endif // HAVE_PCH_PWROK_EC
+    } else if (!pg_new && pg_last) {
+        DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
+
+#if HAVE_PCH_PWROK_EC
+        // De-assert SYS_PWROK
+        GPIO_SET_DEBUG(PCH_PWROK_EC, false);
+#endif // HAVE_PCH_PWROK_EC
+
+#if HAVE_PM_PWROK
+        // De-assert PCH_PWROK
+        GPIO_SET_DEBUG(PM_PWROK, false);
+#endif // HAVE_PM_PWROK
+    }
+    pg_last = pg_new;
+}
+
+/**
+ * Check and handle PLT_RST# assertion.
+ */
+static void power_handle_buf_plt_rst_n(void) {
+    static bool rst_last = false;
+    const bool rst_new = gpio_get(&BUF_PLT_RST_N);
+
+    // clang-format off
+#if LEVEL >= LEVEL_DEBUG
+    if (!rst_new && rst_last) {
+        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
+    } else
+#endif
+    if (rst_new && !rst_last) {
+        DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
+#if CONFIG_BUS_ESPI
+        espi_reset();
+#else // CONFIG_BUS_ESPI
+        power_cpu_reset();
+#endif // CONFIG_BUS_ESPI
+    }
+    // clang-format on
+
+    rst_last = rst_new;
+}
+
+#if HAVE_SLP_SUS_N
+/**
+ * Check and handle SLP_SUS# assertion.
+ */
+static void power_handle_slp_sus_n(void) {
+#if LEVEL >= LEVEL_DEBUG
+    static bool sus_last = true;
+    bool sus_new = gpio_get(&SLP_SUS_N);
+    if (!sus_new && sus_last) {
+        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
+    } else if (sus_new && !sus_last) {
+        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
+    }
+    sus_last = sus_new;
+#endif
+}
+#endif // HAVE_SLP_SUS_N
+
+#if HAVE_LAN_WAKEUP_N
+/**
+ * Check and handle LAN_WAKEUP# assertion.
+ */
+static void power_handle_wake_on_lan(void) {
+    static bool wake_last = true;
+    const bool wake_new = gpio_get(&LAN_WAKEUP_N);
+    if (!wake_new && wake_last) {
+        update_power_state();
+        DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
+        if (power_state == POWER_STATE_OFF) {
+            power_on();
+        }
+    }
+#if LEVEL >= LEVEL_DEBUG
+    else if (wake_new && !wake_last) {
+        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
+    }
+#endif
+    wake_last = wake_new;
+}
+#endif // HAVE_LAN_WAKEUP_N
+
+/**
  * Update power LEDs.
  */
 static void power_update_power_leds(bool ac_new) {
@@ -439,48 +639,7 @@ static void power_update_battery_leds(bool ac_new) {
 #endif // HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
 
 void power_event(void) {
-    // Check if the adapter line goes low
-    static bool ac_send_sci = true;
-    static bool ac_last = true;
-    bool ac_new = gpio_get(&ACIN_N);
-    if (ac_new != ac_last) {
-        // Set CPU power limit to DC limit until we determine available current
-        //TODO: if this returns false, retry?
-        power_peci_limit(false);
-
-        // Configure smart charger
-        DEBUG("Power adapter ");
-        if (ac_new) {
-            DEBUG("unplugged\n");
-            battery_charger_disable();
-        } else {
-            DEBUG("plugged in\n");
-            battery_charger_configure();
-
-            // Set CPU power limit to AC limit, if there is available current
-            //TODO: if this returns false, retry?
-            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
-                power_peci_limit(true);
-            }
-        }
-        battery_debug();
-
-        // Reset main loop cycle to force reading PECI and battery
-        main_cycle = 0;
-
-        // Send SCI to update AC and battery information
-        ac_send_sci = true;
-    }
-    if (ac_send_sci) {
-        // Send SCI 0x16 for AC detect event if ACPI OS is loaded
-        if (acpi_ecos != EC_OS_NONE) {
-            if (pmc_sci(&PMC_1, 0x16)) {
-                ac_send_sci = false;
-            }
-        }
-    }
-    ac_last = ac_new;
-
+    const bool ac_new = power_handle_acin_n();
     gpio_set(&AC_PRESENT, !ac_new);
 
     // Configure charger based on charging thresholds when plugged in
@@ -489,116 +648,19 @@ void power_event(void) {
     }
 
     // Read power switch state
-    static bool ps_last = true;
-    bool ps_new = gpio_get(&PWR_SW_N);
-    if (!ps_new && ps_last) {
-        // Ensure press is not spurious
-        for (uint8_t i = 100; i != 0; i--) {
-            delay_ms(1);
-            if (gpio_get(&PWR_SW_N) != ps_new) {
-                DEBUG("%02X: Spurious press\n", main_cycle);
-                ps_new = ps_last;
-                break;
-            } else if (power_button_disabled()) {
-                // Ignore press when power button disabled
-                ps_new = ps_last;
-                break;
-            }
-        }
-
-        if (ps_new != ps_last) {
-            DEBUG("%02X: Power switch press\n", main_cycle);
-
-            // Enable S5 power if necessary, before sending PWR_BTN
-            update_power_state();
-            if (power_state == POWER_STATE_OFF) {
-                if (config_should_reset())
-                    config_reset();
-                power_on();
-
-                // After power on ensure there is no secondary press sent to PCH
-                ps_new = ps_last;
-            }
-        }
-    }
-#if LEVEL >= LEVEL_DEBUG
-    else if (ps_new && !ps_last) {
-        DEBUG("%02X: Power switch release\n", main_cycle);
-    }
-#endif
-    ps_last = ps_new;
-
+    const bool ps_new = power_handle_pwr_sw_n();
     // Send power signal to PCH
     gpio_set(&PWR_BTN_N, ps_new);
 
     // Update power state before determining actions
     update_power_state();
 
-    // If system power is good
-    static bool pg_last = false;
-    bool pg_new = gpio_get(&ALL_SYS_PWRGD);
-    if (pg_new && !pg_last) {
-        DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
+    power_handle_all_sys_pwrgd();
 
-        //TODO: tPLT04;
-
-#if HAVE_PM_PWROK
-        // Allow H_VR_READY to set PCH_PWROK
-        GPIO_SET_DEBUG(PM_PWROK, true);
-#endif // HAVE_PM_PWROK
-
-        // OEM defined delay from ALL_SYS_PWRGD to SYS_PWROK - TODO
-        delay_ms(10);
-
-#if HAVE_PCH_PWROK_EC
-        // Assert SYS_PWROK, system can finally perform PLT_RST# and boot
-        GPIO_SET_DEBUG(PCH_PWROK_EC, true);
-#endif // HAVE_PCH_PWROK_EC
-    } else if (!pg_new && pg_last) {
-        DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
-
-#if HAVE_PCH_PWROK_EC
-        // De-assert SYS_PWROK
-        GPIO_SET_DEBUG(PCH_PWROK_EC, false);
-#endif // HAVE_PCH_PWROK_EC
-
-#if HAVE_PM_PWROK
-        // De-assert PCH_PWROK
-        GPIO_SET_DEBUG(PM_PWROK, false);
-#endif // HAVE_PM_PWROK
-    }
-    pg_last = pg_new;
-
-    // clang-format off
-    static bool rst_last = false;
-    bool rst_new = gpio_get(&BUF_PLT_RST_N);
-#if LEVEL >= LEVEL_DEBUG
-    if (!rst_new && rst_last) {
-        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
-    } else
-#endif
-    if (rst_new && !rst_last) {
-        DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
-#if CONFIG_BUS_ESPI
-        espi_reset();
-#else // CONFIG_BUS_ESPI
-        power_cpu_reset();
-#endif // CONFIG_BUS_ESPI
-    }
-    rst_last = rst_new;
-    // clang-format on
+    power_handle_buf_plt_rst_n();
 
 #if HAVE_SLP_SUS_N
-#if LEVEL >= LEVEL_DEBUG
-    static bool sus_last = true;
-    bool sus_new = gpio_get(&SLP_SUS_N);
-    if (!sus_new && sus_last) {
-        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
-    } else if (sus_new && !sus_last) {
-        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
-    }
-    sus_last = sus_new;
-#endif
+    power_handle_slp_sus_n();
 #endif // HAVE_SLP_SUS_N
 
 #if CONFIG_BUS_ESPI
@@ -635,21 +697,7 @@ void power_event(void) {
     }
 
 #if HAVE_LAN_WAKEUP_N
-    static bool wake_last = true;
-    bool wake_new = gpio_get(&LAN_WAKEUP_N);
-    if (!wake_new && wake_last) {
-        update_power_state();
-        DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
-        if (power_state == POWER_STATE_OFF) {
-            power_on();
-        }
-    }
-#if LEVEL >= LEVEL_DEBUG
-    else if (wake_new && !wake_last) {
-        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
-    }
-#endif
-    wake_last = wake_new;
+    power_handle_wake_on_lan();
 #endif // HAVE_LAN_WAKEUP_N
 
     power_update_power_leds(ac_new);
