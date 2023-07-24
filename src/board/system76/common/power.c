@@ -519,6 +519,24 @@ static void power_handle_buf_plt_rst_n(void) {
     rst_last = rst_new;
 }
 
+#if HAVE_SLP_SUS_N
+/**
+ * Check and handle SLP_SUS# assertion.
+ */
+static void power_handle_slp_sus_n(void) {
+#if LEVEL >= LEVEL_DEBUG
+    static bool sus_last = true;
+    bool sus_new = gpio_get(&SLP_SUS_N);
+    if (!sus_new && sus_last) {
+        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
+    } else if (sus_new && !sus_last) {
+        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
+    }
+    sus_last = sus_new;
+#endif
+}
+#endif // HAVE_SLP_SUS_N
+
 #if HAVE_LAN_WAKEUP_N
 /**
  * Check and handle LAN_WAKEUP# assertion.
@@ -642,16 +660,7 @@ void power_event(void) {
     power_handle_buf_plt_rst_n();
 
 #if HAVE_SLP_SUS_N
-#if LEVEL >= LEVEL_DEBUG
-    static bool sus_last = true;
-    bool sus_new = gpio_get(&SLP_SUS_N);
-    if (!sus_new && sus_last) {
-        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
-    } else if (sus_new && !sus_last) {
-        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
-    }
-    sus_last = sus_new;
-#endif
+    power_handle_slp_sus_n();
 #endif // HAVE_SLP_SUS_N
 
 #if CONFIG_BUS_ESPI
