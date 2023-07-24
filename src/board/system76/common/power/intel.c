@@ -407,6 +407,52 @@ static bool power_handle_acin_n(void) {
 }
 
 /**
+ * Check and handle PWR_SW# assertion.
+ */
+static bool power_handle_pwr_sw_n(void) {
+    static bool ps_last = true;
+    bool ps_new = gpio_get(&PWR_SW_N);
+    if (!ps_new && ps_last) {
+        // Ensure press is not spurious
+        for (uint8_t i = 100; i != 0; i--) {
+            delay_ms(1);
+            if (gpio_get(&PWR_SW_N) != ps_new) {
+                DEBUG("%02X: Spurious press\n", main_cycle);
+                ps_new = ps_last;
+                break;
+            } else if (power_button_disabled()) {
+                // Ignore press when power button disabled
+                ps_new = ps_last;
+                break;
+            }
+        }
+
+        if (ps_new != ps_last) {
+            DEBUG("%02X: Power switch press\n", main_cycle);
+
+            // Enable S5 power if necessary, before sending PWR_BTN
+            update_power_state();
+            if (power_state == POWER_STATE_OFF) {
+                if (config_should_reset())
+                    config_reset();
+                power_on();
+
+                // After power on ensure there is no secondary press sent to PCH
+                ps_new = ps_last;
+            }
+        }
+    }
+#if LEVEL >= LEVEL_DEBUG
+    else if (ps_new && !ps_last) {
+        DEBUG("%02X: Power switch release\n", main_cycle);
+    }
+#endif
+    ps_last = ps_new;
+
+    return ps_new;
+}
+
+/**
  * Check and handle ALL_SYS_PWRGD assertion.
  */
 static void power_handle_all_sys_pwrgd(void) {
@@ -502,45 +548,7 @@ void power_event(void) {
     }
 
     // Read power switch state
-    static bool ps_last = true;
-    bool ps_new = gpio_get(&PWR_SW_N);
-    if (!ps_new && ps_last) {
-        // Ensure press is not spurious
-        for (uint8_t i = 100; i != 0; i--) {
-            delay_ms(1);
-            if (gpio_get(&PWR_SW_N) != ps_new) {
-                DEBUG("%02X: Spurious press\n", main_cycle);
-                ps_new = ps_last;
-                break;
-            } else if (power_button_disabled()) {
-                // Ignore press when power button disabled
-                ps_new = ps_last;
-                break;
-            }
-        }
-
-        if (ps_new != ps_last) {
-            DEBUG("%02X: Power switch press\n", main_cycle);
-
-            // Enable S5 power if necessary, before sending PWR_BTN
-            update_power_state();
-            if (power_state == POWER_STATE_OFF) {
-                if (config_should_reset())
-                    config_reset();
-                power_on();
-
-                // After power on ensure there is no secondary press sent to PCH
-                ps_new = ps_last;
-            }
-        }
-    }
-#if LEVEL >= LEVEL_DEBUG
-    else if (ps_new && !ps_last) {
-        DEBUG("%02X: Power switch release\n", main_cycle);
-    }
-#endif
-    ps_last = ps_new;
-
+    const bool ps_new = power_handle_pwr_sw_n();
     // Send power signal to PCH
     gpio_set(&PWR_BTN_N, ps_new);
 
