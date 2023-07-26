@@ -28,6 +28,9 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 # Set touchpad PS2 bus
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
+# Set USB-PD I2C bus
+CFLAGS+=-DI2C_USBPD=I2C_1
+
 # Set smart charger parameters
 # FIXME: Verify parts and values.
 CHARGER=oz26786
@@ -59,6 +62,9 @@ CFLAGS+=-DBOARD_DGPU_FAN_POINTS="\
 	FAN_POINT(75, 35), \
 	FAN_POINT(100, 100) \
 "
+
+# Set USB-PD parameters
+USBPD=tps65987
 
 # Add system76 common code
 include src/board/system76/common/common.mk

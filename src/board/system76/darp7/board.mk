@@ -24,6 +24,9 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 # Set touchpad PS2 bus
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
+# Set USB-PD I2C bus
+CFLAGS+=-DI2C_USBPD=I2C_1
+
 # Set smart charger parameters
 CFLAGS+=\
 	-DCHARGER_ADAPTER_RSENSE=5 \
@@ -36,6 +39,9 @@ CFLAGS+=\
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=65 \
 	-DPOWER_LIMIT_DC=45
+
+# Set USB-PD parameters
+USBPD=tps65987
 
 # Add system76 common code
 include src/board/system76/common/common.mk

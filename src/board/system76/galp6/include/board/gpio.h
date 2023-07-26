@@ -21,6 +21,7 @@ extern struct Gpio __code DGPU_PWR_EN;
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;
 extern struct Gpio __code GC6_FB_EN;
+extern struct Gpio __code JACK_IN_N;
 extern struct Gpio __code LAN_WAKEUP_N;
 extern struct Gpio __code LED_ACIN;
 #define HAVE_LED_AIRPLANE_N 0
@@ -39,6 +40,7 @@ extern struct Gpio __code PWR_SW_N;
 #define HAVE_SCI_N 0
 extern struct Gpio __code SLP_S0_N;
 extern struct Gpio __code SLP_SUS_N;
+extern struct Gpio __code SINK_CTRL;
 extern struct Gpio __code SMI_N;
 extern struct Gpio __code SUSB_N_PCH;
 extern struct Gpio __code SUSC_N_PCH;

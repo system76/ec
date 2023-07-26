@@ -334,13 +334,46 @@ void power_off(void) {
     update_power_state();
 }
 
-// Set the CPU power limit appropriately
-static bool power_peci_limit(bool ac) {
+bool power_peci_limit(bool ac) {
     if (peci_available()) {
-        uint16_t watts = ac ? POWER_LIMIT_AC : POWER_LIMIT_DC;
-        // Set PL4 using PECI
-        int16_t res = peci_wr_pkg_config(60, 0, ((uint32_t)watts) * 8);
-        DEBUG("power_peci_limit %d = %d\n", watts, res);
+        uint32_t watts;
+
+        if (ac) {
+            // AC adapter rating with a 15% margin for conversion  losses & spikes
+            // This results in average pwr consumption ~equal to adapter rating
+            // TODO handle this differently for models with HPB enabled
+            watts = (uint32_t)battery_charger_input_current *
+                (uint32_t)battery_charger_input_voltage * 85 / 100000;
+        } else {
+            watts = POWER_LIMIT_DC;
+        }
+
+        uint8_t retry = 10;
+        uint16_t res;
+        do {
+            res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PSYS_PL2, 0, PECI_PSYS_PL2(watts));
+            delay_us(1);
+        } while (res != 0x40 && retry--);
+        DEBUG("PECI SET PsysPL2 ret = %d\n", res);
+
+        retry = 10;
+        do {
+            res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL3, 0, PECI_PL3(watts + 2, 6, 4));
+            delay_us(1);
+        } while (res != 0x40 && retry--);
+        DEBUG("PECI SET PL3 ret = %d\n", res);
+
+        retry = 10;
+        do {
+            res = peci_wr_pkg_config(
+                PECI_REG_PKG_CFG_PL4,
+                0,
+                PECI_PL4((watts > POWER_LIMIT_AC) ? POWER_LIMIT_AC : watts)
+            );
+            delay_us(1);
+        } while (res != 0x40 && retry--);
+        DEBUG("PECI SET PL4 ret = %d\n", res);
+
         return res == 0x40;
     } else {
         return false;
@@ -357,14 +390,8 @@ void power_cpu_reset(void) {
     fan_reset();
     // Reset KBC and touchpad states
     kbled_reset();
-    // Set PL4
-    //TODO: if this returns false, retry?
-    power_peci_limit(
-        // AC is connected
-        (!gpio_get(&ACIN_N)) &&
-        // There is available current
-        (battery_charger_input_current >= CHARGER_INPUT_CURRENT)
-    );
+    // Set power limits
+    power_peci_limit(gpio_get(&ACIN_N));
     kbc_clear_lock();
     ps2_reset(&PS2_1);
     ps2_reset(&PS2_TOUCHPAD);
@@ -411,12 +438,9 @@ void power_event(void) {
         } else {
             DEBUG("plugged in\n");
             battery_charger_configure();
-
-            // Set CPU power limit to AC limit, if there is available current
+            // Set CPU power limit to AC limit
             //TODO: if this returns false, retry?
-            if (battery_charger_input_current >= CHARGER_INPUT_CURRENT) {
-                power_peci_limit(true);
-            }
+            power_peci_limit(true);
         }
         battery_debug();
 

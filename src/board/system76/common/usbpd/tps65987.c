@@ -18,6 +18,19 @@ void usbpd_init(void) {
     i2c_reset(&I2C_USBPD, true);
 }
 
+enum {
+    // PDO is empty
+    USBPD_ERR_PDO_ZERO = 0x1000,
+    // I2C error
+    USBPD_ERR_I2C = 0x2000,
+    // Incorrect register length
+    USBPD_ERR_REG_LEN = 0x3000,
+    // Augumented PDO was received (unimplemented)
+    USBPD_ERR_PDO_TYPE_AUG = 0x4000,
+    // Battery PDO was received (unimplemented)
+    USBPD_ERR_PDO_TYPE_BAT = 0x5000,
+};
+
 static int16_t usbpd_current_limit(void) {
     uint8_t value[7] = { 0 };
     int16_t res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, REG_ACTIVE_CONTRACT_PDO, value, sizeof(value));
@@ -25,6 +38,8 @@ static int16_t usbpd_current_limit(void) {
         if (value[0] == 6) {
             uint32_t pdo = ((uint32_t)value[1]) | (((uint32_t)value[2]) << 8) |
                 (((uint32_t)value[3]) << 16) | (((uint32_t)value[4]) << 24);
+            if (!pdo)
+                return -USBPD_ERR_PDO_ZERO;
             DEBUG("USBPD PDO %08lX ", pdo);
             uint8_t kind = (uint8_t)((pdo >> 30) & 0b11);
             if (kind == 0b00) {
@@ -43,7 +58,7 @@ static int16_t usbpd_current_limit(void) {
                 uint32_t max_voltage_mv = ((pdo >> 20) & 0x3FF) * 50;
                 DEBUG("%ld.%03ld Vax\n", max_voltage_mv / 1000, max_voltage_mv % 1000);
                 //TODO
-                return -0x5000;
+                return -USBPD_ERR_PDO_TYPE_BAT;
             } else if (kind == 0b10) {
                 DEBUG("VAR ");
                 uint32_t current_ma = (pdo & 0x3FF) * 10;
@@ -56,15 +71,15 @@ static int16_t usbpd_current_limit(void) {
             } else {
                 DEBUG("AUG\n");
                 //TODO
-                return -0x4000;
+                return -USBPD_ERR_PDO_TYPE_AUG;
             }
         } else {
-            return -(0x3000 | (int16_t)value[0]);
+            return -(USBPD_ERR_REG_LEN | (int16_t)value[0]);
         }
     } else if (res < 0) {
         return res;
     } else {
-        return -(0x2000 | res);
+        return -(USBPD_ERR_I2C | res);
     }
 }
 
@@ -86,6 +101,8 @@ static void usbpd_dump(void) {
 }
 
 void usbpd_event(void) {
+    static uint8_t wait_for_contract = 0;
+
     bool update = false;
 
     static bool last_ac_in = false;
@@ -113,6 +130,9 @@ void usbpd_event(void) {
         update = true;
 
         DEBUG("SINK_CTRL %d\n", sink_ctrl);
+
+        if (sink_ctrl)
+            wait_for_contract = 100;
     }
 
     static enum PowerState last_power_state = POWER_STATE_OFF;
@@ -122,25 +142,38 @@ void usbpd_event(void) {
         update = true;
     }
 
+    if (wait_for_contract)
+        update = true;
+
     if (update) {
         // Default to disabling input current
         uint16_t next_input_current = 0;
+        uint16_t next_input_voltage = 0;
 
         if (ac_in) {
             if (jack_in) {
                 // Use default input current
                 next_input_current = CHARGER_INPUT_CURRENT;
+                next_input_voltage = BATTERY_CHARGER_VOLTAGE_AC;
             } else if (sink_ctrl) {
-                int16_t res = usbpd_current_limit();
-                if (res < 0) {
-                    DEBUG("ERR %04X\n", -res);
-                } else if (res < CHARGER_INPUT_CURRENT) {
-                    // Use USB-PD charger current if it provides less than AC adapter
-                    next_input_current = (uint16_t)res;
-                } else {
-                    // Use default input current if USB-PD charger provides more
-                    next_input_current = CHARGER_INPUT_CURRENT;
-                }
+                // Default current in case we can't get a value from controller
+                next_input_current = CHARGER_INPUT_CURRENT;
+                next_input_voltage = BATTERY_CHARGER_VOLTAGE_PD;
+            }
+        }
+
+        if (wait_for_contract) {
+            int16_t res = usbpd_current_limit();
+            if (res < 0) {
+                return;
+            } else if (res < CHARGER_INPUT_CURRENT) {
+                // Use USB-PD charger current if it provides less than AC adapter
+                next_input_current = (uint16_t)res;
+                wait_for_contract = 0;
+            } else {
+                // Use default input current if USB-PD charger provides more
+                next_input_current = CHARGER_INPUT_CURRENT;
+                wait_for_contract = 0;
             }
         }
 
@@ -154,10 +187,12 @@ void usbpd_event(void) {
 
         if (next_input_current != battery_charger_input_current) {
             battery_charger_input_current = next_input_current;
+            battery_charger_input_voltage = next_input_voltage;
             DEBUG("CHARGER LIMIT %d mA\n", battery_charger_input_current);
 
             // Disable smart charger so it is reconfigured with the new limit
             battery_charger_disable();
+            power_peci_limit(ac_in);
         }
     }
 

@@ -19,6 +19,7 @@ extern struct Gpio __code CPU_C10_GATE_N;
 extern struct Gpio __code DD_ON;
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;
+#define JACK_IN_N SINK_CTRL // XXX no way to tell if both adapters are in at once
 extern struct Gpio __code LAN_WAKEUP_N;
 extern struct Gpio __code LED_ACIN;
 #define HAVE_LED_AIRPLANE_N 0
@@ -39,6 +40,7 @@ extern struct Gpio __code SCI_N;
 extern struct Gpio __code SLP_S0_N;
 extern struct Gpio __code SLP_SUS_N;
 extern struct Gpio __code SMI_N;
+extern struct Gpio __code SINK_CTRL;
 extern struct Gpio __code SUSB_N_PCH;
 extern struct Gpio __code SUSC_N_PCH;
 #define HAVE_SUSWARN_N 0
