@@ -23,7 +23,7 @@ VERSION?=$(DATE)_$(REV)
 
 # Set build directory
 obj = build
-BUILD = $(obj)/$(BOARD)/$(VERSION)
+BUILD = $(obj)/$(BOARD)
 
 # Default target - build the board's EC firmware
 all: $(BUILD)/ec.rom
