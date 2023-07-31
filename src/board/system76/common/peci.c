@@ -60,13 +60,6 @@ static struct Fan __code FAN = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
-#if CONFIG_PECI_OVER_ESPI
-
-// Maximum OOB channel response time in ms
-#define PECI_ESPI_TIMEOUT 10
-
-void peci_init(void) {}
-
 // Returns true if peci is available
 bool peci_available(void) {
     // Ensure power state is up to date
@@ -76,6 +69,7 @@ bool peci_available(void) {
     if (power_state != POWER_STATE_S0)
         return false;
 
+#if CONFIG_BUS_ESPI
     // Currently waiting for host reset, PECI is not available
     if (espi_host_reset)
         return false;
@@ -88,7 +82,18 @@ bool peci_available(void) {
     // If VW_HOST_C10 virtual wire is VWS_HIGH, PECI will wake the CPU
     //TODO: wake CPU every 8 seconds following Intel recommendation?
     return (vw_get(&VW_HOST_C10) != VWS_HIGH);
+#else
+    // PECI is available if PLTRST# is high
+    return gpio_get(&BUF_PLT_RST_N);
+#endif // CONFIG_BUS_ESPI
 }
+
+#if CONFIG_PECI_OVER_ESPI
+
+// Maximum OOB channel response time in ms
+#define PECI_ESPI_TIMEOUT 10
+
+void peci_init(void) {}
 
 // Returns true on success, false on error
 bool peci_get_temp(int16_t *data) {
@@ -281,19 +286,6 @@ void peci_init(void) {
     HOCTL2R = 0x01;
     // Set VTT to 1V
     PADCTLR = 0x02;
-}
-
-// Returns true if peci is available
-bool peci_available(void) {
-    // Ensure power state is up to date
-    update_power_state();
-
-    // Power state must be S0 for PECI to be useful
-    if (power_state != POWER_STATE_S0)
-        return false;
-
-    // PECI is available if PLTRST# is high
-    return gpio_get(&BUF_PLT_RST_N);
 }
 
 // Returns true on success, false on error
