@@ -1,11 +1,23 @@
 # Debugging the EC firmware
-
 Terms used:
 - *target*: The laptop system that has the EC to be tested
 - *host*: The system that will have all devices connected to it and
     will receive the EC logs
 
-## Parallel port
+## Debugging with target device
+1. Install dependencies
+    ```bash
+    ./scripts/deps.sh
+    ```
+1. Start the console
+    ```bash
+    make BOARD=system76/<model> console_internal
+    ```
+1. If you're not seeing seeing expected output, check the [log level cflag](https://github.com/system76/ec/blob/master/src/board/system76/common/common.mk#L31-L39). This is an EC compile time configuration and changing will require a build and flash of the EC. You can override this in the untracked `./config.mk` file for example.
+
+## Debugging with external device
+
+### Parallel port
 
 This method replaces the keyboard with a device used for debug logging.
 An alternate method of interacting with the target is needed; e.g., an
@@ -20,7 +32,7 @@ Requirements:
 For details on configuring the Mega 2560 and breakout board, see
 [mega2560](./mega2560.md).
 
-### Setup
+#### Setup
 
 1. Enable parallel port debugging in the EC firmware
     - Uncomment `PARALLEL_DEBUG` in `src/board/system76/common/common.mk`
@@ -46,12 +58,12 @@ To return the Mega 2560 to host mode, reset the device.
 
 If logs are corrupted, try power cycling the Mega or reseating the cable.
 
-## I2C connection
+### I2C connection
 
 **Failure to follow steps in order, or performing steps on an
 unsupported board, may result in damaged board components.**
 
-### Wiring the target
+#### Wiring the target
 
 The I2C connection is made through the battery pins. Find the pins marked
 `SMC_BAT` (clock) and `SMD_BAT` (data) in the service manual.
@@ -86,7 +98,7 @@ oryp7       | 6         | 5
 9. Reconnect battery
 10. Replace bottom panel
 
-### Setup
+#### Setup
 
 Requirements:
 - Target wired for EC debugging
