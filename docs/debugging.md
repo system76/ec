@@ -1,10 +1,13 @@
 # Debugging the EC firmware
+
 Terms used:
 - *target*: The laptop system that has the EC to be tested
 - *host*: The system that will have all devices connected to it and
     will receive the EC logs
 
 ## Debugging with target device
+
+[log_cflag]: https://github.com/system76/ec/blob/master/src/board/system76/common/common.mk#L31-L39
 1. Install dependencies
     ```bash
     ./scripts/deps.sh
@@ -13,7 +16,9 @@ Terms used:
     ```bash
     make BOARD=system76/<model> console_internal
     ```
-1. If you're not seeing seeing expected output, check the [log level cflag](https://github.com/system76/ec/blob/master/src/board/system76/common/common.mk#L31-L39). This is an EC compile time configuration and changing will require a build and flash of the EC. You can override this in the untracked `./config.mk` file for example.
+1. If you're not seeing seeing expected output, check the
+  [log level cflag][log_cflag]. This is an EC compile time configuration and
+  changing will require a build and flash of the EC.
 
 ## Debugging with external device
 
