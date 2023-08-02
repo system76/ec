@@ -7,7 +7,6 @@ Terms used:
 
 ## Debugging with target device
 
-[log_cflag]: https://github.com/system76/ec/blob/master/src/board/system76/common/common.mk#L31-L39
 1. Install dependencies
     ```bash
     ./scripts/deps.sh
@@ -17,8 +16,10 @@ Terms used:
     make BOARD=system76/<model> console_internal
     ```
 1. If you're not seeing seeing expected output, check the
-  [log level cflag][log_cflag]. This is an EC compile time configuration and
+  [`LEVEL` cflag][level_cflag]. This is an EC compile time configuration and
   changing will require a build and flash of the EC.
+
+[level_cflag]: https://github.com/system76/ec/blob/01907011bb63/src/board/system76/common/common.mk#L31-L39
 
 ## Debugging with external device
 
