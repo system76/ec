@@ -71,7 +71,7 @@ if [ "$EC_BOARD_VENDOR" = "novacustom" ] ; then
 fi
 
 docker run --rm -v "$PWD":"$PWD" -w "$PWD" -u "$(id -u)" \
-  ghcr.io/dasharo/ec-sdk:main make BOARD=${EC_BOARD_VENDOR}/${EC_BOARD_MODEL}
+  ghcr.io/dasharo/ec-sdk:main make BOARD="${EC_BOARD_VENDOR}/${EC_BOARD_MODEL}"
 errorCheck "Failed to build EC fimware"
 
 cp "$EC_ROM" "$EC_ARTIFACT"
