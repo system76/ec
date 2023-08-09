@@ -25,11 +25,17 @@ enum {
     USBPD_ERR_I2C = 0x2000,
     // Incorrect register length
     USBPD_ERR_REG_LEN = 0x3000,
-    // Augumented PDO was received (unimplemented)
-    USBPD_ERR_PDO_TYPE_AUG = 0x4000,
-    // Battery PDO was received (unimplemented)
-    USBPD_ERR_PDO_TYPE_BAT = 0x5000,
+    // Unsupported PDO type was received
+    USBPD_ERR_PDO_TYPE_UNSUP = 0x4000,
 };
+
+#define PDO_KIND(pdo) ((uint8_t)((pdo) >> 30 & 0b11))
+#define PDO_KIND_FIXED 0b00
+#define PDO_KIND_BATTERY 0b01
+#define PDO_KIND_VARIABLE 0b10
+#define PDO_KIND_AUGUMENTED 0b11
+
+#define PDO_CURRENT_MA(pdo) (((pdo)&0x3FF) * 10)
 
 static int16_t usbpd_current_limit(void) {
     uint8_t value[7] = { 0 };
@@ -41,37 +47,22 @@ static int16_t usbpd_current_limit(void) {
             if (!pdo)
                 return -USBPD_ERR_PDO_ZERO;
             DEBUG("USBPD PDO %08lX ", pdo);
-            uint8_t kind = (uint8_t)((pdo >> 30) & 0b11);
-            if (kind == 0b00) {
+            if (PDO_KIND(pdo) == PDO_KIND_FIXED) {
                 DEBUG("FIX ");
-                uint32_t current_ma = (pdo & 0x3FF) * 10;
-                DEBUG("%ld.%03ld A ", current_ma / 1000, current_ma % 1000);
-                uint32_t voltage_mv = ((pdo >> 10) & 0x3FF) * 50;
-                DEBUG("%ld.%03ld V\n", voltage_mv / 1000, voltage_mv % 1000);
-                return (int16_t)current_ma;
-            } else if (kind == 0b01) {
+                DEBUG("%ld.%03ld A ", PDO_CURRENT_MA(pdo) / 1000, PDO_CURRENT_MA(pdo) % 1000);
+                return (int16_t)PDO_CURRENT_MA(pdo);
+            } else if (PDO_KIND(pdo) == PDO_KIND_BATTERY) {
                 DEBUG("BAT ");
-                uint32_t power_mw = (pdo & 0x3FF) * 250;
-                DEBUG("%ld.%03ld W ", power_mw / 1000, power_mw % 1000);
-                uint32_t min_voltage_mv = ((pdo >> 10) & 0x3FF) * 50;
-                DEBUG("%ld.%03ld Vmin ", min_voltage_mv / 1000, min_voltage_mv % 1000);
-                uint32_t max_voltage_mv = ((pdo >> 20) & 0x3FF) * 50;
-                DEBUG("%ld.%03ld Vax\n", max_voltage_mv / 1000, max_voltage_mv % 1000);
                 //TODO
-                return -USBPD_ERR_PDO_TYPE_BAT;
-            } else if (kind == 0b10) {
+                return -USBPD_ERR_PDO_TYPE_UNSUP;
+            } else if (PDO_KIND(pdo) == PDO_KIND_VARIABLE) {
                 DEBUG("VAR ");
-                uint32_t current_ma = (pdo & 0x3FF) * 10;
-                DEBUG("%ld.%03ld A ", current_ma / 1000, current_ma % 1000);
-                uint32_t min_voltage_mv = ((pdo >> 10) & 0x3FF) * 50;
-                DEBUG("%ld.%03ld Vmin ", min_voltage_mv / 1000, min_voltage_mv % 1000);
-                uint32_t max_voltage_mv = ((pdo >> 20) & 0x3FF) * 50;
-                DEBUG("%ld.%03ld Vax\n", max_voltage_mv / 1000, max_voltage_mv % 1000);
-                return (int16_t)current_ma;
+                DEBUG("%ld.%03ld A ", PDO_CURRENT_MA(pdo) / 1000, PDO_CURRENT_MA(pdo) % 1000);
+                return (int16_t)PDO_CURRENT_MA(pdo);
             } else {
                 DEBUG("AUG\n");
                 //TODO
-                return -USBPD_ERR_PDO_TYPE_AUG;
+                return -USBPD_ERR_PDO_TYPE_UNSUP;
             }
         } else {
             return -(USBPD_ERR_REG_LEN | (int16_t)value[0]);
