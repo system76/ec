@@ -17,7 +17,7 @@ void ec_init(void) {
 }
 
 void ec_read_post_codes(void) {
-#if CONFIG_EC_ITE_IT5570E
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
     while (P80H81HS & 1) {
         uint8_t p80h = P80HD;
         uint8_t p81h = P81HD;

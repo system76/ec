@@ -38,7 +38,7 @@ static const struct IrqGroup irqs[] = {
     IRQ_GROUP(16),
     IRQ_GROUP(17),
     IRQ_GROUP(18),
-#if CONFIG_EC_ITE_IT5570E
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
     IRQ_GROUP(19),
     IRQ_GROUP(20),
     IRQ_GROUP(21),

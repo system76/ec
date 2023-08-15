@@ -21,6 +21,10 @@ CFLAGS+=-DCONFIG_EC_ITE_IT5570E=1
 # 0x0E00-0x1000 is used for AP communication. So this is brought down to 2048,
 # which matches IT8587E limits
 SRAM_SIZE=2048
+else ifeq ($(CONFIG_EC_ITE_IT5571E), y)
+# The IT5571E is effectively the same as the IT5570E.
+CFLAGS+=-DCONFIG_EC_ITE_IT5571E=1
+SRAM_SIZE=2048
 else
 $(error Unsupported EC)
 endif

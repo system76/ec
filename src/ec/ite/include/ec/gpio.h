@@ -58,7 +58,7 @@ volatile uint8_t __xdata __at(0x16FE) GCR15;
 volatile uint8_t __xdata __at(0x16E0) GCR16;
 volatile uint8_t __xdata __at(0x16E1) GCR17;
 volatile uint8_t __xdata __at(0x16E2) GCR18;
-#if CONFIG_EC_ITE_IT5570E
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
 volatile uint8_t __xdata __at(0x16E4) GCR19;
 volatile uint8_t __xdata __at(0x16E5) GCR20;
 volatile uint8_t __xdata __at(0x16E6) GCR21;

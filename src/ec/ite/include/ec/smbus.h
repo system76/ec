@@ -95,7 +95,7 @@ volatile uint8_t __xdata __at(0x1C44) RESLADR2B;
 // SMCLK timing setting for channel B
 volatile uint8_t __xdata __at(0x1C41) SCLKTSB;
 
-#if CONFIG_EC_ITE_IT5570E
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
 // Host status for channel E
 volatile uint8_t __xdata __at(0x1CA0) HOSTAE;
 // Host control for channel E

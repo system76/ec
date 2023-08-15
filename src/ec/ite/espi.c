@@ -2,7 +2,7 @@
 
 #include <ec/espi.h>
 
-#if CONFIG_EC_ITE_IT5570E
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
 
 // Not all wires are defined or implemented
 // Index 2 - AP to EC
@@ -68,4 +68,4 @@ void vw_set(struct VirtualWire *vw, enum VirtualWireState state) __critical {
     *vw->index = index;
 }
 
-#endif // CONFIG_EC_ITE_IT5570E
+#endif // CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
