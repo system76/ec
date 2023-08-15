@@ -32,7 +32,7 @@ struct I2C __code I2C_1 = {
     .trasla = TRASLAB,
 };
 
-#if CONFIG_EC_ITE_IT5570E
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
 struct I2C __code I2C_4 = {
     .hosta = HOSTAE,
     .hoctl = HOCTLE,
