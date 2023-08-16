@@ -46,11 +46,11 @@
 #define CHARGE_CURRENT_MASK 0x1FC0
 
 #if CHARGER_BATTERY_RSENSE == 5
-    #define CHARGE_CURRENT (MIN((CHARGER_CHARGE_CURRENT >> 1), CHARGE_CURRENT_MASK) & CHARGE_CURRENT_MASK)
+    #define CHARGE_CURRENT(c) (MIN(((c) >> 1), CHARGE_CURRENT_MASK) & CHARGE_CURRENT_MASK)
 #elif CHARGER_BATTERY_RSENSE == 10
-    #define CHARGE_CURRENT (MIN(CHARGER_CHARGE_CURRENT, CHARGE_CURRENT_MASK) & CHARGE_CURRENT_MASK)
+    #define CHARGE_CURRENT(c) (MIN(c, CHARGE_CURRENT_MASK) & CHARGE_CURRENT_MASK)
 #elif CHARGER_BATTERY_RSENSE == 20
-    #define CHARGE_CURRENT (MIN((CHARGER_CHARGE_CURRENT << 1), CHARGE_CURRENT_MASK) & CHARGE_CURRENT_MASK)
+    #define CHARGE_CURRENT(c) (MIN(((c) << 1), CHARGE_CURRENT_MASK) & CHARGE_CURRENT_MASK)
 #else
     #error Invalid battery RSENSE value
 #endif
@@ -124,6 +124,15 @@ int16_t battery_charger_disable(void) {
     return 0;
 }
 
+// Determine the current to use for charging.
+static int16_t battery_charger_current(void) {
+    if (battery_info.charge < 10 || battery_info.charge > 90) {
+        return CHARGE_CURRENT(CHARGER_CHARGE_CURRENT >> 1);
+    } else {
+        return CHARGE_CURRENT(CHARGER_CHARGE_CURRENT);
+    }
+}
+
 int16_t battery_charger_enable(void) {
     int16_t res = 0;
 
@@ -135,7 +144,7 @@ int16_t battery_charger_enable(void) {
         return res;
 
     // Set charge current in mA
-    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, CHARGE_CURRENT);
+    res = smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, battery_charger_current());
     if (res < 0)
         return res;
 
@@ -174,6 +183,11 @@ int16_t battery_charger_enable(void) {
 
 void battery_charger_event(void) {
     //TODO: watchdog
+
+    if (charger_enabled) {
+        // Set charge current in mA
+        (void)smbus_write(CHARGER_ADDRESS, REG_CHARGE_CURRENT, battery_charger_current());
+    }
 }
 
 void battery_debug(void) {
