@@ -75,6 +75,23 @@ int16_t battery_charger_configure(void) {
     return battery_charger_disable();
 }
 
+void battery_limit_capacity(void) {
+    // Clevo requires limiting charge to 90% of the SBS reported capacity.
+    battery_info.full_capacity = ((uint32_t)battery_info.full_capacity * 90) / 100;
+
+    // XXX: RemainingCapacity() must *exactly* equal FullChargeCapacity() when
+    // "full" for Linux to report battery as fully charged.
+    battery_info.remaining_capacity = MIN(
+        battery_info.remaining_capacity,
+        battery_info.full_capacity
+    );
+
+    // Manual calculate RSoC based on the new FullChargeCapacity()
+    battery_info.charge = ((uint32_t)battery_info.remaining_capacity * 100) /
+        battery_info.full_capacity;
+    battery_info.charge = MIN(100, battery_info.charge);
+}
+
 void battery_event(void) {
     int16_t res = 0;
 
@@ -101,6 +118,7 @@ void battery_event(void) {
 
     TRACE("BAT %d mV %d mA\n", battery_info.voltage, battery_info.current);
 
+    battery_limit_capacity();
     battery_charger_event();
 }
 
