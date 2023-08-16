@@ -57,8 +57,8 @@ int16_t battery_charger_configure(void) {
     static bool should_charge = true;
 
     if (battery_get_end_threshold() == BATTERY_END_DEFAULT) {
-        // Stop threshold not configured: Always charge on AC.
-        should_charge = true;
+        // Stop threshold not configured: Charge on AC if not full.
+        should_charge = !(battery_info.status & BATTERY_FULLY_CHARGED);
     } else if (battery_info.charge > battery_get_end_threshold()) {
         // Stop threshold configured: Stop charging at threshold.
         should_charge = false;
@@ -90,6 +90,10 @@ void battery_limit_capacity(void) {
     battery_info.charge = ((uint32_t)battery_info.remaining_capacity * 100) /
         battery_info.full_capacity;
     battery_info.charge = MIN(100, battery_info.charge);
+
+    // Override status bit to lie about being fully charged
+    if (battery_info.charge == 100)
+        battery_info.status |= BATTERY_FULLY_CHARGED;
 }
 
 void battery_event(void) {

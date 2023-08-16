@@ -16,6 +16,9 @@
 #define CHARGER_ADDRESS 0x09
 #endif
 
+#define BATTERY_FULLY_DISCHARGED BIT(4)
+#define BATTERY_FULLY_CHARGED BIT(5)
+#define BATTERY_DISCHARGING BIT(6)
 #define BATTERY_INITIALIZED BIT(7)
 
 struct battery_info {
