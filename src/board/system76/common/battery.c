@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/battery.h>
+#include <board/gpio.h>
 #include <board/smbus.h>
 #include <common/debug.h>
 
@@ -55,8 +56,14 @@ bool battery_set_end_threshold(uint8_t value) {
  */
 int16_t battery_charger_configure(void) {
     static bool should_charge = true;
+    bool ac_present = !gpio_get(&ACIN_N);
 
-    if (battery_get_end_threshold() == BATTERY_END_DEFAULT) {
+    if (!ac_present || (battery_info.status & BATTERY_FULLY_CHARGED)) {
+        // Always disable charger if:
+        // - AC is not plugged in, or
+        // - Battery is fully charged
+        should_charge = false;
+    } else if (battery_get_end_threshold() == BATTERY_END_DEFAULT) {
         // Stop threshold not configured: Always charge on AC.
         should_charge = true;
     } else if (battery_info.charge > battery_get_end_threshold()) {
