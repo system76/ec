@@ -29,13 +29,13 @@ enum {
     USBPD_ERR_PDO_TYPE_UNSUP = 0x4000,
 };
 
-#define PDO_KIND(pdo) ((uint8_t)((pdo) >> 30 & 0b11))
+#define PDO_KIND(pdo) ((uint8_t)((pdo) >> 30 & 3))
 
 enum {
-    PDO_KIND_FIXED = 0b00,
-    PDO_KIND_BATTERY = 0b01,
-    PDO_KIND_VARIABLE = 0b10,
-    PDO_KIND_AUGUMENTED = 0b11,
+    PDO_KIND_FIXED = 0,
+    PDO_KIND_BATTERY,
+    PDO_KIND_VARIABLE,
+    PDO_KIND_AUGUMENTED,
 };
 
 #define PDO_CURRENT_MA(pdo) (((pdo)&0x3FF) * 10)
