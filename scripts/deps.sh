@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Install dependencies for development.
+
+# shellcheck disable=SC1091
+
 set -eE
 
 function msg {
@@ -72,26 +76,4 @@ git submodule update --init --recursive
 msg "Installing git hooks"
 make git-config
 
-RUSTUP_NEW_INSTALL=0
-if which rustup &> /dev/null; then
-    msg "Updating rustup"
-    rustup self update
-else
-    RUSTUP_NEW_INSTALL=1
-    msg "Installing Rust"
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-      | sh -s -- -y --default-toolchain none
-
-    msg "Loading Rust environment"
-    source "${HOME}/.cargo/env"
-fi
-
-msg "Installing pinned Rust toolchain and components"
-rustup show
-
-if [[ $RUSTUP_NEW_INSTALL = 1 ]]; then
-    msg "rustup was just installed. Ensure cargo is on the PATH with:"
-    echo -e "    source ~/.cargo/env\n"
-fi
-
-msg "\x1B[32mSuccessfully installed dependencies"
+./scripts/install-rust.sh
