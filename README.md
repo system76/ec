@@ -14,10 +14,11 @@ laptops.
 
 ## Quickstart
 
-Install dependencies using the provided script.
+Install GNU Make, then install the rest of the dependencies and set up the
+environment for development using the Make target.
 
 ```sh
-./scripts/deps.sh
+make set-up
 ```
 
 If rustup was installed as part of this, then the correct `cargo` will not be

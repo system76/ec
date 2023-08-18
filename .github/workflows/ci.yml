@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: ./scripts/deps.sh
+        run: make install-deps
 
       - name:  Check SPDX tags
         run: ./scripts/lint/01-spdx-tags.sh
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: ./scripts/deps.sh
+        run: make install-deps
 
       - name: Build tool
         run: cargo build ${{ matrix.features }} --release --manifest-path tool/Cargo.toml
@@ -57,7 +57,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: ./scripts/deps.sh
+        run: make install-deps
 
       - name: Build firmware
         run: make BOARD=${{ matrix.boards }} VERBOSE=1

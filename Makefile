@@ -88,11 +88,29 @@ list-boards:
 		echo "$$(dirname "$$board")"; \
 	done
 
-# This target is run during setup, and is not shown in the help text.
-.PHONY: git-config
-git-config:
+# Install all development dependencies
+.PHONY: install-deps
+install-deps: install-sys-deps install-rust
+
+# Install system dependencies
+.PHONY: install-sys-deps
+install-sys-deps:
+	./scripts/install-deps.sh
+
+# Install Rust via rustup
+.PHONY: install-rust
+install-rust:
+	./scripts/install-rust.sh
+
+# Install git hooks for development
+.PHONY: install-git-config
+install-git-config:
 	$(eval HOOKS = "$(shell git rev-parse --git-dir)/hooks")
 	ln -sfrv scripts/hooks/pre-commit.sh "$(HOOKS)/pre-commit"
+
+# Set up a new system for development
+.PHONY: set-up
+set-up: install-deps install-git-hooks
 
 .PHONY: help
 help:
@@ -102,4 +120,7 @@ help:
 	@echo "    clean                Remove build artifacts"
 	@echo "    fmt                  Format the source code"
 	@echo "    lint                 Run lint checks"
+	@echo "    install-deps         Install development dependencies"
+	@echo "    install-git-hooks    Install git hooks for development"
+	@echo "    set-up               Set up a new system for development"
 	@echo "    help                 Print this message"

@@ -7,15 +7,7 @@
 
 set -eE
 
-function msg {
-  echo -e "\x1B[1m$*\x1B[0m" >&2
-}
-
-trap 'msg "\x1B[31mFailed to install dependencies!"' ERR
-
-source /etc/os-release
-
-msg "Installing system build dependencies"
+. /etc/os-release
 if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
     sudo apt-get update
     sudo apt-get install \
@@ -65,15 +57,10 @@ elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         systemd-libs \
         vim
 else
-    msg "Please add support for your distribution to:"
-    msg "scripts/deps.sh"
+    printf "\e[1m\e[31munsupported host:\e[0m %s\n" "${ID}"
     exit 1
 fi
 
-msg "Initializing submodules"
-git submodule update --init --recursive
-
-msg "Installing git hooks"
-make git-config
-
-./scripts/install-rust.sh
+if [ -z "$CI" ]; then
+    git submodule update --init --recursive
+fi
