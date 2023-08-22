@@ -30,6 +30,7 @@
 #endif // CONFIG_SECURITY
 
 #endif // !defined(__SCRATCH__)
+#include <board/gpio.h>
 #include <board/smfi.h>
 #include <common/command.h>
 #include <common/macro.h>
@@ -293,6 +294,14 @@ static enum Result cmd_fan_curve_set(void) {
     }
     return RES_OK;
 }
+
+static enum Result cmd_camera_enablement_set(void)
+{
+    gpio_set(&CCD_EN, smfi_cmd[SMFI_CMD_DATA]);
+
+    return RES_OK;
+}
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -443,6 +452,9 @@ void smfi_event(void) {
         case CMD_FAN_CURVE_SET:
             smfi_cmd[SMFI_CMD_RES] = cmd_fan_curve_set();
             break;
+        case CMD_CAMERA_ENABLEMENT_SET:
+                smfi_cmd[SMFI_CMD_RES] = cmd_camera_enablement_set();
+                break;
 #if CONFIG_SECURITY
         case CMD_SECURITY_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_security_get();
