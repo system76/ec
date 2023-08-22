@@ -30,6 +30,7 @@
 #endif // CONFIG_SECURITY
 
 #endif // !defined(__SCRATCH__)
+#include <board/gpio.h>
 #include <board/smfi.h>
 #include <common/command.h>
 #include <common/macro.h>
@@ -298,69 +299,69 @@ static enum Result cmd_fan_curve_set(void) {
 static enum Result cmd_camera_enablement_set(void)
 {
     camera_switch_enabled = smfi_cmd[SMFI_CMD_DATA];
-    gpio_set(&CCD_EN, smfi_cmd[SMFI_CMD_DATA]);
+gpio_set(&CCD_EN, smfi_cmd[SMFI_CMD_DATA]);
 
-    return RES_OK;
+return RES_OK;
 }
 
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
 static enum Result cmd_spi_scratch(void) __critical {
-    uint8_t flags = smfi_cmd[SMFI_CMD_DATA];
-    uint8_t len = smfi_cmd[SMFI_CMD_DATA + 1];
+uint8_t flags = smfi_cmd[SMFI_CMD_DATA];
+uint8_t len = smfi_cmd[SMFI_CMD_DATA + 1];
 
-    // Enable chip
-    if (flags & CMD_SPI_FLAG_BACKUP) {
-        ECINDAR3 = 0xFF;
+// Enable chip
+if (flags & CMD_SPI_FLAG_BACKUP) {
+    ECINDAR3 = 0xFF;
+} else {
+    ECINDAR3 = 0x7F;
+}
+ECINDAR2 = 0xFF;
+ECINDAR1 = 0xFD;
+ECINDAR0 = 0x00;
+
+// Read or write len bytes
+uint8_t i;
+for (i = 0; (i < len) && ((i + SMFI_CMD_DATA + 2) < ARRAY_SIZE(smfi_cmd)); i++) {
+    if (flags & CMD_SPI_FLAG_READ) {
+        smfi_cmd[i + SMFI_CMD_DATA + 2] = ECINDDR;
     } else {
-        ECINDAR3 = 0x7F;
+        ECINDDR = smfi_cmd[i + SMFI_CMD_DATA + 2];
     }
-    ECINDAR2 = 0xFF;
-    ECINDAR1 = 0xFD;
-    ECINDAR0 = 0x00;
+}
 
-    // Read or write len bytes
-    uint8_t i;
-    for (i = 0; (i < len) && ((i + SMFI_CMD_DATA + 2) < ARRAY_SIZE(smfi_cmd)); i++) {
-        if (flags & CMD_SPI_FLAG_READ) {
-            smfi_cmd[i + SMFI_CMD_DATA + 2] = ECINDDR;
-        } else {
-            ECINDDR = smfi_cmd[i + SMFI_CMD_DATA + 2];
-        }
-    }
+// Set actually read/written count
+smfi_cmd[SMFI_CMD_DATA + 1] = i;
 
-    // Set actually read/written count
-    smfi_cmd[SMFI_CMD_DATA + 1] = i;
+if (flags & CMD_SPI_FLAG_DISABLE) {
+    // Disable chip
+    ECINDAR1 = 0xFE;
+    ECINDDR = 0;
+}
 
-    if (flags & CMD_SPI_FLAG_DISABLE) {
-        // Disable chip
-        ECINDAR1 = 0xFE;
-        ECINDDR = 0;
-    }
-
-    return RES_OK;
+return RES_OK;
 }
 #endif // defined(__SCRATCH__)
 
 static enum Result cmd_spi(void) {
 #if defined(__SCRATCH__)
-    return cmd_spi_scratch();
+return cmd_spi_scratch();
 #else // defined(__SCRATCH__)
 
 #if CONFIG_SECURITY
-    if (security_get() != SECURITY_STATE_UNLOCK) {
-        // EC must be unlocked to allow flashing
-        return RES_ERR;
-    }
+if (security_get() != SECURITY_STATE_UNLOCK) {
+    // EC must be unlocked to allow flashing
+    return RES_ERR;
+}
 #endif // CONFIG_SECURITY
 
-    if (smfi_cmd[SMFI_CMD_DATA] & CMD_SPI_FLAG_SCRATCH) {
-        scratch_trampoline();
-    }
+if (smfi_cmd[SMFI_CMD_DATA] & CMD_SPI_FLAG_SCRATCH) {
+    scratch_trampoline();
+}
 
-    // Cannot use follow mode unless running from scratch rom
-    return RES_ERR;
+// Cannot use follow mode unless running from scratch rom
+return RES_ERR;
 #endif // defined(__SCRATCH__)
 }
 
@@ -368,37 +369,37 @@ static enum Result cmd_reset(void) {
 #if !defined(__SCRATCH__)
 
 #if CONFIG_SECURITY
-    if (security_get() != SECURITY_STATE_UNLOCK) {
-        // EC must be unlocked to allow watchdog reset
-        return RES_ERR;
-    }
+if (security_get() != SECURITY_STATE_UNLOCK) {
+    // EC must be unlocked to allow watchdog reset
+    return RES_ERR;
+}
 #endif // CONFIG_SECURITY
 
 #endif // !defined(__SCRATCH__)
 
-    // Attempt to trigger watchdog reset
-    ETWCFG |= BIT(5);
-    EWDKEYR = 0;
+// Attempt to trigger watchdog reset
+ETWCFG |= BIT(5);
+EWDKEYR = 0;
 
-    // Failed if it got this far
-    return RES_ERR;
+// Failed if it got this far
+return RES_ERR;
 }
 
 // Set a watchdog timer of 10 seconds
 void smfi_watchdog(void) {
-    ET1CNTLLR = 0xFF;
-    EWDCNTLLR = 0xFF;
-    EWDCNTLHR = 0x04;
+ET1CNTLLR = 0xFF;
+EWDCNTLLR = 0xFF;
+EWDCNTLHR = 0x04;
 }
 
 void smfi_event(void) {
-    if (smfi_cmd[SMFI_CMD_CMD]) {
+if (smfi_cmd[SMFI_CMD_CMD]) {
 #if defined(__SCRATCH__)
-        // If in scratch ROM, restart watchdog timer when command received
-        smfi_watchdog();
+    // If in scratch ROM, restart watchdog timer when command received
+    smfi_watchdog();
 #endif
 
-        switch (smfi_cmd[SMFI_CMD_CMD]) {
+    switch (smfi_cmd[SMFI_CMD_CMD]) {
 #if !defined(__SCRATCH__)
         case CMD_PROBE:
             // Signature
@@ -453,6 +454,9 @@ void smfi_event(void) {
         case CMD_FAN_CURVE_SET:
             smfi_cmd[SMFI_CMD_RES] = cmd_fan_curve_set();
             break;
+         case CMD_CAMERA_ENABLEMENT_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_camera_enablement_set();
+            break;
 #if CONFIG_SECURITY
         case CMD_SECURITY_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_security_get();
@@ -461,7 +465,6 @@ void smfi_event(void) {
             smfi_cmd[SMFI_CMD_RES] = cmd_security_set();
             break;
 #endif // CONFIG_SECURITY
-
 #endif // !defined(__SCRATCH__)
         case CMD_SPI:
             smfi_cmd[SMFI_CMD_RES] = cmd_spi();

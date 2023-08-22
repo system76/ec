@@ -52,6 +52,8 @@ enum Command {
     CMD_SECURITY_GET = 21,
     // Set security state
     CMD_SECURITY_SET = 22,
+    // Set camera enablement
+    CMD_CAMERA_ENABLEMENT_SET = 23
     //TODO
 };
 
