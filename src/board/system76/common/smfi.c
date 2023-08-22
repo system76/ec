@@ -35,6 +35,7 @@
 #include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <board/kbscan.h>
 #include <ec/etwd.h>
 #include <ec/pwm.h>
 
@@ -297,6 +298,7 @@ static enum Result cmd_fan_curve_set(void) {
 
 static enum Result cmd_camera_enablement_set(void)
 {
+    camera_switch_enabled = smfi_cmd[SMFI_CMD_DATA];
     gpio_set(&CCD_EN, smfi_cmd[SMFI_CMD_DATA]);
 
     return RES_OK;
