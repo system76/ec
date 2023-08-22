@@ -25,6 +25,7 @@
     #include <board/dgpu.h>
     #include <board/fan.h>
 #endif
+#include <board/gpio.h>
 #include <board/smfi.h>
 #include <common/command.h>
 #include <common/macro.h>
@@ -273,6 +274,14 @@ static enum Result cmd_fan_curve_set(void) {
     }
     return RES_OK;
 }
+
+static enum Result cmd_camera_enablement_set(void)
+{
+    gpio_set(&CCD_EN, smfi_cmd[SMFI_CMD_DATA]);
+
+    return RES_OK;
+}
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -403,6 +412,9 @@ void smfi_event(void) {
                 break;
             case CMD_FAN_CURVE_SET:
                 smfi_cmd[SMFI_CMD_RES] = cmd_fan_curve_set();
+                break;
+            case CMD_CAMERA_ENABLEMENT_SET:
+                smfi_cmd[SMFI_CMD_RES] = cmd_camera_enablement_set();
                 break;
 #endif // !defined(__SCRATCH__)
             case CMD_SPI:

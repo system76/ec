@@ -48,6 +48,8 @@ enum Command {
     CMD_SET_NO_INPUT = 19,
     // Set fan curve
     CMD_FAN_CURVE_SET = 20,
+    // Set camera enablement
+    CMD_CAMERA_ENABLEMENT_SET = 21
     //TODO
 };
 
