@@ -31,6 +31,8 @@ uint8_t kbscan_matrix[KM_OUT] = { 0 };
 
 uint8_t sci_extra = 0;
 
+bool camera_switch_enabled = true;
+
 static inline bool matrix_position_is_esc(uint8_t row, uint8_t col) {
     return (row == MATRIX_ESC_OUTPUT) && (col == MATRIX_ESC_INPUT);
 }
@@ -170,8 +172,9 @@ static void hardware_hotkey(uint16_t key) {
         gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
         break;
     case K_CAMERA_TOGGLE:
-        gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
-        break;
+       if(camera_switch_enabled)
+           gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
+       break;
     case K_FAN_TOGGLE:
         fan_max = !fan_max;
         break;
