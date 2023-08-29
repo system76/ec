@@ -28,6 +28,7 @@ FMT_OPTS=(
 _output=$(clang-format "${FMT_OPTS[@]}" "${FILES[@]}" 2>&1)
 if [[ $_output != "" ]]; then
     failed
+    echo "$_output"
     exit 1
 fi
 
