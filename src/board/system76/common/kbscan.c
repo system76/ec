@@ -172,7 +172,7 @@ static void hardware_hotkey(uint16_t key) {
         gpio_set(&BKL_EN, !gpio_get(&BKL_EN));
         break;
     case K_CAMERA_TOGGLE:
-        if(camera_switch_enabled)
+        if (camera_switch_enabled)
             gpio_set(&CCD_EN, !gpio_get(&CCD_EN));
         break;
     case K_FAN_TOGGLE:

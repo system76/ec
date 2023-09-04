@@ -296,8 +296,7 @@ static enum Result cmd_fan_curve_set(void) {
     return RES_OK;
 }
 
-static enum Result cmd_camera_enablement_set(void)
-{
+static enum Result cmd_camera_enablement_set(void) {
     camera_switch_enabled = smfi_cmd[SMFI_CMD_DATA];
     gpio_set(&CCD_EN, smfi_cmd[SMFI_CMD_DATA]);
 
@@ -455,8 +454,8 @@ void smfi_event(void) {
             smfi_cmd[SMFI_CMD_RES] = cmd_fan_curve_set();
             break;
         case CMD_CAMERA_ENABLEMENT_SET:
-                smfi_cmd[SMFI_CMD_RES] = cmd_camera_enablement_set();
-                break;
+            smfi_cmd[SMFI_CMD_RES] = cmd_camera_enablement_set();
+            break;
 #if CONFIG_SECURITY
         case CMD_SECURITY_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_security_get();
