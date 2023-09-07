@@ -21,7 +21,7 @@
 #endif // KM_NKEY
 
 // Debounce time in milliseconds
-#define DEBOUNCE_DELAY 5
+#define DEBOUNCE_DELAY 10
 
 // Deselect all columns for reading
 #define KBSCAN_MATRIX_NONE 0xFF
