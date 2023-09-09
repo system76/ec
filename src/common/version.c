@@ -17,10 +17,10 @@ static const char __code VERSION[] =
     xstr(__FIRMWARE_VERSION__);
 // clang-format on
 
-const char *board() {
+const char *board(void) {
     return &BOARD[11];
 }
 
-const char *version() {
+const char *version(void) {
     return &VERSION[13];
 }

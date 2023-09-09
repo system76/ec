@@ -41,7 +41,7 @@ void pnp_write(uint8_t reg, uint8_t data) {
     ec2i_write(0x2F, data);
 }
 
-void pnp_enable() {
+void pnp_enable(void) {
     DEBUG("Enable PNP devices\n");
 
     // Enable PMC1
