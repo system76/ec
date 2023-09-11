@@ -53,7 +53,9 @@ enum Command {
     // Set security state
     CMD_SECURITY_SET = 22,
     // Set camera enablement
-    CMD_CAMERA_ENABLEMENT_SET = 23
+    CMD_CAMERA_ENABLEMENT_SET = 23,
+    // Set WiFi + Bluetooth card enablement
+    CMD_WIFI_BT_ENABLEMENT_SET = 24,
     //TODO
 };
 

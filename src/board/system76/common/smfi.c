@@ -24,6 +24,7 @@
 #include <board/peci.h>
 #include <board/dgpu.h>
 #include <board/fan.h>
+#include <board/wireless.h>
 
 #if CONFIG_SECURITY
 #include <board/security.h>
@@ -303,6 +304,12 @@ static enum Result cmd_camera_enablement_set(void) {
     return RES_OK;
 }
 
+static enum Result cmd_wifi_bt_enablement_set(void) {
+    wireless_power(smfi_cmd[SMFI_CMD_DATA]);
+    printk(smfi_cmd[SMFI_CMD_DATA] ? "WIRELESS ENABLED\n" : "WIRELESS DISABLED");
+    return RES_OK;
+}
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -455,6 +462,9 @@ void smfi_event(void) {
             break;
         case CMD_CAMERA_ENABLEMENT_SET:
             smfi_cmd[SMFI_CMD_RES] = cmd_camera_enablement_set();
+            break;
+        case CMD_WIFI_BT_ENABLEMENT_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_wifi_bt_enablement_set();
             break;
 #if CONFIG_SECURITY
         case CMD_SECURITY_GET:
