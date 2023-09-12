@@ -5,7 +5,10 @@ CFLAGS += -MMD -Os -fstack-usage -Wall -Werror \
 	-Wl,--gc-sections -Wl,-u,vfprintf -lprintf_flt
 
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=105523
-ifneq ($(findstring 12.,$(shell avr-gcc --version 2>/dev/null)),)
+_gcc_version = $(shell avr-gcc --version 2>/dev/null)
+ifneq ($(findstring 12.,$(_gcc_version)),)
+CFLAGS += --param=min-pagesize=0
+else ifneq ($(findstring 13.,$(_gcc_version)),)
 CFLAGS += --param=min-pagesize=0
 endif
 
