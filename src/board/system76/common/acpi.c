@@ -39,10 +39,9 @@ void fcommand(void) {
         case 0x01:
             fbuf[0] = kbled_get();
             break;
-        // Enable / disable LED
-        case 0x02:
-            kbled_enable(!!fbuf[0]);
-            break;
+        // Get type
+        case 2:
+            fbuf[0] = kbled_kind;
         // Set LED color
         case 0x03:
             kbled_set_color(
@@ -57,6 +56,10 @@ void fcommand(void) {
             fbuf[2] = (color & 0x00ff00) >> 8;
             break;
         }
+        // Enable / disable LED
+        case 0x05:
+            kbled_enable(!!fbuf[0]);
+            break;
         break;
     }
 }
