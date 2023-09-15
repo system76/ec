@@ -25,6 +25,7 @@
 #include <board/dgpu.h>
 #include <board/fan.h>
 #include <board/wireless.h>
+#include <common/debug.h>
 
 #if CONFIG_SECURITY
 #include <board/security.h>
@@ -306,7 +307,7 @@ static enum Result cmd_camera_enablement_set(void) {
 
 static enum Result cmd_wifi_bt_enablement_set(void) {
     wireless_power(smfi_cmd[SMFI_CMD_DATA]);
-    printk(smfi_cmd[SMFI_CMD_DATA] ? "WIRELESS ENABLED\n" : "WIRELESS DISABLED");
+    TRACE("WIRELESS %sABLED\n", smfi_cmd[SMFI_CMD_DATA] ? "EN" : "DIS");
     return RES_OK;
 }
 
