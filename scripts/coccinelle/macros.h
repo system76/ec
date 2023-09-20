@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
-// SDCC extenstions that need to be defined away for spatch
+// SDCC extensions that need to be defined away for spatch
 
 #define __at(x)
 #define __code

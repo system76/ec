@@ -43,10 +43,10 @@ void flash_write_enable(void);
  * NOTE: This *must* be the first function in this file to ensure that it is placed
  *          first in the resulting binary. This is required to ensure that address
  *          matches the address (FLASH_OFFSET) for flash_entry in wrapper.c.
- * NOTE: __reentrant so that parameters and temperary vairables are placed on the
+ * NOTE: __reentrant so that parameters and temporary variables are placed on the
  *          stack, ensuring the main application __data variables are not stomped on.
  * NOTE: __critical to ensure interrupts are disabled. This does mean that interrupt
- *          such as the timer will be block until flash acccess is complete
+ *          such as the timer will be block until flash access is complete
  */
 // clang-format off
 void flash_entry(uint32_t addr, uint8_t *data, uint32_t length, uint8_t command) __reentrant __critical {

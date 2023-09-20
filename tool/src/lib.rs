@@ -2,7 +2,7 @@
 
 //! Library for accessing System76 ECs
 //! First, construct an access method, using an object implementing the `Access` trait. Next, an Ec
-//! object can be contructed, which exposes the command interface.
+//! object can be constructed, which exposes the command interface.
 //!
 //! There are some differences between targets and features that are listed below:
 //!  - `AccessHid` requires the `hidapi` feature. Only functional on USB ECs.

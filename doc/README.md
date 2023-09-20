@@ -1,4 +1,4 @@
-# System76 EC documetation
+# System76 EC documentation
 
 ## TODO
 

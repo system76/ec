@@ -129,7 +129,7 @@ static int16_t i2c_transaction(struct I2C *i2c, uint8_t *data, uint16_t length, 
         uint32_t timeout = I2C_TIMEOUT;
         for (timeout = I2C_TIMEOUT; timeout > 0; timeout--) {
             status = *(i2c->hosta);
-            // If error occured, kill transaction and return error
+            // If error occurred, kill transaction and return error
             if (status & HOSTA_ERR) {
                 i2c_reset(i2c, true);
                 return -(int16_t)(status);
@@ -139,7 +139,7 @@ static int16_t i2c_transaction(struct I2C *i2c, uint8_t *data, uint16_t length, 
                     break;
                 }
         }
-        // If timeout occured, kill transaction and return error
+        // If timeout occurred, kill transaction and return error
         if (timeout == 0) {
             i2c_reset(i2c, true);
             return -(0x1000 | (int16_t)status);
