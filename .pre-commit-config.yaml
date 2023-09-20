@@ -6,6 +6,8 @@ default_install_hook_types: [pre-commit, commit-msg]
 ci:
   autoupdate_commit_msg: 'pre-commit: autoupdate hooks'
   autofix_prs: false
+  # docker is not supported on pre-commit.ci
+  skip: [shellcheck]
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
