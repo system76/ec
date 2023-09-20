@@ -1,0 +1,51 @@
+---
+default_stages: [pre-commit]
+
+default_install_hook_types: [pre-commit, commit-msg]
+
+ci:
+  autoupdate_commit_msg: 'pre-commit: autoupdate hooks'
+  autofix_prs: false
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+
+  - repo: https://github.com/talos-systems/conform
+    rev: v0.1.0-alpha.27
+    hooks:
+      - id: conform
+        stages:
+          - commit-msg
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.5
+    hooks:
+      - id: codespell
+
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: v0.9.0
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning"]
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: 'v16.0.6'  # Use the sha / tag you want to point at
+    hooks:
+      - id: clang-format
+
+  - repo: local
+    hooks:
+      - id: spdx-tags
+        name: Runs 01-spdx-tags.sh script
+        entry: scripts/lint/01-spdx-tags.sh
+        language: script
+        types: [file]

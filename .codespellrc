@@ -1,0 +1,3 @@
+[codespell]
+exclude-file = .codespellx
+ignore-words = .codespelli

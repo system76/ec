@@ -1,0 +1,16 @@
+---
+policies:
+  - type: commit
+    spec:
+      header:
+        length: 80
+        imperative: false
+        invalidLastCharacters: .
+      body:
+        required: false
+      dco: true
+      gpg:
+        required: true
+      spellcheck:
+        locale: US
+      maximumOfOneCommit: false
