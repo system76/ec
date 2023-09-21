@@ -11,6 +11,7 @@
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/lid.h>
+#include <board/options.h>
 #include <board/peci.h>
 #include <board/power.h>
 #include <board/pmc.h>
@@ -441,6 +442,20 @@ void power_event(void) {
             // Set CPU power limit to AC limit
             //TODO: if this returns false, retry?
             power_peci_limit(true);
+            if (options_get(OPT_POWER_ON_AC) == 1) {
+                switch (power_state) {
+                case POWER_STATE_OFF:
+                    power_on();
+                    break;
+                case POWER_STATE_S5:
+                    GPIO_SET_DEBUG(PWR_BTN_N, false);
+                    delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
+                    GPIO_SET_DEBUG(PWR_BTN_N, true);
+                    break;
+                default:
+                    break;
+                }
+            }
         }
         battery_debug();
 
