@@ -14,6 +14,7 @@ board-common-y += kbscan.c
 board-common-y += keymap.c
 board-common-y += lid.c
 board-common-y += main.c
+board-common-y += options.c
 board-common-y += parallel.c
 board-common-y += peci.c
 board-common-y += pmc.c
@@ -35,13 +36,13 @@ board-common-y += wireless.c
 # 3 - INFO
 # 4 - DEBUG
 # 5 - TRACE
-CFLAGS+=-DLEVEL=5
+CFLAGS+=-DLEVEL=0
 
 # Uncomment to enable debug logging over keyboard parallel port
-CFLAGS+=-DPARALLEL_DEBUG
+#CFLAGS+=-DPARALLEL_DEBUG
 
 # Uncomment to enable I2C debug on 0x76
-#CFLAGS+=-DI2C_DEBUGGER=0x76
+CFLAGS+=-DI2C_DEBUGGER=0x76
 
 ifeq ($(CONFIG_SECURITY),y)
 CFLAGS+=-DCONFIG_SECURITY=1

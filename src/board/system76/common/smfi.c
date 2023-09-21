@@ -37,6 +37,7 @@
 #include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <board/options.h>
 #include <board/kbscan.h>
 #include <ec/etwd.h>
 #include <ec/pwm.h>
@@ -311,6 +312,15 @@ static enum Result cmd_wifi_bt_enablement_set(void) {
     return RES_OK;
 }
 
+static enum Result cmd_option_get(void) {
+    smfi_cmd[SMFI_CMD_DATA] = options_get(smfi_cmd[SMFI_CMD_DATA]);
+    return RES_OK;
+}
+
+static enum Result cmd_option_set(void) {
+    return !options_set(smfi_cmd[SMFI_CMD_DATA], smfi_cmd[SMFI_CMD_DATA + 1]);
+}
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -466,6 +476,12 @@ void smfi_event(void) {
             break;
         case CMD_WIFI_BT_ENABLEMENT_SET:
             smfi_cmd[SMFI_CMD_RES] = cmd_wifi_bt_enablement_set();
+            break;
+        case CMD_OPTION_GET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_option_get();
+            break;
+        case CMD_OPTION_SET:
+            smfi_cmd[SMFI_CMD_RES] = cmd_option_set();
             break;
 #if CONFIG_SECURITY
         case CMD_SECURITY_GET:

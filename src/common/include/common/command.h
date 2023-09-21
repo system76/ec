@@ -56,6 +56,10 @@ enum Command {
     CMD_CAMERA_ENABLEMENT_SET = 23,
     // Set WiFi + Bluetooth card enablement
     CMD_WIFI_BT_ENABLEMENT_SET = 24,
+    // Get a persistent option by index
+    CMD_OPTION_GET = 25,
+    // Set a persistent option by index
+    CMD_OPTION_SET = 26,
     //TODO
 };
 
