@@ -55,11 +55,11 @@ void fcommand(void) {
             fbuf[1] = (color & 0xff0000) >> 16;
             fbuf[2] = (color & 0x00ff00) >> 8;
             break;
-        }
         // Enable / disable LED
         case 0x05:
             kbled_enable(!!fbuf[0]);
             break;
+        }
         break;
     }
 }
