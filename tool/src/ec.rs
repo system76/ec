@@ -14,7 +14,7 @@ use crate::{
     SpiTarget,
 };
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
 enum Cmd {
     // None = 0,
@@ -46,7 +46,7 @@ const CMD_SPI_FLAG_DISABLE: u8 = 1 << 1;
 const CMD_SPI_FLAG_SCRATCH: u8 = 1 << 2;
 const CMD_SPI_FLAG_BACKUP: u8 = 1 << 3;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
 pub enum SecurityState {
     // Default value, flashing is prevented, cannot be set with security_set

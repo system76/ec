@@ -21,7 +21,7 @@ pub trait Spi {
 }
 
 /// Target which will receive SPI commands
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SpiTarget {
     /// The ROM normally used by the EC
     Main,
