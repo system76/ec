@@ -158,7 +158,7 @@ impl Access for AccessLpcLinux {
         }
 
         // Write command byte, which starts command
-        self.write_cmd(SMFI_CMD_CMD, cmd as u8)?;
+        self.write_cmd(SMFI_CMD_CMD, cmd)?;
 
         // Wait for command to finish with timeout
         self.timeout.reset();

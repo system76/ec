@@ -35,7 +35,7 @@ impl AccessLpcSim {
 
     fn transaction(&mut self, kind: u8, addr: u16, value: u8) -> io::Result<u8> {
         let addr = addr.to_le_bytes();
-        let request = [kind as u8, addr[0], addr[1], value];
+        let request = [kind, addr[0], addr[1], value];
         if self.socket.send(&request)? != request.len() {
             return Err(io::Error::new(
                 io::ErrorKind::UnexpectedEof,
@@ -99,7 +99,7 @@ impl Access for AccessLpcSim {
         }
 
         // Write command byte, which starts command
-        self.write_cmd(SMFI_CMD_CMD, cmd as u8)?;
+        self.write_cmd(SMFI_CMD_CMD, cmd)?;
 
         // Wait for command to finish with timeout
         self.timeout.reset();
