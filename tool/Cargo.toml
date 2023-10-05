@@ -1,7 +1,7 @@
 [package]
 name = "system76_ectool"
 version = "0.3.8"
-edition = "2018"
+edition = "2021"
 description = "System76 EC tool"
 license = "MIT"
 authors = ["Jeremy Soller <jeremy@system76.com>"]
@@ -18,7 +18,8 @@ required-features = ["std", "hidapi", "clap"]
 [dependencies]
 clap = { version = "3.2", optional = true }
 libc = { version = "0.2", optional = true }
-hidapi = { version = "1.4", default-features = false, features = ["linux-shared-hidraw"], optional = true }
+# NOTE: Upgrading to 2.x blocked on Ubuntu shipping newer hidapi
+hidapi = { version = "1.5", default-features = false, features = ["linux-shared-hidraw"], optional = true }
 redox_hwio = { version = "0.1.6", default-features = false, optional = true }
 downcast-rs = { version = "1.2.0", default-features = false }
 
@@ -28,6 +29,3 @@ std = ["libc", "downcast-rs/std"]
 
 [package.metadata.docs.rs]
 all-features = true
-
-[registries.crates-io]
-protocol = "sparse"
