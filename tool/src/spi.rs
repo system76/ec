@@ -154,6 +154,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
         //TODO: automatically detect write command
         match self.spi.target() {
             SpiTarget::Main => for (i, word) in data.chunks(2).enumerate() {
+                #[allow(clippy::get_first)]
                 let low = *word.get(0).unwrap_or(&0xFF);
                 let high = *word.get(1).unwrap_or(&0xFF);
 

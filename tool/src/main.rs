@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::uninlined_format_args)]
+
 use clap::{Arg, App, AppSettings, SubCommand};
 use ectool::{
     Access,
@@ -225,6 +227,7 @@ unsafe fn matrix(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
 
     let mut data = vec![0; data_size];
     ec.matrix_get(&mut data)?;
+    #[allow(clippy::get_first)]
     let rows = *data.get(0).unwrap_or(&0);
     let cols = *data.get(1).unwrap_or(&0);
     let mut byte = 2;
@@ -305,7 +308,7 @@ fn main() {
         .setting(AppSettings::SubcommandRequired)
         .arg(Arg::with_name("access")
             .long("access")
-            .possible_values(&["lpc-linux", "lpc-sim", "hid"])
+            .possible_values(["lpc-linux", "lpc-sim", "hid"])
             .default_value("lpc-linux")
         )
         .subcommand(SubCommand::with_name("console"))
@@ -386,13 +389,13 @@ fn main() {
         )
         .subcommand(SubCommand::with_name("set_no_input")
             .arg(Arg::with_name("value")
-                .possible_values(&["true", "false"])
+                .possible_values(["true", "false"])
                 .required(true)
             )
         )
         .subcommand(SubCommand::with_name("security")
             .arg(Arg::with_name("state")
-                .possible_values(&["lock", "unlock"])
+                .possible_values(["lock", "unlock"])
             )
         )
         .get_matches();
