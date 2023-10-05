@@ -428,7 +428,7 @@ fn main() {
                             _ => {},
                         }
                     }
-                    Err(hidapi::HidError::OpenHidDeviceError.into())
+                    Err(hidapi::HidError::HidApiErrorEmpty.into())
                 }
                 _ => unreachable!(),
             }
