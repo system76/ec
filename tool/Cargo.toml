@@ -16,7 +16,7 @@ name = "system76_ectool"
 required-features = ["std", "hidapi", "clap"]
 
 [dependencies]
-clap = { version = "3.2", optional = true }
+clap = { version = "3.2", features = ["derive"], optional = true }
 libc = { version = "0.2", optional = true }
 # NOTE: Upgrading to 2.x blocked on Ubuntu shipping newer hidapi
 hidapi = { version = "1.5", default-features = false, features = ["linux-shared-hidraw"], optional = true }
