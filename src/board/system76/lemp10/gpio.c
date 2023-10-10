@@ -67,8 +67,7 @@ void gpio_init() {
     GPDRD = BIT(5) | BIT(4);
     // USB_PWR_EN#
     GPDRE = BIT(3);
-    // H_PECI
-    GPDRF = BIT(6);
+    GPDRF = 0;
     GPDRG = 0;
     GPDRH = 0;
     GPDRI = 0;
@@ -170,7 +169,7 @@ void gpio_init() {
     // TP_DATA
     GPCRF5 = GPIO_ALT | GPIO_UP;
     // H_PECI
-    GPCRF6 = GPIO_ALT;
+    GPCRF6 = GPIO_IN | GPIO_DOWN;
     // CPU_C10_GATE#
     GPCRF7 = GPIO_IN | GPIO_DOWN;
     // VCCIN_AUX_PG

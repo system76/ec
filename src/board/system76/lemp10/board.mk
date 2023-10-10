@@ -8,6 +8,7 @@ CONFIG_EC_ITE_IT5570E=y
 
 # Enable eSPI
 CONFIG_BUS_ESPI=y
+CONFIG_PECI_OVER_ESPI=y
 
 # Include keyboard
 KEYBOARD=14in_83
