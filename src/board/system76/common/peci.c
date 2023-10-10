@@ -33,6 +33,9 @@ int16_t peci_temp = 0;
 
 #define PECI_TEMP(X) ((int16_t)(X))
 
+// Maximum OOB channel response time in ms
+#define PECI_ESPI_TIMEOUT 10
+
 // clang-format off
 #define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
 // clang-format on
@@ -89,9 +92,6 @@ bool peci_available(void) {
 }
 
 #if CONFIG_PECI_OVER_ESPI
-
-// Maximum OOB channel response time in ms
-#define PECI_ESPI_TIMEOUT 10
 
 void peci_init(void) {}
 
@@ -291,7 +291,14 @@ void peci_init(void) {
 // Returns true on success, false on error
 bool peci_get_temp(int16_t *data) {
     // Wait for any in-progress transaction to complete
-    while (HOSTAR & BIT(0)) {}
+    uint32_t start = time_get();
+    while (HOSTAR & BIT(0)) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("%s: host timeout\n", __func__);
+            return false;
+        }
+    }
+
     // Clear status
     HOSTAR = HOSTAR;
 
@@ -309,7 +316,13 @@ bool peci_get_temp(int16_t *data) {
     HOCTLR |= 1;
 
     // Wait for command completion
-    while (!(HOSTAR & BIT(1))) {}
+    start = time_get();
+    while (!(HOSTAR & BIT(1))) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("%s: command timeout\n", __func__);
+            return false;
+        }
+    }
 
     uint8_t status = HOSTAR;
     if (status & 0xEC) {
@@ -333,7 +346,14 @@ bool peci_get_temp(int16_t *data) {
 // negative (0x1000 | status register) on PECI hardware error
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Wait for any in-progress transaction to complete
-    while (HOSTAR & BIT(0)) {}
+    uint32_t start = time_get();
+    while (HOSTAR & BIT(0)) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("%s: host timeout\n", __func__);
+            return false;
+        }
+    }
+
     // Clear status
     HOSTAR = HOSTAR;
 
@@ -365,7 +385,13 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     HOCTLR |= 1;
 
     // Wait for command completion
-    while (!(HOSTAR & BIT(1))) {}
+    start = time_get();
+    while (!(HOSTAR & BIT(1))) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("%s: command timeout\n", __func__);
+            return false;
+        }
+    }
 
     uint8_t status = HOSTAR;
     if (status & 0xEC) {
