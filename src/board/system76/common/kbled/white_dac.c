@@ -20,9 +20,7 @@ void kbled_init(void) {
 }
 
 void kbled_reset(void) {
-    kbled_set_brightness(options_get(OPT_KBLED_BRIGHTNESS));
-    if (gpio_get(&LID_SW_N))
-        kbled_enable(true);
+    kbled_restore();
 }
 
 uint8_t kbled_get(void) {

@@ -23,6 +23,7 @@ uint32_t kbled_get_color(void);
 void kbled_set_color(uint32_t color);
 
 // Provided by common code
+void kbled_restore(void);
 void kbled_enable(bool enabled);
 void kbled_set_brightness(uint8_t value);
 void kbled_hotkey_color(void);

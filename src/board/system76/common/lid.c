@@ -26,8 +26,6 @@ void lid_event(void) {
                 pmc_swi();
                 lid_wake = false;
             }
-
-            kbled_enable(true);
         } else {
             DEBUG("closed\n");
 

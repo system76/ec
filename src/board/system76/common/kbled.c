@@ -44,6 +44,11 @@ static const uint32_t __code COLORS[] = {
 static bool enabled = false;
 static uint8_t brightness = 0;
 
+void kbled_restore(void) {
+    kbled_set_brightness(options_get(OPT_KBLED_BRIGHTNESS));
+    kbled_set_color(COLORS[options_get(OPT_KBLED_COLOR_I)]);
+}
+
 void kbled_enable(bool enable) {
     enabled = enable;
 
@@ -69,9 +74,7 @@ void kbled_hotkey_color(void) {
         COLOR_I = 0;
     }
     kbled_set_color(COLORS[COLOR_I]);
-    options_set(OPT_KBLED_COLOR_B, (uint8_t)COLORS[COLOR_I]);
-    options_set(OPT_KBLED_COLOR_G, (uint8_t)(COLORS[COLOR_I] >> 8));
-    options_set(OPT_KBLED_COLOR_R, (uint8_t)(COLORS[COLOR_I] >> 16));
+    options_set(OPT_KBLED_COLOR_I, COLOR_I);
 }
 
 void kbled_hotkey_down(void) {
