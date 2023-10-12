@@ -414,8 +414,8 @@ static void update_s0ix_state() {
     if (!gpio_get(&SLP_S0_N)) {
         last_sleep_time = time;
     }
-    // Allow for sub-500ms wakeups
-    in_s0ix = (time - last_sleep_time) < 500;
+    // Allow for sub-1s wakeups
+    in_s0ix = (time - last_sleep_time) < 1000;
 }
 #endif
 
@@ -659,6 +659,7 @@ void power_event(void) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
                 last_time = time;
             }
+            kbled_enable(false);
             gpio_set(&LED_ACIN, false);
         } else
 #endif
@@ -666,6 +667,9 @@ void power_event(void) {
             // CPU on, green light
             gpio_set(&LED_PWR, true);
             gpio_set(&LED_ACIN, false);
+
+            if (gpio_get(&LID_SW_N))
+                kbled_enable(true);
         }
     } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
@@ -674,6 +678,7 @@ void power_event(void) {
             last_time = time;
         }
         gpio_set(&LED_ACIN, false);
+        kbled_enable(false);
     } else if (!ac_new) {
         // AC plugged in, orange light
         gpio_set(&LED_PWR, false);
