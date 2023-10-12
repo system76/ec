@@ -11,6 +11,9 @@ ec-y += ps2.c
 ec-y += signature.c
 ec-y += wuc.c
 
+# Chip clock frequency: 9.2 MHz
+CFLAGS += -DCONFIG_CLOCK_FREQ_KHZ=9200
+
 ifeq ($(CONFIG_EC_ITE_IT8587E), y)
 CFLAGS+=-DCONFIG_EC_ITE_IT8587E=1
 # SRAM is 4096 bytes, but SRAM at address 2048 is used for scratch ROM
