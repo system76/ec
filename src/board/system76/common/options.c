@@ -6,11 +6,8 @@
 
 uint8_t __xdata OPTIONS[NUM_OPTIONS];
 uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = {
-    [OPT_POWER_ON_AC] = 0,
-    [OPT_KBLED_BRIGHTNESS] = 0xFF,
-    [OPT_KBLED_COLOR_I] = 0,
-    [OPT_BAT_THRESHOLD_START] = 95,
-    [OPT_BAT_THRESHOLD_STOP] = 98,
+    [OPT_POWER_ON_AC] = 0,          [OPT_KBLED_BRIGHTNESS] = 0xFF, [OPT_KBLED_COLOR_I] = 0,
+    [OPT_BAT_THRESHOLD_START] = 95, [OPT_BAT_THRESHOLD_STOP] = 98,
 };
 
 // Config is in the second to last sector of flash
@@ -52,13 +49,13 @@ static bool options_changed() {
     uint8_t current[NUM_OPTIONS];
     // Check if anything changed
     if (flash_read_u16(OPTIONS_ADDR) != OPTIONS_SIGNATURE) {
-        return(true);
+        return (true);
     } else {
         // Read the options if signature is valid
         flash_read(OPTIONS_ADDR + sizeof(OPTIONS_SIGNATURE), current, sizeof(current));
         for (uint8_t i = 0; i < NUM_OPTIONS; ++i) {
             if (current[i] != OPTIONS[i]) {
-                return(true);
+                return (true);
             }
         }
     }
