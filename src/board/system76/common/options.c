@@ -5,7 +5,15 @@
 #include <common/debug.h>
 
 uint8_t __xdata OPTIONS[NUM_OPTIONS];
-uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = { 0 };
+uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = {
+    [OPT_POWER_ON_AC] = 0,
+    [OPT_KBLED_BRIGHTNESS] = 0xFF,
+    [OPT_KBLED_COLOR_R] = 0xFF,
+    [OPT_KBLED_COLOR_G] = 0xFF,
+    [OPT_KBLED_COLOR_B] = 0xFF,
+    [OPT_BAT_THRESHOLD_START] = 95,
+    [OPT_BAT_THRESHOLD_STOP] = 98,
+};
 
 // Config is in the second to last sector of flash
 const uint32_t OPTIONS_ADDR = 0x1F800;
