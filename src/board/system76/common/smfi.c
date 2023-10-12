@@ -197,54 +197,6 @@ static enum Result cmd_keymap_set(void) {
     }
 }
 
-static enum Result cmd_led_get_value(void) {
-    uint8_t index = smfi_cmd[SMFI_CMD_DATA];
-    if (index == CMD_LED_INDEX_ALL) {
-        smfi_cmd[SMFI_CMD_DATA + 1] = kbled_get();
-        smfi_cmd[SMFI_CMD_DATA + 2] = kbled_max();
-        return RES_OK;
-    } else {
-        return RES_ERR;
-    }
-}
-
-static enum Result cmd_led_set_value(void) {
-    uint8_t index = smfi_cmd[SMFI_CMD_DATA];
-    if (index == CMD_LED_INDEX_ALL) {
-        kbled_set_brightness(smfi_cmd[SMFI_CMD_DATA + 1]);
-        return RES_OK;
-    } else {
-        return RES_ERR;
-    }
-}
-
-static enum Result cmd_led_get_color(void) {
-    uint8_t index = smfi_cmd[SMFI_CMD_DATA];
-    if (index == CMD_LED_INDEX_ALL) {
-        uint32_t color = kbled_get_color();
-        smfi_cmd[SMFI_CMD_DATA + 1] = (uint8_t)(color >> 16);
-        smfi_cmd[SMFI_CMD_DATA + 2] = (uint8_t)(color >> 8);
-        smfi_cmd[SMFI_CMD_DATA + 3] = (uint8_t)(color >> 0);
-        return RES_OK;
-    } else {
-        return RES_ERR;
-    }
-}
-
-static enum Result cmd_led_set_color(void) {
-    uint8_t index = smfi_cmd[SMFI_CMD_DATA];
-    if (index == CMD_LED_INDEX_ALL) {
-        kbled_set_color(
-            (((uint32_t)smfi_cmd[SMFI_CMD_DATA + 1]) << 16) |
-            (((uint32_t)smfi_cmd[SMFI_CMD_DATA + 2]) << 8) |
-            (((uint32_t)smfi_cmd[SMFI_CMD_DATA + 3]) << 0)
-        );
-        return RES_OK;
-    } else {
-        return RES_ERR;
-    }
-}
-
 static enum Result cmd_matrix_get(void) {
     smfi_cmd[SMFI_CMD_DATA] = KM_OUT;
     smfi_cmd[SMFI_CMD_DATA + 1] = KM_IN;
@@ -452,18 +404,6 @@ void smfi_event(void) {
             break;
         case CMD_KEYMAP_SET:
             smfi_cmd[SMFI_CMD_RES] = cmd_keymap_set();
-            break;
-        case CMD_LED_GET_VALUE:
-            smfi_cmd[SMFI_CMD_RES] = cmd_led_get_value();
-            break;
-        case CMD_LED_SET_VALUE:
-            smfi_cmd[SMFI_CMD_RES] = cmd_led_set_value();
-            break;
-        case CMD_LED_GET_COLOR:
-            smfi_cmd[SMFI_CMD_RES] = cmd_led_get_color();
-            break;
-        case CMD_LED_SET_COLOR:
-            smfi_cmd[SMFI_CMD_RES] = cmd_led_set_color();
             break;
         case CMD_MATRIX_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_matrix_get();

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/kbled.h>
+#include <board/options.h>
 #include <common/macro.h>
 
 enum KbledKind kbled_kind = KBLED_NONE;
@@ -58,6 +59,7 @@ void kbled_set_brightness(uint8_t value) {
     if (enabled) {
         kbled_set(brightness);
     }
+    options_set(OPT_KBLED_BRIGHTNESS, brightness);
 }
 
 void kbled_hotkey_color(void) {
@@ -67,6 +69,9 @@ void kbled_hotkey_color(void) {
         COLOR_I = 0;
     }
     kbled_set_color(COLORS[COLOR_I]);
+    options_set(OPT_KBLED_COLOR_B, (uint8_t)COLORS[COLOR_I]);
+    options_set(OPT_KBLED_COLOR_G, (uint8_t)(COLORS[COLOR_I] >> 8));
+    options_set(OPT_KBLED_COLOR_R, (uint8_t)(COLORS[COLOR_I] >> 16));
 }
 
 void kbled_hotkey_down(void) {

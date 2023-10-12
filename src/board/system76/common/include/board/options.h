@@ -8,12 +8,6 @@
 
 // Initialize the options
 void options_init(void);
-// Set the options to the default options
-void options_load_default(void);
-// Erase options in flash
-bool options_erase_config(void);
-// Load options from flash
-bool options_load_config(void);
 // Save options to flash
 bool options_save_config(void);
 // Get an option
@@ -23,6 +17,12 @@ bool options_set(uint16_t index, uint8_t value);
 
 enum {
     OPT_POWER_ON_AC = 0,
+    OPT_KBLED_BRIGHTNESS,
+    OPT_KBLED_COLOR_R,
+    OPT_KBLED_COLOR_G,
+    OPT_KBLED_COLOR_B,
+    OPT_BAT_THRESHOLD_START,
+    OPT_BAT_THRESHOLD_STOP,
     NUM_OPTIONS
 };
 

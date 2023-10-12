@@ -21,49 +21,6 @@ enum EcOs acpi_ecos = EC_OS_NONE;
 
 extern bool pmc_s0_hack;
 
-static uint8_t fcmd = 0;
-static uint8_t fdat = 0;
-static uint8_t fbuf[4] = { 0, 0, 0, 0 };
-
-void fcommand(void) {
-    uint32_t color;
-    switch (fcmd) {
-    // Keyboard backlight
-    case 0xCA:
-        switch (fdat) {
-        // Set LED brightness
-        case 0x00:
-            kbled_set_brightness(fbuf[0]);
-            break;
-        // Get LED brightness
-        case 0x01:
-            fbuf[0] = kbled_get();
-            break;
-        // Get type
-        case 2:
-            fbuf[0] = kbled_kind;
-        // Set LED color
-        case 0x03:
-            kbled_set_color(
-                ((uint32_t)fbuf[0]) | ((uint32_t)fbuf[1] << 16) | ((uint32_t)fbuf[2] << 8)
-            );
-            break;
-        // Get LED color
-        case 0x04:
-            color = kbled_get_color();
-            fbuf[0] = color & 0x0000ff;
-            fbuf[1] = (color & 0xff0000) >> 16;
-            fbuf[2] = (color & 0x00ff00) >> 8;
-            break;
-        // Enable / disable LED
-        case 0x05:
-            kbled_enable(!!fbuf[0]);
-            break;
-        }
-        break;
-    }
-}
-
 void acpi_reset(void) {
     // Disable lid wake
     lid_wake = false;
@@ -178,13 +135,6 @@ uint8_t acpi_read(uint8_t addr) {
 
         // Set size of flash (from old firmware)
         ACPI_8 (0xE5, 0x80);
-
-        ACPI_8 (0xF8, fcmd);
-        ACPI_8 (0xF9, fdat);
-        ACPI_8 (0xFA, fbuf[0]);
-        ACPI_8 (0xFB, fbuf[1]);
-        ACPI_8 (0xFC, fbuf[2]);
-        ACPI_8 (0xFD, fbuf[3]);
     }
 
     TRACE("acpi_read %02X = %02X\n", addr, data);
@@ -219,25 +169,5 @@ void acpi_write(uint8_t addr, uint8_t data) {
         gpio_set(&LED_AIRPLANE_N, !(bool)(data & BIT(6)));
         break;
 #endif
-
-    case 0xF8:
-        fcmd = data;
-        fcommand();
-        break;
-    case 0xF9:
-        fdat = data;
-        break;
-    case 0xFA:
-        fbuf[0] = data;
-        break;
-    case 0xFB:
-        fbuf[1] = data;
-        break;
-    case 0xFC:
-        fbuf[2] = data;
-        break;
-    case 0xFD:
-        fbuf[3] = data;
-        break;
     }
 }

@@ -185,16 +185,13 @@ static void hardware_hotkey(uint16_t key) {
         kbled_hotkey_color();
         break;
     case K_KBD_DOWN:
-        if (acpi_ecos != EC_OS_FULL)
-            kbled_hotkey_down();
+        kbled_hotkey_down();
         break;
     case K_KBD_UP:
-        if (acpi_ecos != EC_OS_FULL)
-            kbled_hotkey_up();
+        kbled_hotkey_up();
         break;
     case K_KBD_TOGGLE:
-        if (acpi_ecos != EC_OS_FULL)
-            kbled_hotkey_toggle();
+        kbled_hotkey_toggle();
         break;
     }
 }

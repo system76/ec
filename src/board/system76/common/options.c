@@ -12,27 +12,13 @@ const uint32_t OPTIONS_ADDR = 0x1F800;
 // Signature is the size of the config
 const uint16_t OPTIONS_SIGNATURE = sizeof(OPTIONS);
 
-void options_init(void) {
-    if (!options_load_config()) {
-        options_load_default();
-    }
-}
-
-void options_load_default(void) {
+static void options_load_default() {
     for (uint8_t opt = 0; opt < NUM_OPTIONS; opt++) {
         OPTIONS[opt] = DEFAULT_OPTIONS[opt];
     }
 }
 
-bool options_erase_config(void) {
-    // This will erase 1024 bytes
-    flash_erase(OPTIONS_ADDR);
-
-    // Verify signature is erased
-    return flash_read_u16(OPTIONS_ADDR) == 0xFFFF;
-}
-
-bool options_load_config(void) {
+static bool options_load_config() {
     // Check signature
     if (flash_read_u16(OPTIONS_ADDR) != OPTIONS_SIGNATURE)
         return false;
@@ -42,7 +28,42 @@ bool options_load_config(void) {
     return true;
 }
 
+static bool options_erase_config(void) {
+    // This will erase 1024 bytes
+    flash_erase(OPTIONS_ADDR);
+
+    // Verify signature is erased
+    return flash_read_u16(OPTIONS_ADDR) == 0xFFFF;
+}
+
+void options_init(void) {
+    if (!options_load_config()) {
+        options_load_default();
+    }
+}
+
+static bool options_changed() {
+    uint8_t current[NUM_OPTIONS];
+    // Check if anything changed
+    if (flash_read_u16(OPTIONS_ADDR) != OPTIONS_SIGNATURE) {
+        return(true);
+    } else {
+        // Read the options if signature is valid
+        flash_read(OPTIONS_ADDR + sizeof(OPTIONS_SIGNATURE), current, sizeof(current));
+        for (uint8_t i = 0; i < NUM_OPTIONS; ++i) {
+            if (current[i] != OPTIONS[i]) {
+                return(true);
+            }
+        }
+    }
+    return false;
+}
+
 bool options_save_config(void) {
+    // Bail if no settings changed to save flash write cycles
+    if (!options_changed())
+        return true;
+
     // Erase config region
     if (!options_erase_config())
         return false;
@@ -68,10 +89,10 @@ uint8_t options_get(uint16_t index) {
 }
 
 bool options_set(uint16_t index, uint8_t value) {
-    if (index < NUM_OPTIONS && OPTIONS[value] != value) {
+    if (index < NUM_OPTIONS) {
         OPTIONS[index] = value;
         TRACE("OPTION %x WRITE %x\n", index, value);
-        return options_save_config();
+        return true;
     } else {
         return false;
     }
