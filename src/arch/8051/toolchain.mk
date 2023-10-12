@@ -31,25 +31,25 @@ sim: $(BUILD)/ec.rom
 
 # Convert from Intel Hex file to binary file
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx
-	@echo "  OBJCOPY   $(subst $(obj)/,,$@)"
+	@echo "  OBJCOPY   $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	objcopy -I ihex -O binary --gap-fill=0xFF --pad-to=$(CONFIG_EC_FLASH_SIZE) $< $@
 
 # Link object files into Intel Hex file
 $(BUILD)/ec.ihx: $(OBJ)
-	@echo "  LINK      $(subst $(obj)/,,$@)"
+	@echo "  LINK      $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(CC) $(LDFLAGS) -o $@ $^
 
 # Compile ASM files into object files
 $(ASM_OBJ): $(BUILD)/%.rel: src/%.asm
-	@echo "  AS        $(subst $(obj)/,,$@)"
+	@echo "  AS        $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(AS) $(ASFLAGS) $@ $<
 
 # Compile C files into object files
 $(C_OBJ): $(BUILD)/%.rel: src/%.c $(INCLUDE)
-	@echo "  CC        $(subst $(obj)/,,$@)"
+	@echo "  CC        $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
 
