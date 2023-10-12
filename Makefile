@@ -10,6 +10,9 @@ ifneq ($(VERBOSE),1)
 MAKEFLAGS += -s
 endif
 
+# Set build directory
+BUILD = build
+
 # Parameter for current board
 ifeq ($(BOARD),)
 all:
@@ -20,10 +23,6 @@ else
 DATE=$(shell git show --format="%cs" --no-patch --no-show-signature)
 REV=$(shell git describe --abbrev=7 --always --dirty)
 VERSION?=$(DATE)_$(REV)
-
-# Set build directory
-obj = build
-BUILD = $(obj)/$(BOARD)
 
 # Default target - build the board's EC firmware
 all: $(BUILD)/ec.rom
@@ -72,7 +71,7 @@ docs:
 
 .PHONY: clean
 clean:
-	rm -rf $(obj)
+	rm -rf $(BUILD)
 
 .PHONY: fmt
 fmt:

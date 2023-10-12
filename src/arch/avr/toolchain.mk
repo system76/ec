@@ -22,25 +22,25 @@ sim: $(BUILD)/ec.elf
 
 # Convert from Intel Hex file to binary file
 $(BUILD)/ec.rom: $(BUILD)/ec.ihx
-	@echo "  OBJCOPY   $(subst $(obj)/,,$@)"
+	@echo "  OBJCOPY   $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(OBJCOPY) -I ihex -O binary --gap-fill 0xFF $< $@
 
 # Convert from ELF file to Intel Hex file
 $(BUILD)/ec.ihx: $(BUILD)/ec.elf
-	@echo "  OBJCOPY   $(subst $(obj)/,,$@)"
+	@echo "  OBJCOPY   $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(OBJCOPY) -j .text -j .data -O ihex $< $@
 
 # Link object files into ELF file
 $(BUILD)/ec.elf: $(OBJ)
-	@echo "  LINK      $(subst $(obj)/,,$@)"
+	@echo "  LINK      $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(CC) -o $@ $^
 
 # Compile C files into object files
 $(BUILD)/%.o: src/%.c $(INCLUDE)
-	@echo "  CC        $(subst $(obj)/,,$@)"
+	@echo "  CC        $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ -c $<
 

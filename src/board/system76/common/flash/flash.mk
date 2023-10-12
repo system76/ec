@@ -33,25 +33,25 @@ FLASH_CC=\
 
 # Convert from binary file to C header
 $(BUILD)/include/flash.h: $(FLASH_BUILD)/flash.rom
-	@echo "  XXD       $(subst $(obj)/,,$@)"
+	@echo "  XXD       $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	xxd -include < $< > $@
 
 # Convert from Intel Hex file to binary file
 $(FLASH_BUILD)/flash.rom: $(FLASH_BUILD)/flash.ihx
-	@echo "  OBJCOPY   $(subst $(obj)/,,$@)"
+	@echo "  OBJCOPY   $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	objcopy -I ihex -O binary $< $@
 
 # Link object files into Intel Hex file
 $(FLASH_BUILD)/flash.ihx: $(FLASH_OBJ)
-	@echo "  LINK      $(subst $(obj)/,,$@)"
+	@echo "  LINK      $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(FLASH_CC) -o $@ $^
 
 # Compile C files into object files
 $(FLASH_OBJ): $(FLASH_BUILD)/%.rel: src/%.c $(FLASH_INCLUDE)
-	@echo "  CC        $(subst $(obj)/,,$@)"
+	@echo "  CC        $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
 	$(FLASH_CC) $(FLASH_CFLAGS) -o $@ -c $<
 
