@@ -241,9 +241,7 @@ static enum Result cmd_matrix_get(void) {
     smfi_cmd[SMFI_CMD_DATA] = KM_OUT;
     smfi_cmd[SMFI_CMD_DATA + 1] = KM_IN;
     for (uint8_t row = 0; row < KM_OUT; row++) {
-        if ((SMFI_CMD_DATA + 2 + row) < ARRAY_SIZE(smfi_cmd)) {
-            smfi_cmd[SMFI_CMD_DATA + 2 + row] = kbscan_matrix[row];
-        }
+        smfi_cmd[SMFI_CMD_DATA + 2 + row] = kbscan_matrix[row];
     }
     return RES_OK;
 }
