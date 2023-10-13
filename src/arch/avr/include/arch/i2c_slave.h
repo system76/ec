@@ -9,6 +9,6 @@ void i2c_slave_init(
     void (*recv_cb)(uint8_t),
     uint8_t (*send_cb)()
 );
-void i2c_slave_stop();
+void i2c_slave_stop(void);
 
 #endif // _ARCH_I2C_SLAVE_H

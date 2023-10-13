@@ -40,7 +40,7 @@ void i2c_slave_init(
     sei();
 }
 
-void i2c_slave_stop() {
+void i2c_slave_stop(void) {
     // clear interrupts
     cli();
 

@@ -41,7 +41,7 @@ struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4); // renamed to EN_3V
 // clang-format on
 
-void gpio_init() {
+void gpio_init(void) {
     // PWRSW WDT 2 Enable 2
     GCR9 = BIT(5);
     // PWRSW WDT 2 Enable 1

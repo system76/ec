@@ -35,7 +35,7 @@ struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clang-format on
 
-void gpio_init() {
+void gpio_init(void) {
     // Not documented
     //GCR22 = BIT(7);
     GCR10 = 0x02;

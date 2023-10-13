@@ -42,7 +42,7 @@ struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clang-format on
 
-void gpio_init() {
+void gpio_init(void) {
     // Enable LPC reset on GPD2
     GCR = 0x04;
     // Enable SMBus channel 4
