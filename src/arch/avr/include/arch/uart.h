@@ -21,7 +21,7 @@ struct Uart {
 
 void uart_init(struct Uart *uart, uint32_t baud);
 
-int16_t uart_count();
+int16_t uart_count(void);
 struct Uart *uart_new(int16_t num);
 
 uint8_t uart_can_read(struct Uart *uart);

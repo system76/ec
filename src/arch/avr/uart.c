@@ -42,7 +42,7 @@
 #endif
 // clang-format on
 
-int16_t uart_count() {
+int16_t uart_count(void) {
     return sizeof(UARTS) / sizeof(struct Uart);
 }
 

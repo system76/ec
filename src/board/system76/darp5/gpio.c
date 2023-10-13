@@ -45,7 +45,7 @@ struct Gpio __code WLAN_EN =        GPIO(H, 5);
 struct Gpio __code WLAN_PWR_EN =    GPIO(J, 4);
 // clang-format on
 
-void gpio_init() {
+void gpio_init(void) {
     // Enable LPC reset on GPD2
     GCR = 0x04;
 
