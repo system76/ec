@@ -340,7 +340,7 @@ void power_off(void) {
 
 bool power_peci_limit(bool ac) {
     if (peci_available()) {
-        uint32_t watts;
+        uint32_t watts = 0;
 
         if (ac) {
             // AC adapter rating with a 15% margin for conversion  losses & spikes
@@ -348,9 +348,11 @@ bool power_peci_limit(bool ac) {
             // TODO handle this differently for models with HPB enabled
             watts = (uint32_t)battery_charger_input_current *
                 (uint32_t)battery_charger_input_voltage * 85 / 100000;
-        } else {
-            watts = POWER_LIMIT_DC;
         }
+
+        // In the absence of AC adapter params, default to DC limits for safety.
+        if (!ac || !watts)
+            watts = POWER_LIMIT_DC;
 
         uint8_t retry = 10;
         uint16_t res;
