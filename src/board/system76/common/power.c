@@ -131,7 +131,8 @@ extern uint8_t main_cycle;
 enum PowerState power_state = POWER_STATE_OFF;
 
 #if USE_S0IX
-bool in_s0ix = false;
+bool pep_in_s0ix = false;
+bool pep_display_on = true;
 #endif
 
 enum PowerState calculate_power_state(void) {
@@ -408,28 +409,11 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
-#if USE_S0IX
-static void update_s0ix_state() {
-    uint32_t time = time_get();
-    static uint32_t last_sleep_time = 0;
-
-    if (!gpio_get(&SLP_S0_N)) {
-        last_sleep_time = time;
-    }
-    // Allow for sub-1s wakeups
-    in_s0ix = (time - last_sleep_time) < 1000;
-}
-#endif
-
 void power_event(void) {
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
     static bool ac_last = true;
     bool ac_new = gpio_get(&ACIN_N);
-
-#if USE_S0IX
-    update_s0ix_state();
-#endif
 
     if (ac_new != ac_last) {
         // Set CPU power limit to DC limit until we determine available current
@@ -655,7 +639,7 @@ void power_event(void) {
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
 #if USE_S0IX
-        if (in_s0ix) {
+        if (pep_in_s0ix) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
@@ -670,8 +654,10 @@ void power_event(void) {
             gpio_set(&LED_PWR, true);
             gpio_set(&LED_ACIN, false);
 
-            if (gpio_get(&LID_SW_N))
+            if (gpio_get(&LID_SW_N) && pep_display_on)
                 kbled_enable(true);
+            else
+                kbled_enable(false);
         }
     } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light

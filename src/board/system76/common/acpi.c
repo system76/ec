@@ -7,6 +7,7 @@
 #include <board/kbled.h>
 #include <board/lid.h>
 #include <board/peci.h>
+#include <board/power.h>
 #include <common/macro.h>
 #include <common/debug.h>
 #include <ec/pwm.h>
@@ -133,8 +134,13 @@ uint8_t acpi_read(uint8_t addr) {
             break;
 #endif // HAVE_LED_AIRPLANE_N
 
-        // Set size of flash (from old firmware)
-        ACPI_8 (0xE5, 0x80);
+        // S0ix hook
+        case 0xE0:
+            data = pep_in_s0ix;
+            break;
+        case 0xE1:
+            data = pep_display_on;
+            break;
     }
 
     TRACE("acpi_read %02X = %02X\n", addr, data);
@@ -169,5 +175,13 @@ void acpi_write(uint8_t addr, uint8_t data) {
         gpio_set(&LED_AIRPLANE_N, !(bool)(data & BIT(6)));
         break;
 #endif
+    // S0ix hook
+    case 0xE0:
+        pep_in_s0ix = !!data;
+        break;
+    // Display hook
+    case 0xE1:
+        pep_display_on = !!data;
+        break;
     }
 }
