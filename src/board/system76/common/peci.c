@@ -350,58 +350,64 @@ bool peci_get_temp(int16_t *data) {
 // Returns positive completion code on success, negative completion code or
 // negative (0x1000 | status register) on PECI hardware error
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
-    // Wait for any in-progress transaction to complete
-    while (HOSTAR & BIT(0)) {}
-    // Clear status
-    HOSTAR = HOSTAR;
-
-    // Enable PECI, clearing data fifo's, enable AW_FCS
-    HOCTLR = BIT(5) | BIT(3) | BIT(1);
-    // Set address to default
-    HOTRADDR = 0x30;
-    // Set write length
-    HOWRLR = 10;
-    // Set read length
-    HORDLR = 1;
-    // Set command
-    HOCMDR = 0xA5;
-
-    // Write host ID
-    HOWRDR = 0;
-    // Write index
-    HOWRDR = index;
-    // Write param
-    HOWRDR = (uint8_t)param;
-    HOWRDR = (uint8_t)(param >> 8);
-    // Write data
-    HOWRDR = (uint8_t)data;
-    HOWRDR = (uint8_t)(data >> 8);
-    HOWRDR = (uint8_t)(data >> 16);
-    HOWRDR = (uint8_t)(data >> 24);
-
-    // Start transaction
-    HOCTLR |= 1;
-
-    // Wait for command completion
-    while (!(HOSTAR & BIT(1))) {}
-
-    uint8_t status = HOSTAR;
-    if (status & 0xEC) {
-        ERROR("peci_wr_pkg_config: hardware error: 0x%02X\n", status);
-        // Clear status
-        HOSTAR = HOSTAR;
-        return -(0x1000 | status);
-    }
-
+    int retry = 50; // TODO how many retries are appropriate?
     uint8_t cc = HORDDR;
 
-    // Clear status
-    HOSTAR = HOSTAR;
+    // Wait for any in-progress transaction to complete
+    while (HOSTAR & BIT(0)) {}
+    do {
+        // Clear status
+        HOSTAR = HOSTAR;
 
-    if (cc == 0x40) {
-        TRACE("peci_wr_pkg_config: command successful\n");
-        return cc;
-    }
+        // Enable PECI, clearing data fifo's, enable AW_FCS
+        HOCTLR = BIT(5) | BIT(3) | BIT(1);
+        // Set address to default
+        HOTRADDR = 0x30;
+        // Set write length
+        HOWRLR = 10;
+        // Set read length
+        HORDLR = 1;
+        // Set command
+        HOCMDR = 0xA5;
+
+        // Write host ID
+        HOWRDR = 0;
+        // Write index
+        HOWRDR = index;
+        // Write param
+        HOWRDR = (uint8_t)param;
+        HOWRDR = (uint8_t)(param >> 8);
+        // Write data
+        HOWRDR = (uint8_t)data;
+        HOWRDR = (uint8_t)(data >> 8);
+        HOWRDR = (uint8_t)(data >> 16);
+        HOWRDR = (uint8_t)(data >> 24);
+
+        // Start transaction
+        HOCTLR |= 1;
+
+        // Wait for command completion
+        while (!(HOSTAR & BIT(1))) {}
+
+        uint8_t status = HOSTAR;
+        if (status & 0xEC) {
+            ERROR("peci_wr_pkg_config: hardware error: 0x%02X\n", status);
+            // Clear status
+            HOSTAR = HOSTAR;
+            return -(0x1000 | status);
+        }
+
+        cc = HORDDR;
+
+        // Clear status
+        HOSTAR = HOSTAR;
+
+        if (cc == 0x40) {
+            TRACE("peci_wr_pkg_config: command successful\n");
+            return cc;
+        }
+
+    } while (cc == 0x80 || cc == 0x81 || !retry--);
 
     ERROR("peci_wr_pkg_config: command error: 0x%02X\n", cc);
     return -((int16_t)cc);
