@@ -28,6 +28,4 @@ void power_cpu_reset(void);
 
 void power_event(void);
 
-bool power_peci_limit(bool);
-
 #endif // _BOARD_POWER_H
