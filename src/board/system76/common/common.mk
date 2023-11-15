@@ -101,7 +101,7 @@ board-common-y += flash/wrapper.c
 
 console_internal:
 	cargo build --manifest-path tool/Cargo.toml --release
-	sudo tool/target/release/system76_ectool console
+	sudo tool/target/release/dasharo_ectool console
 
 console_external:
 	sudo test -c "$(PROGRAMMER)"
@@ -115,7 +115,7 @@ console_external_forced:
 
 flash_internal: $(BUILD)/ec.rom
 	cargo build --manifest-path tool/Cargo.toml --release
-	sudo tool/target/release/system76_ectool flash $<
+	sudo tool/target/release/dasharo_ectool flash $<
 
 flash_external: $(BUILD)/ec.rom
 	cargo build --manifest-path ecflash/Cargo.toml --example isp --release

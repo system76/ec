@@ -301,7 +301,7 @@ fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
 }
 
 fn main() {
-    let matches = App::new("system76_ectool")
+    let matches = App::new("dasharo_ectool")
         .setting(AppSettings::SubcommandRequired)
         .arg(Arg::with_name("access")
             .long("access")

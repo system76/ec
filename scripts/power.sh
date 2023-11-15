@@ -97,7 +97,7 @@ do
 
         if [ "${has_ec}" == "1" ]
         then
-            D="$(sudo tool/target/release/system76_ectool fan 0)"
+            D="$(sudo tool/target/release/dasharo_ectool fan 0)"
             P="$(echo "(${D} * 100)/255" | bc -lq)"
             F="${F}\t$(printf "%.0f" "${P}")"
         fi
@@ -112,7 +112,7 @@ do
 
             if [ "${has_ec}" == "1" ]
             then
-                D="$(sudo tool/target/release/system76_ectool fan 1)"
+                D="$(sudo tool/target/release/dasharo_ectool fan 1)"
                 P="$(echo "(${D} * 100)/255" | bc -lq)"
                 F="${F}\t$(printf "%.0f" "${P}")"
             fi

@@ -3,4 +3,4 @@
 
 set -e
 cargo build --release --manifest-path tool/Cargo.toml
-sudo tool/target/release/system76_ectool "$@"
+sudo tool/target/release/dasharo_ectool "$@"
