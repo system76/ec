@@ -18,7 +18,6 @@
 #include <board/pnp.h>
 #include <board/ps2.h>
 #include <board/wireless.h>
-#include <board/usbpd.h>
 #include <common/debug.h>
 
 #if CONFIG_BUS_ESPI
@@ -254,9 +253,6 @@ void power_on(void) {
 
     // Wait for SUSPWRDNACK validity
     tPLT01;
-
-    // Ensure USB-PD is disabled before turning on CPU
-    usbpd_disable_charging();
 
     GPIO_SET_DEBUG(PWR_BTN_N, false);
     delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that

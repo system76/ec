@@ -151,14 +151,6 @@ void usbpd_event(void) {
             }
         }
 
-        if (sink_ctrl) {
-            if (jack_in || power_state == POWER_STATE_S0) {
-                usbpd_disable_charging();
-            } else {
-                usbpd_enable_charging();
-            }
-        }
-
         if (next_input_current != battery_charger_input_current) {
             battery_charger_input_current = next_input_current;
             battery_charger_input_voltage = next_input_voltage;
