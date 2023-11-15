@@ -176,6 +176,25 @@ static int16_t usbpd_aneg(void) {
     return 0;
 }
 
+int16_t usbpd_disc(uint8_t timeout) {
+    int16_t res;
+
+    uint8_t cmd[5] = { 4, 'D', 'I', 'S', 'C' };
+    uint8_t data[2] = { 1, 0 };
+
+    data[1] = timeout;
+
+    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x09, data, sizeof(data));
+    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x08, cmd, sizeof(cmd));
+    if (res < 0) {
+        return res;
+    }
+
+    //TODO: wait on command completion
+
+    return 0;
+}
+
 void usbpd_disable_charging(void) {
     int16_t res;
 

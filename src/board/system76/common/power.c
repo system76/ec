@@ -17,6 +17,7 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <board/ps2.h>
+#include <board/usbpd.h>
 #include <board/wireless.h>
 #include <common/debug.h>
 
@@ -291,6 +292,9 @@ void power_off(void) {
 
     // Commit settings to flash on shutdown
     options_save_config();
+
+    // Trigger USB-PD disconnect, will be reconnected after TI reset
+    usbpd_disc(0);
 
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
