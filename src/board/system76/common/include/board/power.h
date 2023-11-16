@@ -16,8 +16,9 @@ extern enum PowerState power_state;
 void update_power_state(void);
 
 #if USE_S0IX
-extern bool pep_in_s0ix;
-extern bool pep_display_on;
+#define PEP_S0IX_FLAG BIT(0)
+#define PEP_DISPLAY_FLAG BIT(1)
+extern uint8_t pep_hook;
 #endif
 
 void power_init(void);

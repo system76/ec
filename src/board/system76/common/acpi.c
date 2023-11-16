@@ -134,12 +134,9 @@ uint8_t acpi_read(uint8_t addr) {
             break;
 #endif // HAVE_LED_AIRPLANE_N
 
-        // S0ix hook
+        // Power engine plug-in hook for S0ix
         case 0xE0:
-            data = pep_in_s0ix;
-            break;
-        case 0xE1:
-            data = pep_display_on;
+            data = pep_hook;
             break;
     }
 
@@ -175,13 +172,9 @@ void acpi_write(uint8_t addr, uint8_t data) {
         gpio_set(&LED_AIRPLANE_N, !(bool)(data & BIT(6)));
         break;
 #endif
-    // S0ix hook
+    // Power engine plug-in hook for S0ix
     case 0xE0:
-        pep_in_s0ix = !!data;
-        break;
-    // Display hook
-    case 0xE1:
-        pep_display_on = !!data;
+        pep_hook = data;
         break;
     }
 }

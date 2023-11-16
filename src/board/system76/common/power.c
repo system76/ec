@@ -131,8 +131,7 @@ extern uint8_t main_cycle;
 enum PowerState power_state = POWER_STATE_OFF;
 
 #if USE_S0IX
-bool pep_in_s0ix = false;
-bool pep_display_on = true;
+uint8_t pep_hook = PEP_DISPLAY_FLAG;
 #endif
 
 enum PowerState calculate_power_state(void) {
@@ -639,7 +638,7 @@ void power_event(void) {
     uint32_t time = time_get();
     if (power_state == POWER_STATE_S0) {
 #if USE_S0IX
-        if (pep_in_s0ix) {
+        if (pep_hook & PEP_S0IX_FLAG) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
@@ -654,7 +653,7 @@ void power_event(void) {
             gpio_set(&LED_PWR, true);
             gpio_set(&LED_ACIN, false);
 
-            if (gpio_get(&LID_SW_N) && pep_display_on)
+            if (gpio_get(&LID_SW_N) && (pep_hook & PEP_DISPLAY_FLAG))
                 kbled_enable(true);
             else
                 kbled_enable(false);
