@@ -2,9 +2,9 @@
 name = "dasharo_ectool"
 version = "0.3.8"
 edition = "2018"
-description = "System76 EC tool"
+description = "Dasharo EC tool"
 license = "MIT"
-authors = ["Jeremy Soller <jeremy@system76.com>"]
+authors = ["Jeremy Soller <jeremy@system76.com>", "Michał Kopeć <michal.kopec@3mdeb.com>"]
 repository = "https://github.com/dasharo/ec"
 documentation = "https://docs.dasharo.com"
 
