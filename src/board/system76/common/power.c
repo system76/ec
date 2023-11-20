@@ -339,6 +339,7 @@ void power_off(void) {
 }
 
 static void power_peci_limit(bool ac) {
+    uint32_t supply_watts = 0;
     uint32_t watts = 0;
     uint16_t res;
 
@@ -348,30 +349,33 @@ static void power_peci_limit(bool ac) {
     }
 
     if (ac) {
-        // AC adapter rating with a 15% margin for conversion  losses & spikes
-        // This results in average pwr consumption ~equal to adapter rating
-        // TODO handle this differently for models with HPB enabled
-        watts = (uint32_t)battery_charger_input_current * (uint32_t)battery_charger_input_voltage *
-            85 / 100000;
+        supply_watts = (uint32_t)battery_charger_input_current *
+            (uint32_t)battery_charger_input_voltage / 1000;
+        DEBUG("%llu W supply detected, ", supply_watts);
+        // 15% safety margin
+        supply_watts = supply_watts * 85 / 100;
+        DEBUG("correcting to %llu W\n", supply_watts);
     }
 
-    if (!ac || !watts)
-        watts = POWER_LIMIT_DC;
+    if (!ac || !supply_watts)
+        supply_watts = POWER_LIMIT_DC;
 
-    DEBUG("PECI watts = %llu\n", watts);
+    DEBUG("PECI PL: %llu watts available from %s\n", supply_watts, ac ? "AC" : "DC");
 
+    // Set PL2 to 2W below supply wattage (Intel says PL3 = PL2 + 2W)
+    watts = supply_watts - 2;
     res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PSYS_PL2, 0, PECI_PSYS_PL2(watts));
-    DEBUG(" SET PsysPL2, ret = %d\n", res);
+    DEBUG(" SET PsysPL2 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
 
-    res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL3, 0, PECI_PL3(watts + 2, 6, 4));
-    DEBUG(" SET PL3, ret = %d\n", res);
+    // Set PsysPL3 (peak short term power) to supply wattage
+    watts = supply_watts;
+    res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL3, 0, PECI_PL3(watts, 6, 4));
+    DEBUG(" SET PL3 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
 
-    res = peci_wr_pkg_config(
-        PECI_REG_PKG_CFG_PL4,
-        0,
-        PECI_PL4((watts > POWER_LIMIT_AC) ? POWER_LIMIT_AC : watts)
-    );
-    DEBUG(" SET PL4, ret = %d\n", res);
+    // Cap PL4 to supply wattage if needed
+    watts = (supply_watts > POWER_LIMIT_AC) ? POWER_LIMIT_AC : supply_watts;
+    res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL4, 0, PECI_PL4(watts));
+    DEBUG(" SET PL4 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
 
     return;
 }
