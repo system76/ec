@@ -145,7 +145,6 @@ void usbpd_event(void) {
                 next_input_voltage = BATTERY_CHARGER_VOLTAGE_AC;
             } else if (sink_ctrl) {
                 while ((res = usbpd_current_limit()) < 0 && retry--) {};
-                DEBUG("CURRENT = %d\n", res);
                 next_input_current = res < CHARGER_INPUT_CURRENT ? res : CHARGER_INPUT_CURRENT;
                 next_input_voltage = BATTERY_CHARGER_VOLTAGE_PD;
             }
