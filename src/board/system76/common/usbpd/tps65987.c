@@ -3,6 +3,7 @@
 // USB-PD driver for TPS65987 and the mostly compatible TPS65993 and TPS65994.
 // I2C register reference: https://www.ti.com/lit/ug/slvubh2b/slvubh2b.pdf
 
+#include <arch/time.h>
 #include <board/battery.h>
 #include <board/gpio.h>
 #include <board/power.h>
@@ -12,11 +13,10 @@
 
 #define USBPD_ADDRESS 0x20
 
+#define REG_MODE 0x03
+#define REG_CMD1 0x08
+#define REG_DATA1 0x09
 #define REG_ACTIVE_CONTRACT_PDO 0x34
-
-void usbpd_init(void) {
-    i2c_reset(&I2C_USBPD, true);
-}
 
 enum {
     // PDO is empty
@@ -27,6 +27,19 @@ enum {
     USBPD_ERR_REG_LEN = 0x3000,
     // Unsupported PDO type was received
     USBPD_ERR_PDO_TYPE_UNSUP = 0x4000,
+};
+
+enum {
+    // Fully functional, normal operation
+    USBPD_MODE_APP = 0,
+    // PD controller is running BIST
+    USBPD_MODE_BIST,
+    // PD controller booted in dead battery mode
+    USBPD_MODE_BOOT,
+    // Simulated port disconnect by previously issued DISC command
+    USBPD_MODE_DISC,
+    // Other values indicate limited functionality
+    USBPD_MODE_UNKNOWN,
 };
 
 #define PDO_KIND(pdo) ((uint8_t)((pdo) >> 30 & 3))
@@ -92,6 +105,79 @@ static void usbpd_dump(void) {
             DEBUG("\n");
         }
     }
+}
+
+#define FOURCC(a, b, c, d) (((((d) << 8) | (c)) << 8 | (b)) << 8 | (a))
+
+// Check the operational state of the PD controller
+static int16_t usbpd_get_mode(void) {
+    int16_t res;
+    int16_t mode;
+    uint8_t reg[5] = { 0 };
+
+    DEBUG("USBPD controller mode: ");
+
+    res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, REG_MODE, reg, sizeof(reg));
+    if (res < 0 || reg[0] < 4) {
+        DEBUG("UNKNOWN (I2C error %d)\n", res);
+        return USBPD_MODE_UNKNOWN;
+    }
+
+    mode = FOURCC(reg[1], reg[2], reg[3], reg[4]);
+
+    switch (mode) {
+    case FOURCC('A', 'P', 'P', ' '):
+        DEBUG("APP\n");
+        return USBPD_MODE_APP;
+    case FOURCC('B', 'I', 'S', 'T'):
+        DEBUG("BIST\n");
+        return USBPD_MODE_BIST;
+    case FOURCC('B', 'O', 'O', 'T'):
+        DEBUG("BOOT\n");
+        return USBPD_MODE_BOOT;
+    case FOURCC('D', 'I', 'S', 'C'):
+        DEBUG("DISC\n");
+        return USBPD_MODE_DISC;
+    }
+
+    DEBUG("UNKNOWN %llx\n", mode);
+    return USBPD_MODE_UNKNOWN;
+}
+
+// Disconnect port for [timeout] seconds
+// If timeout is 0, port will remain disconnected indefinitely
+static int16_t usbpd_disc(uint8_t timeout) {
+    int16_t res;
+    uint8_t cmd[5] = { 4, 'D', 'I', 'S', 'C' };
+    uint8_t data[2] = { 1, 0 };
+
+    data[1] = timeout;
+
+    do {
+        res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_DATA1, data, sizeof(data));
+    } while (res < 0);
+
+    do {
+        res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
+    } while (res < 0);
+
+    // TI says this never fails and completes immediately
+    return 0;
+}
+
+// Return to normal operation
+// Reboots the PD controller and exits any modal tasks
+void usbpd_reset(void) {
+    int16_t res;
+
+    uint8_t cmd[5] = { 4, 'G', 'a', 'i', 'd' };
+
+    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
+    if (res < 0)
+        return;
+
+    i2c_reset(&I2C_USBPD, true);
+    return;
 }
 
 void usbpd_event(void) {
@@ -165,26 +251,7 @@ static int16_t usbpd_aneg(void) {
     int16_t res;
 
     uint8_t cmd[5] = { 4, 'A', 'N', 'e', 'g' };
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x08, cmd, sizeof(cmd));
-    if (res < 0) {
-        return res;
-    }
-
-    //TODO: wait on command completion
-
-    return 0;
-}
-
-int16_t usbpd_disc(uint8_t timeout) {
-    int16_t res;
-
-    uint8_t cmd[5] = { 4, 'D', 'I', 'S', 'C' };
-    uint8_t data[2] = { 1, 0 };
-
-    data[1] = timeout;
-
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x09, data, sizeof(data));
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x08, cmd, sizeof(cmd));
+    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
     if (res < 0) {
         return res;
     }
@@ -268,4 +335,8 @@ void usbpd_enable_charging(void) {
     }
 
     DEBUG("OK\n");
+}
+
+void usbpd_init(void) {
+    i2c_reset(&I2C_USBPD, true);
 }

@@ -175,6 +175,9 @@ void update_power_state(void) {
     if (power_state != new_power_state) {
         power_state = new_power_state;
 
+        if (power_state != POWER_STATE_S0)
+            pep_hook = PEP_DISPLAY_FLAG;
+
 #if LEVEL >= LEVEL_DEBUG
         switch (power_state) {
         case POWER_STATE_OFF:
@@ -293,9 +296,6 @@ void power_off(void) {
     // Commit settings to flash on shutdown
     options_save_config();
 
-    // Trigger USB-PD disconnect, will be reconnected after TI reset
-    usbpd_disc(0);
-
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
@@ -390,6 +390,8 @@ void power_cpu_reset(void) {
     fan_reset();
     // Reset KBC and touchpad states
     kbled_reset();
+    // Reset USB-PD
+    usbpd_reset();
     // Set power limits
     power_peci_limit(!gpio_get(&ACIN_N));
     kbc_clear_lock();
@@ -593,7 +595,10 @@ void power_event(void) {
     {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
-            power_off();
+            // Stay in S5 on AC
+            if (gpio_get(&ACIN_N)) {
+                power_off();
+            }
 
 #if CONFIG_SECURITY
             // Handle security state changes if necessary
@@ -659,12 +664,9 @@ void power_event(void) {
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, true);
     } else {
-        // CPU off and AC adapter unplugged, flashing orange light
+        // CPU off and AC adapter unplugged, LEDs off
         gpio_set(&LED_PWR, false);
-        if ((time - last_time) >= 1000) {
-            gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
-            last_time = time;
-        }
+        gpio_set(&LED_ACIN, false);
 
 #if HAVE_XLP_OUT
         // Power off VDD3 if system should be off
