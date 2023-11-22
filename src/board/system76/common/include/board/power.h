@@ -6,10 +6,10 @@
 #include <stdbool.h>
 
 enum PowerState {
-    POWER_STATE_OFF,
-    POWER_STATE_S5,
-    POWER_STATE_S3,
-    POWER_STATE_S0,
+    POWER_STATE_S0 = 0x0,
+    POWER_STATE_S3 = 0x3,
+    POWER_STATE_S5 = 0x5,
+    POWER_STATE_OFF = 0xf,
 };
 
 extern enum PowerState power_state;

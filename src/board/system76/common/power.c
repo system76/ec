@@ -390,8 +390,6 @@ void power_cpu_reset(void) {
     fan_reset();
     // Reset KBC and touchpad states
     kbled_reset();
-    // Reset USB-PD
-    usbpd_reset();
     // Set power limits
     power_peci_limit(!gpio_get(&ACIN_N));
     kbc_clear_lock();
@@ -664,9 +662,13 @@ void power_event(void) {
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, true);
     } else {
-        // CPU off and AC adapter unplugged, LEDs off
+        // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
-        gpio_set(&LED_ACIN, false);
+        if ((time - last_time) >= 1000) {
+            gpio_set(&LED_ACIN, false);
+            gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
+            last_time = time;
+        }
 
 #if HAVE_XLP_OUT
         // Power off VDD3 if system should be off

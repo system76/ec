@@ -16,6 +16,7 @@
 #define REG_MODE 0x03
 #define REG_CMD1 0x08
 #define REG_DATA1 0x09
+#define REG_POWER_STATE 0x20
 #define REG_ACTIVE_CONTRACT_PDO 0x34
 
 enum {
@@ -180,6 +181,21 @@ void usbpd_reset(void) {
     return;
 }
 
+// Clear dead battery flag
+// Switches the PD controller power supply from Vbus to VIN_3V3
+static void usbpd_dbfg(void) {
+    int16_t res;
+
+    uint8_t cmd[5] = { 4, 'D', 'B', 'f', 'g' };
+
+    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
+    if (res < 0)
+        return;
+
+    i2c_reset(&I2C_USBPD, true);
+    return;
+}
+
 void usbpd_event(void) {
     bool update = false;
     int16_t res;
@@ -214,8 +230,20 @@ void usbpd_event(void) {
     static enum PowerState last_power_state = POWER_STATE_OFF;
     update_power_state();
     if (power_state != last_power_state) {
-        last_power_state = power_state;
         update = true;
+
+        if (power_state != POWER_STATE_OFF) {
+            // Pass sleep states to PD controller
+            uint8_t pwr_reg[2] = { 1, 0 };
+            pwr_reg[1] = power_state;
+            res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_POWER_STATE, pwr_reg, sizeof(pwr_reg));
+        }
+
+        if (last_power_state == POWER_STATE_OFF) {
+            // VIN_3V3 now available, allow PD to use it instead of Vbus
+            usbpd_dbfg();
+        }
+        last_power_state = power_state;
     }
 
     if (update) {
