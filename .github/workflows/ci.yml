@@ -57,7 +57,7 @@ jobs:
         run: EC_BOARD_VENDOR=${{ matrix.vendor }} EC_BOARD_MODEL=${{ matrix.model }} ./build.sh
 
       - name: Save artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: "dasharo-${{ matrix.vendor }}-${{ matrix.model }}"
           path: |
