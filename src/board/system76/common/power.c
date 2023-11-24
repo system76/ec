@@ -410,6 +410,7 @@ void power_event(void) {
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
     static bool ac_last = true;
+    static uint32_t ac_unplug_time = 0;
     bool ac_new = gpio_get(&ACIN_N);
 
     if (ac_new != ac_last) {
@@ -417,6 +418,8 @@ void power_event(void) {
         DEBUG("Power adapter ");
         if (ac_new) {
             DEBUG("unplugged\n");
+            GPIO_SET_DEBUG(H_PROCHOT_EC, false);
+            ac_unplug_time = time_get();
             battery_charger_disable();
         } else {
             DEBUG("plugged in\n");
@@ -454,6 +457,9 @@ void power_event(void) {
         }
     }
     ac_last = ac_new;
+
+    // Unthrottle on AC, or after 3 seconds on DC
+    gpio_set(&H_PROCHOT_EC, !ac_new | (ac_unplug_time < (time_get() - 3000)));
 
     gpio_set(&AC_PRESENT, !ac_new);
 
