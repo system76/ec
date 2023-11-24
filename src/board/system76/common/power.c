@@ -351,18 +351,22 @@ static void power_peci_limit(bool ac) {
     if (ac) {
         supply_watts = (uint32_t)battery_charger_input_current *
             (uint32_t)battery_charger_input_voltage / 1000;
-        DEBUG("%llu W supply detected, ", supply_watts);
+        DEBUG("%llu W supply detected\n", supply_watts);
         // 15% safety margin
         supply_watts = supply_watts * 85 / 100;
-        DEBUG("correcting to %llu W\n", supply_watts);
     }
 
-    if (!ac || !supply_watts)
-        supply_watts = POWER_LIMIT_DC;
+    if (!ac || !supply_watts || options_get(OPT_ALLOW_BAT_BOOST)) {
+        supply_watts += POWER_LIMIT_DC;
+    }
 
-    DEBUG("PECI PL: %llu watts available from %s\n", supply_watts, ac ? "AC" : "DC");
+    DEBUG(
+        "PECI PL: %llu watts available from %s\n",
+        supply_watts,
+        ac ? options_get(OPT_ALLOW_BAT_BOOST) ? "AC + DC" : "AC" : "DC"
+    );
 
-    // Set PL2 to 2W below supply wattage (Intel says PL3 = PL2 + 2W)
+    // Set PsysL2 to 2W below supply wattage (Intel says PL3 = PL2 + 2W)
     watts = supply_watts - 2;
     res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PSYS_PL2, 0, PECI_PSYS_PL2(watts));
     DEBUG(" SET PsysPL2 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
