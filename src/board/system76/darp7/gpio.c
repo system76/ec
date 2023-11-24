@@ -14,6 +14,7 @@ struct Gpio __code CPU_C10_GATE_N = GPIO(D, 3);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code EC_EN =          GPIO(B, 6); // renamed to SUSBC_EN
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
+struct Gpio __code H_PROCHOT_EC =   GPIO(G, 6);
 struct Gpio __code LAN_WAKEUP_N =   GPIO(H, 4);
 struct Gpio __code LED_ACIN =       GPIO(C, 7);
 struct Gpio __code LED_BAT_CHG =    GPIO(H, 5);

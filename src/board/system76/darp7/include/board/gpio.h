@@ -19,6 +19,7 @@ extern struct Gpio __code CPU_C10_GATE_N;
 extern struct Gpio __code DD_ON;
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;
+extern struct Gpio __code H_PROCHOT_EC;
 #define JACK_IN_N SINK_CTRL // XXX no way to tell if both adapters are in at once
 extern struct Gpio __code LAN_WAKEUP_N;
 extern struct Gpio __code LED_ACIN;
