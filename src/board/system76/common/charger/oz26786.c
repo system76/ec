@@ -14,6 +14,7 @@
 #define REG_CHARGE_CURRENT 0x14
 #define REG_CHARGE_VOLTAGE 0x15
 #define REG_CHARGE_OPTION_1 0x3D
+    #define CHARGE_OPTION_1_HPB_EN BIT(10)
     #define CHARGE_OPTION_1_600KHZ BIT(11)
 #define REG_CHARGE_OPTION_2 0x3B
     #define CHARGE_OPTION_2_PSYS_EN BIT(11)
@@ -89,12 +90,12 @@ int16_t battery_charger_disable(void) {
     if (!charger_enabled)
         return 0;
 
-    // Set charge option 1 to converter frequency 600 KHz
+    // Set charge option 1 to converter frequency 600 KHz and enable HPB
     //TODO: needed when charging disabled?
     res = smbus_write(
         CHARGER_ADDRESS,
         REG_CHARGE_OPTION_1,
-        CHARGE_OPTION_1_600KHZ | ADAPTER_RSENSE | BATTERY_RSENSE
+        CHARGE_OPTION_1_600KHZ | ADAPTER_RSENSE | BATTERY_RSENSE | CHARGE_OPTION_1_HPB_EN
     );
     if (res < 0)
         return res;
@@ -139,11 +140,11 @@ int16_t battery_charger_enable(void) {
     if (res < 0)
         return res;
 
-    // Set charge option 1 to converter frequency 600 KHz
+    // Set charge option 1 to converter frequency 600 KHz and enable HPB
     res = smbus_write(
         CHARGER_ADDRESS,
         REG_CHARGE_OPTION_1,
-        CHARGE_OPTION_1_600KHZ | ADAPTER_RSENSE | BATTERY_RSENSE
+        CHARGE_OPTION_1_600KHZ | ADAPTER_RSENSE | BATTERY_RSENSE | CHARGE_OPTION_1_HPB_EN
     );
     if (res < 0)
         return res;
