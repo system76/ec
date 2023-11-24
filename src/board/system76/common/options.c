@@ -13,6 +13,7 @@ uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = {
     [OPT_KBLED_COLOR_I] = 0,
     [OPT_BAT_THRESHOLD_START] = 95,
     [OPT_BAT_THRESHOLD_STOP] = 98,
+    [OPT_ALLOW_BAT_BOOST] = 0,
 };
 // clang-format on
 
