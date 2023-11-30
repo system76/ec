@@ -695,9 +695,8 @@ void power_event(void) {
         // Discharging (no AC adapter)
         gpio_set(&LED_BAT_CHG, false);
         gpio_set(&LED_BAT_FULL, false);
-    } else if (battery_info.current == 0) {
+    } else if (battery_info.charge >= battery_get_start_threshold()) {
         // Fully charged
-        // TODO: turn off charger
         gpio_set(&LED_BAT_CHG, false);
         gpio_set(&LED_BAT_FULL, true);
     } else {
