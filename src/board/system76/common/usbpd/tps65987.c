@@ -144,27 +144,6 @@ static int16_t usbpd_get_mode(void) {
     return USBPD_MODE_UNKNOWN;
 }
 
-// Disconnect port for [timeout] seconds
-// If timeout is 0, port will remain disconnected indefinitely
-static int16_t usbpd_disc(uint8_t timeout) {
-    int16_t res;
-    uint8_t cmd[5] = { 4, 'D', 'I', 'S', 'C' };
-    uint8_t data[2] = { 1, 0 };
-
-    data[1] = timeout;
-
-    do {
-        res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_DATA1, data, sizeof(data));
-    } while (res < 0);
-
-    do {
-        res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
-    } while (res < 0);
-
-    // TI says this never fails and completes immediately
-    return 0;
-}
-
 // Return to normal operation
 // Reboots the PD controller and exits any modal tasks
 void usbpd_reset(void) {
