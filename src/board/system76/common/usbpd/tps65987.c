@@ -16,7 +16,6 @@
 #define REG_MODE 0x03
 #define REG_CMD1 0x08
 #define REG_DATA1 0x09
-#define REG_POWER_STATE 0x20
 #define REG_ACTIVE_CONTRACT_PDO 0x34
 
 enum {
@@ -231,13 +230,6 @@ void usbpd_event(void) {
     update_power_state();
     if (power_state != last_power_state) {
         update = true;
-
-        if (power_state != POWER_STATE_OFF) {
-            // Pass sleep states to PD controller
-            uint8_t pwr_reg[2] = { 1, 0 };
-            pwr_reg[1] = power_state;
-            res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_POWER_STATE, pwr_reg, sizeof(pwr_reg));
-        }
 
         if (last_power_state == POWER_STATE_OFF) {
             // VIN_3V3 now available, allow PD to use it instead of Vbus
