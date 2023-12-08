@@ -40,6 +40,7 @@ enum Cmd {
     SecurityGet = 20,
     SecuritySet = 21,
     FanTach = 22,
+    UsbcMuxInfo = 23,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -326,6 +327,16 @@ impl<A: Access> Ec<A> {
     pub unsafe fn security_set(&mut self, state: SecurityState) -> Result<(), Error> {
        let mut data = [state as u8];
        self.command(Cmd::SecuritySet, &mut data)
+    }
+
+    /// Get USB-C mux info
+    pub unsafe fn usbc_mux_info(&mut self, port: u8) -> Result<u16, Error> {
+       let mut data = [port, 0, 0];
+       self.command(Cmd::UsbcMuxInfo, &mut data)?;
+        Ok(
+            (data[1] as u16) |
+            ((data[2] as u16) << 8)
+        )
     }
 
     /// Read fan tachometer by fan index
