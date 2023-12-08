@@ -52,6 +52,8 @@ enum Command {
     CMD_SECURITY_SET = 21,
     // Get fan tachometer
     CMD_FAN_TACH = 22,
+    // Get USB-C mux info (for coreboot)
+    CMD_USBC_MUX_INFO = 23,
     //TODO
 };
 
@@ -85,6 +87,39 @@ enum SecurityState {
     SECURITY_STATE_PREPARE_LOCK = 2,
     // Flashing will be allowed on the next reboot
     SECURITY_STATE_PREPARE_UNLOCK = 3,
+};
+
+enum UsbcMuxInfoFlags {
+    // DisplayPort connected if set
+    CMD_USBC_MUX_INFO_DP = BIT(0),
+    // USB connected if set
+    CMD_USBC_MUX_INFO_USB = BIT(1),
+    // Active cable if set, passive if not set
+    CMD_USBC_MUX_INFO_CABLE = BIT(2),
+    // Polarity of device, flipped if set, normal if not set
+    CMD_USBC_MUX_INFO_POLARITY = BIT(3),
+    // HPD level assert
+    CMD_USBC_MUX_INFO_HPD_LVL = BIT(4),
+    // HPD IRQ assert
+    CMD_USBC_MUX_INFO_HPD_IRQ = BIT(5),
+    // UFP if set, DFP if not set
+    CMD_USBC_MUX_INFO_UFP = BIT(6),
+    // Debug accessory if set
+    CMD_USBC_MUX_INFO_DBG_ACC = BIT(7),
+    // Mask for DP pin mode
+    CMD_USBC_MUX_INFO_DP_MODE_MASK = (0xF << 8),
+    // DP pin mode A
+    CMD_USBC_MUX_INFO_DP_MODE_A = (1 << 8),
+    // DP pin mode B
+    CMD_USBC_MUX_INFO_DP_MODE_B = (2 << 8),
+    // DP pin mode C
+    CMD_USBC_MUX_INFO_DP_MODE_C = (3 << 8),
+    // DP pin mode D
+    CMD_USBC_MUX_INFO_DP_MODE_D = (4 << 8),
+    // DP pin mode E
+    CMD_USBC_MUX_INFO_DP_MODE_E = (5 << 8),
+    // DP pin mode F
+    CMD_USBC_MUX_INFO_DP_MODE_F = (6 << 8),
 };
 
 #endif // _COMMON_COMMAND_H
