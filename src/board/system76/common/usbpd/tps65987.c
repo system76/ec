@@ -3,10 +3,10 @@
 // USB-PD driver for TPS65987 and the mostly compatible TPS65993 and TPS65994.
 // I2C register reference: https://www.ti.com/lit/ug/slvubh2b/slvubh2b.pdf
 
+#include <board/usbpd.h>
 #include <board/battery.h>
 #include <board/gpio.h>
 #include <board/power.h>
-#include <board/usbpd.h>
 #include <common/command.h>
 #include <common/debug.h>
 #include <ec/i2c.h>

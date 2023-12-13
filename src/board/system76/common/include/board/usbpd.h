@@ -3,6 +3,9 @@
 #ifndef _BOARD_USBPD_H
 #define _BOARD_USBPD_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 void usbpd_init(void);
 void usbpd_event(void);
 void usbpd_disable_charging(void);
