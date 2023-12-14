@@ -109,17 +109,17 @@ enum UsbcMuxInfoFlags {
     // Mask for DP pin mode
     CMD_USBC_MUX_INFO_DP_MODE_MASK = (0xF << 8),
     // DP pin mode A
-    CMD_USBC_MUX_INFO_DP_MODE_A = (1 << 8),
+    CMD_USBC_MUX_INFO_DP_MODE_A = BIT(8),
     // DP pin mode B
-    CMD_USBC_MUX_INFO_DP_MODE_B = (2 << 8),
+    CMD_USBC_MUX_INFO_DP_MODE_B = BIT(9),
     // DP pin mode C
-    CMD_USBC_MUX_INFO_DP_MODE_C = (3 << 8),
+    CMD_USBC_MUX_INFO_DP_MODE_C = BIT(10),
     // DP pin mode D
-    CMD_USBC_MUX_INFO_DP_MODE_D = (4 << 8),
+    CMD_USBC_MUX_INFO_DP_MODE_D = BIT(11),
     // DP pin mode E
-    CMD_USBC_MUX_INFO_DP_MODE_E = (5 << 8),
+    CMD_USBC_MUX_INFO_DP_MODE_E = BIT(12),
     // DP pin mode F
-    CMD_USBC_MUX_INFO_DP_MODE_F = (6 << 8),
+    CMD_USBC_MUX_INFO_DP_MODE_F = BIT(13),
 };
 
 #endif // _COMMON_COMMAND_H
