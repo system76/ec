@@ -12,9 +12,6 @@ KEYBOARD=15in_102_nkey
 # Set keyboard LED mechanism
 KBLED=bonw14
 
-# Set USB-PD I2C bus
-CFLAGS+=-DI2C_USBPD=I2C_1
-
 # Set discrete GPU I2C bus
 CFLAGS+=-DI2C_DGPU=I2C_1
 
@@ -33,8 +30,8 @@ CFLAGS+=\
 	-DCHARGER_INPUT_CURRENT=14000
 
 # Set USB-PD parameters
-USBPD=tps65987
-CFLAGS+=-DHAVE_USBPD_CHARGING=0
+USBPD = tps65987
+CFLAGS += -DI2C_USBPD=I2C_1
 
 # Set CPU power limits in watts
 CFLAGS+=\
