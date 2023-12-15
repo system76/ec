@@ -20,9 +20,6 @@ KEYBOARD=15in_102
 CONFIG_HAVE_KBLED = y
 KBLED=bonw14
 
-# Set USB-PD I2C bus
-CFLAGS+=-DI2C_USBPD=I2C_1
-
 # Set discrete GPU I2C bus
 CFLAGS+=-DI2C_DGPU=I2C_1
 
@@ -31,9 +28,6 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 
 # Set touchpad PS2 bus
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
-
-# Set USB-PD I2C bus
-CFLAGS+=-DI2C_USBPD=I2C_1
 
 # Set smart charger parameters
 # XXX: PRS1 and PRS2 are in parallel for adapter Rsense?
@@ -47,7 +41,9 @@ CFLAGS+=\
 
 # Set USB-PD parameters
 # XXX: Actually TPS65994
-USBPD=tps65987
+USBPD = tps65987
+CFLAGS += -DI2C_USBPD=I2C_1
+CFLAGS += -DHAVE_USBPD_CHARGING=1
 
 # Set CPU power limits in watts
 CFLAGS+=\

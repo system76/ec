@@ -33,7 +33,7 @@
 // clang-format on
 
 #ifndef HAVE_USBPD_CHARGING
-#define HAVE_USBPD_CHARGING 1
+#define HAVE_USBPD_CHARGING 0
 #endif // HAVE_USBPD_CHARGING
 
 void usbpd_init(void) {
