@@ -36,6 +36,11 @@ CFLAGS+=\
 	-DCHARGER_INPUT_CURRENT=3420 \
 	-DCHARGER_PSYS_GAIN=500
 
+# Set USB-PD parameters
+# XXX: Actually TPS65993
+USBPD = tps65987
+CFLAGS += -DI2C_USBPD=I2C_1
+
 # Set CPU power limits in watts
 CFLAGS+=\
 	-DPOWER_LIMIT_AC=65 \

@@ -27,9 +27,6 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 # Set touchpad PS2 bus
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
-# Set USB-PD I2C bus
-CFLAGS+=-DI2C_USBPD=I2C_1
-
 # Set smart charger parameters
 # XXX: PRS1 and PRS2 are in parallel for adapter Rsense?
 CHARGER=oz26786
@@ -41,7 +38,10 @@ CFLAGS+=\
 	-DCHARGER_INPUT_CURRENT=16920
 
 # Set USB-PD parameters
-USBPD=tps65987
+# XXX: Actually TPS65994
+USBPD = tps65987
+CFLAGS += -DI2C_USBPD=I2C_1
+CFLAGS += -DHAVE_USBPD_CHARGING=1
 
 # Set CPU power limits in watts
 CFLAGS+=\
