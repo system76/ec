@@ -12,11 +12,6 @@
 #define LEVEL_ERROR 1
 #define LEVEL_NONE 0
 
-// This is the user-configurable log level
-#ifndef LEVEL
-#define LEVEL LEVEL_INFO
-#endif
-
 #if LEVEL >= LEVEL_TRACE
 #define TRACE(...) printf(__VA_ARGS__)
 #else

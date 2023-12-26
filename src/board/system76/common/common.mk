@@ -29,13 +29,28 @@ board-common-y += stdio.c
 board-common-y += wireless.c
 
 # Set log level
-# 0 - NONE
-# 1 - ERROR
-# 2 - WARN
-# 3 - INFO
-# 4 - DEBUG
-# 5 - TRACE
-CFLAGS+=-DLEVEL=4
+# - none
+# - error
+# - warn
+# - info
+# - debug
+# - trace
+ifeq ($(CONFIG_LOG_LEVEL),none)
+CFLAGS += -DLEVEL=0
+else ifeq ($(CONFIG_LOG_LEVEL),error)
+CFLAGS += -DLEVEL=1
+else ifeq ($(CONFIG_LOG_LEVEL),warn)
+CFLAGS += -DLEVEL=2
+else ifeq ($(CONFIG_LOG_LEVEL),info)
+CFLAGS += -DLEVEL=3
+else ifeq ($(CONFIG_LOG_LEVEL),debug)
+CFLAGS += -DLEVEL=4
+else ifeq ($(CONFIG_LOG_LEVEL),trace)
+CFLAGS += -DLEVEL=5
+else
+# XXX: Preserve old behavior of LEVEL always being set to DEBUG.
+CFLAGS += -DLEVEL=4
+endif
 
 # Uncomment to enable debug logging over keyboard parallel port
 #CFLAGS+=-DPARALLEL_DEBUG

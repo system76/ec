@@ -15,11 +15,19 @@ Terms used:
     ```bash
     make BOARD=system76/<model> console_internal
     ```
-1. If you're not seeing seeing expected output, check the
-  [`LEVEL` cflag][level_cflag]. This is an EC compile time configuration and
-  changing will require a build and flash of the EC.
+If you're not seeing seeing expected output, check the value of
+`CONFIG_LOG_LEVEL` in `common.mk`. This is an EC compile time configuration
+and changing it will require a build and flash of the EC. Supported log levels
+are:
 
-[level_cflag]: https://github.com/system76/ec/blob/01907011bb63/src/board/system76/common/common.mk#L31-L39
+- `none`
+- `error`
+- `warn`
+- `info`
+- `debug`
+- `trace`
+
+The default value is `debug` if unspecified.
 
 ## Debugging with external device
 
