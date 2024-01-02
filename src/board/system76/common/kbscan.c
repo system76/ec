@@ -23,9 +23,6 @@
 // Debounce time in milliseconds
 #define DEBOUNCE_DELAY 10
 
-// Deselect all columns for reading
-#define KBSCAN_MATRIX_NONE 0xFF
-
 bool kbscan_fn_held = false;
 bool kbscan_esc_held = false;
 
@@ -45,6 +42,27 @@ static inline bool matrix_position_is_fn(uint8_t row, uint8_t col) {
     return (row == MATRIX_FN_OUTPUT) && (col == MATRIX_FN_INPUT);
 }
 
+// Assert the specified column for reading the row.
+static void kbscan_set_column(uint8_t col) {
+    // Assert the specific bit corresponding to the column.
+    uint32_t colbit = ~BIT(col);
+    KSOL = colbit & 0xFF;
+    KSOH1 = (colbit >> 8) & 0xFF;
+    KSOH2 = (colbit >> 16) & 0x03;
+
+    // Wait for matrix to stabilize
+    delay_ticks(20);
+}
+
+// Disable reading from all columns.
+static void kbscan_disable_reading(void) {
+    KSOL = 0xFF;
+    KSOH1 = 0xFF;
+    KSOH2 = 0x3;
+
+    // No need to wait for matrix to stabilize as a read won't happen.
+}
+
 // Initialize the Keyboard Matrix Scan Controller in KBS (Normal) mode for
 // reading keyboard input.
 void kbscan_init(void) {
@@ -53,10 +71,8 @@ void kbscan_init(void) {
     KSOCTRL = BIT(2) | BIT(0);
     KSOHGCTRL = 0;
     KSOLGCTRL = 0;
-    // XXX: Still set outputs low?
-    KSOL = 0;
-    KSOH1 = 0;
-    KSOH2 = 0;
+
+    kbscan_disable_reading();
 
     // KSI[7:0]: Enable pull-up, set to KBS mode
     KSICTRLR = BIT(2);
@@ -72,25 +88,6 @@ static inline uint8_t kbscan_get_row(void) {
 
     // Invert KSI for positive logic of pressed keys.
     return ~KSI;
-}
-
-// Assert the specified column for reading the row.
-static void kbscan_set_column(uint8_t col) {
-    if (col == KBSCAN_MATRIX_NONE) {
-        // Disable reading from all columns
-        KSOL = 0xFF;
-        KSOH1 = 0xFF;
-        KSOH2 = 0x3;
-    } else {
-        // Assert the specific bit corresponding to the column
-        uint32_t colbit = ~BIT(col);
-        KSOL = colbit & 0xFF;
-        KSOH1 = (colbit >> 8) & 0xFF;
-        KSOH2 = (colbit >> 16) & 0x03;
-    }
-
-    // Wait for matrix to stabilize
-    delay_ticks(20);
 }
 
 #if KM_NKEY
@@ -314,8 +311,7 @@ void kbscan_event(void) {
         kbscan_set_column(i);
         matrix_curr[i] = kbscan_get_row();
     }
-    // Disable reading any keys
-    kbscan_set_column(KBSCAN_MATRIX_NONE);
+    kbscan_disable_reading();
 
     for (uint8_t i = 0; i < KM_OUT; i++) {
         uint8_t new = matrix_curr[i];
