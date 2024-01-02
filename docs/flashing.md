@@ -4,6 +4,10 @@
 
 Use this method for flashing a system already running System76 EC.
 
+This method will only work if the running firmware is not locked. Firmware is
+write locked if it was built with `CONFIG_SECURITY=y`. firmware-update must be
+used to flash from UEFI in this state (see `flash.sh` in firmware-open).
+
 This will trigger a watchdog reset causing the system to **immediately power
 off**. OS data may be lost or corrupted as a result. Save and close all
 applications before flashing.
