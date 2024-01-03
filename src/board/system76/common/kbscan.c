@@ -81,11 +81,6 @@ void kbscan_init(void) {
 
 // Read the state of the row for the selected column.
 static inline uint8_t kbscan_get_row(void) {
-    // Report all keys as released when lid is closed
-    if (!lid_state) {
-        return 0;
-    }
-
     // Invert KSI for positive logic of pressed keys.
     return ~KSI;
 }
@@ -160,7 +155,7 @@ static void hardware_hotkey(uint16_t key) {
 
 bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
     // Wake from sleep on keypress
-    if (pressed && lid_state && (power_state == POWER_STATE_S3)) {
+    if (pressed && (power_state == POWER_STATE_S3)) {
         pmc_swi();
     }
 
@@ -308,8 +303,13 @@ void kbscan_event(void) {
 
     // Read the current state of the hardware matrix
     for (uint8_t i = 0; i < KM_OUT; i++) {
-        kbscan_set_column(i);
-        matrix_curr[i] = kbscan_get_row();
+        if (!lid_state) {
+            // Report all keys as released when lid is closed
+            matrix_curr[i] = 0;
+        } else {
+            kbscan_set_column(i);
+            matrix_curr[i] = kbscan_get_row();
+        }
     }
     kbscan_disable_reading();
 
