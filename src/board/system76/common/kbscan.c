@@ -282,7 +282,6 @@ void kbscan_event(void) {
     static uint8_t kbscan_layer = 0;
     uint8_t layer = kbscan_layer;
     static uint8_t kbscan_last_layer[KM_OUT][KM_IN] = { { 0 } };
-    static bool kbscan_ghost[KM_OUT] = { false };
     uint8_t matrix_curr[KM_OUT];
 
     static bool debounce = false;
