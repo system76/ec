@@ -102,7 +102,7 @@ void main(void) {
     uint32_t last_time_fan = 0;
 
     for (main_cycle = 0;; main_cycle++) {
-        switch (main_cycle % 3U) {
+        switch (main_cycle & 3U) {
         case 0:
             // Handle USB-C events immediately before power states
             usbpd_event();
@@ -122,6 +122,11 @@ void main(void) {
         case 2:
             // Handle lid close/open
             lid_event();
+            break;
+
+        case 3:
+            // We previously used modulo to limit when the logic for other
+            // cases ran, so this case is unused.
             break;
         }
 
