@@ -360,6 +360,84 @@ static bool power_button_disabled(void) {
     return !gpio_get(&LID_SW_N) && gpio_get(&ACIN_N);
 }
 
+/**
+ * Update power LEDs.
+ */
+static void power_update_power_leds(bool ac_new) {
+    static uint32_t last_time = 0;
+    uint32_t time = time_get();
+
+    if (power_state == POWER_STATE_S0) {
+#if CONFIG_BUS_ESPI
+        // HOST_C10 virtual wire is high when CPU is in C10 sleep state
+        if (vw_get(&VW_HOST_C10) == VWS_HIGH) {
+            // Modern suspend, flashing green light
+            if ((time - last_time) >= 1000) {
+                gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+                last_time = time;
+            }
+            gpio_set(&LED_ACIN, false);
+        } else
+#endif
+        {
+            // CPU on, green light
+            gpio_set(&LED_PWR, true);
+            gpio_set(&LED_ACIN, false);
+        }
+    } else if (power_state == POWER_STATE_S3) {
+        // Suspended, flashing green light
+        if ((time - last_time) >= 1000) {
+            gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+            last_time = time;
+        }
+        gpio_set(&LED_ACIN, false);
+    } else if (!ac_new) {
+        // AC plugged in, orange light
+        gpio_set(&LED_PWR, false);
+        gpio_set(&LED_ACIN, true);
+    } else {
+        // CPU off and AC adapter unplugged, flashing orange light
+        gpio_set(&LED_PWR, false);
+        if ((time - last_time) >= 1000) {
+            gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
+            last_time = time;
+        }
+
+        // FIXME: Move out of LED logic.
+#if HAVE_XLP_OUT
+        // Power off VDD3 if system should be off
+        gpio_set(&XLP_OUT, 0);
+#endif
+    }
+}
+
+#if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
+/**
+ * Update battery LEDs.
+ *
+ * TODO: do not require both LEDs
+ */
+static void power_update_battery_leds(bool ac_new) {
+    if (!(battery_info.status & BATTERY_INITIALIZED)) {
+        // No battery connected
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, false);
+    } else if (ac_new) {
+        // Discharging (no AC adapter)
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, false);
+    } else if (battery_info.current == 0) {
+        // Fully charged
+        gpio_set(&LED_BAT_CHG, false);
+        gpio_set(&LED_BAT_FULL, true);
+    } else {
+        // Charging
+        gpio_set(&LED_BAT_CHG, true);
+        gpio_set(&LED_BAT_FULL, false);
+    }
+}
+#endif // HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
+
 void power_event(void) {
     // Check if the adapter line goes low
     static bool ac_send_sci = true;
@@ -574,69 +652,8 @@ void power_event(void) {
     wake_last = wake_new;
 #endif // HAVE_LAN_WAKEUP_N
 
-    static uint32_t last_time = 0;
-    uint32_t time = time_get();
-    if (power_state == POWER_STATE_S0) {
-#if CONFIG_BUS_ESPI
-        // HOST_C10 virtual wire is high when CPU is in C10 sleep state
-        if (vw_get(&VW_HOST_C10) == VWS_HIGH) {
-            // Modern suspend, flashing green light
-            if ((time - last_time) >= 1000) {
-                gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
-                last_time = time;
-            }
-            gpio_set(&LED_ACIN, false);
-        } else
-#endif
-        {
-            // CPU on, green light
-            gpio_set(&LED_PWR, true);
-            gpio_set(&LED_ACIN, false);
-        }
-    } else if (power_state == POWER_STATE_S3) {
-        // Suspended, flashing green light
-        if ((time - last_time) >= 1000) {
-            gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
-            last_time = time;
-        }
-        gpio_set(&LED_ACIN, false);
-    } else if (!ac_new) {
-        // AC plugged in, orange light
-        gpio_set(&LED_PWR, false);
-        gpio_set(&LED_ACIN, true);
-    } else {
-        // CPU off and AC adapter unplugged, flashing orange light
-        gpio_set(&LED_PWR, false);
-        if ((time - last_time) >= 1000) {
-            gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
-            last_time = time;
-        }
-
-#if HAVE_XLP_OUT
-        // Power off VDD3 if system should be off
-        gpio_set(&XLP_OUT, 0);
-#endif // HAVE_XLP_OUT
-    }
-
-//TODO: do not require both LEDs
+    power_update_power_leds(ac_new);
 #if HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
-    if (!(battery_info.status & BATTERY_INITIALIZED)) {
-        // No battery connected
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, false);
-    } else if (ac_new) {
-        // Discharging (no AC adapter)
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, false);
-    } else if (battery_info.current == 0) {
-        // Fully charged
-        // TODO: turn off charger
-        gpio_set(&LED_BAT_CHG, false);
-        gpio_set(&LED_BAT_FULL, true);
-    } else {
-        // Charging
-        gpio_set(&LED_BAT_CHG, true);
-        gpio_set(&LED_BAT_FULL, false);
-    }
-#endif // HAVE_LED_BAT_CHG && HAVE_LED_BAT_FULL
+    power_update_battery_leds(ac_new);
+#endif
 }
