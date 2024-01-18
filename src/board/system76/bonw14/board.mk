@@ -12,9 +12,6 @@ KEYBOARD=15in_102_nkey
 # Set keyboard LED mechanism
 KBLED=bonw14
 
-# Set discrete GPU I2C bus
-CFLAGS+=-DI2C_DGPU=I2C_1
-
 # Set battery I2C bus
 CFLAGS+=-DI2C_SMBUS=I2C_4
 
@@ -43,8 +40,9 @@ CFLAGS+=-DBOARD_FAN_POINTS="\
 	FAN_POINT(80, 100) \
 "
 
-# Enable DGPU support
-CFLAGS+=-DHAVE_DGPU=1
+# Enable dGPU support
+CONFIG_HAVE_DGPU = y
+CFLAGS += -DI2C_DGPU=I2C_1
 CFLAGS+=-DBOARD_DGPU_FAN_POINTS="\
 	FAN_POINT(60, 40), \
 	FAN_POINT(65, 60), \

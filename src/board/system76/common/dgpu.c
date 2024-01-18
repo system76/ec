@@ -2,9 +2,6 @@
 
 #include <board/dgpu.h>
 #include <board/fan.h>
-
-#if HAVE_DGPU
-
 #include <board/gpio.h>
 #include <board/peci.h>
 #include <board/power.h>
@@ -95,13 +92,3 @@ uint8_t dgpu_get_fan_duty(void) {
     TRACE("DGPU temp=%d\n", dgpu_temp);
     return duty;
 }
-
-#else
-
-void dgpu_init(void) {}
-
-uint8_t dgpu_get_fan_duty(void) {
-    return PWM_DUTY(0);
-}
-
-#endif // HAVE_DGPU

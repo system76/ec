@@ -57,7 +57,7 @@ void init(void) {
     gpio_init();
 
     // Can happen in any order
-#if HAVE_DGPU
+#if CONFIG_HAVE_DGPU
     dgpu_init();
 #endif
     ecpm_init();
