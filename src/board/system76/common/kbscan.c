@@ -105,11 +105,7 @@ static bool kbscan_row_has_ghost(uint8_t *matrix, uint8_t col) {
     }
 
     // Check against other rows to see if more than one column matches.
-    for (uint8_t i = 0; i < KM_OUT; i++) {
-        if (i == col) {
-            continue;
-        }
-
+    for (uint8_t i = col + 1; i < KM_OUT; i++) {
         uint8_t common = rowdata & matrix[i];
         if (popcount_more_than_one(common)) {
             return true;
