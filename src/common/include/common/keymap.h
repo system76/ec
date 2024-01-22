@@ -39,8 +39,12 @@ bool keymap_set(uint8_t layer, uint8_t output, uint8_t input, uint16_t value);
 uint16_t keymap_translate(uint16_t key);
 
 // Helper definition for empty key
-#define ___ (0x0000)
-#define K_NONE (0x0000)
+#define K_NONE 0x0000
+#define ___ K_NONE
+
+// Fall-through for layer 1 to use layer 0 key
+#define K_TRANSPARENT 0xF000
+#define _______ K_TRANSPARENT
 
 // Key types
 #define KT_MASK (0xF000)
