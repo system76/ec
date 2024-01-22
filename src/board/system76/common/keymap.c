@@ -73,6 +73,10 @@ bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t *const va
     if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
         if (keymap_fnlock && keymap_is_f_key(output, input))
             layer ^= 1;
+
+        if (DYNAMIC_KEYMAP[layer][output][input] == K_TRANSPARENT)
+            layer = 0;
+
         *value = DYNAMIC_KEYMAP[layer][output][input];
         return true;
     } else {
