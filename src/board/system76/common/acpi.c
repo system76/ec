@@ -25,6 +25,7 @@ static uint8_t fbuf[4] = { 0, 0, 0, 0 };
 
 void fcommand(void) {
     switch (fcmd) {
+#if CONFIG_HAVE_KBLED
     // Keyboard backlight
     case 0xCA:
         switch (fdat) {
@@ -65,6 +66,7 @@ void fcommand(void) {
             break;
         }
         break;
+#endif // CONFIG_HAVE_KBLED
     }
 }
 

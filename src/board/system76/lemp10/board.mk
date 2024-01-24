@@ -14,6 +14,7 @@ CONFIG_BUS_ESPI=y
 KEYBOARD=14in_83
 
 # Set keyboard LED mechanism
+CONFIG_HAVE_KBLED = y
 KBLED=white_dac
 CFLAGS+=-DKBLED_DAC=2
 

@@ -131,6 +131,7 @@ static void hardware_hotkey(uint16_t key) {
     case K_FAN_TOGGLE:
         fan_max = !fan_max;
         break;
+#if CONFIG_HAVE_KBLED
     case K_KBD_BKL:
         kbled_hotkey_step();
         break;
@@ -150,6 +151,7 @@ static void hardware_hotkey(uint16_t key) {
         if (acpi_ecos != EC_OS_FULL)
             kbled_hotkey_toggle();
         break;
+#endif // CONFIG_HAVE_KBLED
     }
 }
 
