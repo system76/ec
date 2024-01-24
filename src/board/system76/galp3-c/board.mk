@@ -10,6 +10,7 @@ CONFIG_EC_ITE_IT8587E=y
 KEYBOARD=14in_86
 
 # Set keyboard LED mechanism
+CONFIG_HAVE_KBLED = y
 KBLED=white_dac
 CFLAGS+=-DKBLED_DAC=5
 

@@ -10,6 +10,7 @@ CONFIG_EC_ITE_IT5570E=y
 KEYBOARD=15in_102_nkey
 
 # Set keyboard LED mechanism
+CONFIG_HAVE_KBLED = y
 KBLED=bonw14
 
 # Set discrete GPU I2C bus

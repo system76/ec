@@ -9,7 +9,6 @@ board-common-$(CONFIG_BUS_ESPI) += espi.c
 board-common-y += fan.c
 board-common-y += gctrl.c
 board-common-y += kbc.c
-board-common-y += kbled.c
 board-common-y += kbscan.c
 board-common-y += keymap.c
 board-common-y += lid.c
@@ -88,8 +87,11 @@ KEYBOARD_DIR=src/keyboard/system76/$(KEYBOARD)
 include $(KEYBOARD_DIR)/keyboard.mk
 
 # Add kbled
-KBLED?=none
+ifeq ($(CONFIG_HAVE_KBLED),y)
+CFLAGS += -DCONFIG_HAVE_KBLED=1
+board-common-y += kbled/common.c
 board-common-y += kbled/$(KBLED).c
+endif
 
 # Add scratch ROM
 include $(SYSTEM76_COMMON_DIR)/scratch/scratch.mk

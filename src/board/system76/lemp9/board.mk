@@ -10,6 +10,7 @@ CONFIG_EC_ITE_IT5570E=y
 KEYBOARD=14in_83
 
 # Set keyboard LED mechanism
+CONFIG_HAVE_KBLED = y
 KBLED=white_dac
 CFLAGS+=-DKBLED_DAC=2
 

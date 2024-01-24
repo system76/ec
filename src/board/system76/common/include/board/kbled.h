@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#if CONFIG_HAVE_KBLED
+
 enum KbledKind {
     KBLED_NONE = 0,
     KBLED_WHITE = 1,
@@ -12,7 +14,7 @@ enum KbledKind {
 };
 extern enum KbledKind kbled_kind;
 
-// Must be specified by board
+// Must be specified per mechanism
 void kbled_init(void);
 void kbled_reset(void);
 uint8_t kbled_get(void);
@@ -27,5 +29,38 @@ void kbled_hotkey_down(void);
 void kbled_hotkey_up(void);
 void kbled_hotkey_toggle(void);
 void kbled_hotkey_step(void);
+
+#else // CONFIG_HAVE_KBLED
+
+static inline void kbled_init(void) {}
+static inline void kbled_reset(void) {}
+
+static inline uint8_t kbled_get(void) {
+    return 0;
+}
+
+static inline uint8_t kbled_max(void) {
+    return 0;
+}
+
+static inline void kbled_set(uint8_t level) {
+    (void)level;
+}
+
+static inline uint32_t kbled_get_color(void) {
+    return 0;
+}
+
+static inline void kbled_set_color(uint32_t color) {
+    (void)color;
+}
+
+static inline void kbled_hotkey_color(void) {}
+static inline void kbled_hotkey_down(void) {}
+static inline void kbled_hotkey_up(void) {}
+static inline void kbled_hotkey_toggle(void) {}
+static inline void kbled_hotkey_step(void) {}
+
+#endif // CONFIG_HAVE_KBLED
 
 #endif // _BOARD_KBLED_H

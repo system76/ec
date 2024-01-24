@@ -16,6 +16,7 @@ CONFIG_SECURITY=y
 KEYBOARD=15in_102
 
 # Set keyboard LED mechanism
+CONFIG_HAVE_KBLED = y
 KBLED=bonw14
 
 # Set discrete GPU I2C bus
