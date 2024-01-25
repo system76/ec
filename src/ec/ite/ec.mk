@@ -34,5 +34,11 @@ ARCH=8051
 # 64 KB is the max without banking
 CODE_SIZE=65536
 
-# Total flash size: 128 KiB
+# Chip flash size
+ifeq ($(CONFIG_EC_FLASH_SIZE_128K),y)
 CONFIG_EC_FLASH_SIZE = 131072
+else ifeq ($(CONFIG_EC_FLASH_SIZE_256K),y)
+CONFIG_EC_FLASH_SIZE = 262144
+else
+$(error flash size not specified)
+endif

@@ -8,6 +8,7 @@ CFLAGS += -I$(BOARD_DIR)/../galp3-c/include
 
 EC=ite
 CONFIG_EC_ITE_IT8587E=y
+CONFIG_EC_FLASH_SIZE_128K = y
 
 # Include keyboard
 KEYBOARD=14in_86
