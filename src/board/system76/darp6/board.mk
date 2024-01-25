@@ -8,6 +8,7 @@ CFLAGS += -I$(BOARD_DIR)/../darp5/include
 
 EC=ite
 CONFIG_EC_ITE_IT8587E=y
+CONFIG_EC_FLASH_SIZE_128K = y
 
 # Include keyboard
 KEYBOARD=15in_102

@@ -8,6 +8,7 @@ CFLAGS += -I$(BOARD_DIR)/../galp6/include
 
 EC=ite
 CONFIG_EC_ITE_IT5570E=y
+CONFIG_EC_FLASH_SIZE_128K = y
 
 # Enable eSPI
 CONFIG_BUS_ESPI=y
