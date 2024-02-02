@@ -46,6 +46,8 @@ struct Fan {
     bool interpolate;
 };
 
+extern uint8_t acpi_dgpu_fan_duty;
+extern uint8_t acpi_peci_fan_duty;
 extern bool fan_max;
 
 void fan_reset(void);

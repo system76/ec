@@ -3,6 +3,7 @@
 #include <board/acpi.h>
 #include <board/battery.h>
 #include <board/dgpu.h>
+#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
@@ -65,6 +66,14 @@ void fcommand(void) {
             break;
         }
         break;
+    case 0xCE:
+        acpi_peci_fan_duty = fbuf[0];
+        break;
+#if HAVE_DGPU
+    case 0xCF:
+        acpi_dgpu_fan_duty = fbuf[0];
+        break;
+#endif
     }
 }
 
