@@ -16,8 +16,7 @@ BUILD = build
 # Parameter for current board
 ifeq ($(BOARD),)
 all:
-	@echo -e "\x1B[31mBOARD must be specified\x1B[0m"
-	@exit 1
+	$(error BOARD must be specified)
 else
 # Calculate version
 DATE=$(shell git show --format="%cs" --no-patch --no-show-signature)
