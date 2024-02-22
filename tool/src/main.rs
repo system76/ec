@@ -63,11 +63,13 @@ unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], se
 }
 
 unsafe fn flash_inner(ec: &mut Ec<Box<dyn Access>>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
-    let rom_size = 128 * 1024;
+    let new_rom = firmware.data.to_vec();
 
-    let mut new_rom = firmware.data.to_vec();
-    while new_rom.len() < rom_size {
-        new_rom.push(0xFF);
+    // XXX: Get flash size programatically?
+    let rom_size = new_rom.len();
+    if rom_size % 1024 != 0 {
+        println!("ROM size of {} is not valid", rom_size);
+        return Err(ectool::Error::Verify);
     }
 
     let mut spi_bus = ec.spi(target, scratch)?;
