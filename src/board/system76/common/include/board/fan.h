@@ -50,10 +50,10 @@ extern bool fan_max;
 
 void fan_reset(void);
 
-uint8_t fan_duty(const struct Fan *fan, int16_t temp) __reentrant;
+uint8_t fan_duty(const struct Fan *const fan, int16_t temp) __reentrant;
 void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant;
-uint8_t fan_heatup(const struct Fan *fan, uint8_t duty) __reentrant;
-uint8_t fan_cooldown(const struct Fan *fan, uint8_t duty) __reentrant;
+uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) __reentrant;
+uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) __reentrant;
 uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant;
 
 #endif // _BOARD_FAN_H

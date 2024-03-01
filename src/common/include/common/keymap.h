@@ -30,7 +30,7 @@ bool keymap_load_config(void);
 // Save dynamic keymap to flash
 bool keymap_save_config(void);
 // Get a keycode from the dynamic keymap
-bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t *value);
+bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t *const value);
 // Set a keycode in the dynamic keymap
 bool keymap_set(uint8_t layer, uint8_t output, uint8_t input, uint16_t value);
 #endif

@@ -86,7 +86,7 @@ static inline uint8_t kbscan_get_row(void) {
 }
 
 #if KM_NKEY
-static bool kbscan_row_has_ghost(uint8_t *matrix, uint8_t col) {
+static bool kbscan_row_has_ghost(uint8_t *const matrix, uint8_t col) {
     (void)matrix;
     (void)col;
     return false;
@@ -96,7 +96,7 @@ static inline bool popcount_more_than_one(uint8_t rowdata) {
     return rowdata & (rowdata - 1);
 }
 
-static bool kbscan_row_has_ghost(uint8_t *matrix, uint8_t col) {
+static bool kbscan_row_has_ghost(uint8_t *const matrix, uint8_t col) {
     uint8_t rowdata = matrix[col];
 
     // No ghosts exist when less than 2 keys in the row are active.
@@ -155,7 +155,7 @@ static void hardware_hotkey(uint16_t key) {
     }
 }
 
-bool kbscan_press(uint16_t key, bool pressed, uint8_t *layer) {
+bool kbscan_press(uint16_t key, bool pressed, uint8_t *const layer) {
     // Wake from sleep on keypress
     if (pressed && (power_state == POWER_STATE_S3)) {
         pmc_swi();

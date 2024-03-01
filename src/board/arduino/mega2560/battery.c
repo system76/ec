@@ -4,7 +4,7 @@
 
 #include <common/i2c.h>
 
-int16_t smbus_read(uint8_t address, uint8_t command, uint16_t *data) {
+int16_t smbus_read(uint8_t address, uint8_t command, uint16_t *const data) {
     return i2c_get(NULL, address, command, (uint8_t *)data, 2);
 }
 

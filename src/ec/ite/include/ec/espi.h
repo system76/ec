@@ -27,9 +27,9 @@ enum VirtualWireState {
     VWS_HIGH = 0x11,
 };
 
-enum VirtualWireState vw_get(struct VirtualWire *vw) __critical;
+enum VirtualWireState vw_get(struct VirtualWire *const vw) __critical;
 
-void vw_set(struct VirtualWire *vw, enum VirtualWireState state) __critical;
+void vw_set(struct VirtualWire *const vw, enum VirtualWireState state) __critical;
 
 // Not all wires are defined or implemented
 // Index 2 - AP to EC

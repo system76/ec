@@ -83,7 +83,7 @@ static uint8_t kbc_buffer[16] = { 0 };
 static uint8_t kbc_buffer_head = 0;
 static uint8_t kbc_buffer_tail = 0;
 
-static bool kbc_buffer_pop(uint8_t *scancode) {
+static bool kbc_buffer_pop(uint8_t *const scancode) {
     if (kbc_buffer_head == kbc_buffer_tail) {
         return false;
     }
@@ -92,7 +92,7 @@ static bool kbc_buffer_pop(uint8_t *scancode) {
     return true;
 }
 
-static bool kbc_buffer_push(uint8_t *scancodes, uint8_t len) {
+static bool kbc_buffer_push(uint8_t *const scancodes, uint8_t len) {
     //TODO: make this test more efficient
     for (uint8_t i = 0; i < len; i++) {
         if ((kbc_buffer_tail + i + 1U) % ARRAY_SIZE(kbc_buffer) == kbc_buffer_head) {
@@ -165,13 +165,13 @@ static uint8_t state_data = 0;
 static enum KbcState state_next = KBC_STATE_NORMAL;
 
 // Clear output buffer
-static void kbc_clear_output(struct Kbc *kbc) {
+static void kbc_clear_output(struct Kbc *const kbc) {
     *(kbc->control) |= BIT(5);
     *(kbc->control) |= BIT(6);
     *(kbc->control) &= ~BIT(5);
 }
 
-static void kbc_on_input_command(struct Kbc *kbc, uint8_t data) {
+static void kbc_on_input_command(struct Kbc *const kbc, uint8_t data) {
     TRACE("kbc cmd: %02X\n", data);
     // Controller commands always reset the state
     state = KBC_STATE_NORMAL;
@@ -254,7 +254,7 @@ static void kbc_on_input_command(struct Kbc *kbc, uint8_t data) {
     }
 }
 
-static void kbc_on_input_data(struct Kbc *kbc, uint8_t data) {
+static void kbc_on_input_data(struct Kbc *const kbc, uint8_t data) {
     TRACE("kbc data: %02X\n", data);
     switch (state) {
     case KBC_STATE_TOUCHPAD:
@@ -415,7 +415,7 @@ static void kbc_on_input_data(struct Kbc *kbc, uint8_t data) {
     }
 }
 
-static void kbc_on_output_empty(struct Kbc *kbc) {
+static void kbc_on_output_empty(struct Kbc *const kbc) {
     switch (state) {
     case KBC_STATE_KEYBOARD:
         TRACE("kbc keyboard: %02X\n", state_data);
@@ -454,7 +454,7 @@ static void kbc_on_output_empty(struct Kbc *kbc) {
     }
 }
 
-void kbc_event(struct Kbc *kbc) {
+void kbc_event(struct Kbc *const kbc) {
     uint8_t sts;
 
     // Read from scancode buffer when possible

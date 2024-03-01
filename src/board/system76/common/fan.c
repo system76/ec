@@ -25,7 +25,7 @@ void fan_reset(void) {
 
 // Get duty cycle based on temperature, adapted from
 // https://github.com/pop-os/system76-power/blob/master/src/fan.rs
-uint8_t fan_duty(const struct Fan *fan, int16_t temp) __reentrant {
+uint8_t fan_duty(const struct Fan *const fan, int16_t temp) __reentrant {
     for (uint8_t i = 0; i < fan->points_size; i++) {
         const struct FanPoint *cur = &fan->points[i];
 
@@ -85,7 +85,7 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
     }
 }
 
-uint8_t fan_heatup(const struct Fan *fan, uint8_t duty) __reentrant {
+uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) __reentrant {
     uint8_t lowest = duty;
 
     uint8_t i;
@@ -101,7 +101,7 @@ uint8_t fan_heatup(const struct Fan *fan, uint8_t duty) __reentrant {
     return lowest;
 }
 
-uint8_t fan_cooldown(const struct Fan *fan, uint8_t duty) __reentrant {
+uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) __reentrant {
     uint8_t highest = duty;
 
     uint8_t i;

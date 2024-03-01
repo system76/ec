@@ -117,7 +117,7 @@ static struct Parallel PORT = {
 // clang-format on
 
 // Set port to all high-impedance inputs
-void parallel_hiz(struct Parallel *port) {
+void parallel_hiz(struct Parallel *const port) {
 #define PIN(N, P) \
     gpio_set_dir(port->N, false); \
     gpio_set(port->N, false);
@@ -126,7 +126,7 @@ void parallel_hiz(struct Parallel *port) {
 }
 
 // Place all data lines in high or low impendance state
-void parallel_data_dir(struct Parallel *port, bool dir) {
+void parallel_data_dir(struct Parallel *const port, bool dir) {
 #define DATA_BIT(B) gpio_set_dir(port->d##B, dir);
     DATA_BITS
 #undef DATA_BIT
@@ -134,7 +134,7 @@ void parallel_data_dir(struct Parallel *port, bool dir) {
 #define parallel_data_forward(P) parallel_data_dir(P, true)
 #define parallel_data_reverse(P) parallel_data_dir(P, false)
 
-void parallel_data_set_high(struct Parallel *port, uint8_t byte) {
+void parallel_data_set_high(struct Parallel *const port, uint8_t byte) {
     // By convention all lines are high, so only set the ones needed
 #define DATA_BIT(B) \
     if (!(byte & (1 << B))) \
@@ -144,7 +144,7 @@ void parallel_data_set_high(struct Parallel *port, uint8_t byte) {
 }
 
 // Set port to initial state required before being able to perform cycles
-void parallel_reset(struct Parallel *port, bool host) {
+void parallel_reset(struct Parallel *const port, bool host) {
     parallel_hiz(port);
 
     // nRESET: output on host, input on peripherals
@@ -183,7 +183,7 @@ void parallel_reset(struct Parallel *port, bool host) {
     }
 }
 
-void parallel_state(struct Parallel *port, enum ParallelState state) {
+void parallel_state(struct Parallel *const port, enum ParallelState state) {
     if (port->state != state) {
         switch (state) {
         case PARALLEL_STATE_UNKNOWN:
@@ -202,7 +202,7 @@ void parallel_state(struct Parallel *port, enum ParallelState state) {
     }
 }
 
-uint8_t parallel_read_data(struct Parallel *port) {
+uint8_t parallel_read_data(struct Parallel *const port) {
     uint8_t byte = 0;
 #define DATA_BIT(B) \
     if (gpio_get(port->d##B)) \
@@ -212,7 +212,7 @@ uint8_t parallel_read_data(struct Parallel *port) {
     return byte;
 }
 
-void parallel_write_data(struct Parallel *port, uint8_t byte) {
+void parallel_write_data(struct Parallel *const port, uint8_t byte) {
     // By convention all lines are high, so only set the ones needed
 
 #define DATA_BIT(B) \
@@ -224,8 +224,8 @@ void parallel_write_data(struct Parallel *port, uint8_t byte) {
 
 //TODO: timeout
 int16_t parallel_transaction(
-    struct Parallel *port,
-    uint8_t *data,
+    struct Parallel *const port,
+    uint8_t *const data,
     int16_t length,
     bool read,
     bool addr
@@ -299,7 +299,12 @@ int16_t parallel_transaction(
 
 // host write -> peripheral read
 // host read -> peripheral write
-bool parallel_peripheral_cycle(struct Parallel *port, uint8_t *data, bool *read, bool *addr) {
+bool parallel_peripheral_cycle(
+    struct Parallel *const port,
+    uint8_t *const data,
+    bool *const read,
+    bool *const addr
+) {
     if (!gpio_get(port->reset_n)) {
         // XXX: Give host some time to get ready
         _delay_ms(1);
@@ -351,7 +356,12 @@ static uint8_t ZERO = 0x00;
 static uint8_t SPI_ENABLE = 0xFE;
 static uint8_t SPI_DATA = 0xFD;
 
-int16_t parallel_ecms_read(struct Parallel *port, uint16_t addr, uint8_t *data, int16_t length) {
+int16_t parallel_ecms_read(
+    struct Parallel *const port,
+    uint16_t addr,
+    uint8_t *const data,
+    int16_t length
+) {
     int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_ECMSADDR1, 1);
@@ -378,7 +388,7 @@ int16_t parallel_ecms_read(struct Parallel *port, uint16_t addr, uint8_t *data, 
 }
 
 // Disable chip
-int16_t parallel_spi_reset(struct Parallel *port) {
+int16_t parallel_spi_reset(struct Parallel *const port) {
     int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
@@ -397,7 +407,12 @@ int16_t parallel_spi_reset(struct Parallel *port) {
 }
 
 // Enable chip and read or write data
-int16_t parallel_spi_transaction(struct Parallel *port, uint8_t *data, int16_t length, bool read) {
+int16_t parallel_spi_transaction(
+    struct Parallel *const port,
+    uint8_t *const data,
+    int16_t length,
+    bool read
+) {
     int16_t res;
 
     res = parallel_set_address(port, &ADDRESS_INDAR1, 1);
@@ -420,8 +435,8 @@ int16_t parallel_spi_transaction(struct Parallel *port, uint8_t *data, int16_t l
 
 // "Hardware" accelerated SPI programming, requires ECINDARs to be set
 int16_t parallel_spi_program(
-    struct Parallel *port,
-    uint8_t *data,
+    struct Parallel *const port,
+    uint8_t *const data,
     int16_t length,
     bool initialized
 ) {
@@ -483,7 +498,7 @@ int16_t parallel_spi_program(
     return i;
 }
 
-int16_t serial_transaction(uint8_t *data, int16_t length, bool read) {
+int16_t serial_transaction(uint8_t *const data, int16_t length, bool read) {
     int16_t i;
     for (i = 0; i < length; i++) {
         if (read) {

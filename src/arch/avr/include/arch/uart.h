@@ -19,16 +19,16 @@ struct Uart {
     uint8_t c_init;
 };
 
-void uart_init(struct Uart *uart, uint32_t baud);
+void uart_init(struct Uart *const uart, uint32_t baud);
 
 int16_t uart_count(void);
 struct Uart *uart_new(int16_t num);
 
-uint8_t uart_can_read(struct Uart *uart);
-uint8_t uart_can_write(struct Uart *uart);
+uint8_t uart_can_read(struct Uart *const uart);
+uint8_t uart_can_write(struct Uart *const uart);
 
-uint8_t uart_read(struct Uart *uart);
-void uart_write(struct Uart *uart, uint8_t data);
+uint8_t uart_read(struct Uart *const uart);
+void uart_write(struct Uart *const uart, uint8_t data);
 
 extern struct Uart *uart_stdio;
 void uart_stdio_init(int16_t num, uint32_t baud);
