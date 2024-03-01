@@ -16,6 +16,8 @@ CONFIG_PECI_OVER_ESPI = y
 
 # Set keyboard configs
 KEYBOARD = 18H9LHA04
+
+CONFIG_HAVE_KBLED = y
 KBLED = rgb_pwm
 
 # Set touchpad PS2 bus
