@@ -12,15 +12,15 @@ struct Kbc __code KBC = {
     .data_in = &KBHIDIR,
 };
 
-uint8_t kbc_status(struct Kbc *const kbc) {
+uint8_t kbc_status(const struct Kbc *const kbc) {
     return *(kbc->status);
 }
 
-uint8_t kbc_read(struct Kbc *const kbc) {
+uint8_t kbc_read(const struct Kbc *const kbc) {
     return *(kbc->data_in);
 }
 
-static bool kbc_wait(struct Kbc *const kbc, uint16_t timeout) {
+static bool kbc_wait(const struct Kbc *const kbc, uint16_t timeout) {
     while (*(kbc->status) & KBC_STS_OBF) {
         if (timeout == 0)
             return false;

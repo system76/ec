@@ -32,7 +32,7 @@ struct Gpio {
 }
 // clang-format on
 
-bool gpio_get(struct Gpio *const gpio);
+bool gpio_get(const struct Gpio *const gpio);
 void gpio_set(struct Gpio *const gpio, bool value);
 
 #ifdef GPIO_DEBUG

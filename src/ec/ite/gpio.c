@@ -3,7 +3,7 @@
 #include <ec/gpio.h>
 #include <common/debug.h>
 
-bool gpio_get(struct Gpio *const gpio) {
+bool gpio_get(const struct Gpio *const gpio) {
     if (*(gpio->data) & gpio->value) {
         return true;
     } else {

@@ -29,8 +29,8 @@ extern struct Kbc __code KBC;
 #define KBC_STS_IBF BIT(1)
 #define KBC_STS_CMD BIT(3)
 
-uint8_t kbc_status(struct Kbc *const kbc);
-uint8_t kbc_read(struct Kbc *const kbc);
+uint8_t kbc_status(const struct Kbc *const kbc);
+uint8_t kbc_read(const struct Kbc *const kbc);
 bool kbc_keyboard(struct Kbc *const kbc, uint8_t data, uint16_t timeout);
 bool kbc_mouse(struct Kbc *const kbc, uint8_t data, uint16_t timeout);
 
