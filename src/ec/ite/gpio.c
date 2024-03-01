@@ -3,7 +3,7 @@
 #include <ec/gpio.h>
 #include <common/debug.h>
 
-bool gpio_get(struct Gpio *gpio) {
+bool gpio_get(struct Gpio *const gpio) {
     if (*(gpio->data) & gpio->value) {
         return true;
     } else {
@@ -11,7 +11,7 @@ bool gpio_get(struct Gpio *gpio) {
     }
 }
 
-void gpio_set(struct Gpio *gpio, bool value) {
+void gpio_set(struct Gpio *const gpio, bool value) {
     if (value) {
         *(gpio->data) |= gpio->value;
     } else {
@@ -21,11 +21,11 @@ void gpio_set(struct Gpio *gpio, bool value) {
 
 #ifdef GPIO_DEBUG
 static void gpio_debug_bank(
-    char *bank,
+    char *const bank,
     uint8_t data,
     uint8_t mirror,
     uint8_t pot,
-    volatile uint8_t *control
+    volatile uint8_t *const control
 ) {
     for (char i = 0; i < 8; i++) {
         DEBUG(

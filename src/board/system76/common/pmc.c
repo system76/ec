@@ -54,7 +54,7 @@ static void pmc_sci_interrupt(void) {
 #endif // CONFIG_BUS_ESPI
 }
 
-bool pmc_sci(struct Pmc *pmc, uint8_t sci) {
+bool pmc_sci(struct Pmc *const pmc, uint8_t sci) {
     // Set SCI pending bit
     pmc_set_status(pmc, pmc_status(pmc) | BIT(5));
 
@@ -101,7 +101,7 @@ void pmc_swi(void) {
 static enum PmcState state = PMC_STATE_DEFAULT;
 static uint8_t state_data = 0;
 
-static void pmc_on_input_command(struct Pmc *pmc, uint8_t data) {
+static void pmc_on_input_command(struct Pmc *const pmc, uint8_t data) {
     TRACE("pmc cmd: %02X\n", data);
     state = PMC_STATE_DEFAULT;
     switch (data) {
@@ -169,7 +169,7 @@ static void pmc_on_input_data(uint8_t data) {
     }
 }
 
-static void pmc_on_output_empty(struct Pmc *pmc) {
+static void pmc_on_output_empty(struct Pmc *const pmc) {
     switch (state) {
     case PMC_STATE_WRITE:
         TRACE("pmc write: %02X\n", state_data);
@@ -181,7 +181,7 @@ static void pmc_on_output_empty(struct Pmc *pmc) {
     }
 }
 
-void pmc_event(struct Pmc *pmc) {
+void pmc_event(struct Pmc *const pmc) {
     uint8_t sts;
 
     // Read command/data if available

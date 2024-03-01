@@ -12,15 +12,15 @@ struct Kbc __code KBC = {
     .data_in = &KBHIDIR,
 };
 
-uint8_t kbc_status(struct Kbc *kbc) {
+uint8_t kbc_status(struct Kbc *const kbc) {
     return *(kbc->status);
 }
 
-uint8_t kbc_read(struct Kbc *kbc) {
+uint8_t kbc_read(struct Kbc *const kbc) {
     return *(kbc->data_in);
 }
 
-static bool kbc_wait(struct Kbc *kbc, uint16_t timeout) {
+static bool kbc_wait(struct Kbc *const kbc, uint16_t timeout) {
     while (*(kbc->status) & KBC_STS_OBF) {
         if (timeout == 0)
             return false;
@@ -30,7 +30,7 @@ static bool kbc_wait(struct Kbc *kbc, uint16_t timeout) {
     return true;
 }
 
-bool kbc_keyboard(struct Kbc *kbc, uint8_t data, uint16_t timeout) {
+bool kbc_keyboard(struct Kbc *const kbc, uint8_t data, uint16_t timeout) {
     if (!kbc_wait(kbc, timeout))
         return false;
     *(kbc->status) &= ~0x20;
@@ -38,7 +38,7 @@ bool kbc_keyboard(struct Kbc *kbc, uint8_t data, uint16_t timeout) {
     return true;
 }
 
-bool kbc_mouse(struct Kbc *kbc, uint8_t data, uint16_t timeout) {
+bool kbc_mouse(struct Kbc *const kbc, uint8_t data, uint16_t timeout) {
     if (!kbc_wait(kbc, timeout))
         return false;
     *(kbc->status) |= 0x20;

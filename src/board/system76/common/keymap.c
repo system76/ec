@@ -69,7 +69,7 @@ bool keymap_save_config(void) {
     return flash_read_u16(CONFIG_ADDR) == CONFIG_SIGNATURE;
 }
 
-bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t *value) {
+bool keymap_get(uint8_t layer, uint8_t output, uint8_t input, uint16_t *const value) {
     if (layer < KM_LAY && output < KM_OUT && input < KM_IN) {
         if (keymap_fnlock && keymap_is_f_key(output, input))
             layer ^= 1;

@@ -42,7 +42,7 @@ struct I2C __code I2C_4 = {
 };
 #endif
 
-void i2c_reset(struct I2C *i2c, bool kill) {
+void i2c_reset(struct I2C *const i2c, bool kill) {
     if (*(i2c->hosta) & HOSTA_BUSY) {
         // Set kill bit
         if (kill)
@@ -58,7 +58,7 @@ void i2c_reset(struct I2C *i2c, bool kill) {
     *(i2c->hoctl2) = 0;
 }
 
-int16_t i2c_start(struct I2C *i2c, uint8_t addr, bool read) __reentrant {
+int16_t i2c_start(struct I2C *const i2c, uint8_t addr, bool read) __reentrant {
     // If we are already in a transaction
     if (*(i2c->hosta) & HOSTA_BYTE_DONE) {
         // If we are switching direction
@@ -86,7 +86,7 @@ int16_t i2c_start(struct I2C *i2c, uint8_t addr, bool read) __reentrant {
     return 0;
 }
 
-void i2c_stop(struct I2C *i2c) {
+void i2c_stop(struct I2C *const i2c) {
     // Disable i2c compatibility
     *(i2c->hoctl2) &= ~BIT(1);
     // Clear status
@@ -95,7 +95,12 @@ void i2c_stop(struct I2C *i2c) {
     i2c_reset(i2c, false);
 }
 
-static int16_t i2c_transaction(struct I2C *i2c, uint8_t *data, uint16_t length, bool read) {
+static int16_t i2c_transaction(
+    struct I2C *const i2c,
+    uint8_t *const data,
+    uint16_t length,
+    bool read
+) {
     uint16_t i;
     for (i = 0; i < length; i++) {
         if (read) {
@@ -154,10 +159,10 @@ static int16_t i2c_transaction(struct I2C *i2c, uint8_t *data, uint16_t length, 
     return i;
 }
 
-int16_t i2c_read(struct I2C *i2c, uint8_t *data, uint16_t length) __reentrant {
+int16_t i2c_read(struct I2C *const i2c, uint8_t *const data, uint16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, true);
 }
 
-int16_t i2c_write(struct I2C *i2c, uint8_t *data, uint16_t length) __reentrant {
+int16_t i2c_write(struct I2C *const i2c, uint8_t *const data, uint16_t length) __reentrant {
     return i2c_transaction(i2c, data, length, false);
 }

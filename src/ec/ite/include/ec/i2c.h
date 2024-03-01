@@ -11,6 +11,6 @@ extern struct I2C __code I2C_1;
 extern struct I2C __code I2C_4;
 #endif
 
-void i2c_reset(struct I2C *i2c, bool kill);
+void i2c_reset(struct I2C *const i2c, bool kill);
 
 #endif // _EC_I2C_H

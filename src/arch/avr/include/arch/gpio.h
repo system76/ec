@@ -25,9 +25,9 @@ struct Gpio {
 }
 // clang-format on
 
-bool gpio_get(struct Gpio *gpio);
-void gpio_set(struct Gpio *gpio, bool value);
-bool gpio_get_dir(struct Gpio *gpio);
-void gpio_set_dir(struct Gpio *gpio, bool value);
+bool gpio_get(struct Gpio *const gpio);
+void gpio_set(struct Gpio *const gpio, bool value);
+bool gpio_get_dir(struct Gpio *const gpio);
+void gpio_set_dir(struct Gpio *const gpio, bool value);
 
 #endif // _ARCH_GPIO_H

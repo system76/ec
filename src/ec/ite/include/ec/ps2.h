@@ -22,7 +22,7 @@ extern struct Ps2 __code PS2_1;
 extern struct Ps2 __code PS2_2;
 extern struct Ps2 __code PS2_3;
 
-void ps2_reset(struct Ps2 *ps2);
+void ps2_reset(struct Ps2 *const ps2);
 
 volatile uint8_t __xdata __at(0x1700) PSCTL1;
 volatile uint8_t __xdata __at(0x1701) PSCTL2;

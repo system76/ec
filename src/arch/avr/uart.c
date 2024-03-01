@@ -54,7 +54,7 @@ struct Uart *uart_new(int16_t num) {
     }
 }
 
-void uart_init(struct Uart *uart, uint32_t baud) {
+void uart_init(struct Uart *const uart, uint32_t baud) {
     uint32_t baud_prescale = (F_CPU / (baud * 16UL)) - 1;
     *(uart->baud_h) = (uint8_t)(baud_prescale >> 8);
     *(uart->baud_l) = (uint8_t)(baud_prescale);
@@ -63,20 +63,20 @@ void uart_init(struct Uart *uart, uint32_t baud) {
     *(uart->c) = uart->c_init;
 }
 
-uint8_t uart_can_read(struct Uart *uart) {
+uint8_t uart_can_read(struct Uart *const uart) {
     return (*(uart->a)) & uart->a_read;
 }
 
-uint8_t uart_read(struct Uart *uart) {
+uint8_t uart_read(struct Uart *const uart) {
     while (!uart_can_read(uart)) {}
     return *(uart->data);
 }
 
-uint8_t uart_can_write(struct Uart *uart) {
+uint8_t uart_can_write(struct Uart *const uart) {
     return (*(uart->a)) & uart->a_write;
 }
 
-void uart_write(struct Uart *uart, uint8_t data) {
+void uart_write(struct Uart *const uart, uint8_t data) {
     while (!uart_can_write(uart)) {}
     *(uart->data) = data;
 }

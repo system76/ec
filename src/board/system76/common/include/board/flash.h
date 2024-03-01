@@ -26,7 +26,7 @@
  * \param[out] data   The memory area to copy to.
  * \param[in]  length The number of bytes to copy.
  */
-void flash_read(uint32_t addr, __xdata uint8_t *data, uint32_t length);
+void flash_read(uint32_t addr, __xdata uint8_t *const data, uint32_t length);
 
 /**
  * Read a single byte from flash.
@@ -62,7 +62,7 @@ uint32_t flash_read_u32(uint32_t addr);
  * \param[in] data   The memory area to copy from.
  * \param[in] length The number of bytes to copy.
  */
-void flash_write(uint32_t addr, __xdata uint8_t *data, uint32_t length);
+void flash_write(uint32_t addr, __xdata uint8_t *const data, uint32_t length);
 
 /**
  * Write a single byte to flash.

@@ -37,7 +37,7 @@ struct VirtualWire __code VW_SUS_PWRDN_ACK = VIRTUAL_WIRE(41, 1);
 // Index 47 - AP to EC (platform specific)
 struct VirtualWire __code VW_HOST_C10 = VIRTUAL_WIRE(47, 0);
 
-enum VirtualWireState vw_get(struct VirtualWire *vw) __critical {
+enum VirtualWireState vw_get(struct VirtualWire *const vw) __critical {
     uint8_t index = *vw->index;
     if (index & vw->valid_mask) {
         if (index & vw->data_mask) {
@@ -50,7 +50,7 @@ enum VirtualWireState vw_get(struct VirtualWire *vw) __critical {
     }
 }
 
-void vw_set(struct VirtualWire *vw, enum VirtualWireState state) __critical {
+void vw_set(struct VirtualWire *const vw, enum VirtualWireState state) __critical {
     uint8_t index = *vw->index;
     switch (state) {
     case VWS_LOW:

@@ -96,7 +96,7 @@ bool peci_available(void) {
 void peci_init(void) {}
 
 // Returns true on success, false on error
-bool peci_get_temp(int16_t *data) {
+bool peci_get_temp(int16_t *const data) {
     //TODO: Wait for completion?
     // Clear upstream status
     ESUCTRL0 = ESUCTRL0;
@@ -289,7 +289,7 @@ void peci_init(void) {
 }
 
 // Returns true on success, false on error
-bool peci_get_temp(int16_t *data) {
+bool peci_get_temp(int16_t *const data) {
     // Wait for any in-progress transaction to complete
     uint32_t start = time_get();
     while (HOSTAR & BIT(0)) {
