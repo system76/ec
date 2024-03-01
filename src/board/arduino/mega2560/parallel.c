@@ -436,7 +436,7 @@ int16_t parallel_spi_transaction(
 // "Hardware" accelerated SPI programming, requires ECINDARs to be set
 int16_t parallel_spi_program(
     struct Parallel *const port,
-    uint8_t *const data,
+    const uint8_t *const data,
     int16_t length,
     bool initialized
 ) {

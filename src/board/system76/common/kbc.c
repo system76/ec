@@ -92,7 +92,7 @@ static bool kbc_buffer_pop(uint8_t *const scancode) {
     return true;
 }
 
-static bool kbc_buffer_push(uint8_t *const scancodes, uint8_t len) {
+static bool kbc_buffer_push(const uint8_t *const scancodes, uint8_t len) {
     //TODO: make this test more efficient
     for (uint8_t i = 0; i < len; i++) {
         if ((kbc_buffer_tail + i + 1U) % ARRAY_SIZE(kbc_buffer) == kbc_buffer_head) {

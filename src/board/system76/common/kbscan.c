@@ -96,7 +96,7 @@ static inline bool popcount_more_than_one(uint8_t rowdata) {
     return rowdata & (rowdata - 1);
 }
 
-static bool kbscan_row_has_ghost(uint8_t *const matrix, uint8_t col) {
+static bool kbscan_row_has_ghost(const uint8_t *const matrix, uint8_t col) {
     uint8_t rowdata = matrix[col];
 
     // No ghosts exist when less than 2 keys in the row are active.

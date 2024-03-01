@@ -52,7 +52,7 @@ void i2c_stop(struct I2C *const i2c) {
     TWCR = BIT(TWINT) | BIT(TWEN) | BIT(TWSTO);
 }
 
-int16_t i2c_write(struct I2C *const i2c, uint8_t *const data, uint16_t length) {
+int16_t i2c_write(struct I2C *const i2c, const uint8_t *const data, uint16_t length) {
     uint16_t i;
     for (i = 0; i < length; i++) {
         // load data into data register

@@ -24,7 +24,7 @@ void i2c_stop(struct I2C *const i2c) __reentrant;
 
 // Send a byte on i2c bus
 // Must be defined by arch, board, or ec
-int16_t i2c_write(struct I2C *const i2c, uint8_t *const data, uint16_t length) __reentrant;
+int16_t i2c_write(struct I2C *const i2c, const uint8_t *const data, uint16_t length) __reentrant;
 
 // Read bytes from bus
 // Must be defined by arch, board, or ec
