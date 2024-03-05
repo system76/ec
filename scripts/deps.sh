@@ -73,10 +73,7 @@ msg "Installing git hooks"
 make git-config
 
 RUSTUP_NEW_INSTALL=0
-if which rustup &> /dev/null; then
-    msg "Updating rustup"
-    rustup self update
-else
+if ! command -v rustup >/dev/null 2>&1; then
     RUSTUP_NEW_INSTALL=1
     msg "Installing Rust"
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
