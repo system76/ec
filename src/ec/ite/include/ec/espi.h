@@ -158,6 +158,10 @@ volatile uint8_t __xdata __at(0x3207) VWIDX7;
 volatile uint8_t __xdata __at(0x3240) VWIDX40;
 volatile uint8_t __xdata __at(0x3241) VWIDX41;
 volatile uint8_t __xdata __at(0x3242) VWIDX42;
+volatile uint8_t __xdata __at(0x3243) VWIDX43;
+volatile uint8_t __xdata __at(0x3244) VWIDX44;
+volatile uint8_t __xdata __at(0x3245) VWIDX45;
+volatile uint8_t __xdata __at(0x3246) VWIDX46;
 volatile uint8_t __xdata __at(0x3247) VWIDX47;
 
 // Virtual wire control

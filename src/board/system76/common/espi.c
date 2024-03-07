@@ -176,6 +176,15 @@ void espi_event(void) {
                 VW_SET_DEBUG(VW_SUS_ACK_N, wire);
             }
         }
+        if (value & BIT(4)) {
+            DEBUG("VWIDX42 %X\n", VWIDX42);
+        }
+        if (value & BIT(5)) {
+            DEBUG("VWIDX43 %X\n", VWIDX43);
+        }
+        if (value & BIT(6)) {
+            DEBUG("VWIDX44 %X\n", VWIDX44);
+        }
         if (value & BIT(7)) {
             DEBUG("VWIDX47 %X\n", VWIDX47);
         }
