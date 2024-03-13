@@ -18,7 +18,7 @@ No specific IDE or editor is required or recommended.
 EC development depends on using distro-provided packages for the most of the
 toolset.
 
-A complete list of dependencies can be seen in `scripts/deps.sh`.
+A complete list of dependencies can be seen in `scripts/install-deps.sh`.
 
 ### Cargo
 

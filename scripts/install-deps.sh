@@ -1,17 +1,13 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Install dependencies for development.
+
+# shellcheck disable=SC1091
+
 set -eE
 
-function msg {
-  echo -e "\x1B[1m$*\x1B[0m" >&2
-}
-
-trap 'msg "\x1B[31mFailed to install dependencies!"' ERR
-
-source /etc/os-release
-
-msg "Installing system build dependencies"
+. /etc/os-release
 if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
     sudo apt-get update
     sudo apt-get install \
@@ -61,37 +57,10 @@ elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         systemd-libs \
         vim
 else
-    msg "Please add support for your distribution to:"
-    msg "scripts/deps.sh"
+    printf "\e[1m\e[31munsupported host:\e[0m %s\n" "${ID}"
     exit 1
 fi
 
-msg "Initializing submodules"
-git submodule update --init --recursive
-
-msg "Installing git hooks"
-make git-config
-
-RUSTUP_NEW_INSTALL=0
-if which rustup &> /dev/null; then
-    msg "Updating rustup"
-    rustup self update
-else
-    RUSTUP_NEW_INSTALL=1
-    msg "Installing Rust"
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-      | sh -s -- -y --default-toolchain none
-
-    msg "Loading Rust environment"
-    source "${HOME}/.cargo/env"
+if [ -z "$CI" ]; then
+    git submodule update --init --recursive
 fi
-
-msg "Installing pinned Rust toolchain and components"
-rustup show
-
-if [[ $RUSTUP_NEW_INSTALL = 1 ]]; then
-    msg "rustup was just installed. Ensure cargo is on the PATH with:"
-    echo -e "    source ~/.cargo/env\n"
-fi
-
-msg "\x1B[32mSuccessfully installed dependencies"

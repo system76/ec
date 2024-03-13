@@ -9,7 +9,7 @@ Terms used:
 
 1. Install dependencies
     ```bash
-    ./scripts/deps.sh
+    make install-deps
     ```
 1. Start the console
     ```bash
