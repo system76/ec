@@ -39,6 +39,7 @@ enum Cmd {
     SetNoInput = 19,
     SecurityGet = 20,
     SecuritySet = 21,
+    FanTach = 22,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -325,6 +326,20 @@ impl<A: Access> Ec<A> {
     pub unsafe fn security_set(&mut self, state: SecurityState) -> Result<(), Error> {
        let mut data = [state as u8];
        self.command(Cmd::SecuritySet, &mut data)
+    }
+
+    /// Read fan tachometer by fan index
+    pub unsafe fn fan_tach(&mut self, index: u8) -> Result<u16, Error> {
+        let mut data = [
+            index,
+            0,
+            0
+        ];
+        self.command(Cmd::FanTach, &mut data)?;
+        Ok(
+            (data[1] as u16) |
+            ((data[2] as u16) << 8)
+        )
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>
