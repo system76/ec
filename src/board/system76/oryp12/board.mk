@@ -12,7 +12,7 @@ CONFIG_BUS_ESPI = y
 CONFIG_PECI_OVER_ESPI = y
 
 # Enable firmware security
-#CONFIG_SECURITY=y
+CONFIG_SECURITY=y
 
 # Include keyboard
 KEYBOARD = 18H9LHA04
