@@ -25,8 +25,7 @@ KBLED = rgb_pwm
 CFLAGS += -DPS2_TOUCHPAD=PS2_3
 
 # Set smart charger parameters
-# TODO: actually bq24800
-CHARGER = bq24780s
+CHARGER = oz26786
 CFLAGS += -DI2C_SMBUS=I2C_4
 CFLAGS+=\
 	-DCHARGER_ADAPTER_RSENSE=10 \
