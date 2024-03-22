@@ -170,6 +170,12 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
         println!("ec version: {:?}", str::from_utf8(ec_version));
     }
 
+    if let Ok(security) = ec.security_get() {
+        if security != SecurityState::Unlock {
+            return Err(Error::WriteLocked);
+        }
+    }
+
     if scratch {
         // Wait for any key releases
         eprintln!("Waiting 5 seconds for all keys to be released");
@@ -378,8 +384,6 @@ struct Args {
 }
 
 fn main() {
-    //.subcommand(Command::new("security").arg(Arg::new("state").value_parser(["lock", "unlock"])))
-
     let args = Args::parse();
 
     let get_ec = || -> Result<_, Error> {
