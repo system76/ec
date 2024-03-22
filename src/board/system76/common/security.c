@@ -11,7 +11,7 @@ enum SecurityState security_get(void) {
 
 bool security_set(enum SecurityState state) {
     switch (state) {
-    // Allow perpare states to be set
+    // Allow prepare states to be set
     case SECURITY_STATE_PREPARE_LOCK:
     case SECURITY_STATE_PREPARE_UNLOCK:
         security_state = state;
