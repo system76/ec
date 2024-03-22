@@ -1,15 +1,27 @@
 # Flashing firmware
 
+## UEFI application
+
+The `flash.sh` script from the top-level firmware-open project will use
+firmware-update, the UEFI application which is used for normal system updates.
+
+This will flash both the SBIOS and the EC after building the firmware. To
+flash just the EC, delete the built `firmware.rom` before running `flash.sh`.
+
 ## Internal programmer
 
 Use this method for flashing a system already running System76 EC.
 
 This method will only work if the running firmware is not locked. Firmware is
-write locked if it was built with `CONFIG_SECURITY=y`. firmware-update must be
-used to flash from UEFI in this state (see `flash.sh` in firmware-open).
+write locked if it was built with `CONFIG_SECURITY=y`. The firmware can be
+unlocked using ectool for a single boot:
 
-This will trigger a watchdog reset causing the system to **immediately power
-off**. OS data may be lost or corrupted as a result. Save and close all
+```
+./scripts/ectool.sh security unlock
+```
+
+This method will trigger a watchdog reset causing the system to **immediately
+power off**. OS data may be lost or corrupted as a result. Save and close all
 applications before flashing.
 
 ```
