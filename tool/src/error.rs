@@ -29,6 +29,8 @@ pub enum Error {
     /// Encountered a hidapi::Error
     #[cfg(feature = "hidapi")]
     Hid(hidapi::HidError),
+    /// Writing to flash is disabled
+    WriteLocked,
 }
 
 #[cfg(feature = "std")]

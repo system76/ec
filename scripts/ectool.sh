@@ -2,5 +2,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 set -e
-cargo build --release --manifest-path tool/Cargo.toml
+cargo build --release --quiet --manifest-path tool/Cargo.toml
 sudo tool/target/release/system76_ectool "$@"
