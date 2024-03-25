@@ -3,7 +3,7 @@
 board-common-y += acpi.c
 board-common-y += battery.c
 board-common-y += config.c
-board-common-y += dgpu.c
+board-common-$(CONFIG_HAVE_DGPU) += dgpu.c
 board-common-y += ecpm.c
 board-common-$(CONFIG_BUS_ESPI) += espi.c
 board-common-y += fan.c
@@ -56,6 +56,10 @@ CFLAGS += -DCONFIG_BUS_ESPI=1
 ifeq ($(CONFIG_PECI_OVER_ESPI),y)
 CFLAGS += -DCONFIG_PECI_OVER_ESPI=1
 endif
+endif
+
+ifeq ($(CONFIG_HAVE_DGPU),y)
+CFLAGS += -DCONFIG_HAVE_DGPU=1
 endif
 
 # Include system76 common source
