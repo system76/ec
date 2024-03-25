@@ -15,11 +15,19 @@ Terms used:
     ```bash
     make BOARD=system76/<model> console_internal
     ```
-1. If you're not seeing seeing expected output, check the
-  [`LEVEL` cflag][level_cflag]. This is an EC compile time configuration and
-  changing will require a build and flash of the EC.
+If you're not seeing seeing expected output, check the value of
+`CONFIG_LOG_LEVEL` in `common.mk`. This is an EC compile time configuration
+and changing it will require a build and flash of the EC. Supported log levels
+are:
 
-[level_cflag]: https://github.com/system76/ec/blob/01907011bb63/src/board/system76/common/common.mk#L31-L39
+- `none`
+- `error`
+- `warn`
+- `info`
+- `debug`
+- `trace`
+
+The default value is `debug` if unspecified.
 
 ## Debugging with external device
 
@@ -41,7 +49,7 @@ For details on configuring the Mega 2560 and breakout board, see
 #### Setup
 
 1. Enable parallel port debugging in the EC firmware
-    - Uncomment `PARALLEL_DEBUG` in `src/board/system76/common/common.mk`
+    - Set `CONFIG_PARALLEL_DEBUG=y` in `config.mk`
     - Build and flash the firmware for the target
 2. Power off target
 3. Remove bottom panel
@@ -112,7 +120,7 @@ Requirements:
 - USB-C cable
 
 1. Enable I2C debugging in the EC firmware for the target
-    - Uncomment `I2C_DEBUGGER` in `src/board/system76/common/common.mk`
+    - Set `CONFIG_I2C_DEBUG=y` in `config.mk`
     - Build and flash firmware
 2. Connect Trinket M0 to host
     - This will create an ACM device at `/dev/ttyACM*`
