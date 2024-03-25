@@ -76,8 +76,12 @@ CHARGER?=bq24780s
 board-common-y += charger/$(CHARGER).c
 
 # Add USB-PD
-USBPD?=none
-board-common-y += usbpd/$(USBPD).c
+ifeq ($(CONFIG_HAVE_USBPD),y)
+CFLAGS += -DCONFIG_HAVE_USBPD=1
+ifeq ($(CONFIG_USBPD_TPS65987),y)
+board-common-y += usbpd/tps65987.c
+endif
+endif
 
 # Add keyboard
 ifndef KEYBOARD

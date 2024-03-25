@@ -3,9 +3,20 @@
 #ifndef _BOARD_USBPD_H
 #define _BOARD_USBPD_H
 
+#if CONFIG_HAVE_USBPD
+
 void usbpd_init(void);
 void usbpd_event(void);
 void usbpd_disable_charging(void);
 void usbpd_enable_charging(void);
+
+#else
+
+static inline void usbpd_init(void) {}
+static inline void usbpd_event(void) {}
+static inline void usbpd_disable_charging(void) {}
+static inline void usbpd_enable_charging(void) {}
+
+#endif
 
 #endif // _BOARD_USBPD_H
