@@ -100,6 +100,7 @@ void main(void) {
 #endif
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
+    ec_print_reset_reason();
 
     uint32_t last_time_battery = 0;
     uint32_t last_time_fan = 0;

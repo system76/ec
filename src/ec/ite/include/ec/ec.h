@@ -4,6 +4,7 @@
 #define _EC_EC_H
 
 void ec_init(void);
+void ec_print_reset_reason(void);
 void ec_read_post_codes(void);
 
 #endif // _EC_EC_H

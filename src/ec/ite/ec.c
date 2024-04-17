@@ -16,6 +16,11 @@ void ec_init(void) {
 #endif
 }
 
+void ec_print_reset_reason(void) {
+    if (SPCTRL4 & BIT(1))
+        WARN("Last reset caused by PWRSW WDT Timeout!\n");
+}
+
 void ec_read_post_codes(void) {
 #if CONFIG_EC_ITE_IT5570E
     while (P80H81HS & 1) {
