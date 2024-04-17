@@ -46,6 +46,11 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // clang-format on
 
 void gpio_init() {
+    // PWRSW WDT 1 Timeout 5s
+    GCR11 = BIT(0);
+    // PWRSW WDT 1 Enable
+    GCR9 = BIT(1) | BIT(2);
+
     // Enable LPC reset on GPD2
     GCR = 0x04;
     // Enable SMBus channel 4
