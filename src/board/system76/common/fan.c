@@ -73,6 +73,10 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
         TRACE("PECI fan_duty_raw=%d\n", peci_fan_duty);
         last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
         DCR2 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
+#if HAVE_CPU_FAN2
+        // FIXME: Handle better
+        DCR3 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
+#endif
         TRACE("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
     }
 

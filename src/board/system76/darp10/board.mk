@@ -38,5 +38,7 @@ CFLAGS += \
 	-DPOWER_LIMIT_AC=65 \
 	-DPOWER_LIMIT_DC=45
 
+CFLAGS += -DHAVE_CPU_FAN2=1
+
 # Add common code
 include src/board/system76/common/common.mk
