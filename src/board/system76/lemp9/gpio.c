@@ -93,8 +93,6 @@ void gpio_init(void) {
     GPCRB5 = GPIO_OUT;
     // NC
     GPCRB6 = GPIO_IN;
-    // NC
-    GPCRB7 = GPIO_IN;
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // SMB_CLK_EC

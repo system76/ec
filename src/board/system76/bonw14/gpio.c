@@ -97,8 +97,6 @@ void gpio_init(void) {
     GPCRB5 = GPIO_OUT | GPIO_UP;
     // EC_EN
     GPCRB6 = GPIO_OUT | GPIO_UP;
-    // NO PIN
-    GPCRB7 = GPIO_IN;
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // KBC_SMBus_CLK1

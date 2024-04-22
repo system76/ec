@@ -118,7 +118,9 @@ volatile uint8_t __xdata __at(0x161B) GPCRB3;
 volatile uint8_t __xdata __at(0x161C) GPCRB4;
 volatile uint8_t __xdata __at(0x161D) GPCRB5;
 volatile uint8_t __xdata __at(0x161E) GPCRB6;
+#if CONFIG_EC_ITE_IT5571E || CONFIG_EC_ITE_IT8587E
 volatile uint8_t __xdata __at(0x161F) GPCRB7;
+#endif
 
 volatile uint8_t __xdata __at(0x1620) GPCRC0;
 volatile uint8_t __xdata __at(0x1621) GPCRC1;
