@@ -102,8 +102,6 @@ void gpio_init(void) {
     GPCRB5 = GPIO_OUT | GPIO_UP;
     // SUSBC_EN#
     GPCRB6 = GPIO_OUT | GPIO_UP;
-    // Does not exist
-    GPCRB7 = GPIO_IN;
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
     // SMC_VGA_THERM

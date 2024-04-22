@@ -109,8 +109,6 @@ void gpio_init(void) {
     GPCRB5 = GPIO_OUT;
     // SUSBC_EC#
     GPCRB6 = GPIO_OUT | GPIO_UP;
-    // NC
-    GPCRB7 = GPIO_IN;
 
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
