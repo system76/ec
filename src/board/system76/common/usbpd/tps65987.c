@@ -11,11 +11,13 @@
 #include <common/debug.h>
 #include <ec/i2c.h>
 
-#define USBPD_ADDRESS 0x20
+#define PORT_A_ADDRESS 0x20
+#define PORT_B_ADDRESS 0x24
 
 #define REG_MODE 0x03
 #define REG_CMD1 0x08
 #define REG_DATA1 0x09
+#define REG_GLOBAL_CONFIG 0x27
 #define REG_ACTIVE_CONTRACT_PDO 0x34
 
 enum {
@@ -53,9 +55,9 @@ enum {
 
 #define PDO_CURRENT_MA(pdo) (((pdo)&0x3FF) * 10)
 
-static int16_t usbpd_current_limit(void) {
+static int16_t usbpd_current_limit(uint8_t address) {
     uint8_t value[7] = { 0 };
-    int16_t res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, REG_ACTIVE_CONTRACT_PDO, value, sizeof(value));
+    int16_t res = i2c_get(&I2C_USBPD, address, REG_ACTIVE_CONTRACT_PDO, value, sizeof(value));
     if (res == 7) {
         if (value[0] == 6) {
             uint32_t pdo = ((uint32_t)value[1]) | (((uint32_t)value[2]) << 8) |
@@ -90,11 +92,11 @@ static int16_t usbpd_current_limit(void) {
     }
 }
 
-static void usbpd_dump(void) {
+static void usbpd_dump(uint8_t address) {
     /* Dump all registers for debugging */
     for (uint8_t reg = 0x00; reg < 0x40; reg += 1) {
         uint8_t value[65] = { 0 };
-        int16_t res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, reg, value, sizeof(value));
+        int16_t res = i2c_get(&I2C_USBPD, address, reg, value, sizeof(value));
         if (res < 0) {
             DEBUG("USBPD %02X ERROR %04X\n", reg, res);
         } else {
@@ -117,7 +119,7 @@ static int16_t usbpd_get_mode(void) {
 
     DEBUG("USBPD controller mode: ");
 
-    res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, REG_MODE, reg, sizeof(reg));
+    res = i2c_get(&I2C_USBPD, PORT_A_ADDRESS, REG_MODE, reg, sizeof(reg));
     if (res < 0 || reg[0] < 4) {
         DEBUG("UNKNOWN (I2C error %d)\n", res);
         return USBPD_MODE_UNKNOWN;
@@ -151,7 +153,7 @@ void usbpd_reset(void) {
 
     uint8_t cmd[5] = { 4, 'G', 'a', 'i', 'd' };
 
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
+    res = i2c_set(&I2C_USBPD, PORT_A_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
     if (res < 0)
         return;
 
@@ -166,12 +168,33 @@ static void usbpd_dbfg(void) {
 
     uint8_t cmd[5] = { 4, 'D', 'B', 'f', 'g' };
 
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
+    res = i2c_set(&I2C_USBPD, PORT_A_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
     if (res < 0)
         return;
 
     i2c_reset(&I2C_USBPD, true);
     return;
+}
+
+// Enables automatic sink management policy
+// Port with highest negotiated power will be used
+static void usbpd_set_multiport_policy(void) {
+    int16_t res;
+    uint8_t reg[15] = { 0 };
+
+    DEBUG("USBPD set multiport policy\n");
+    res = i2c_get(&I2C_USBPD, PORT_A_ADDRESS, REG_GLOBAL_CONFIG, reg, sizeof(reg));
+    if (res < 0)
+        return;
+
+    DEBUG("USBPD multiport policy: %x\n", reg[4] & 0x01);
+    if (reg[4] & 0x01)
+        return;
+
+    reg[4] |= 0x01; // Highest Power sink policy
+
+    res = i2c_set(&I2C_USBPD, PORT_A_ADDRESS, REG_GLOBAL_CONFIG, reg, sizeof(reg));
+    DEBUG("USBPD multiport policy set RES = %ld\n", res);
 }
 
 void usbpd_event(void) {
@@ -196,14 +219,25 @@ void usbpd_event(void) {
         DEBUG("JACK_IN %d\n", jack_in);
     }
 
-    static bool last_sink_ctrl = false;
-    bool sink_ctrl = gpio_get(&SINK_CTRL);
-    if (sink_ctrl != last_sink_ctrl) {
-        last_sink_ctrl = sink_ctrl;
+    static bool last_sink_ctrl_1 = false;
+    bool sink_ctrl_1 = gpio_get(&SINK_CTRL);
+    if (sink_ctrl_1 != last_sink_ctrl_1) {
+        last_sink_ctrl_1 = sink_ctrl_1;
         update = true;
 
-        DEBUG("SINK_CTRL %d\n", sink_ctrl);
+        DEBUG("SINK_CTRL %d\n", sink_ctrl_1);
     }
+
+#ifdef USBPD_DUAL_PORT
+    static bool last_sink_ctrl_2 = false;
+    bool sink_ctrl_2 = gpio_get(&SINK_CTRL_2);
+    if (sink_ctrl_2 != last_sink_ctrl_2) {
+        last_sink_ctrl_2 = sink_ctrl_2;
+        update = true;
+
+        DEBUG("SINK_CTRL_2 %d\n", sink_ctrl_2);
+    }
+#endif
 
     static enum PowerState last_power_state = POWER_STATE_OFF;
     update_power_state();
@@ -213,6 +247,10 @@ void usbpd_event(void) {
         if (last_power_state == POWER_STATE_OFF) {
             // VIN_3V3 now available, allow PD to use it instead of Vbus
             usbpd_dbfg();
+#ifdef USBPD_DUAL_PORT
+            // This resets the PD port so it has to be done after dbfg
+            usbpd_set_multiport_policy();
+#endif
         }
         last_power_state = power_state;
     }
@@ -228,10 +266,16 @@ void usbpd_event(void) {
                 // Use default input current
                 next_input_current = CHARGER_INPUT_CURRENT;
                 next_input_voltage = BATTERY_CHARGER_VOLTAGE_AC;
-            } else if (sink_ctrl) {
-                while ((res = usbpd_current_limit()) < 0 && retry--) {};
+            } else if (sink_ctrl_1) {
+                while ((res = usbpd_current_limit(PORT_A_ADDRESS)) < 0 && retry--) {};
                 next_input_current = res < CHARGER_INPUT_CURRENT ? res : CHARGER_INPUT_CURRENT;
                 next_input_voltage = BATTERY_CHARGER_VOLTAGE_PD;
+#ifdef USBPD_DUAL_PORT
+            } else if (sink_ctrl_2) {
+                while ((res = usbpd_current_limit(PORT_B_ADDRESS)) < 0 && retry--) {};
+                next_input_current = res < CHARGER_INPUT_CURRENT ? res : CHARGER_INPUT_CURRENT;
+                next_input_voltage = BATTERY_CHARGER_VOLTAGE_PD;
+#endif
             }
         }
 
@@ -242,98 +286,10 @@ void usbpd_event(void) {
 
             // Disable smart charger so it is reconfigured with the new limit
             battery_charger_disable();
+            // In case power was renegotiated without power loss
+            power_peci_limit(true);
         }
     }
-}
-
-static int16_t usbpd_aneg(void) {
-    int16_t res;
-
-    uint8_t cmd[5] = { 4, 'A', 'N', 'e', 'g' };
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
-    if (res < 0) {
-        return res;
-    }
-
-    //TODO: wait on command completion
-
-    return 0;
-}
-
-void usbpd_disable_charging(void) {
-    int16_t res;
-
-    DEBUG("USBPD DISABLE CHARGING ");
-
-    // Read current value
-    uint8_t value[2] = { 0 };
-    res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
-    if (res < 0) {
-        DEBUG("ERR %04X\n", -res);
-        return;
-    }
-
-    // Charging already disabled
-    if (value[1] == 1) {
-        DEBUG("NOP\n");
-        return;
-    }
-
-    // Enable only the first TX sink PDO (5V)
-    value[0] = 1;
-    value[1] = 1;
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
-    if (res < 0) {
-        DEBUG("ERR %04X\n", -res);
-        return;
-    }
-
-    // Auto negotiate sink update
-    res = usbpd_aneg();
-    if (res < 0) {
-        DEBUG("ERR %04X\n", -res);
-        return;
-    }
-
-    DEBUG("OK\n");
-}
-
-void usbpd_enable_charging(void) {
-    int16_t res;
-
-    DEBUG("USBPD ENABLE CHARGING ");
-
-    // Read current value
-    uint8_t value[2] = { 0 };
-    res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
-    if (res < 0) {
-        DEBUG("ERR %04X\n", -res);
-        return;
-    }
-
-    // Charging already enabled
-    if (value[1] == 2) {
-        DEBUG("NOP\n");
-        return;
-    }
-
-    // Enable the first two TX sink PDO (5V and 20V)
-    value[0] = 1;
-    value[1] = 2;
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
-    if (res < 0) {
-        DEBUG("ERR %04X\n", -res);
-        return;
-    }
-
-    // Auto negotiate sink update
-    res = usbpd_aneg();
-    if (res < 0) {
-        DEBUG("ERR %04X\n", -res);
-        return;
-    }
-
-    DEBUG("OK\n");
 }
 
 void usbpd_init(void) {

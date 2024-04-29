@@ -338,7 +338,7 @@ void power_off(void) {
     update_power_state();
 }
 
-static void power_peci_limit(bool ac) {
+void power_peci_limit(bool ac) {
     uint32_t supply_watts = 0;
     uint32_t watts = 0;
     uint16_t res;
