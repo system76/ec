@@ -59,23 +59,33 @@ void dgpu_init(void) {
     i2c_reset(&I2C_DGPU, true);
 }
 
-uint8_t dgpu_get_fan_duty(void) {
-    uint8_t duty;
-    if (power_state == POWER_STATE_S0 && gpio_get(&DGPU_PWR_EN) && !gpio_get(&GC6_FB_EN)) {
-        // Use I2CS if in S0 state
+bool dgpu_get_temp(int16_t *const data) {
+    if (gpio_get(&DGPU_PWR_EN) && !gpio_get(&GC6_FB_EN)) {
         int8_t rlts;
         int16_t res = i2c_get(&I2C_DGPU, 0x4F, 0x00, &rlts, 1);
         if (res == 1) {
-            dgpu_temp = (int16_t)rlts;
-            duty = fan_duty(&FAN, dgpu_temp);
+            *data = (int16_t)rlts;
+            return true;
         } else {
             DEBUG("DGPU temp error: %d\n", res);
-            // Default to 50% if there is an error
-            dgpu_temp = 0;
+            *data = 0;
+            return false;
+        }
+    }
+
+    *data = 0;
+    return true;
+}
+
+uint8_t dgpu_get_fan_duty(void) {
+    uint8_t duty;
+    if (power_state == POWER_STATE_S0) {
+        if (dgpu_get_temp(&dgpu_temp)) {
+            duty = fan_duty(&FAN, dgpu_temp);
+        } else {
             duty = PWM_DUTY(50);
         }
     } else {
-        // Turn fan off if not in S0 state or GPU power not on
         dgpu_temp = 0;
         duty = PWM_DUTY(0);
     }
