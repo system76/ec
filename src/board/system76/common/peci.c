@@ -25,13 +25,13 @@ static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
 
 static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 
-// Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
-#define T_JUNCTION 100
-
 bool peci_on = false;
 int16_t peci_temp = 0;
 
 #define PECI_TEMP(X) ((int16_t)(X))
+
+// Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
+#define T_JUNCTION PECI_TEMP(100)
 
 // Maximum OOB channel response time in ms
 #define PECI_ESPI_TIMEOUT 10
@@ -159,9 +159,12 @@ bool peci_get_temp(int16_t *const data) {
         // Received enough data for temperature
         uint8_t low = PUTOOBDB[5];
         uint8_t high = PUTOOBDB[6];
-        *data = (((int16_t)high << 8) | (int16_t)low);
+        int16_t offset = (((int16_t)high << 8) | (int16_t)low);
+        *data = T_JUNCTION + (offset >> 6);
+
         // Clear PUT_OOB status
         ESOCTRL0 = ESOCTRL0_STATUS;
+
         return true;
     } else {
         // Did not receive enough data
@@ -328,16 +331,17 @@ bool peci_get_temp(int16_t *const data) {
         // Clear status
         HOSTAR = HOSTAR;
         return false;
-    } else {
-        // Read two byte temperature data if finished successfully
-        uint8_t low = HORDDR;
-        uint8_t high = HORDDR;
-        *data = (((int16_t)high << 8) | (int16_t)low);
-
-        // Clear status
-        HOSTAR = HOSTAR;
-        return true;
     }
+
+    // Read two byte temperature data if finished successfully
+    uint8_t low = HORDDR;
+    uint8_t high = HORDDR;
+    int16_t offset = (((int16_t)high << 8) | (int16_t)low);
+    *data = T_JUNCTION + (offset >> 6);
+
+    // Clear status
+    HOSTAR = HOSTAR;
+    return true;
 }
 
 // Returns positive completion code on success, negative completion code or
@@ -422,10 +426,8 @@ uint8_t peci_get_fan_duty(void) {
 
     peci_on = peci_available();
     if (peci_on) {
-        int16_t peci_offset = 0;
-        if (peci_get_temp(&peci_offset)) {
+        if (peci_get_temp(&peci_temp)) {
             // Use result if finished successfully
-            peci_temp = PECI_TEMP(T_JUNCTION) + (peci_offset >> 6);
             duty = fan_duty(&FAN, peci_temp);
         } else {
             // Default to 50% if there is an error
