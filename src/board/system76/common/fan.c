@@ -4,6 +4,9 @@
 #include <common/debug.h>
 #include <ec/pwm.h>
 
+// Fan-off hysteresis value (Celsius)
+#define FAN_OFF_TEMP_HYSTERESIS 2
+
 #if SMOOTH_FANS != 0
 #define MAX_JUMP_UP ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_UP)
 #define MAX_JUMP_DOWN ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_DOWN)
@@ -33,9 +36,12 @@ uint8_t fan_duty(const struct Fan *const fan, int16_t temp) __reentrant {
         if (temp == cur->temp) {
             return cur->duty;
         } else if (temp < cur->temp) {
-            // If lower than first temp, return 0%
             if (i == 0) {
-                return MIN_FAN_SPEED;
+                // Run fans until below temperature hyteresis to prevent fans
+                // from constantly stopping/starting at fan-off value.
+                if (temp < cur->temp - FAN_OFF_TEMP_HYSTERESIS)
+                    return MIN_FAN_SPEED;
+                return cur->duty;
             } else {
                 const struct FanPoint *prev = &fan->points[i - 1];
 
