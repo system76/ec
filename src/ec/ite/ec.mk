@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 ec-y += ec.c
+ec-y += adc.c
 ec-$(CONFIG_BUS_ESPI) += espi.c
 ec-y += gpio.c
 ec-y += i2c.c
