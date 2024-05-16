@@ -228,7 +228,7 @@ void gpio_init(void) {
     // THERM_VOLT2
     GPCRI6 = GPIO_ALT;
     // MODEL_ID
-    GPCRI7 = GPIO_IN;
+    GPCRI7 = GPIO_ALT;
 
     // LED_BAT_FULL
     GPCRJ0 = GPIO_OUT;
