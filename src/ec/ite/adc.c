@@ -7,6 +7,17 @@
 
 // Based on chromium EC chip/it83xx/adc.c
 
+const struct Vch adc_channels[] = {
+    VCH(0),
+    VCH(1),
+    VCH(2),
+    VCH(3),
+    VCH(4),
+    VCH(5),
+    VCH(6),
+    VCH(7),
+};
+
 void adc_init(void) {
     ADCSTS &= ~BIT(7);
     // Start analog accuracy initialization

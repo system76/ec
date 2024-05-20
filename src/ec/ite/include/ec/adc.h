@@ -22,16 +22,7 @@ struct Vch {
 }
 // clang-format on
 
-const struct Vch adc_channels[] = {
-    VCH(0),
-    VCH(1),
-    VCH(2),
-    VCH(3),
-    VCH(4),
-    VCH(5),
-    VCH(6),
-    VCH(7),
-};
+extern const struct Vch adc_channels[];
 
 void adc_init(void);
 int16_t adc_read_channel(uint8_t channel);
