@@ -9,7 +9,7 @@ uint8_t __xdata OPTIONS[NUM_OPTIONS];
 // clang-format off
 uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = {
     [OPT_POWER_ON_AC] = 0,
-    [OPT_KBLED_BRIGHTNESS] = 0xFF,
+    [OPT_KBLED_LEVEL_I] = 0,
     [OPT_KBLED_COLOR_I] = 0,
     [OPT_BAT_THRESHOLD_START] = 95,
     [OPT_BAT_THRESHOLD_STOP] = 98,

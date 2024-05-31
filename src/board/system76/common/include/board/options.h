@@ -17,7 +17,7 @@ bool options_set(uint16_t index, uint8_t value);
 
 enum {
     OPT_POWER_ON_AC = 0,
-    OPT_KBLED_BRIGHTNESS,
+    OPT_KBLED_LEVEL_I,
     OPT_KBLED_COLOR_I,
     OPT_BAT_THRESHOLD_START,
     OPT_BAT_THRESHOLD_STOP,

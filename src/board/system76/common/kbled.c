@@ -7,7 +7,6 @@
 enum KbledKind kbled_kind = KBLED_NONE;
 
 // clang-format off
-static uint8_t LEVEL_I = 1;
 #ifdef KBLED_DAC
 // XXX: DAC uses separate levels due to brightness being different.
 static const uint8_t __code LEVELS[] = {
@@ -29,7 +28,6 @@ static const uint8_t __code LEVELS[] = {
 };
 #endif
 
-static uint8_t COLOR_I = 0;
 static const uint32_t __code COLORS[] = {
     0xFFFFFF,
     0x0000FF,
@@ -45,7 +43,7 @@ static bool enabled = false;
 static uint8_t brightness = 0;
 
 void kbled_restore(void) {
-    kbled_set_brightness(options_get(OPT_KBLED_BRIGHTNESS));
+    kbled_set_brightness(LEVELS[options_get(OPT_KBLED_LEVEL_I)]);
     kbled_set_color(COLORS[options_get(OPT_KBLED_COLOR_I)]);
 }
 
@@ -64,36 +62,41 @@ void kbled_set_brightness(uint8_t value) {
     if (enabled) {
         kbled_set(brightness);
     }
-    options_set(OPT_KBLED_BRIGHTNESS, brightness);
 }
 
 void kbled_hotkey_color(void) {
-    if (COLOR_I < (ARRAY_SIZE(COLORS) - 1)) {
-        COLOR_I += 1;
+    uint8_t color_i = options_get(OPT_KBLED_COLOR_I);
+    if (color_i < (ARRAY_SIZE(COLORS) - 1)) {
+        color_i += 1;
     } else {
-        COLOR_I = 0;
+        color_i = 0;
     }
-    kbled_set_color(COLORS[COLOR_I]);
-    options_set(OPT_KBLED_COLOR_I, COLOR_I);
+    kbled_set_color(COLORS[color_i]);
+    options_set(OPT_KBLED_COLOR_I, color_i);
 }
 
 void kbled_hotkey_down(void) {
-    if (LEVEL_I > 0) {
-        LEVEL_I -= 1;
+    uint8_t level = options_get(OPT_KBLED_LEVEL_I);
+    if (level > 0) {
+        level -= 1;
     }
-    kbled_set_brightness(LEVELS[LEVEL_I]);
+    kbled_set_brightness(LEVELS[level]);
+    options_set(OPT_KBLED_LEVEL_I, level);
 }
 
 void kbled_hotkey_up(void) {
-    if (LEVEL_I < (ARRAY_SIZE(LEVELS) - 1)) {
-        LEVEL_I += 1;
+    uint8_t level = options_get(OPT_KBLED_LEVEL_I);
+    if (level < (ARRAY_SIZE(LEVELS) - 1)) {
+        level += 1;
     }
-    kbled_set_brightness(LEVELS[LEVEL_I]);
+    kbled_set_brightness(LEVELS[level]);
+    options_set(OPT_KBLED_LEVEL_I, level);
 }
 
 void kbled_hotkey_toggle(void) {
+    uint8_t level = options_get(OPT_KBLED_LEVEL_I);
     if (kbled_get() == 0) {
-        kbled_set_brightness(LEVELS[LEVEL_I]);
+        kbled_set_brightness(LEVELS[level]);
     } else {
         kbled_set_brightness(0);
     }
@@ -101,10 +104,12 @@ void kbled_hotkey_toggle(void) {
 
 // Change the backlight level to the next value, cycling through "off".
 void kbled_hotkey_step(void) {
-    if (LEVEL_I < (ARRAY_SIZE(LEVELS) - 1)) {
-        LEVEL_I += 1;
+    uint8_t level = options_get(OPT_KBLED_LEVEL_I);
+    if (level < (ARRAY_SIZE(LEVELS) - 1)) {
+        level += 1;
     } else {
-        LEVEL_I = 0;
+        level = 0;
     }
-    kbled_set_brightness(LEVELS[LEVEL_I]);
+    kbled_set_brightness(LEVELS[level]);
+    options_set(OPT_KBLED_LEVEL_I, level);
 }
