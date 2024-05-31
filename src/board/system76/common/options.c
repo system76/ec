@@ -22,7 +22,7 @@ const uint32_t OPTIONS_ADDR = 0x1F800;
 // Signature is the size of the config
 const uint16_t OPTIONS_SIGNATURE = sizeof(OPTIONS);
 
-static void options_load_default() {
+void options_reset() {
     for (uint8_t opt = 0; opt < NUM_OPTIONS; opt++) {
         OPTIONS[opt] = DEFAULT_OPTIONS[opt];
     }
@@ -48,7 +48,7 @@ static bool options_erase_config(void) {
 
 void options_init(void) {
     if (!options_load_config()) {
-        options_load_default();
+        options_reset();
     }
 }
 

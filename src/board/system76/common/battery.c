@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/battery.h>
+#include <board/options.h>
 #include <board/smbus.h>
 #include <common/debug.h>
 
@@ -13,41 +14,31 @@ uint16_t battery_charger_input_voltage = BATTERY_CHARGER_VOLTAGE_AC;
 #define BATTERY_START_DEFAULT 0
 #define BATTERY_END_DEFAULT 100
 
-// Represents a battery percentage level, below which charging will begin.
-// Valid values are [0, 100]
-// A value of 0 turns off the start threshold control.
-static uint8_t battery_start_threshold = BATTERY_START_THRESHOLD;
-
-// Represents a battery percentage level, above which charging will stop.
-// Valid values are [0, 100]
-// A value of 100 turns off the stop threshold control.
-static uint8_t battery_end_threshold = BATTERY_END_THRESHOLD;
-
 uint8_t battery_get_start_threshold(void) {
-    if (battery_start_threshold > 100)
+    if (options_get(OPT_BAT_THRESHOLD_START) > 100)
         return BATTERY_START_DEFAULT;
-    return battery_start_threshold;
+    return options_get(OPT_BAT_THRESHOLD_START);
 }
 
 bool battery_set_start_threshold(uint8_t value) {
-    if (value > 100 || value >= battery_end_threshold)
+    if (value > 100 || value >= options_get(OPT_BAT_THRESHOLD_STOP))
         return false;
 
-    battery_start_threshold = value;
+    options_set(OPT_BAT_THRESHOLD_START, value);
     return true;
 }
 
 uint8_t battery_get_end_threshold(void) {
-    if (battery_end_threshold > 100)
+    if (options_get(OPT_BAT_THRESHOLD_STOP) > 100)
         return BATTERY_END_DEFAULT;
-    return battery_end_threshold;
+    return options_get(OPT_BAT_THRESHOLD_STOP);
 }
 
 bool battery_set_end_threshold(uint8_t value) {
-    if (value > 100 || value <= battery_start_threshold)
+    if (value > 100 || value <= options_get(OPT_BAT_THRESHOLD_START))
         return false;
 
-    battery_end_threshold = value;
+    options_set(OPT_BAT_THRESHOLD_STOP, value);
     return true;
 }
 
@@ -97,9 +88,4 @@ void battery_event(void) {
     TRACE("BAT %d mV %d mA\n", battery_info.voltage, battery_info.current);
 
     battery_charger_event();
-}
-
-void battery_reset(void) {
-    battery_start_threshold = BATTERY_START_THRESHOLD;
-    battery_end_threshold = BATTERY_END_THRESHOLD;
 }

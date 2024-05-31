@@ -5,6 +5,7 @@
 #include <board/battery.h>
 #include <board/kbscan.h>
 #include <board/keymap.h>
+#include <board/options.h>
 #include <common/debug.h>
 
 /**
@@ -19,7 +20,7 @@ bool config_should_reset(void) {
  */
 void config_reset(void) {
     INFO("Reset configuration\n");
-    battery_reset();
+    options_reset();
     keymap_erase_config();
     keymap_load_default();
 }

@@ -8,6 +8,8 @@
 
 // Initialize the options
 void options_init(void);
+// Restore defaults
+void options_reset(void);
 // Save options to flash
 bool options_save_config(void);
 // Get an option

@@ -46,7 +46,6 @@ bool battery_set_end_threshold(uint8_t value);
 
 int16_t battery_charger_configure(void);
 void battery_event(void);
-void battery_reset(void);
 
 // Defined by charger/*.c
 int16_t battery_charger_disable(void);
