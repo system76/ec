@@ -17,7 +17,8 @@ KEYBOARD = 14in_83
 KEYMAP=combo_iso_ansi_micmute
 
 # Set keyboard LED mechanism
-KBLED = rgb_pwm
+KBLED=white_dac
+CFLAGS+=-DKBLED_DAC=2
 
 # Set battery I2C bus
 CFLAGS += -DI2C_SMBUS=I2C_4
