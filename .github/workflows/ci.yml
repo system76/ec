@@ -49,6 +49,10 @@ jobs:
             model: nv4x_adl
           - vendor: novacustom
             model: ns5x_adl
+          - vendor: novacustom
+            model: v540tu
+          - vendor: novacustom
+            model: v560tu
 
     steps:
       - uses: actions/checkout@v3
