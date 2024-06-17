@@ -400,15 +400,13 @@ static void kbc_on_input_data(struct Kbc *const kbc, uint8_t data) {
         TRACE("  write second port input\n");
         state = KBC_STATE_NORMAL;
         // Begin write
-        *(PS2_TOUCHPAD.control) = 0x0D;
-        // Enable Transaction Done interrupt
-        *(PS2_TOUCHPAD.interrupt) |= BIT(2);
+        *(PS2_TOUCHPAD.control) = 0x1D;
         // Write the data
         *(PS2_TOUCHPAD.data) = data;
         // Pull data line low
-        *(PS2_TOUCHPAD.control) = 0x0C;
+        *(PS2_TOUCHPAD.control) = 0x1C;
         // Pull clock line high
-        *(PS2_TOUCHPAD.control) = 0x0E;
+        *(PS2_TOUCHPAD.control) = 0x1E;
         // Set wait timeout of 100 cycles
         kbc_second_wait = 100;
         break;
@@ -489,9 +487,7 @@ void kbc_event(struct Kbc *const kbc) {
 
         if (kbc_second_wait == 0) {
             // Attempt to read from touchpad
-            *(PS2_TOUCHPAD.control) = 0x07;
-            // Enable Transaction Done interrupt
-            *(PS2_TOUCHPAD.interrupt) |= BIT(2);
+            *(PS2_TOUCHPAD.control) = 0x17;
             if (state == KBC_STATE_NORMAL) {
                 uint8_t sts = *(PS2_TOUCHPAD.status);
                 *(PS2_TOUCHPAD.status) = sts;
