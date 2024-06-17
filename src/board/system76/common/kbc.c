@@ -468,6 +468,7 @@ void kbc_event(struct Kbc *const kbc) {
             // Wait for touchpad write transaction to finish
             kbc_second_wait -= 1;
             uint8_t sts = *(PS2_TOUCHPAD.status);
+            *(PS2_TOUCHPAD.status) = sts;
             // If transaction is done, stop waiting
             if (sts & PSSTS_DONE) {
                 kbc_second_wait = 0;
