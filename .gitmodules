@@ -4,7 +4,7 @@
 	branch = master
 [submodule "ecflash"]
 	path = ecflash
-	url = https://github.com/system76/ecflash.git
+	url = https://github.com/Dasharo/ecflash.git
 	branch = master
 [submodule "ecspy"]
 	path = ecspy
