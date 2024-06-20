@@ -8,7 +8,7 @@ board-y += parallel.c
 EC=atmega
 EC_VARIANT=atmega2560
 
-PORT=$(wildcard /dev/ttyACM*)
+PORT=$(wildcard /dev/ttyACM* /dev/ttyUSB*)
 CONSOLE_BAUD=1000000
 CFLAGS+=-D__CONSOLE_BAUD__=$(CONSOLE_BAUD)
 

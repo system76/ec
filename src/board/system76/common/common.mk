@@ -49,7 +49,7 @@ CFLAGS+=-DCONFIG_SECURITY=1
 endif
 
 # Set external programmer
-PROGRAMMER=$(wildcard /dev/serial/by-id/usb-Arduino*)
+PROGRAMMER=$(wildcard /dev/ttyACM* /dev/ttyUSB*)
 
 ifeq ($(CONFIG_BUS_ESPI),y)
 CFLAGS += -DCONFIG_BUS_ESPI=1
