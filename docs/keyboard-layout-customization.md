@@ -104,10 +104,6 @@ make
 
 See [flashing firmware](./flashing.md) for details.
 
-```sh
-make flash_internal
-```
-
 Do not use the keyboard or touchpad while it is flashing.
 
 The system will power off as part of the flash process. Turn it back on after
