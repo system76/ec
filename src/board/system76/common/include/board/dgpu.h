@@ -3,6 +3,7 @@
 #ifndef _BOARD_DGPU_H
 #define _BOARD_DGPU_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #ifndef HAVE_DGPU
@@ -14,6 +15,7 @@ extern int16_t dgpu_temp;
 #endif // HAVE_DGPU
 
 void dgpu_init(void);
+bool dgpu_get_temp(int16_t *const data);
 uint8_t dgpu_get_fan_duty(void);
 
 #endif // _BOARD_DGPU_H
