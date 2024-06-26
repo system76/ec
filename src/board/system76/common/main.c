@@ -135,6 +135,11 @@ void main(void) {
 
                 // Update fan speeds
                 fan_duty_set(peci_get_fan_duty(), dgpu_get_fan_duty());
+
+                // NOTE: These values are reported to ACPI. Update them at the
+                // same interval as the fan duties.
+                pwm_tach0_rpm = pwm_get_tach0_rpm();
+                pwm_tach1_rpm = pwm_get_tach1_rpm();
             }
 
             // Only run the following once per interval
