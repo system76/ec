@@ -21,7 +21,7 @@ void scratch_trampoline(void) {
 #if HAVE_CPU_FAN2
     DCR3 = 0xFF;
 #endif
-#if HAVE_DGPU
+#if CONFIG_HAVE_DGPU
     DCR4 = 0xFF;
 #endif
 
