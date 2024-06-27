@@ -3,6 +3,7 @@
 #include <board/flash.h>
 #include <board/options.h>
 #include <common/debug.h>
+#include <common/macro.h>
 
 uint8_t __xdata OPTIONS[NUM_OPTIONS];
 
@@ -16,6 +17,8 @@ uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = {
     [OPT_ALLOW_BAT_BOOST] = 0,
 };
 // clang-format on
+
+#define SAVE_IMMEDIATELY BIT(OPT_POWER_ON_AC)
 
 // Config is in the second to last sector of flash
 const uint32_t OPTIONS_ADDR = 0x1F800;
@@ -100,8 +103,10 @@ uint8_t options_get(uint16_t index) {
 
 bool options_set(uint16_t index, uint8_t value) {
     if (index < NUM_OPTIONS) {
-        OPTIONS[index] = value;
         TRACE("OPTION %x WRITE %x\n", index, value);
+        OPTIONS[index] = value;
+        if (SAVE_IMMEDIATELY & BIT(index))
+            return options_save_config();
         return true;
     } else {
         return false;
