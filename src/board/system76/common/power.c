@@ -491,7 +491,6 @@ void power_event(void) {
     }
     pg_last = pg_new;
 
-    // clang-format off
     static bool rst_last = false;
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
 #if LEVEL >= LEVEL_DEBUG
@@ -508,7 +507,6 @@ void power_event(void) {
 #endif // CONFIG_BUS_ESPI
     }
     rst_last = rst_new;
-    // clang-format on
 
 #if HAVE_SLP_SUS_N
 #if LEVEL >= LEVEL_DEBUG

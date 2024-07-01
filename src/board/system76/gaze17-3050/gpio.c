@@ -3,7 +3,7 @@
 #include <board/gpio.h>
 #include <common/macro.h>
 
-// clang-format off
+// uncrustify:off
 struct Gpio __code ACIN_N =         GPIO(B, 0);
 struct Gpio __code AC_PRESENT =     GPIO(E, 1);
 struct Gpio __code ALL_SYS_PWRGD =  GPIO(C, 0);
@@ -36,7 +36,7 @@ struct Gpio __code VA_EC_EN =       GPIO(H, 7);
 struct Gpio __code WLAN_EN =        GPIO(G, 1);
 struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
-// clang-format on
+// uncrustify:on
 
 void gpio_init(void) {
     // PWRSW WDT 2 Enable 2

@@ -134,15 +134,14 @@ static int16_t i2c_transaction(
         uint32_t timeout = I2C_TIMEOUT;
         for (timeout = I2C_TIMEOUT; timeout > 0; timeout--) {
             status = *(i2c->hosta);
-            // If error occured, kill transaction and return error
             if (status & HOSTA_ERR) {
+                // If error occured, kill transaction and return error
                 i2c_reset(i2c, true);
                 return -(int16_t)(status);
-            } else
+            } else if (status & HOSTA_BYTE_DONE) {
                 // If byte done, break
-                if (status & HOSTA_BYTE_DONE) {
-                    break;
-                }
+                break;
+            }
         }
         // If timeout occured, kill transaction and return error
         if (timeout == 0) {

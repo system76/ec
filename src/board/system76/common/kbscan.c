@@ -330,10 +330,8 @@ void kbscan_event(void) {
 
             // A key was pressed or released
             for (uint8_t j = 0; j < KM_IN; j++) {
-                // clang-format off
                 bool new_b = new & BIT(j);
                 bool last_b = last & BIT(j);
-                // clang-format on
                 if (new_b != last_b) {
                     bool reset = false;
 

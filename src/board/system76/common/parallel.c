@@ -19,14 +19,12 @@
  * nWAIT    = KSOH[1]
  */
 
-// clang-format off
 #define CTL_WRITE   BIT(0)
 #define CTL_DATA    BIT(1)
 #define CTL_RESET   BIT(2)
 #define CTL_ADDR    BIT(3)
 
 #define STS_WAIT    BIT(1)
-// clang-format on
 
 // Maximum peripheral response time in ms
 #define PARALLEL_TIMEOUT 10

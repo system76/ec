@@ -16,7 +16,7 @@
 #define DEBUG_SET(REG, MASK, BITS) \
     { \
         DEBUG("%s: %X", #REG, REG); \
-        REG = ((REG) & ~(MASK)) | (BITS); \
+        REG = (REG & ~(MASK)) | (BITS); \
         DEBUG(" set to %X\n", REG); \
     }
 

@@ -36,9 +36,7 @@ int16_t peci_temp = 0;
 // Maximum OOB channel response time in ms
 #define PECI_ESPI_TIMEOUT 10
 
-// clang-format off
 #define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
-// clang-format on
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static struct FanPoint __code FAN_POINTS[] = {
