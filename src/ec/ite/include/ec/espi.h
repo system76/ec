@@ -13,13 +13,11 @@ struct VirtualWire {
     uint8_t valid_mask;
 };
 
-// clang-format off
 #define VIRTUAL_WIRE(INDEX, SHIFT) { \
     .index = &VWIDX ## INDEX, \
     .data_mask = BIT(SHIFT), \
     .valid_mask = BIT(SHIFT + 4), \
 }
-// clang-format on
 
 enum VirtualWireState {
     VWS_INVALID = 0x00,

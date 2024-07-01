@@ -6,7 +6,6 @@
 #include <arch/uart.h>
 #include <board/cpu.h>
 
-// clang-format off
 #define UART(N) \
     { \
         &UCSR ## N ## A, \
@@ -40,7 +39,6 @@
 #else
     #error "Could not find UART definitions"
 #endif
-// clang-format on
 
 int16_t uart_count(void) {
     return sizeof(UARTS) / sizeof(struct Uart);

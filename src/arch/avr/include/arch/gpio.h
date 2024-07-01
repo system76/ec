@@ -16,14 +16,12 @@ struct Gpio {
     uint8_t value;
 };
 
-// clang-format off
 #define GPIO(BLOCK, NUMBER) { \
     .pin = &PIN ## BLOCK, \
     .ddr = &DDR ## BLOCK, \
     .port = &PORT ## BLOCK, \
     .value = BIT(NUMBER), \
 }
-// clang-format on
 
 bool gpio_get(const struct Gpio *const gpio);
 void gpio_set(struct Gpio *const gpio, bool value);

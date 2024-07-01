@@ -41,7 +41,6 @@ static bool kbc_translate = true;
 // LED state
 uint8_t kbc_leds = 0;
 
-// clang-format off
 // Values from linux/drivers/input/keyboard/atkbd.c
 static const uint16_t kbc_typematic_period[32] = {
     33,     // 30.0 cps = ~33.33ms
@@ -77,7 +76,6 @@ static const uint16_t kbc_typematic_period[32] = {
     470,    //  2.1 cps = ~478.19ms
     500,    //  2.0 cps = 500ms
 };
-// clang-format on
 
 static uint8_t kbc_buffer[16] = { 0 };
 static uint8_t kbc_buffer_head = 0;

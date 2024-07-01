@@ -15,7 +15,6 @@ volatile uint8_t __xdata __at(0x103D) ECINDAR2;
 volatile uint8_t __xdata __at(0x103E) ECINDAR3;
 volatile uint8_t __xdata __at(0x103F) ECINDDR;
 
-// clang-format off
 #define SPI_DEVICE                  (0x70)
 #define SPI_FOLLOW_MODE             (0x0F)
 #define SPI_CHIP_SELECT             (0xFD)
@@ -30,7 +29,6 @@ volatile uint8_t __xdata __at(0x103F) ECINDDR;
 #define SPI_ERASE_SECTOR_COMMAND    (0xD7)
 
 #define SPI_STATUS_WIP              (0x01)
-// clang-format on
 
 void flash_enter_follow_mode(void);
 void flash_exit_follow_mode(void);
@@ -48,9 +46,7 @@ void flash_write_enable(void);
  * NOTE: __critical to ensure interrupts are disabled. This does mean that interrupt
  *          such as the timer will be block until flash acccess is complete
  */
-// clang-format off
 void flash_entry(uint32_t addr, uint8_t *data, uint32_t length, uint8_t command) __reentrant __critical {
-    // clang-format on
     // Only allow access from 64KB to 128KB.
     if ((addr < 0x10000) || (length > 0x10000) || ((addr + length) > 0x20000))
         return;
@@ -73,7 +69,8 @@ void flash_entry(uint32_t addr, uint8_t *data, uint32_t length, uint8_t command)
         flash_enter_follow_mode();
 
         while (length) {
-            // Note, this is the slow way to do it, but it's simple and all bytes are written properly.
+            // Note, this is the slow way to do it, but it's simple and all
+            // bytes are written properly.
             flash_write_enable();
 
             // Select the device

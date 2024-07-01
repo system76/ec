@@ -2,9 +2,7 @@
 
 #include <common/i2c.h>
 
-// clang-format off
 int16_t i2c_recv(struct I2C *const i2c, uint8_t addr, uint8_t *const data, uint16_t length) __reentrant {
-    // clang-format on
     int16_t res = 0;
 
     res = i2c_start(i2c, addr, true);
@@ -20,9 +18,7 @@ int16_t i2c_recv(struct I2C *const i2c, uint8_t addr, uint8_t *const data, uint1
     return res;
 }
 
-// clang-format off
 int16_t i2c_send(struct I2C *const i2c, uint8_t addr, uint8_t *const data, uint16_t length) __reentrant {
-    // clang-format on
     int16_t res = 0;
 
     res = i2c_start(i2c, addr, false);

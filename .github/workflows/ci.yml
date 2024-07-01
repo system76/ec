@@ -19,7 +19,7 @@ jobs:
         run: ./scripts/lint/01-spdx-tags.sh
 
       - name: Check formatting
-        run: ./scripts/lint/02-clang-format.sh
+        run: ./scripts/lint/02-uncrustify.sh
 
       - name: Check shell scripts
         run: ./scripts/lint/03-shellcheck.sh

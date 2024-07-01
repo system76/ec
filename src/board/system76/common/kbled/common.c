@@ -5,7 +5,6 @@
 
 enum KbledKind kbled_kind = KBLED_NONE;
 
-// clang-format off
 static uint8_t LEVEL_I = 1;
 #ifdef KBLED_DAC
 // XXX: DAC uses separate levels due to brightness being different.
@@ -38,7 +37,6 @@ static const uint32_t __code COLORS[] = {
     0x00FFFF,
     0xFFFF00
 };
-// clang-format on
 
 void kbled_hotkey_color(void) {
     if (COLOR_I < (ARRAY_SIZE(COLORS) - 1)) {
