@@ -134,6 +134,7 @@ static enum Result cmd_fan_get(void) {
     case 0:
         // Get duty of fan 0
         smfi_cmd[SMFI_CMD_DATA + 1] = DCR2;
+        // TODO handle dual CPU fans
         return RES_OK;
     case 1:
         // Get duty of fan 1
@@ -151,6 +152,10 @@ static enum Result cmd_fan_set(void) {
     case 0:
         // Set duty cycle of fan 0
         DCR2 = smfi_cmd[SMFI_CMD_DATA + 1];
+#if HAVE_CPU_FAN2
+        // TODO handle CPU fan 2 separately
+        DCR3 = smfi_cmd[SMFI_CMD_DATA + 1];
+#endif
         return RES_OK;
     case 1:
         // Set duty cycle of fan 1

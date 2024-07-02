@@ -116,6 +116,9 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8(0xCC, sci_extra);
 
         ACPI_8(0xCE, DCR2);
+#if HAVE_CPU_FAN2
+        ACPI_8(0xCF, DCR3);
+#endif
         ACPI_8(0xD0, F1TLRR);
         ACPI_8(0xD1, F1TMRR);
 #if HAVE_DGPU
