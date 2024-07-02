@@ -19,7 +19,7 @@ void board_init(void) {
 }
 
 void board_on_ac(bool ac) {
-    /* Fix unused variable */
+    // Fix unused variable
     ac = ac;
 }
 
