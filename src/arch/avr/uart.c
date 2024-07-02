@@ -22,20 +22,20 @@
     }
 
 #if defined(__AVR_ATmega328P__)
-    static struct Uart UARTS[] = {
-        UART(0)
-    };
+static struct Uart UARTS[] = {
+    UART(0)
+};
 #elif defined(__AVR_ATmega32U4__)
-    static struct Uart UARTS[] = {
-        UART(1)
-    };
+static struct Uart UARTS[] = {
+    UART(1)
+};
 #elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-    static struct Uart UARTS[] = {
-        UART(0),
-        UART(1),
-        UART(2),
-        UART(3)
-    };
+static struct Uart UARTS[] = {
+    UART(0),
+    UART(1),
+    UART(2),
+    UART(3)
+};
 #else
     #error "Could not find UART definitions"
 #endif

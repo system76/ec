@@ -46,7 +46,8 @@ void flash_write_enable(void);
  * NOTE: __critical to ensure interrupts are disabled. This does mean that interrupt
  *          such as the timer will be block until flash acccess is complete
  */
-void flash_entry(uint32_t addr, uint8_t *data, uint32_t length, uint8_t command) __reentrant __critical {
+void flash_entry(uint32_t addr, uint8_t *data, uint32_t length,
+                 uint8_t command) __reentrant __critical {
     // Only allow access from 64KB to 128KB.
     if ((addr < 0x10000) || (length > 0x10000) || ((addr + length) > 0x20000))
         return;

@@ -382,7 +382,7 @@ void kbscan_event(void) {
             }
 
             kbscan_matrix[i] = new;
-        } else if (new &&repeat_key != 0 && key_should_repeat(repeat_key)) {
+        } else if (new && repeat_key != 0 && key_should_repeat(repeat_key)) {
             // A key is being pressed
             uint32_t time = time_get();
             static uint32_t repeat_start = 0;

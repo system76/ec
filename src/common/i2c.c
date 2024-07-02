@@ -2,7 +2,8 @@
 
 #include <common/i2c.h>
 
-int16_t i2c_recv(struct I2C *const i2c, uint8_t addr, uint8_t *const data, uint16_t length) __reentrant {
+int16_t i2c_recv(struct I2C *const i2c, uint8_t addr, uint8_t *const data,
+                 uint16_t length) __reentrant {
     int16_t res = 0;
 
     res = i2c_start(i2c, addr, true);
@@ -18,7 +19,8 @@ int16_t i2c_recv(struct I2C *const i2c, uint8_t addr, uint8_t *const data, uint1
     return res;
 }
 
-int16_t i2c_send(struct I2C *const i2c, uint8_t addr, uint8_t *const data, uint16_t length) __reentrant {
+int16_t i2c_send(struct I2C *const i2c, uint8_t addr, uint8_t *const data,
+                 uint16_t length) __reentrant {
     int16_t res = 0;
 
     res = i2c_start(i2c, addr, false);

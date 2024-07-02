@@ -82,7 +82,7 @@ bool peci_available(void) {
 
     // If VW_HOST_C10 virtual wire is VWS_HIGH, PECI will wake the CPU
     //TODO: wake CPU every 8 seconds following Intel recommendation?
-    return (vw_get(&VW_HOST_C10) != VWS_HIGH);
+    return vw_get(&VW_HOST_C10) != VWS_HIGH;
 #else
     // PECI is available if PLTRST# is high
     return gpio_get(&BUF_PLT_RST_N);
@@ -415,7 +415,8 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 
 #endif // CONFIG_PECI_OVER_ESPI
 
-// PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
+// PECI information can be found here:
+// https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
 uint8_t peci_get_fan_duty(void) {
     uint8_t duty;
 
