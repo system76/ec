@@ -13,6 +13,6 @@ extern int16_t peci_temp;
 void peci_init(void);
 bool peci_available(void);
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data);
-uint8_t peci_get_fan_duty(void);
+void peci_read_temp(void);
 
 #endif // _BOARD_PECI_H

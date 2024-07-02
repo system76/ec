@@ -133,8 +133,12 @@ void main(void) {
             if ((time - last_time_fan) >= fan_interval) {
                 last_time_fan = time;
 
+                // Read thermal data
+                peci_read_temp();
+                dgpu_read_temp();
+
                 // Update fan speeds
-                fan_duty_set(peci_get_fan_duty(), dgpu_get_fan_duty());
+                fan_update_duty();
 
                 // NOTE: These values are reported to ACPI. Update them at the
                 // same interval as the fan duties.

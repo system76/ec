@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+// PECI information can be found here:
+// https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
+
 #include <arch/time.h>
 #include <board/espi.h>
 #include <board/fan.h>
@@ -11,55 +14,14 @@
 #include <ec/gpio.h>
 #include <ec/pwm.h>
 
-// Fan speed is the lowest requested over HEATUP seconds
-#ifndef BOARD_HEATUP
-#define BOARD_HEATUP 4
-#endif
-
-static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
-
-// Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifndef BOARD_COOLDOWN
-#define BOARD_COOLDOWN 10
-#endif
-
-static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
-
 bool peci_on = false;
 int16_t peci_temp = 0;
 
-#define PECI_TEMP(X) ((int16_t)(X))
-
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
-#define T_JUNCTION PECI_TEMP(100)
+#define T_JUNCTION ((int16_t)100)
 
 // Maximum OOB channel response time in ms
 #define PECI_ESPI_TIMEOUT 10
-
-#define FAN_POINT(T, D) { .temp = PECI_TEMP(T), .duty = PWM_DUTY(D) }
-
-// Fan curve with temperature in degrees C, duty cycle in percent
-static struct FanPoint __code FAN_POINTS[] = {
-#ifdef BOARD_FAN_POINTS
-    BOARD_FAN_POINTS
-#else
-    FAN_POINT(70, 40),
-    FAN_POINT(75, 50),
-    FAN_POINT(80, 60),
-    FAN_POINT(85, 65),
-    FAN_POINT(90, 65)
-#endif
-};
-
-static struct Fan __code FAN = {
-    .points = FAN_POINTS,
-    .points_size = ARRAY_SIZE(FAN_POINTS),
-    .heatup = FAN_HEATUP,
-    .heatup_size = ARRAY_SIZE(FAN_HEATUP),
-    .cooldown = FAN_COOLDOWN,
-    .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
-    .interpolate = SMOOTH_FANS != 0,
-};
 
 // Returns true if peci is available
 bool peci_available(void) {
@@ -419,36 +381,13 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 
 #endif // CONFIG_PECI_OVER_ESPI
 
-// PECI information can be found here:
-// https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
-uint8_t peci_get_fan_duty(void) {
-    uint8_t duty;
-
+void peci_read_temp(void) {
     peci_on = peci_available();
     if (peci_on) {
         if (peci_get_temp(&peci_temp)) {
-            // Use result if finished successfully
-            duty = fan_duty(&FAN, peci_temp);
-        } else {
-            // Default to 50% if there is an error
-            peci_temp = 0;
-            duty = PWM_DUTY(50);
+            return;
         }
-    } else {
-        // Turn fan off if not in S0 state
-        peci_temp = 0;
-        duty = PWM_DUTY(0);
     }
 
-    if (peci_on && fan_max) {
-        // Override duty if fans are manually set to maximum
-        duty = PWM_DUTY(100);
-    } else {
-        // Apply heatup and cooldown filters to duty
-        duty = fan_heatup(&FAN, duty);
-        duty = fan_cooldown(&FAN, duty);
-    }
-
-    TRACE("PECI temp=%d\n", peci_temp);
-    return duty;
+    peci_temp = 0;
 }
