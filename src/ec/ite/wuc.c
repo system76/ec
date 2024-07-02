@@ -10,8 +10,6 @@ struct WucGroup {
     volatile uint8_t *enable;
 };
 
-// clang-format off
-
 // Only groups 1, 3, and 4 have WUENR.
 #define WUC_GROUP_EN(nr) { \
     .edge = &WUEMR ## nr, \
@@ -42,8 +40,6 @@ static const struct WucGroup wuc[] = {
     WUC_GROUP(13),
     WUC_GROUP(14),
 };
-
-// clang-format on
 
 void wuc_enable(uint8_t nr, enum WucEdgeMode detect) {
     // XXX: SDCC doesn't optimize division with power-of-2.

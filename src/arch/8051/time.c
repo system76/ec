@@ -8,7 +8,7 @@
 #define OSC_DIVISOR 12
 #define TICK_INTERVAL_MS 1
 // Value to reload into the timer when the overflow interrupt is triggered.
-#define TIMER_RELOAD (0xFFFF - ((TICK_INTERVAL_MS) * ((CONFIG_CLOCK_FREQ_KHZ) / OSC_DIVISOR)))
+#define TIMER_RELOAD (0xFFFF - (TICK_INTERVAL_MS * (CONFIG_CLOCK_FREQ_KHZ / OSC_DIVISOR)))
 
 static volatile uint32_t time_overflows = 0;
 

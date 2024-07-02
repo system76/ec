@@ -4,7 +4,7 @@
 
 #include <board/keymap.h>
 
-// clang-format off
+// uncrustify:off
 uint16_t __code KEYMAP[KM_LAY][KM_OUT][KM_IN] = {
 LAYOUT(
     K_ESC, K_F1, K_F2, K_F3, K_F4, K_F5, K_F6, K_F7, K_F8, K_F9, K_F10, K_F11, K_F12, K_PRINT_SCREEN, K_INSERT, K_DEL, K_HOME, K_END, K_PGUP, K_PGDN,
@@ -23,4 +23,4 @@ LAYOUT(
     K_LEFT_CTRL, KT_FN, K_LEFT_SUPER, K_LEFT_ALT, K_SPACE, K_RIGHT_ALT, K_APP, K_RIGHT_CTRL, K_LEFT, K_DOWN, K_RIGHT, K_NUM_0, K_NUM_PERIOD
 )
 };
-// clang-format on
+// uncrustify:on

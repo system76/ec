@@ -74,7 +74,7 @@ clean:
 
 .PHONY: fmt
 fmt:
-	./scripts/clang-format.sh apply
+	uncrustify -c .uncrustify.cfg -q --no-backup $(shell git ls-files '*.c' '*.h')
 
 .PHONY: lint
 lint:

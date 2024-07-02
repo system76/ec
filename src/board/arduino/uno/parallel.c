@@ -11,8 +11,6 @@
 #include <arch/gpio.h>
 #include <arch/uart.h>
 
-// clang-format off
-
 // Mapping of 24-pin ribbon cable to parallel pins. See schematic
 #define PINS \
     /* Data (KSO0 - KSO7) - bi-directional */ \
@@ -67,8 +65,6 @@ static struct Gpio GPIOS[13] = {
     GPIO(C, 0),
 };
 
-// clang-format on
-
 // Parallel struct definition
 // See http://efplus.com/techref/io/parallel/1284/eppmode.htm
 struct Parallel {
@@ -89,6 +85,7 @@ void parallel_hiz(struct Parallel *const port) {
 #define PIN(N, P) \
     gpio_set_dir(port->N, false); \
     gpio_set(port->N, false);
+
     PINS
 #undef PIN
 }
@@ -105,8 +102,10 @@ void parallel_data_dir(struct Parallel *const port, bool dir) {
 void parallel_data_set_high(struct Parallel *const port, uint8_t byte) {
     // By convention all lines are high, so only set the ones needed
 #define DATA_BIT(B) \
-    if (!(byte & (1 << B))) \
-        gpio_set(port->d##B, true);
+    if (!(byte & (1 << B))) { \
+        gpio_set(port->d##B, true); \
+    }
+
     DATA_BITS
 #undef DATA_BIT
 }
@@ -154,8 +153,10 @@ void parallel_reset(struct Parallel *const port, bool host) {
 uint8_t parallel_read_data(struct Parallel *const port) {
     uint8_t byte = 0;
 #define DATA_BIT(B) \
-    if (gpio_get(port->d##B)) \
-        byte |= (1 << B);
+    if (gpio_get(port->d##B)) { \
+        byte |= (1 << B); \
+    }
+
     DATA_BITS
 #undef DATA_BIT
     return byte;
@@ -164,8 +165,10 @@ uint8_t parallel_read_data(struct Parallel *const port) {
 void parallel_write_data(struct Parallel *const port, uint8_t byte) {
     // By convention all lines are high, so only set the ones needed
 #define DATA_BIT(B) \
-    if (!(byte & (1 << B))) \
-        gpio_set(port->d##B, false);
+    if (!(byte & (1 << B))) { \
+        gpio_set(port->d##B, false); \
+    }
+
     DATA_BITS
 #undef DATA_BIT
 }

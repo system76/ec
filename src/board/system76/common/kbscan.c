@@ -330,10 +330,8 @@ void kbscan_event(void) {
 
             // A key was pressed or released
             for (uint8_t j = 0; j < KM_IN; j++) {
-                // clang-format off
                 bool new_b = new & BIT(j);
                 bool last_b = last & BIT(j);
-                // clang-format on
                 if (new_b != last_b) {
                     bool reset = false;
 
@@ -384,7 +382,7 @@ void kbscan_event(void) {
             }
 
             kbscan_matrix[i] = new;
-        } else if (new &&repeat_key != 0 && key_should_repeat(repeat_key)) {
+        } else if (new && repeat_key != 0 && key_should_repeat(repeat_key)) {
             // A key is being pressed
             uint32_t time = time_get();
             static uint32_t repeat_start = 0;

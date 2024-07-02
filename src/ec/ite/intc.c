@@ -10,7 +10,6 @@ struct IrqGroup {
     volatile uint8_t *polarity;
 };
 
-// clang-format off
 #define IRQ_GROUP(nr) { \
     .status = &ISR ## nr, \
     .enable = &IER ## nr, \
@@ -44,7 +43,6 @@ static const struct IrqGroup irqs[] = {
     IRQ_GROUP(21),
 #endif
 };
-// clang-format on
 
 void intc_enable(uint8_t nr) {
     // XXX: SDCC doesn't optimize division with power-of-2.

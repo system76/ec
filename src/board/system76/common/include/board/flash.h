@@ -12,11 +12,9 @@
 /** \cond INTERNAL
  * Internal defines
  */
-// clang-format off
 #define FLASH_COMMAND_READ      (0x0)
 #define FLASH_COMMAND_WRITE     (0x1)
 #define FLASH_COMMAND_ERASE_1K  (0x2)
-// clang-format on
 /** \endcond */
 
 /**

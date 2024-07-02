@@ -41,7 +41,6 @@ static bool kbc_translate = true;
 // LED state
 uint8_t kbc_leds = 0;
 
-// clang-format off
 // Values from linux/drivers/input/keyboard/atkbd.c
 static const uint16_t kbc_typematic_period[32] = {
     33,     // 30.0 cps = ~33.33ms
@@ -77,7 +76,6 @@ static const uint16_t kbc_typematic_period[32] = {
     470,    //  2.1 cps = ~478.19ms
     500,    //  2.0 cps = 500ms
 };
-// clang-format on
 
 static uint8_t kbc_buffer[16] = { 0 };
 static uint8_t kbc_buffer_head = 0;
@@ -122,7 +120,7 @@ bool kbc_scancode(uint16_t key, bool pressed) {
     case KF_E0:
         scancodes[scancodes_len++] = 0xE0;
         key &= 0xFF;
-        // Fall through
+    // Fall through
     case 0x00:
         if (!pressed) {
             if (kbc_translate) {
@@ -260,7 +258,7 @@ static void kbc_on_input_data(struct Kbc *const kbc, uint8_t data) {
     case KBC_STATE_TOUCHPAD:
         // Interrupt touchpad command
         state = KBC_STATE_NORMAL;
-        // Fall through
+    // Fall through
     case KBC_STATE_NORMAL:
         TRACE("  keyboard command\n");
         // Keyboard commands clear output buffer
@@ -424,7 +422,7 @@ static void kbc_on_output_empty(struct Kbc *const kbc) {
         break;
     case KBC_STATE_TOUCHPAD:
         state_data = *(PS2_TOUCHPAD.data);
-        // Fall through
+    // Fall through
     case KBC_STATE_MOUSE:
         TRACE("kbc mouse: %02X\n", state_data);
         if (kbc_mouse(kbc, state_data, KBC_TIMEOUT)) {

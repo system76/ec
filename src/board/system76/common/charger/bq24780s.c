@@ -8,7 +8,7 @@
 #include <common/macro.h>
 #include <common/debug.h>
 
-// clang-format off
+// uncrustify:off
 
 // Registers
 #define REG_CHARGE_CURRENT 0x14
@@ -86,7 +86,7 @@
     #error Invalid adapter:battery RSENSE ratio
 #endif
 
-// clang-format on
+// uncrustify:on
 
 // XXX: Assumption: ac_last is initialized high.
 static bool charger_enabled = false;

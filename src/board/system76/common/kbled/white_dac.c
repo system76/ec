@@ -35,11 +35,11 @@ void kbled_set(uint8_t level) {
 }
 
 uint32_t kbled_get_color(void) {
-    /* Always white */
+    // Always white
     return 0xFFFFFF;
 }
 
 void kbled_set_color(uint32_t color) {
-    /* Fix unused variable */
+    // Fix unused variable
     color = color;
 }

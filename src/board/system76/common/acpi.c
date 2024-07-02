@@ -43,22 +43,22 @@ void fcommand(void) {
             break;
         // Set color
         case 3:
-            // clang-format off
             kbled_set_color(
                 ((uint32_t)fbuf[0]) |
                 ((uint32_t)fbuf[1] << 16) |
                 ((uint32_t)fbuf[2] << 8)
             );
-            // clang-format on
             break;
         // Get color
         case 4:
+            // uncrustify:off
             {
                 uint32_t color = kbled_get_color();
                 fbuf[0] = color & 0xFF;
                 fbuf[1] = (color >> 16) & 0xFF;
                 fbuf[2] = (color >> 8) & 0xFF;
             }
+            // uncrustify:on
             break;
         // DUPLICATE: Set brightness
         case 6:
@@ -83,7 +83,7 @@ void acpi_reset(void) {
 #endif
 }
 
-// clang-format off
+// uncrustify:off
 uint8_t acpi_read(uint8_t addr) {
     uint8_t data = 0;
 
@@ -181,20 +181,20 @@ uint8_t acpi_read(uint8_t addr) {
 #endif // HAVE_LED_AIRPLANE_N
 
         // Set size of flash (from old firmware)
-        ACPI_8 (0xE5, 0x80);
+        ACPI_8(0xE5, 0x80);
 
-        ACPI_8 (0xF8, fcmd);
-        ACPI_8 (0xF9, fdat);
-        ACPI_8 (0xFA, fbuf[0]);
-        ACPI_8 (0xFB, fbuf[1]);
-        ACPI_8 (0xFC, fbuf[2]);
-        ACPI_8 (0xFD, fbuf[3]);
+        ACPI_8(0xF8, fcmd);
+        ACPI_8(0xF9, fdat);
+        ACPI_8(0xFA, fbuf[0]);
+        ACPI_8(0xFB, fbuf[1]);
+        ACPI_8(0xFC, fbuf[2]);
+        ACPI_8(0xFD, fbuf[3]);
     }
 
     TRACE("acpi_read %02X = %02X\n", addr, data);
     return data;
 }
-// clang-format on
+// uncrustify:on
 
 void acpi_write(uint8_t addr, uint8_t data) {
     TRACE("acpi_write %02X = %02X\n", addr, data);

@@ -11,9 +11,11 @@
 #include <arch/i2c_slave.h>
 #include <common/macro.h>
 
+// uncrustify:off
 static void (*volatile i2c_slave_new_cb)() = NULL;
 static void (*volatile i2c_slave_recv_cb)(uint8_t) = NULL;
 static uint8_t (*volatile i2c_slave_send_cb)() = NULL;
+// uncrustify:on
 
 void i2c_slave_init(
     uint8_t address,

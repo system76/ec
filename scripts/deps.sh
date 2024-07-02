@@ -19,7 +19,6 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         --yes \
         avr-libc \
         avrdude \
-        clang-format \
         curl \
         gcc \
         gcc-avr \
@@ -30,6 +29,7 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         pkgconf \
         sdcc \
         shellcheck \
+        uncrustify \
         xxd
 elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
     sudo dnf install \
@@ -37,13 +37,13 @@ elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avr-gcc \
         avr-libc \
         avrdude \
-        clang-tools-extra \
         curl \
         gcc \
         make \
         sdcc \
         ShellCheck \
         systemd-devel \
+        uncrustify \
         vim-common
 elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
     sudo pacman -S \
@@ -51,7 +51,6 @@ elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         avr-gcc \
         avr-libc \
         avrdude \
-        clang \
         curl \
         gcc \
         make \
@@ -59,6 +58,7 @@ elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         sdcc \
         shellcheck \
         systemd-libs \
+        uncrustify \
         vim
 else
     msg "Please add support for your distribution to:"

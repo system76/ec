@@ -30,8 +30,6 @@ int16_t i2c_write(struct I2C *const i2c, const uint8_t *const data, uint16_t len
 // Must be defined by arch, board, or ec
 int16_t i2c_read(struct I2C *const i2c, uint8_t *const data, uint16_t length) __reentrant;
 
-// clang-format off
-
 // Read multiple bytes from address in one transaction
 int16_t i2c_recv(
     struct I2C *const i2c,
@@ -47,8 +45,6 @@ int16_t i2c_send(
     uint8_t *const data,
     uint16_t length
 ) __reentrant;
-
-// clang-format on
 
 // Read multiple bytes from a register in one transaction
 int16_t i2c_get(

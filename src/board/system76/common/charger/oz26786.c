@@ -8,7 +8,7 @@
 #include <common/debug.h>
 #include <common/macro.h>
 
-// clang-format off
+// uncrustify:off
 
 // Registers
 #define REG_CHARGE_CURRENT 0x14
@@ -71,7 +71,8 @@
 #else
     #error Invalid CHARGER_PSYS_GAIN value
 #endif
-// clang-format on
+
+// uncrustify:on
 
 // Sense resistor values in milliohms.
 enum sense_resistor {

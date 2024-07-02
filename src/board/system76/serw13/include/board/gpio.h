@@ -7,7 +7,6 @@
 
 void gpio_init(void);
 
-// clang-format off
 extern struct Gpio __code ACIN_N;
 extern struct Gpio __code AC_PRESENT;
 extern struct Gpio __code ALL_SYS_PWRGD;
@@ -45,6 +44,5 @@ extern struct Gpio __code VA_EC_EN;
 #define HAVE_WLAN_EN 0
 #define HAVE_WLAN_PWR_EN 0
 extern struct Gpio __code XLP_OUT;
-// clang-format on
 
 #endif // _BOARD_GPIO_H
