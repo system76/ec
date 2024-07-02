@@ -35,10 +35,13 @@ void pwm_init(void) {
     // Set cycle time to 255 + 1
     CTR0 = 255;
 
-    // Turn off CPU fan (temperature control in peci_get_fan_duty)
+    // Turn off fans
     DCR2 = 0;
 #if HAVE_CPU_FAN2
     DCR3 = 0;
+#endif
+#if CONFIG_HAVE_DGPU
+    DCR4 = 0;
 #endif
 
 #if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E

@@ -12,7 +12,7 @@ extern int16_t dgpu_temp;
 
 void dgpu_init(void);
 bool dgpu_get_temp(int16_t *const data);
-uint8_t dgpu_get_fan_duty(void);
+void dgpu_read_temp(void);
 
 #else
 
@@ -23,9 +23,7 @@ static inline bool dgpu_get_temp(int16_t *const data) {
     return true;
 }
 
-static inline uint8_t dgpu_get_fan_duty(void) {
-    return 0;
-}
+static inline void dgpu_read_temp(void) {}
 
 #endif // CONFIG_HAVE_DGPU
 
