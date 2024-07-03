@@ -10,8 +10,8 @@
 
 bool fan_max = false;
 
-static uint8_t last_duty_dgpu = 0;
-static uint8_t last_duty_peci = 0;
+static uint8_t last_fan1_duty = 0;
+static uint8_t last_fan2_duty = 0;
 
 #define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
 
@@ -26,29 +26,29 @@ static uint8_t last_duty_peci = 0;
 #define MIN_SPEED_TO_SMOOTH PWM_DUTY(SMOOTH_FANS_MIN)
 
 // Fan speed is the lowest requested over HEATUP seconds
-#ifndef BOARD_HEATUP
-#define BOARD_HEATUP 4
+#ifndef BOARD_FAN1_HEATUP
+#define BOARD_FAN1_HEATUP 4
 #endif
 
-static uint8_t FAN1_HEATUP[BOARD_HEATUP] = { 0 };
+static uint8_t FAN1_HEATUP[BOARD_FAN1_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifndef BOARD_COOLDOWN
-#define BOARD_COOLDOWN 10
+#ifndef BOARD_FAN1_COOLDOWN
+#define BOARD_FAN1_COOLDOWN 10
 #endif
 
-static uint8_t FAN1_COOLDOWN[BOARD_COOLDOWN] = { 0 };
+static uint8_t FAN1_COOLDOWN[BOARD_FAN1_COOLDOWN] = { 0 };
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static struct FanPoint __code FAN1_POINTS[] = {
-#ifdef BOARD_FAN_POINTS
-    BOARD_FAN_POINTS
+#ifdef BOARD_FAN1_POINTS
+    BOARD_FAN1_POINTS
 #else
     FAN_POINT(70, 40),
     FAN_POINT(75, 50),
     FAN_POINT(80, 60),
     FAN_POINT(85, 65),
-    FAN_POINT(90, 65)
+    FAN_POINT(90, 65),
 #endif
 };
 
@@ -65,29 +65,29 @@ static struct Fan __code FAN1 = {
 #if CONFIG_HAVE_DGPU
 
 // Fan speed is the lowest requested over HEATUP seconds
-#ifndef BOARD_DGPU_HEATUP
-#define BOARD_DGPU_HEATUP 4
+#ifndef BOARD_FAN2_HEATUP
+#define BOARD_FAN2_HEATUP 4
 #endif
 
-static uint8_t FAN2_HEATUP[BOARD_DGPU_HEATUP] = { 0 };
+static uint8_t FAN2_HEATUP[BOARD_FAN2_HEATUP] = { 0 };
 
 // Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifndef BOARD_DGPU_COOLDOWN
-#define BOARD_DGPU_COOLDOWN 10
+#ifndef BOARD_FAN2_COOLDOWN
+#define BOARD_FAN2_COOLDOWN 10
 #endif
 
-static uint8_t FAN2_COOLDOWN[BOARD_DGPU_COOLDOWN] = { 0 };
+static uint8_t FAN2_COOLDOWN[BOARD_FAN2_COOLDOWN] = { 0 };
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static struct FanPoint __code FAN2_POINTS[] = {
-#ifdef BOARD_DGPU_FAN_POINTS
-    BOARD_DGPU_FAN_POINTS
+#ifdef BOARD_FAN2_POINTS
+    BOARD_FAN2_POINTS
 #else
     FAN_POINT(70, 40),
     FAN_POINT(75, 50),
     FAN_POINT(80, 60),
     FAN_POINT(85, 65),
-    FAN_POINT(90, 65)
+    FAN_POINT(90, 65),
 #endif
 };
 
@@ -209,7 +209,7 @@ static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) __reentra
     return highest;
 }
 
-static uint8_t peci_get_fan_duty(void) {
+static uint8_t get_fan1_duty(void) {
     uint8_t duty;
 
     if (power_state == POWER_STATE_S0) {
@@ -228,7 +228,7 @@ static uint8_t peci_get_fan_duty(void) {
 }
 
 #if CONFIG_HAVE_DGPU
-static uint8_t dgpu_get_fan_duty(void) {
+static uint8_t get_fan2_duty(void) {
     uint8_t duty;
 
     if (power_state == POWER_STATE_S0) {
@@ -246,40 +246,40 @@ static uint8_t dgpu_get_fan_duty(void) {
     return duty;
 }
 #else
-static uint8_t dgpu_get_fan_duty(void) {
+static uint8_t get_fan2_duty(void) {
     return PWM_DUTY(0);
 }
 #endif // CONFIG_HAVE_DGPU
 
-static void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
+static void fan_duty_set(uint8_t fan1_duty, uint8_t fan2_duty) __reentrant {
 #if SYNC_FANS != 0
-    peci_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
-    dgpu_fan_duty = peci_fan_duty > dgpu_fan_duty ? peci_fan_duty : dgpu_fan_duty;
+    fan1_duty = fan1_duty > fan2_duty ? fan1_duty : fan2_duty;
+    fan2_duty = fan1_duty > fan2_duty ? fan1_duty : fan2_duty;
 #endif
 
-    // set PECI fan duty
-    if (peci_fan_duty != DCR2) {
-        TRACE("PECI fan_duty_raw=%d\n", peci_fan_duty);
-        last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
-        DCR2 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
+    // set FAN1 duty
+    if (fan1_duty != DCR2) {
+        TRACE("FAN1 fan_duty_raw=%d\n", fan1_duty);
+        last_fan1_duty = fan1_duty = fan_smooth(last_fan1_duty, fan1_duty);
+        DCR2 = fan_max ? MAX_FAN_SPEED : fan1_duty;
 #if HAVE_CPU_FAN2
         // FIXME: Handle better
-        DCR3 = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
+        DCR3 = fan_max ? MAX_FAN_SPEED : fan1_duty;
 #endif
-        TRACE("PECI fan_duty_smoothed=%d\n", peci_fan_duty);
+        TRACE("FAN1 fan_duty_smoothed=%d\n", fan1_duty);
     }
 
-    // set dGPU fan duty
-    if (dgpu_fan_duty != DCR4) {
-        TRACE("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
-        last_duty_dgpu = dgpu_fan_duty = fan_smooth(last_duty_dgpu, dgpu_fan_duty);
-        DCR4 = fan_max ? MAX_FAN_SPEED : dgpu_fan_duty;
-        TRACE("DGPU fan_duty_smoothed=%d\n", dgpu_fan_duty);
+    // set FAN2 duty
+    if (fan2_duty != DCR4) {
+        TRACE("FAN2 fan_duty_raw=%d\n", fan2_duty);
+        last_fan2_duty = fan2_duty = fan_smooth(last_fan2_duty, fan2_duty);
+        DCR4 = fan_max ? MAX_FAN_SPEED : fan2_duty;
+        TRACE("FAN2 fan_duty_smoothed=%d\n", fan2_duty);
     }
 }
 
 void fan_update_duty(void) {
-    uint8_t fan1_duty = peci_get_fan_duty();
-    uint8_t fan2_duty = dgpu_get_fan_duty();
+    uint8_t fan1_duty = get_fan1_duty();
+    uint8_t fan2_duty = get_fan2_duty();
     fan_duty_set(fan1_duty, fan2_duty);
 }
