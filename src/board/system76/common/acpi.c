@@ -161,13 +161,15 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_8(0xCC, sci_extra);
 
-        ACPI_8(0xCE, DCR2);
+        ACPI_8(0xCE, FAN1_PWM);
         ACPI_16(0xD0, pwm_tach0_rpm);
 #if CONFIG_HAVE_DGPU
         ACPI_8(0xCD, dgpu_temp);
-        ACPI_8(0xCF, DCR4);
-        ACPI_16(0xD2, pwm_tach1_rpm);
 #endif // CONFIG_HAVE_DGPU
+#ifdef FAN2_PWM
+        ACPI_8(0xCF, FAN2_PWM);
+        ACPI_16(0xD2, pwm_tach1_rpm);
+#endif // FAN2_PWM
 
 #if HAVE_LED_AIRPLANE_N
         // Airplane mode LED

@@ -251,35 +251,32 @@ static uint8_t get_fan2_duty(void) {
 }
 #endif // CONFIG_HAVE_DGPU
 
-static void fan_duty_set(uint8_t fan1_duty, uint8_t fan2_duty) __reentrant {
+void fan_update_duty(void) {
+    uint8_t fan1_duty = get_fan1_duty();
+#ifdef FAN2_PWM
+    uint8_t fan2_duty = get_fan2_duty();
+
 #if SYNC_FANS != 0
-    fan1_duty = fan1_duty > fan2_duty ? fan1_duty : fan2_duty;
-    fan2_duty = fan1_duty > fan2_duty ? fan1_duty : fan2_duty;
-#endif
+    fan1_duty = MAX(fan1_duty, fan2_duty);
+    fan2_duty = MAX(fan1_duty, fan2_duty);
+#endif // SYNC_FANS
+#endif // FAN2_PWM
 
     // set FAN1 duty
-    if (fan1_duty != DCR2) {
+    if (fan1_duty != FAN1_PWM) {
         TRACE("FAN1 fan_duty_raw=%d\n", fan1_duty);
         last_fan1_duty = fan1_duty = fan_smooth(last_fan1_duty, fan1_duty);
-        DCR2 = fan_max ? MAX_FAN_SPEED : fan1_duty;
-#if HAVE_CPU_FAN2
-        // FIXME: Handle better
-        DCR3 = fan_max ? MAX_FAN_SPEED : fan1_duty;
-#endif
+        FAN1_PWM = fan_max ? MAX_FAN_SPEED : fan1_duty;
         TRACE("FAN1 fan_duty_smoothed=%d\n", fan1_duty);
     }
 
+#ifdef FAN2_PWM
     // set FAN2 duty
-    if (fan2_duty != DCR4) {
+    if (fan2_duty != FAN2_PWM) {
         TRACE("FAN2 fan_duty_raw=%d\n", fan2_duty);
         last_fan2_duty = fan2_duty = fan_smooth(last_fan2_duty, fan2_duty);
-        DCR4 = fan_max ? MAX_FAN_SPEED : fan2_duty;
+        FAN2_PWM = fan_max ? MAX_FAN_SPEED : fan2_duty;
         TRACE("FAN2 fan_duty_smoothed=%d\n", fan2_duty);
     }
-}
-
-void fan_update_duty(void) {
-    uint8_t fan1_duty = get_fan1_duty();
-    uint8_t fan2_duty = get_fan2_duty();
-    fan_duty_set(fan1_duty, fan2_duty);
+#endif
 }

@@ -36,12 +36,9 @@ void pwm_init(void) {
     CTR0 = 255;
 
     // Turn off fans
-    DCR2 = 0;
-#if HAVE_CPU_FAN2
-    DCR3 = 0;
-#endif
-#if CONFIG_HAVE_DGPU
-    DCR4 = 0;
+    FAN1_PWM = 0;
+#ifdef FAN2_PWM
+    FAN2_PWM = 0;
 #endif
 
 #if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E

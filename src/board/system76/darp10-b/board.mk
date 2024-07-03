@@ -41,7 +41,8 @@ CFLAGS += \
 	-DPOWER_LIMIT_AC=65 \
 	-DPOWER_LIMIT_DC=45
 
-CFLAGS += -DHAVE_CPU_FAN2=1
+CFLAGS += -DFAN1_PWM=DCR2
+CFLAGS += -DFAN2_PWM=DCR3
 
 # Add common code
 include src/board/system76/common/common.mk

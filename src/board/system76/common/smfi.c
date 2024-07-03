@@ -123,15 +123,16 @@ static enum Result cmd_print(void) {
 
 static enum Result cmd_fan_get(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
-    case 0:
-        // Get duty of fan 0
-        smfi_cmd[SMFI_CMD_DATA + 1] = DCR2;
-        return RES_OK;
     case 1:
-        // Get duty of fan 1
-        //TODO: only allow on platforms like addw2
-        smfi_cmd[SMFI_CMD_DATA + 1] = DCR4;
+        // Get duty of FAN1
+        smfi_cmd[SMFI_CMD_DATA + 1] = FAN1_PWM;
         return RES_OK;
+#ifdef FAN2_PWM
+    case 2:
+        // Get duty of FAN2
+        smfi_cmd[SMFI_CMD_DATA + 1] = FAN2_PWM;
+        return RES_OK;
+#endif
     }
 
     // Failed if fan not found
@@ -140,15 +141,16 @@ static enum Result cmd_fan_get(void) {
 
 static enum Result cmd_fan_set(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
-    case 0:
-        // Set duty cycle of fan 0
-        DCR2 = smfi_cmd[SMFI_CMD_DATA + 1];
-        return RES_OK;
     case 1:
-        // Set duty cycle of fan 1
-        //TODO: only allow on platforms like addw2
-        DCR4 = smfi_cmd[SMFI_CMD_DATA + 1];
+        // Set duty cycle of FAN1
+        FAN1_PWM = smfi_cmd[SMFI_CMD_DATA + 1];
         return RES_OK;
+#ifdef FAN2_PWM
+    case 2:
+        // Set duty cycle of FAN2
+        FAN2_PWM = smfi_cmd[SMFI_CMD_DATA + 1];
+        return RES_OK;
+#endif
     }
 
     // Failed if fan not found
