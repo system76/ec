@@ -42,5 +42,7 @@ CFLAGS+=\
 	-DPOWER_LIMIT_AC=65 \
 	-DPOWER_LIMIT_DC=45
 
+CFLAGS += -DFAN1_PWM=DCR2
+
 # Add system76 common code
 include src/board/system76/common/common.mk
