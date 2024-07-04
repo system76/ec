@@ -45,6 +45,9 @@ struct Gpio __code WLAN_PWR_EN =    GPIO(B, 0);
 // uncrustify:on
 
 void gpio_init(void) {
+    // PWRSW WDT 2 Enable
+    GCR8 = BIT(4);
+
     // Enable LPC reset on GPD2
     GCR = 0x04;
 
