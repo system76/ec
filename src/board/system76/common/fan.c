@@ -62,7 +62,7 @@ static struct Fan __code FAN1 = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
-#if CONFIG_HAVE_DGPU
+#ifdef FAN2_PWM
 
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_FAN2_HEATUP
@@ -101,7 +101,7 @@ static struct Fan __code FAN2 = {
     .interpolate = SMOOTH_FANS != 0,
 };
 
-#endif // CONFIG_HAVE_DGPU
+#endif // FAN2_PWM
 
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
@@ -209,16 +209,16 @@ static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) {
     return highest;
 }
 
-static uint8_t get_fan1_duty(void) {
+static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
     uint8_t duty;
 
     if (power_state == POWER_STATE_S0) {
-        duty = fan_duty(&FAN1, peci_temp);
+        duty = fan_duty(fan, temp);
         if (fan_max) {
             duty = PWM_DUTY(100);
         } else {
-            duty = fan_heatup(&FAN1, duty);
-            duty = fan_cooldown(&FAN1, duty);
+            duty = fan_heatup(fan, duty);
+            duty = fan_cooldown(fan, duty);
         }
     } else {
         duty = PWM_DUTY(0);
@@ -226,35 +226,15 @@ static uint8_t get_fan1_duty(void) {
 
     return duty;
 }
-
-#if CONFIG_HAVE_DGPU
-static uint8_t get_fan2_duty(void) {
-    uint8_t duty;
-
-    if (power_state == POWER_STATE_S0) {
-        duty = fan_duty(&FAN2, dgpu_temp);
-        if (fan_max) {
-            duty = PWM_DUTY(100);
-        } else {
-            duty = fan_heatup(&FAN2, duty);
-            duty = fan_cooldown(&FAN2, duty);
-        }
-    } else {
-        duty = PWM_DUTY(0);
-    }
-
-    return duty;
-}
-#else
-static uint8_t get_fan2_duty(void) {
-    return PWM_DUTY(0);
-}
-#endif // CONFIG_HAVE_DGPU
 
 void fan_update_duty(void) {
-    uint8_t fan1_duty = get_fan1_duty();
+#if defined(FAN2_PWM) && !CONFIG_HAVE_DGPU
+    int16_t dgpu_temp = peci_temp;
+#endif
+
+    uint8_t fan1_duty = fan_get_duty(&FAN1, peci_temp);
 #ifdef FAN2_PWM
-    uint8_t fan2_duty = get_fan2_duty();
+    uint8_t fan2_duty = fan_get_duty(&FAN2, dgpu_temp);
 
 #if SYNC_FANS != 0
     fan1_duty = MAX(fan1_duty, fan2_duty);
