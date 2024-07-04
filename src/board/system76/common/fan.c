@@ -110,7 +110,7 @@ void fan_reset(void) {
 
 // Get duty cycle based on temperature, adapted from
 // https://github.com/pop-os/system76-power/blob/master/src/fan.rs
-static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) __reentrant {
+static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
     for (uint8_t i = 0; i < fan->points_size; i++) {
         const struct FanPoint *cur = &fan->points[i];
 
@@ -145,7 +145,7 @@ static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) __reentrant {
     return MAX_FAN_SPEED;
 }
 
-static uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
+static uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) {
     uint8_t next_duty = duty;
 
     // ramping down
@@ -177,7 +177,7 @@ static uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) __reentrant {
     return next_duty;
 }
 
-static uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) __reentrant {
+static uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) {
     uint8_t lowest = duty;
 
     uint8_t i;
@@ -193,7 +193,7 @@ static uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) __reentrant
     return lowest;
 }
 
-static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) __reentrant {
+static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) {
     uint8_t highest = duty;
 
     uint8_t i;
