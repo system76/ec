@@ -194,8 +194,6 @@ void gpio_init(void) {
     GPCRH5 = GPIO_IN | GPIO_UP;
     // SUSB#_PCH
     GPCRH6 = GPIO_IN;
-    // Unknown
-    GPCRH7 = GPIO_IN;
 
     // BAT_DET
     GPCRI0 = GPIO_ALT;
