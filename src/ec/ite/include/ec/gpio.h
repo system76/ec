@@ -170,7 +170,9 @@ volatile uint8_t __xdata __at(0x164B) GPCRH3;
 volatile uint8_t __xdata __at(0x164C) GPCRH4;
 volatile uint8_t __xdata __at(0x164D) GPCRH5;
 volatile uint8_t __xdata __at(0x164E) GPCRH6;
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
 volatile uint8_t __xdata __at(0x164F) GPCRH7;
+#endif
 
 volatile uint8_t __xdata __at(0x1650) GPCRI0;
 volatile uint8_t __xdata __at(0x1651) GPCRI1;
