@@ -220,18 +220,15 @@ static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
 }
 
 void fan_update_duty(void) {
-#if defined(FAN2_PWM) && !CONFIG_HAVE_DGPU
-    int16_t dgpu_temp = peci_temp;
+#if CONFIG_HAVE_DGPU
+    int16_t sys_temp = MAX(peci_temp, dgpu_temp);
+#else
+    int16_t sys_temp = peci_temp;
 #endif
 
-    uint8_t fan1_duty = fan_get_duty(&FAN1, peci_temp);
+    uint8_t fan1_duty = fan_get_duty(&FAN1, sys_temp);
 #ifdef FAN2_PWM
-    uint8_t fan2_duty = fan_get_duty(&FAN2, dgpu_temp);
-
-#if SYNC_FANS != 0
-    fan1_duty = MAX(fan1_duty, fan2_duty);
-    fan2_duty = MAX(fan1_duty, fan2_duty);
-#endif // SYNC_FANS
+    uint8_t fan2_duty = fan_get_duty(&FAN2, sys_temp);
 #endif // FAN2_PWM
 
     // set FAN1 duty
