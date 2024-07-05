@@ -14,10 +14,6 @@
 #define SMOOTH_FANS 1 // default to fan smoothing
 #endif
 
-#ifndef SYNC_FANS
-#define SYNC_FANS 1 // default to syncing fan speeds
-#endif
-
 #if SMOOTH_FANS != 0
 #ifndef SMOOTH_FANS_UP
 #define SMOOTH_FANS_UP 45 // default to ~11 seconds for full ramp-up
