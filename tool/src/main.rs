@@ -2,7 +2,7 @@
 
 #![allow(clippy::uninlined_format_args)]
 
-use clap::{AppSettings, Parser};
+use clap::Parser;
 use ectool::{
     Access,
     AccessHid,
@@ -329,7 +329,7 @@ enum SubCommand {
     },
     LedColor {
         index: u8,
-        #[clap(validator = |x| parse_color(x).and(Ok(())))]
+        #[clap(value_parser = parse_color)]
         value: Option<String>,
     },
     LedValue {
@@ -350,7 +350,6 @@ enum SubCommand {
         message: Vec<String>,
     },
     SetNoInput {
-        #[clap(parse(try_from_str))]
         value: bool,
     },
     Security {
@@ -358,7 +357,7 @@ enum SubCommand {
     },
 }
 
-#[derive(clap::ArgEnum, Clone)]
+#[derive(clap::ValueEnum, Clone)]
 enum AccessMode {
     LpcLinux,
     LpcSim,
@@ -366,11 +365,11 @@ enum AccessMode {
 }
 
 #[derive(Parser)]
-#[clap(name = "system76_ectool", setting = AppSettings::SubcommandRequired)]
+#[clap(name = "system76_ectool")]
 struct Args {
     #[clap(
         long = "access",
-        arg_enum,
+        value_enum,
         default_value = "lpc-linux",
     )]
     access: AccessMode,
