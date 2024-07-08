@@ -39,7 +39,11 @@ CFLAGS+=\
 # Don't smooth fan speed changes below 25% to mitigate buzzing
 CFLAGS+=-DSMOOTH_FANS_MIN=25
 
-# Custom fan curve
+# Enable dGPU support
+CONFIG_HAVE_DGPU = y
+CFLAGS += -DI2C_DGPU=I2C_1
+
+# Fan configs
 CFLAGS += -DFAN1_PWM=DCR2
 CFLAGS += -DBOARD_FAN1_POINTS="\
 	FAN_POINT(55, 25), \
@@ -50,10 +54,6 @@ CFLAGS += -DBOARD_FAN1_POINTS="\
 	FAN_POINT(85, 90), \
 	FAN_POINT(90, 100), \
 "
-
-# Enable dGPU support
-CONFIG_HAVE_DGPU = y
-CFLAGS += -DI2C_DGPU=I2C_1
 
 CFLAGS += -DFAN2_PWM=DCR4
 CFLAGS += -DBOARD_FAN2_POINTS="\

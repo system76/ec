@@ -40,19 +40,15 @@ static uint8_t FAN1_HEATUP[BOARD_FAN1_HEATUP] = { 0 };
 static uint8_t FAN1_COOLDOWN[BOARD_FAN1_COOLDOWN] = { 0 };
 
 // Fan curve with temperature in degrees C, duty cycle in percent
-static struct FanPoint __code FAN1_POINTS[] = {
-#ifdef BOARD_FAN1_POINTS
-    BOARD_FAN1_POINTS
+static const struct FanPoint __code FAN1_POINTS[] = {
+#ifndef BOARD_FAN1_POINTS
+#error Board must declare fan points
 #else
-    FAN_POINT(70, 40),
-    FAN_POINT(75, 50),
-    FAN_POINT(80, 60),
-    FAN_POINT(85, 65),
-    FAN_POINT(90, 65),
+    BOARD_FAN1_POINTS
 #endif
 };
 
-static struct Fan __code FAN1 = {
+static const struct Fan __code FAN1 = {
     .points = FAN1_POINTS,
     .points_size = ARRAY_SIZE(FAN1_POINTS),
     .heatup = FAN1_HEATUP,
@@ -79,19 +75,15 @@ static uint8_t FAN2_HEATUP[BOARD_FAN2_HEATUP] = { 0 };
 static uint8_t FAN2_COOLDOWN[BOARD_FAN2_COOLDOWN] = { 0 };
 
 // Fan curve with temperature in degrees C, duty cycle in percent
-static struct FanPoint __code FAN2_POINTS[] = {
-#ifdef BOARD_FAN2_POINTS
-    BOARD_FAN2_POINTS
+static const struct FanPoint __code FAN2_POINTS[] = {
+#ifndef BOARD_FAN2_POINTS
+#error Board must declare fan points
 #else
-    FAN_POINT(70, 40),
-    FAN_POINT(75, 50),
-    FAN_POINT(80, 60),
-    FAN_POINT(85, 65),
-    FAN_POINT(90, 65),
+    BOARD_FAN2_POINTS
 #endif
 };
 
-static struct Fan __code FAN2 = {
+static const struct Fan __code FAN2 = {
     .points = FAN2_POINTS,
     .points_size = ARRAY_SIZE(FAN2_POINTS),
     .heatup = FAN2_HEATUP,
