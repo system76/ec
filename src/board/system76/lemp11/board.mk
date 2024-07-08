@@ -38,7 +38,15 @@ CFLAGS+=\
 	-DPOWER_LIMIT_AC=65 \
 	-DPOWER_LIMIT_DC=45
 
+# Fan configs
 CFLAGS += -DFAN1_PWM=DCR2
+CFLAGS += -DBOARD_FAN1_POINTS="\
+	FAN_POINT(70, 40), \
+	FAN_POINT(75, 50), \
+	FAN_POINT(80, 60), \
+	FAN_POINT(85, 65), \
+	FAN_POINT(90, 65), \
+"
 
 # Add system76 common code
 include src/board/system76/common/common.mk
