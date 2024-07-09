@@ -8,14 +8,7 @@
 // Based on chromium EC chip/it83xx/adc.c
 
 const struct Vch adc_channels[] = {
-    VCH(0),
-    VCH(1),
-    VCH(2),
-    VCH(3),
-    VCH(4),
-    VCH(5),
-    VCH(6),
-    VCH(7),
+    VCH(0), VCH(1), VCH(2), VCH(3), VCH(4), VCH(5), VCH(6), VCH(7),
 };
 
 void adc_init(void) {
@@ -72,8 +65,7 @@ int16_t adc_read_channel(uint8_t ch) {
         }
     };
 
-    uint32_t measurement = (((*adc_channels[ch].data_hi) & 0x03) << 8)
-                            | *adc_channels[ch].data_lo;
+    uint32_t measurement = (((*adc_channels[ch].data_hi) & 0x03) << 8) | *adc_channels[ch].data_lo;
 
     adc_disable_channel(ch);
 

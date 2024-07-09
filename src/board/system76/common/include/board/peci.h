@@ -15,12 +15,12 @@
 #define PECI_PL_ENABLE BIT(15)
 #define PECI_PL_CLAMP BIT(16)
 #define PECI_PL_TIME_WINDOW(time, duty) \
-    ((uint32_t)((time)&0x3f) << 17 | (uint32_t)((duty)&0xf) << 24)
+    ((uint32_t)((time) & 0x3f) << 17 | (uint32_t)((duty) & 0xf) << 24)
 
-#define PECI_PSYS_PL2(watts) ((watts)*8 | PECI_PL_ENABLE | PECI_PL_CLAMP)
+#define PECI_PSYS_PL2(watts) ((watts) * 8 | PECI_PL_ENABLE | PECI_PL_CLAMP)
 #define PECI_PL3(watts, time, duty) \
-    ((watts)*8 | PECI_PL_ENABLE | PECI_PL_CLAMP | PECI_PL_TIME_WINDOW(time, duty))
-#define PECI_PL4(watts) ((watts)*8)
+    ((watts) * 8 | PECI_PL_ENABLE | PECI_PL_CLAMP | PECI_PL_TIME_WINDOW(time, duty))
+#define PECI_PL4(watts) ((watts) * 8)
 
 // Set the CPU power limit appropriately
 extern bool peci_on;

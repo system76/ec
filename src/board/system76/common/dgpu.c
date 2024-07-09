@@ -31,8 +31,7 @@ int16_t dgpu_temp = 0;
 
 #define DGPU_TEMP(X) ((int16_t)(X))
 
-#define FAN_POINT(T, D) \
-    { .temp = DGPU_TEMP(T), .duty = PWM_DUTY(D) }
+#define FAN_POINT(T, D) { .temp = DGPU_TEMP(T), .duty = PWM_DUTY(D) }
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static struct FanPoint FAN_POINTS[] = {

@@ -53,7 +53,7 @@ enum {
     PDO_KIND_AUGUMENTED,
 };
 
-#define PDO_CURRENT_MA(pdo) (((pdo)&0x3FF) * 10)
+#define PDO_CURRENT_MA(pdo) (((pdo) & 0x3FF) * 10)
 
 static int16_t usbpd_current_limit(uint8_t address) {
     uint8_t value[7] = { 0 };
