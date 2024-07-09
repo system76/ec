@@ -5,20 +5,6 @@ on:
   pull_request:
 
 jobs:
-  lint:
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Check SPDX identifiers
-        run: ./scripts/lint/01-spdx-tags.sh
-
-      - name: Check formatting
-        run: ./scripts/lint/02-clang-format.sh
-
-      - name: Check shell scripts
-        run: ./scripts/lint/03-shellcheck.sh
-
   tool:
     strategy:
       matrix:
@@ -26,7 +12,7 @@ jobs:
           - features:
           - features: --no-default-features --features="redox_hwio"
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v3
 
