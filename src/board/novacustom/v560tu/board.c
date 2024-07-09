@@ -51,8 +51,7 @@ uint8_t board_id(void) {
 
 exit:
     cached = true;
-    return 1;
-
+    return board_id;
 }
 
 void board_event(void) {
