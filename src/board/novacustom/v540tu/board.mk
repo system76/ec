@@ -39,9 +39,11 @@ CFLAGS += \
 	-DCHARGER_INPUT_CURRENT=4740
 
 # Set CPU power limits in watts
+# AC: power rating of the included AC adapter
+# DC: battery discharge rate (assume 1C rating??)
 CFLAGS += \
-	-DPOWER_LIMIT_AC=65 \
-	-DPOWER_LIMIT_DC=45
+	-DPOWER_LIMIT_AC=90 \
+	-DPOWER_LIMIT_DC=73
 
 # Set fan parameters
 CFLAGS+=-DHAVE_CPU_FAN2=1
