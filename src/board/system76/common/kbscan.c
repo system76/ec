@@ -284,15 +284,15 @@ void kbscan_event(void) {
     uint8_t matrix_curr[KM_OUT];
 
     static bool debounce = false;
-    static uint32_t debounce_time = 0;
+    static systick_t debounce_time = 0;
 
     static bool repeat = false;
     static uint16_t repeat_key = 0;
-    static uint32_t repeat_key_time = 0;
+    static systick_t repeat_key_time = 0;
 
     // If debounce complete
     if (debounce) {
-        uint32_t time = time_get();
+        systick_t time = time_get();
         if ((time - debounce_time) >= DEBOUNCE_DELAY) {
             // Debounce time elapsed: Read new state
             debounce = false;
@@ -384,8 +384,8 @@ void kbscan_event(void) {
             kbscan_matrix[i] = new;
         } else if (new && repeat_key != 0 && key_should_repeat(repeat_key)) {
             // A key is being pressed
-            uint32_t time = time_get();
-            static uint32_t repeat_start = 0;
+            systick_t time = time_get();
+            static systick_t repeat_start = 0;
 
             if (!repeat) {
                 if (time < repeat_key_time) {
