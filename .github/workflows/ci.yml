@@ -61,3 +61,7 @@ jobs:
 
       - name: Build firmware
         run: make BOARD=${{ matrix.boards }} VERBOSE=1
+
+      - name: Show memory layout
+        run: cat build/ec.mem
+        continue-on-error: true
