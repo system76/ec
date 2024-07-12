@@ -45,9 +45,12 @@ void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
 
-#define INTERVAL_100MS 100U
-#define INTERVAL_250MS 250U
-#define INTERVAL_1SEC 1000U
+#define INTERVAL_1MS    1U
+#define INTERVAL_5MS    5U
+#define INTERVAL_100MS  100U
+#define INTERVAL_250MS  250U
+#define INTERVAL_500MS  500U
+#define INTERVAL_1SEC   1000U
 
 void init(void) {
     // Must happen first
@@ -98,22 +101,37 @@ void main(void) {
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
+    systick_t last_time_1ms = 0;
+    systick_t last_time_5ms = 0;
     systick_t last_time_100ms = 0;
     systick_t last_time_250ms = 0;
+    systick_t last_time_500ms = 0;
     systick_t last_time_1sec = 0;
 
     for (main_cycle = 0;; main_cycle++) {
-        // NOTE: Do note use modulo to avoid expensive call to SDCC library
-        // call. (Modulo is optimized for powers of 2, however.)
-        switch (main_cycle & 3U) {
-        case 0:
+        systick_t time = time_get();
+
+        if ((time - last_time_1ms) >= INTERVAL_1MS) {
+            last_time_1ms = time;
+
             // Handle USB-C events immediately before power states
             usbpd_event();
-
             // Handle power states
             power_event();
-            break;
-        case 1:
+
+            // Board-specific events
+            board_event();
+            // Checks for keyboard/mouse packets from host
+            kbc_event(&KBC);
+            // Handles ACPI communication
+            pmc_event(&PMC_1);
+            // AP/EC communication over SMFI
+            smfi_event();
+        }
+
+        if ((time - last_time_5ms) >= INTERVAL_5MS) {
+            last_time_5ms = time;
+
 #if PARALLEL_DEBUG
             if (!parallel_debug)
 #endif // PARALLEL_DEBUG
@@ -121,46 +139,35 @@ void main(void) {
                 // Scans keyboard and sends keyboard packets
                 kbscan_event();
             }
-            break;
-        case 2:
+        }
+
+        if ((time - last_time_100ms) >= INTERVAL_100MS) {
+            last_time_100ms = time;
+
+            fan_event();
+        }
+
+        if ((time - last_time_250ms) >= INTERVAL_250MS) {
+            last_time_250ms = time;
+
+            peci_read_temp();
+            dgpu_read_temp();
+        }
+
+        if ((time - last_time_500ms) >= INTERVAL_500MS) {
+            last_time_500ms = time;
+
             // Handle lid close/open
             lid_event();
-            break;
         }
 
-        if (main_cycle == 0) {
-            systick_t time = time_get();
+        if ((time - last_time_1sec) >= INTERVAL_1SEC) {
+            last_time_1sec = time;
 
-            if ((time - last_time_100ms) >= INTERVAL_100MS) {
-                last_time_100ms = time;
-
-                fan_event();
-            }
-
-            if ((time - last_time_250ms) >= INTERVAL_250MS) {
-                last_time_250ms = time;
-
-                peci_read_temp();
-                dgpu_read_temp();
-            }
-
-            if ((time - last_time_1sec) >= INTERVAL_1SEC) {
-                last_time_1sec = time;
-
-                battery_event();
-            }
+            battery_event();
         }
 
-        // Board-specific events
-        board_event();
-
-        // Checks for keyboard/mouse packets from host
-        kbc_event(&KBC);
-        // Handles ACPI communication
-        pmc_event(&PMC_1);
-        // AP/EC communication over SMFI
-        smfi_event();
         // Idle until next timer interrupt
-        //Disabled until interrupts used: PCON |= 1;
+        //PCON |= BIT(0);
     }
 }
