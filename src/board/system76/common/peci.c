@@ -131,7 +131,7 @@ bool peci_get_temp(int16_t *const data) {
     ESUCTRL0 |= ESUCTRL0_GO;
 
     // Wait until upstream done
-    uint32_t start = time_get();
+    systick_t start = time_get();
     while (!(ESUCTRL0 & ESUCTRL0_DONE)) {
         if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
             DEBUG("peci_get_temp: upstream timeout\n");
@@ -224,7 +224,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     ESUCTRL0 |= ESUCTRL0_GO;
 
     // Wait until upstream done
-    uint32_t start = time_get();
+    systick_t start = time_get();
     while (!(ESUCTRL0 & ESUCTRL0_DONE)) {
         DEBUG("peci_wr_pkg_config: wait upstream\n");
         if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
@@ -289,7 +289,7 @@ void peci_init(void) {
 // Returns true on success, false on error
 bool peci_get_temp(int16_t *const data) {
     // Wait for any in-progress transaction to complete
-    uint32_t start = time_get();
+    systick_t start = time_get();
     while (HOSTAR & BIT(0)) {
         if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
             DEBUG("%s: host timeout\n", __func__);
@@ -344,7 +344,7 @@ bool peci_get_temp(int16_t *const data) {
 // negative (0x1000 | status register) on PECI hardware error
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Wait for any in-progress transaction to complete
-    uint32_t start = time_get();
+    systick_t start = time_get();
     while (HOSTAR & BIT(0)) {
         if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
             DEBUG("%s: host timeout\n", __func__);

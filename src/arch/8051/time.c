@@ -10,7 +10,7 @@
 // Value to reload into the timer when the overflow interrupt is triggered.
 #define TIMER_RELOAD (0xFFFF - (TICK_INTERVAL_MS * (CONFIG_CLOCK_FREQ_KHZ / OSC_DIVISOR)))
 
-static volatile uint32_t time_overflows = 0;
+static volatile systick_t time_overflows = 0;
 
 void timer_0(void) __interrupt(1) {
     // Hardware automatically clears the the interrupt
@@ -52,6 +52,6 @@ void time_init(void) __critical {
     TR0 = 1;
 }
 
-uint32_t time_get(void) __critical {
+systick_t time_get(void) __critical {
     return time_overflows;
 }

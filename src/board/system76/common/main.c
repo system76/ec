@@ -98,8 +98,8 @@ void main(void) {
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
-    uint32_t last_time_battery = 0;
-    uint32_t last_time_fan = 0;
+    systick_t last_time_battery = 0;
+    systick_t last_time_fan = 0;
 
     for (main_cycle = 0;; main_cycle++) {
         // NOTE: Do note use modulo to avoid expensive call to SDCC library
@@ -128,7 +128,7 @@ void main(void) {
         }
 
         if (main_cycle == 0) {
-            uint32_t time = time_get();
+            systick_t time = time_get();
             // Only run the following once per interval
             if ((time - last_time_fan) >= fan_interval) {
                 last_time_fan = time;

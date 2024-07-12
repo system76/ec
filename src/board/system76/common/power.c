@@ -572,8 +572,8 @@ void power_event(void) {
     wake_last = wake_new;
 #endif // HAVE_LAN_WAKEUP_N
 
-    static uint32_t last_time = 0;
-    uint32_t time = time_get();
+    static systick_t last_time = 0;
+    systick_t time = time_get();
     if (power_state == POWER_STATE_S0) {
 #if CONFIG_BUS_ESPI
         // HOST_C10 virtual wire is high when CPU is in C10 sleep state
