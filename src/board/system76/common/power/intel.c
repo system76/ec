@@ -388,9 +388,6 @@ void power_event(void) {
         }
         battery_debug();
 
-        // Reset main loop cycle to force reading PECI and battery
-        main_cycle = 0;
-
         // Send SCI to update AC and battery information
         ac_send_sci = true;
     }
