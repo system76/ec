@@ -44,10 +44,12 @@ void serial(void) __interrupt(4) {}
 void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
-const uint16_t battery_interval = 1000;
-// update fan speed more frequently for smoother fans
-// NOTE: event loop is longer than 100ms and maybe even longer than 250
-const uint16_t fan_interval = SMOOTH_FANS != 0 ? 250 : 1000;
+
+#define INTERVAL_1MS    1U
+#define INTERVAL_5MS    5U
+#define INTERVAL_250MS  250U
+#define INTERVAL_500MS  500U
+#define INTERVAL_1SEC   1000U
 
 void init(void) {
     // Must happen first
@@ -98,21 +100,36 @@ void main(void) {
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
-    systick_t last_time_battery = 0;
-    systick_t last_time_fan = 0;
+    systick_t last_time_1ms = 0;
+    systick_t last_time_5ms = 0;
+    systick_t last_time_250ms = 0;
+    systick_t last_time_500ms = 0;
+    systick_t last_time_1sec = 0;
 
     for (main_cycle = 0;; main_cycle++) {
-        // NOTE: Do note use modulo to avoid expensive call to SDCC library
-        // call. (Modulo is optimized for powers of 2, however.)
-        switch (main_cycle & 3U) {
-        case 0:
+        systick_t time = time_get();
+
+        if ((time - last_time_1ms) >= INTERVAL_1MS) {
+            last_time_1ms = time;
+
             // Handle USB-C events immediately before power states
             usbpd_event();
-
             // Handle power states
             power_event();
-            break;
-        case 1:
+
+            // Board-specific events
+            board_event();
+            // Checks for keyboard/mouse packets from host
+            kbc_event(&KBC);
+            // Handles ACPI communication
+            pmc_event(&PMC_1);
+            // AP/EC communication over SMFI
+            smfi_event();
+        }
+
+        if ((time - last_time_5ms) >= INTERVAL_5MS) {
+            last_time_5ms = time;
+
 #if PARALLEL_DEBUG
             if (!parallel_debug)
 #endif // PARALLEL_DEBUG
@@ -120,51 +137,39 @@ void main(void) {
                 // Scans keyboard and sends keyboard packets
                 kbscan_event();
             }
-            break;
-        case 2:
+        }
+
+        if ((time - last_time_250ms) >= INTERVAL_250MS) {
+            last_time_250ms = time;
+
+            // Read thermal data
+            peci_read_temp();
+            dgpu_read_temp();
+
+            // Update fan speeds
+            fan_update_duty();
+
+            // NOTE: These values are reported to ACPI. Update them at the
+            // same interval as the fan duties.
+            pwm_tach0_rpm = pwm_get_tach0_rpm();
+            pwm_tach1_rpm = pwm_get_tach1_rpm();
+        }
+
+        if ((time - last_time_500ms) >= INTERVAL_500MS) {
+            last_time_500ms = time;
+
             // Handle lid close/open
             lid_event();
-            break;
         }
 
-        if (main_cycle == 0) {
-            systick_t time = time_get();
-            // Only run the following once per interval
-            if ((time - last_time_fan) >= fan_interval) {
-                last_time_fan = time;
+        if ((time - last_time_1sec) >= INTERVAL_1SEC) {
+            last_time_1sec = time;
 
-                // Read thermal data
-                peci_read_temp();
-                dgpu_read_temp();
-
-                // Update fan speeds
-                fan_update_duty();
-
-                // NOTE: These values are reported to ACPI. Update them at the
-                // same interval as the fan duties.
-                pwm_tach0_rpm = pwm_get_tach0_rpm();
-                pwm_tach1_rpm = pwm_get_tach1_rpm();
-            }
-
-            // Only run the following once per interval
-            if ((time - last_time_battery) >= battery_interval) {
-                last_time_battery = time;
-
-                // Updates battery status
-                battery_event();
-            }
+            // Updates battery status
+            battery_event();
         }
 
-        // Board-specific events
-        board_event();
-
-        // Checks for keyboard/mouse packets from host
-        kbc_event(&KBC);
-        // Handles ACPI communication
-        pmc_event(&PMC_1);
-        // AP/EC communication over SMFI
-        smfi_event();
         // Idle until next timer interrupt
-        //Disabled until interrupts used: PCON |= 1;
+        //PCON |= BIT(0);
     }
 }
