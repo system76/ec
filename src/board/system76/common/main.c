@@ -43,8 +43,6 @@ void timer_1(void) __interrupt(3) {}
 void serial(void) __interrupt(4) {}
 void timer_2(void) __interrupt(5) {}
 
-uint8_t main_cycle = 0;
-
 #define INTERVAL_1MS    1U
 #define INTERVAL_5MS    5U
 #define INTERVAL_100MS  100U
@@ -108,7 +106,7 @@ void main(void) {
     systick_t last_time_500ms = 0;
     systick_t last_time_1sec = 0;
 
-    for (main_cycle = 0;; main_cycle++) {
+    while (1) {
         systick_t time = time_get();
 
         if ((time - last_time_1ms) >= INTERVAL_1MS) {
