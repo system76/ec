@@ -21,7 +21,7 @@
 #endif // KM_NKEY
 
 // Debounce time in milliseconds
-#define DEBOUNCE_DELAY 10
+#define DEBOUNCE_DELAY 20
 
 bool kbscan_fn_held = false;
 bool kbscan_esc_held = false;
