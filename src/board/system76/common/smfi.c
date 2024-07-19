@@ -20,6 +20,7 @@
 #include <board/kbled.h>
 #include <board/kbscan.h>
 #include <board/scratch.h>
+#include <board/usbpd.h>
 
 #if CONFIG_SECURITY
 #include <board/security.h>
@@ -264,6 +265,18 @@ static enum Result cmd_security_set(void) {
 }
 #endif // CONFIG_SECURITY
 
+static enum Result cmd_usbc_mux_info(void) {
+    uint8_t port = smfi_cmd[SMFI_CMD_DATA];
+    uint16_t info = 0;
+    if (usbc_mux_info(port, &info)) {
+        smfi_cmd[SMFI_CMD_DATA + 1] = (uint8_t)info;
+        smfi_cmd[SMFI_CMD_DATA + 2] = (uint8_t)(info >> 8);
+        return RES_OK;
+    } else {
+        return RES_ERR;
+    }
+}
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -420,6 +433,10 @@ void smfi_event(void) {
             smfi_cmd[SMFI_CMD_RES] = cmd_security_set();
             break;
 #endif // CONFIG_SECURITY
+
+        case CMD_USBC_MUX_INFO:
+            smfi_cmd[SMFI_CMD_RES] = cmd_usbc_mux_info();
+            break;
 
 #endif // !defined(__SCRATCH__)
         case CMD_SPI:
