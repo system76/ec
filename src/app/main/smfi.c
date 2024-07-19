@@ -20,6 +20,7 @@
 #include <app/kbled.h>
 #include <app/kbscan.h>
 #include <app/scratch.h>
+#include <drivers/usbpd/usbpd.h>
 
 #if CONFIG_SECURITY
 #include <drivers/security/security.h>
@@ -304,6 +305,20 @@ static enum Result cmd_security_set(void) {
 }
 #endif // CONFIG_SECURITY
 
+#if CONFIG_HAVE_USBPD
+static enum Result cmd_usbc_mux_info(void) {
+    uint8_t port = smfi_cmd[SMFI_CMD_DATA];
+    uint16_t info = 0;
+    if (usbc_mux_info(port, &info)) {
+        smfi_cmd[SMFI_CMD_DATA + 1] = (uint8_t)info;
+        smfi_cmd[SMFI_CMD_DATA + 2] = (uint8_t)(info >> 8);
+        return RES_OK;
+    } else {
+        return RES_ERR;
+    }
+}
+#endif // CONFIG_HAVE_USBPD
+
 #endif // !defined(__SCRATCH__)
 
 #if defined(__SCRATCH__)
@@ -470,6 +485,12 @@ void smfi_event(void) {
         case CMD_FAN_SET_MODE:
             smfi_cmd[SMFI_CMD_RES] = cmd_fan_set_mode();
             break;
+
+#if CONFIG_HAVE_USBPD
+        case CMD_USBC_MUX_INFO:
+            smfi_cmd[SMFI_CMD_RES] = cmd_usbc_mux_info();
+            break;
+#endif // CONFIG_HAVE_USBPD
 
 #endif // !defined(__SCRATCH__)
         case CMD_SPI:
