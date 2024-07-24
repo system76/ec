@@ -45,10 +45,21 @@ static inline bool matrix_position_is_fn(uint8_t row, uint8_t col) {
 // Assert the specified column for reading the row.
 static void kbscan_set_column(uint8_t col) {
     // Assert the specific bit corresponding to the column.
-    uint32_t colbit = ~BIT(col);
-    KSOL = colbit & 0xFF;
-    KSOH1 = (colbit >> 8) & 0xFF;
-    KSOH2 = (colbit >> 16) & 0x03;
+    // XXX: IT8587E will hang if the column is determined with:
+    //      uint32_t colbit = ~BIT(col);
+    if (col < 8) {
+        KSOL = ~BIT(col);
+        KSOH1 = 0xFF;
+        KSOH2 = 0xFF;
+    } else if (col < 16) {
+        KSOL = 0xFF;
+        KSOH1 = ~BIT(col - 8);
+        KSOH2 = 0xFF;
+    } else {
+        KSOL = 0xFF;
+        KSOH1 = 0xFF;
+        KSOH2 = ~BIT(col - 16);
+    }
 
     // Wait for matrix to stabilize
     delay_ticks(20);
@@ -58,7 +69,7 @@ static void kbscan_set_column(uint8_t col) {
 static void kbscan_disable_reading(void) {
     KSOL = 0xFF;
     KSOH1 = 0xFF;
-    KSOH2 = 0x3;
+    KSOH2 = 0xFF;
 
     // No need to wait for matrix to stabilize as a read won't happen.
 }
