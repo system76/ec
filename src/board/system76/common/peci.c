@@ -84,8 +84,8 @@ bool peci_get_temp(int16_t *const data) {
     UDB[5] = 1;
     // PECI read length
     UDB[6] = 2;
-    // PECI command (0x01 = GetTemp)
-    UDB[7] = 0x01;
+    // PECI command
+    UDB[7] = PECI_CMD_GET_TEMP;
 
     // Set upstream enable
     ESUCTRL0 |= ESUCTRL0_ENABLE;
@@ -167,8 +167,8 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     UDB[5] = 10;
     // PECI read length
     UDB[6] = 1;
-    // PECI command (0xA5 = WrPkgConfig)
-    UDB[7] = 0xA5;
+    // PECI command
+    UDB[7] = PECI_CMD_WR_PKG_CONFIG;
 
     // Write host ID
     UDB[8] = 0;
@@ -274,7 +274,7 @@ bool peci_get_temp(int16_t *const data) {
     // Set read length
     HORDLR = 2;
     // Set command
-    HOCMDR = 1;
+    HOCMDR = PECI_CMD_GET_TEMP;
     // Start transaction
     HOCTLR |= 1;
 
@@ -330,7 +330,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Set read length
     HORDLR = 1;
     // Set command
-    HOCMDR = 0xA5;
+    HOCMDR = PECI_CMD_WR_PKG_CONFIG;
 
     // Write host ID
     HOWRDR = 0;
