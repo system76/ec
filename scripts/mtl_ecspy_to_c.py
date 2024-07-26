@@ -59,7 +59,7 @@ def bit_positions_to_hex(positions: list[int]) -> str:
 # using #defines for the bit positions
 def gpcr_control_bit_positions_to_c(positions: list[int]) -> str:
     macros = []
-    pimmode = ("1" if 6 in positions else "0") + ("1" if 7 in positions else "0")
+    pimmode = ("1" if 7 in positions else "0") + ("1" if 6 in positions else "0")
     macros.append(gpcr_control_pin_mode_to_c_define[pimmode])
     if 2 in positions:
         macros.append("GPIO_UP")
@@ -84,6 +84,9 @@ def bit_positions_to_macros(positions: list[int]) -> str:
     macros_joined = " | ".join(macros)
     return macros_joined
 
+def gpcr_is_output(gpdr: dict) -> bool:
+    return 6 in gpdr['control'] and 7 not in gpdr['control']
+
 # converts a dictionary of gpdr letter group
 # data to a list of bit positions
 # where the data is set to 1
@@ -95,7 +98,7 @@ def bit_positions_to_macros(positions: list[int]) -> str:
 def gpdr_letter_group_data_to_bit_positions(gpdrs: dict) -> list[int]:
     bit_positions = []
     for number in gpdrs:
-        if gpdrs[number]['data'] == 1:
+        if gpdrs[number]['data'] == 1 and gpcr_is_output(gpdrs[number]):
             bit_positions.append(number)
     return bit_positions
 
