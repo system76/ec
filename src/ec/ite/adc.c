@@ -48,7 +48,7 @@ bool adc_data_valid(uint8_t ch) {
 
 // TODO what's a good timeout here? Chromium has 1ms
 #define ADC_VALID_TIMEOUT 1000
-// Max measurement of 3V
+// Max measurement of 3V (Vcc / 1.1)
 #define ADC_MAX 3000
 
 // Measure voltage value on a specified ADC channel. Returns voltage in mV from
