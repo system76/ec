@@ -46,7 +46,7 @@ CFLAGS += \
 	-DPOWER_LIMIT_DC=73
 
 # Set fan parameters
-CFLAGS+=-DHAVE_CPU_FAN2=1
+CFLAGS+=-DCPU_FAN2=3
 
 # Set USB-PD parameters
 USBPD=tps65987
