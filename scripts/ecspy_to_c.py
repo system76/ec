@@ -24,8 +24,18 @@ gpcr_control_pin_mode_to_c_define = {
 #       }
 #   }
 def parse_ecspy_log(lines: list[str]) -> tuple[dict, dict]:
-    gpr_line_re = re.compile(r"(?P<letter>[A-M])(?P<number>\d): data (?P<data>\d) mirror (?P<mirror>\d) (pot (?P<pot>\d) )?control (?P<control>[0-9A-Fa-f]{2})")
-    gcr_line_re = re.compile(r"GCR(\d?): 0x([0-9A-Fa-f]{2})")
+    gpr_line_re = re.compile(r''
+        '(?P<letter>[A-M])'
+        '(?P<number>\d): '
+        '(data (?P<data>\d) )'
+        '(mirror (?P<mirror>\d) )'
+        '(pot (?P<pot>\d) )?'
+        '(control (?P<control>[0-9A-Fa-f]{2}))'
+    )
+    gcr_line_re = re.compile(r''
+        'GCR(?P<number>\d?): '
+        '0x(?P<value>[0-9A-Fa-f]{2})'
+    )
     gpr_grouped = {}
     gcr_grouped = {}
     for line in lines:
@@ -49,8 +59,8 @@ def parse_ecspy_log(lines: list[str]) -> tuple[dict, dict]:
 
         if match_gcr:
             gcr = {}
-            gcr['number'] = match_gcr.group(1)
-            gcr['value'] = int_to_bit_positions(int(match_gcr.group(2), 16))
+            gcr['number'] = match_gcr.group('number')
+            gcr['value'] = int_to_bit_positions(int(match_gcr.group('value'), 16))
             if gcr['number'] not in gcr_grouped:
                 gcr_grouped[gcr['number']] = gcr
     return gpr_grouped, gcr_grouped
