@@ -1,19 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/pwm.h>
+#include <ec/pwm.h>
 #include <common/macro.h>
-
-#define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
-
-// Fan Speed (RPM) = 60 / (1/fs sec * {FnTMRR, FnRLRR} * P)
-// - n: 1 or 2
-// - P: the numbers of square pulses per revolution
-// - fs: sample rate (FreqEC / 128)
-// - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
-#define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
-
-int16_t pwm_tach0_rpm = -1;
-int16_t pwm_tach1_rpm = -1;
 
 void pwm_init(void) {
     // Set T0CHSEL to TACH0A and T1CHSEL to TACH1A
@@ -48,22 +37,4 @@ void pwm_init(void) {
 
     // Enable PWM
     ZTIER = BIT(1);
-}
-
-int16_t pwm_get_tach0_rpm(void) {
-    uint16_t rpm = (F1TMRR << 8) | F1TLRR;
-
-    if (rpm)
-        rpm = TACH_TO_RPM(rpm);
-
-    return rpm;
-}
-
-int16_t pwm_get_tach1_rpm(void) {
-    uint16_t rpm = (F2TMRR << 8) | F2TLRR;
-
-    if (rpm)
-        rpm = TACH_TO_RPM(rpm);
-
-    return rpm;
 }

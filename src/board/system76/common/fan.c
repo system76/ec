@@ -13,6 +13,18 @@ bool fan_max = false;
 static uint8_t last_fan1_duty = 0;
 static uint8_t last_fan2_duty = 0;
 
+uint16_t fan1_rpm = 0;
+uint16_t fan2_rpm = 0;
+
+#define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
+
+// Fan Speed (RPM) = 60 / (1/fs sec * {FnTMRR, FnRLRR} * P)
+// - n: 1 or 2
+// - P: the numbers of square pulses per revolution
+// - fs: sample rate (FreqEC / 128)
+// - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
+#define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
+
 #define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
 
 #if SMOOTH_FANS != 0
@@ -219,33 +231,50 @@ static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
     return duty;
 }
 
-void fan_update_duty(void) {
+static uint16_t fan_get_tach0_rpm(void) {
+    uint16_t rpm = (F1TMRR << 8) | F1TLRR;
+
+    if (rpm)
+        rpm = TACH_TO_RPM(rpm);
+
+    return rpm;
+}
+
+static uint16_t fan_get_tach1_rpm(void) {
+    uint16_t rpm = (F2TMRR << 8) | F2TLRR;
+
+    if (rpm)
+        rpm = TACH_TO_RPM(rpm);
+
+    return rpm;
+}
+
+void fan_event(void) {
 #if CONFIG_HAVE_DGPU
     int16_t sys_temp = MAX(peci_temp, dgpu_temp);
 #else
     int16_t sys_temp = peci_temp;
 #endif
 
-    uint8_t fan1_duty = fan_get_duty(&FAN1, sys_temp);
-#ifdef FAN2_PWM
-    uint8_t fan2_duty = fan_get_duty(&FAN2, sys_temp);
-#endif // FAN2_PWM
-
     // set FAN1 duty
+    uint8_t fan1_duty = fan_get_duty(&FAN1, sys_temp);
     if (fan1_duty != FAN1_PWM) {
         TRACE("FAN1 fan_duty_raw=%d\n", fan1_duty);
         last_fan1_duty = fan1_duty = fan_smooth(last_fan1_duty, fan1_duty);
         FAN1_PWM = fan_max ? MAX_FAN_SPEED : fan1_duty;
         TRACE("FAN1 fan_duty_smoothed=%d\n", fan1_duty);
     }
+    fan1_rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
     // set FAN2 duty
+    uint8_t fan2_duty = fan_get_duty(&FAN2, sys_temp);
     if (fan2_duty != FAN2_PWM) {
         TRACE("FAN2 fan_duty_raw=%d\n", fan2_duty);
         last_fan2_duty = fan2_duty = fan_smooth(last_fan2_duty, fan2_duty);
         FAN2_PWM = fan_max ? MAX_FAN_SPEED : fan2_duty;
         TRACE("FAN2 fan_duty_smoothed=%d\n", fan2_duty);
     }
+    fan2_rpm = fan_get_tach1_rpm();
 #endif
 }
