@@ -30,6 +30,7 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/ec.h>
+#include <ec/etwd.h>
 
 #ifdef PARALLEL_DEBUG
 #include <board/parallel.h>
@@ -95,6 +96,8 @@ void main(void) {
 #ifdef GPIO_DEBUG
     gpio_debug();
 #endif
+
+    wdt_init();
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
@@ -164,6 +167,9 @@ void main(void) {
         pmc_event(&PMC_1);
         // AP/EC communication over SMFI
         smfi_event();
+
+        wdt_kick();
+
         // Idle until next timer interrupt
         //Disabled until interrupts used: PCON |= 1;
     }
