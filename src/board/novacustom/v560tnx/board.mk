@@ -37,14 +37,14 @@ CFLAGS += \
 	-DCHARGER_BATTERY_RSENSE=10 \
 	-DCHARGER_CHARGE_CURRENT=1536 \
 	-DCHARGER_CHARGE_VOLTAGE=17600 \
-	-DCHARGER_INPUT_CURRENT=4740
+	-DCHARGER_INPUT_CURRENT=6500
 
 # Set CPU power limits in watts
 # AC: power rating of the included AC adapter
 # DC: battery discharge rate (assume 1C rating??)
 CFLAGS += \
-	-DPOWER_LIMIT_AC=90 \
-	-DPOWER_LIMIT_DC=73
+	-DPOWER_LIMIT_AC=180 \
+	-DPOWER_LIMIT_DC=80
 
 # DGPU support
 CFLAGS+=-DHAVE_DGPU=1 -DGPU_FAN1=3
