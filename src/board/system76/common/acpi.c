@@ -3,6 +3,7 @@
 #include <board/acpi.h>
 #include <board/battery.h>
 #include <board/dgpu.h>
+#include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
@@ -162,13 +163,13 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8(0xCC, sci_extra);
 
         ACPI_8(0xCE, FAN1_PWM);
-        ACPI_16(0xD0, pwm_tach0_rpm);
+        ACPI_16(0xD0, fan1_rpm);
 #if CONFIG_HAVE_DGPU
         ACPI_8(0xCD, dgpu_temp);
 #endif // CONFIG_HAVE_DGPU
 #ifdef FAN2_PWM
         ACPI_8(0xCF, FAN2_PWM);
-        ACPI_16(0xD2, pwm_tach1_rpm);
+        ACPI_16(0xD2, fan2_rpm);
 #endif // FAN2_PWM
 
 #if HAVE_LED_AIRPLANE_N
