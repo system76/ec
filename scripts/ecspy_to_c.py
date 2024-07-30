@@ -4,7 +4,7 @@ import re
 
 
 gpcr_control_pin_mode_to_c_define = {
-    "00": "GPIO_ALT1",
+    "00": "GPIO_ALT",
     "01": "GPIO_OUT",
     "10": "GPIO_IN",
 }
