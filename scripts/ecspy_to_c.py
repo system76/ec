@@ -24,7 +24,7 @@ gpcr_control_pin_mode_to_c_define = {
 #       }
 #   }
 def parse_ecspy_log(lines: list[str]) -> tuple[dict, dict]:
-    gpr_line_re = re.compile(r"([A-M])(\d): data (\d) mirror (\d) pot (\d) control ([0-9A-Fa-f]{2})")
+    gpr_line_re = re.compile(r"(?P<letter>[A-M])(?P<number>\d): data (?P<data>\d) mirror (?P<mirror>\d) (pot (?P<pot>\d) )?control (?P<control>[0-9A-Fa-f]{2})")
     gcr_line_re = re.compile(r"GCR(\d?): 0x([0-9A-Fa-f]{2})")
     gpr_grouped = {}
     gcr_grouped = {}
@@ -32,13 +32,16 @@ def parse_ecspy_log(lines: list[str]) -> tuple[dict, dict]:
         match_gpr = gpr_line_re.match(line)
         match_gcr = gcr_line_re.match(line)
         if match_gpr:
+            # print(match_gpr.groups())
             gpr = {}
-            gpr['letter'] = match_gpr.group(1)
-            gpr['number'] = int(match_gpr.group(2))
-            gpr['data'] = int(match_gpr.group(3))
-            gpr['mirror'] = int(match_gpr.group(4))
-            gpr['pot'] = int(match_gpr.group(5))
-            gpr['control'] = int_to_bit_positions(int(match_gpr.group(6), 16))
+            gpr['letter'] = match_gpr.group('letter')
+            gpr['number'] = int(match_gpr.group('number'))
+            gpr['data'] = int(match_gpr.group('data'))
+            gpr['mirror'] = int(match_gpr.group('mirror'))
+            gpr['pot'] = int(match_gpr.group('pot')) \
+                if match_gpr.group('pot') is not None \
+                else None
+            gpr['control'] = int_to_bit_positions(int(match_gpr.group('control'), 16))
 
             if gpr['letter'] not in gpr_grouped:
                 gpr_grouped[gpr['letter']] = {}
