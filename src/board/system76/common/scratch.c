@@ -6,6 +6,7 @@
 #include <board/dgpu.h>
 #include <board/smfi.h>
 #include <common/macro.h>
+#include <ec/etwd.h>
 #include <ec/pwm.h>
 #include <ec/scratch.h>
 
@@ -24,8 +25,8 @@ void scratch_trampoline(void) {
 
     //TODO: Clear keyboard presses
 
-    // Start watchdog timer
-    smfi_watchdog();
+    // Restart WDT before entry to scratch ROM
+    wdt_kick();
 
     // Disable interrupts
     EA = 0;
