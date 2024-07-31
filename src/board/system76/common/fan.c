@@ -10,7 +10,12 @@
 
 bool fan_max = false;
 
+uint8_t fan1_pwm_actual = 0;
+uint8_t fan1_pwm_target = 0;
 uint16_t fan1_rpm = 0;
+
+uint8_t fan2_pwm_actual = 0;
+uint8_t fan2_pwm_target = 0;
 uint16_t fan2_rpm = 0;
 
 #define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
@@ -197,19 +202,19 @@ void fan_event(void) {
 #endif
 
     // set FAN1 duty
-    uint8_t fan1_duty = fan_get_duty(&FAN1, sys_temp);
-    if (fan1_duty != FAN1_PWM) {
-        TRACE("FAN1 duty=%d\n", fan1_duty);
-        FAN1_PWM = fan1_duty;
+    fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
+    if (FAN1_PWM != fan1_pwm_target) {
+        TRACE("FAN1 duty=%d\n", fan1_pwm_target);
+        FAN1_PWM = fan1_pwm_target;
     }
     fan1_rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
     // set FAN2 duty
-    uint8_t fan2_duty = fan_get_duty(&FAN2, sys_temp);
-    if (fan2_duty != FAN2_PWM) {
-        TRACE("FAN2 duty=%d\n", fan2_duty);
-        FAN2_PWM = fan2_duty;
+    fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
+    if (FAN2_PWM != fan2_pwm_target) {
+        TRACE("FAN2 duty=%d\n", fan2_pwm_target);
+        FAN2_PWM = fan2_pwm_target;
     }
     fan2_rpm = fan_get_tach1_rpm();
 #endif

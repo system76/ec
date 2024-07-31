@@ -24,9 +24,11 @@ struct Fan {
 
 extern bool fan_max;
 
-// NOTE: These are used instead of the functions directly for ACPI to prevent
-// double reads of the tachometer values.
+extern uint8_t fan1_pwm_actual;
+extern uint8_t fan1_pwm_target;
 extern uint16_t fan1_rpm;
+extern uint8_t fan2_pwm_actual;
+extern uint8_t fan2_pwm_target;
 extern uint16_t fan2_rpm;
 
 void fan_reset(void);
