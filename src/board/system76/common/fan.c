@@ -124,7 +124,7 @@ static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
         } else if (temp < cur->temp) {
             // If lower than first temp, return 0%
             if (i == 0) {
-                return MIN_FAN_SPEED;
+                return 0;
             } else {
                 const struct FanPoint *prev = &fan->points[i - 1];
 
@@ -146,7 +146,7 @@ static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
     }
 
     // If no point is found, return 100%
-    return MAX_FAN_SPEED;
+    return CTR0;
 }
 
 static uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) {
@@ -219,13 +219,13 @@ static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
     if (power_state == POWER_STATE_S0) {
         duty = fan_duty(fan, temp);
         if (fan_max) {
-            duty = PWM_DUTY(100);
+            duty = CTR0;
         } else {
             duty = fan_heatup(fan, duty);
             duty = fan_cooldown(fan, duty);
         }
     } else {
-        duty = PWM_DUTY(0);
+        duty = 0;
     }
 
     return duty;
