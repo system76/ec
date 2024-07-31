@@ -10,9 +10,6 @@
 
 bool fan_max = false;
 
-static uint8_t last_fan1_duty = 0;
-static uint8_t last_fan2_duty = 0;
-
 uint16_t fan1_rpm = 0;
 uint16_t fan2_rpm = 0;
 
@@ -26,16 +23,6 @@ uint16_t fan2_rpm = 0;
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
 #define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
-
-#if SMOOTH_FANS != 0
-#define MAX_JUMP_UP ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_UP)
-#define MAX_JUMP_DOWN ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_DOWN)
-#else
-#define MAX_JUMP_UP (MAX_FAN_SPEED - MIN_FAN_SPEED)
-#define MAX_JUMP_DOWN (MAX_FAN_SPEED - MIN_FAN_SPEED)
-#endif
-
-#define MIN_SPEED_TO_SMOOTH PWM_DUTY(SMOOTH_FANS_MIN)
 
 // Fan speed is the lowest requested over HEATUP seconds
 #ifndef BOARD_FAN1_HEATUP
@@ -122,7 +109,7 @@ static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
         } else if (temp < cur->temp) {
             // If lower than first temp, return 0%
             if (i == 0) {
-                return MIN_FAN_SPEED;
+                return PWM_DUTY(0);
             } else {
                 const struct FanPoint *prev = &fan->points[i - 1];
                 return prev->duty;
@@ -131,39 +118,7 @@ static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
     }
 
     // If no point is found, return 100%
-    return MAX_FAN_SPEED;
-}
-
-static uint8_t fan_smooth(uint8_t last_duty, uint8_t duty) {
-    uint8_t next_duty = duty;
-
-    // ramping down
-    if (duty < last_duty) {
-        // out of bounds (lower) safeguard
-        uint8_t smoothed = last_duty < MIN_FAN_SPEED + MAX_JUMP_DOWN
-            ? MIN_FAN_SPEED
-            : last_duty - MAX_JUMP_DOWN;
-
-        // use smoothed value if above min and if smoothed is closer than raw
-        if (last_duty > MIN_SPEED_TO_SMOOTH && smoothed > duty) {
-            next_duty = smoothed;
-        }
-    }
-
-    // ramping up
-    if (duty > last_duty) {
-        // out of bounds (higher) safeguard
-        uint8_t smoothed = last_duty > MAX_FAN_SPEED - MAX_JUMP_UP
-            ? MAX_FAN_SPEED
-            : last_duty + MAX_JUMP_UP;
-
-        // use smoothed value if above min and if smoothed is closer than raw
-        if (duty > MIN_SPEED_TO_SMOOTH && smoothed < duty) {
-            next_duty = smoothed;
-        }
-    }
-
-    return next_duty;
+    return PWM_DUTY(100);
 }
 
 static uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) {
@@ -244,10 +199,8 @@ void fan_event(void) {
     // set FAN1 duty
     uint8_t fan1_duty = fan_get_duty(&FAN1, sys_temp);
     if (fan1_duty != FAN1_PWM) {
-        TRACE("FAN1 fan_duty_raw=%d\n", fan1_duty);
-        last_fan1_duty = fan1_duty = fan_smooth(last_fan1_duty, fan1_duty);
-        FAN1_PWM = fan_max ? MAX_FAN_SPEED : fan1_duty;
-        TRACE("FAN1 fan_duty_smoothed=%d\n", fan1_duty);
+        TRACE("FAN1 duty=%d\n", fan1_duty);
+        FAN1_PWM = fan1_duty;
     }
     fan1_rpm = fan_get_tach0_rpm();
 
@@ -255,10 +208,8 @@ void fan_event(void) {
     // set FAN2 duty
     uint8_t fan2_duty = fan_get_duty(&FAN2, sys_temp);
     if (fan2_duty != FAN2_PWM) {
-        TRACE("FAN2 fan_duty_raw=%d\n", fan2_duty);
-        last_fan2_duty = fan2_duty = fan_smooth(last_fan2_duty, fan2_duty);
-        FAN2_PWM = fan_max ? MAX_FAN_SPEED : fan2_duty;
-        TRACE("FAN2 fan_duty_smoothed=%d\n", fan2_duty);
+        TRACE("FAN2 duty=%d\n", fan2_duty);
+        FAN2_PWM = fan2_duty;
     }
     fan2_rpm = fan_get_tach1_rpm();
 #endif
