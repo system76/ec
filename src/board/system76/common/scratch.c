@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <8051.h>
-#include <stdint.h>
-
 #include <board/dgpu.h>
+#include <board/fan.h>
 #include <board/smfi.h>
 #include <common/macro.h>
 #include <ec/pwm.h>
 #include <ec/scratch.h>
+
+#include <8051.h>
+#include <stdint.h>
 
 // Include scratch ROM
 uint8_t __code __at(SCRATCH_OFFSET) scratch_rom[] = {

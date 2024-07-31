@@ -44,10 +44,10 @@ void serial(void) __interrupt(4) {}
 void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
-const uint16_t battery_interval = 1000;
-// update fan speed more frequently for smoother fans
-// NOTE: event loop is longer than 100ms and maybe even longer than 250
-const uint16_t fan_interval = SMOOTH_FANS != 0 ? 250 : 1000;
+
+#define INTERVAL_100MS 100U
+#define INTERVAL_250MS 250U
+#define INTERVAL_1SEC 1000U
 
 void init(void) {
     // Must happen first
@@ -98,8 +98,9 @@ void main(void) {
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
-    systick_t last_time_battery = 0;
-    systick_t last_time_fan = 0;
+    systick_t last_time_100ms = 0;
+    systick_t last_time_250ms = 0;
+    systick_t last_time_1sec = 0;
 
     for (main_cycle = 0;; main_cycle++) {
         // NOTE: Do note use modulo to avoid expensive call to SDCC library
@@ -129,22 +130,23 @@ void main(void) {
 
         if (main_cycle == 0) {
             systick_t time = time_get();
-            // Only run the following once per interval
-            if ((time - last_time_fan) >= fan_interval) {
-                last_time_fan = time;
 
-                // Read thermal data
-                peci_read_temp();
-                dgpu_read_temp();
+            if ((time - last_time_100ms) >= INTERVAL_100MS) {
+                last_time_100ms = time;
 
                 fan_event();
             }
 
-            // Only run the following once per interval
-            if ((time - last_time_battery) >= battery_interval) {
-                last_time_battery = time;
+            if ((time - last_time_250ms) >= INTERVAL_250MS) {
+                last_time_250ms = time;
 
-                // Updates battery status
+                peci_read_temp();
+                dgpu_read_temp();
+            }
+
+            if ((time - last_time_1sec) >= INTERVAL_1SEC) {
+                last_time_1sec = time;
+
                 battery_event();
             }
         }
