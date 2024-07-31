@@ -18,9 +18,9 @@ uint8_t __code __at(SCRATCH_OFFSET) scratch_rom[] = {
 // Enter or exit scratch ROM
 void scratch_trampoline(void) {
     // Set fans to 100%
-    FAN1_PWM = PWM_DUTY(100);
+    FAN1_PWM = CTR0;
 #ifdef FAN2_PWM
-    FAN2_PWM = PWM_DUTY(100);
+    FAN2_PWM = CTR0;
 #endif
 
     //TODO: Clear keyboard presses
