@@ -158,20 +158,13 @@ static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) {
     return highest;
 }
 
+// Determine the fan target duty for a given temperature.
 static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
     uint8_t duty;
 
-    if (power_state == POWER_STATE_S0) {
-        duty = fan_duty(fan, temp);
-        if (fan_max) {
-            duty = CTR0;
-        } else {
-            duty = fan_heatup(fan, duty);
-            duty = fan_cooldown(fan, duty);
-        }
-    } else {
-        duty = 0;
-    }
+    duty = fan_duty(fan, temp);
+    duty = fan_heatup(fan, duty);
+    duty = fan_cooldown(fan, duty);
 
     return duty;
 }
@@ -201,21 +194,58 @@ void fan_event(void) {
     int16_t sys_temp = peci_temp;
 #endif
 
-    // set FAN1 duty
+    // Fan update interval is 250ms (main.c). The event changes PWM duty
+    // by 1 every interval to give a smoothing effect.
+    // TODO: Determine if update interval should be shorter, such as 100ms
+
+    // Enabling fan max toggle and exiting S0 will cause duty to immediately
+    // change instead of ramping to provide the desired effects.
+
+    // Set FAN1 duty
     fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
-    if (FAN1_PWM != fan1_pwm_target) {
-        TRACE("FAN1 duty=%d\n", fan1_pwm_target);
-        FAN1_PWM = fan1_pwm_target;
+    if (fan_max) {
+        fan1_pwm_target = CTR0;
+        fan1_pwm_actual = CTR0;
+    } else if (power_state != POWER_STATE_S0) {
+        fan1_pwm_target = 0;
+        fan1_pwm_actual = 0;
+    } else if (fan1_pwm_actual < fan1_pwm_target) {
+        // TODO :Check against board-defined maximum
+        if (fan1_pwm_actual < CTR0) {
+            fan1_pwm_actual++;
+        }
+    } else if (fan1_pwm_actual > fan1_pwm_target) {
+        // TODO: Check against board-defined minimum
+        if (fan1_pwm_actual > 0) {
+            fan1_pwm_actual--;
+        }
     }
+    TRACE("FAN1 duty=%d\n", fan1_pwm_actual);
+    FAN1_PWM = fan1_pwm_actual;
     fan1_rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
     // set FAN2 duty
     fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
-    if (FAN2_PWM != fan2_pwm_target) {
-        TRACE("FAN2 duty=%d\n", fan2_pwm_target);
-        FAN2_PWM = fan2_pwm_target;
+    if (fan_max) {
+        fan2_pwm_target = CTR0;
+        fan2_pwm_actual = CTR0;
+    } else if (power_state != POWER_STATE_S0) {
+        fan2_pwm_target = 0;
+        fan2_pwm_actual = 0;
+    } else if (fan2_pwm_actual < fan2_pwm_target) {
+        // TODO :Check against board-defined maximum
+        if (fan2_pwm_actual < CTR0) {
+            fan2_pwm_actual++;
+        }
+    } else if (fan2_pwm_actual > fan2_pwm_target) {
+        // TODO: Check against board-defined minimum
+        if (fan2_pwm_actual > 0) {
+            fan2_pwm_actual--;
+        }
     }
+    TRACE("FAN2 duty=%d\n", fan2_pwm_actual);
+    FAN2_PWM = fan2_pwm_actual;
     fan2_rpm = fan_get_tach1_rpm();
 #endif
 }
