@@ -67,7 +67,6 @@ static const struct Fan __code FAN1 = {
     .heatup_size = ARRAY_SIZE(FAN1_HEATUP),
     .cooldown = FAN1_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN1_COOLDOWN),
-    .interpolate = SMOOTH_FANS != 0,
 };
 
 #ifdef FAN2_PWM
@@ -102,7 +101,6 @@ static const struct Fan __code FAN2 = {
     .heatup_size = ARRAY_SIZE(FAN2_HEATUP),
     .cooldown = FAN2_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN2_COOLDOWN),
-    .interpolate = SMOOTH_FANS != 0,
 };
 
 #endif // FAN2_PWM
@@ -127,20 +125,7 @@ static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
                 return MIN_FAN_SPEED;
             } else {
                 const struct FanPoint *prev = &fan->points[i - 1];
-
-                if (fan->interpolate) {
-                    // If in between current temp and previous temp, interpolate
-                    if (temp > prev->temp) {
-                        int16_t dtemp = (cur->temp - prev->temp);
-                        int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
-                        return (uint8_t)(
-                            ((int16_t)prev->duty) +
-                            ((temp - prev->temp) * dduty) / dtemp
-                        );
-                    }
-                } else {
-                    return prev->duty;
-                }
+                return prev->duty;
             }
         }
     }

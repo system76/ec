@@ -39,7 +39,6 @@ struct Fan {
     uint8_t heatup_size;
     uint8_t *cooldown;
     uint8_t cooldown_size;
-    bool interpolate;
 };
 
 extern bool fan_max;
