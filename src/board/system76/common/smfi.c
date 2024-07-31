@@ -13,26 +13,28 @@
 // the command is complete and the result is available. The client should only
 // read the SMFI_CMD_RES value when SMFI_CMD_CMD is set to CMD_NONE.
 
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
+#include <board/smfi.h>
 
 #if !defined(__SCRATCH__)
-#include <board/scratch.h>
+#include <board/fan.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
+#include <board/scratch.h>
 
 #if CONFIG_SECURITY
 #include <board/security.h>
 #endif // CONFIG_SECURITY
-
 #endif // !defined(__SCRATCH__)
-#include <board/smfi.h>
+
 #include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/etwd.h>
 #include <ec/pwm.h>
+
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
 
 // Shared memory host semaphore
 volatile uint8_t __xdata __at(0x1022) SMHSR;
@@ -124,13 +126,11 @@ static enum Result cmd_print(void) {
 static enum Result cmd_fan_get(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
-        // Get duty of FAN1
-        smfi_cmd[SMFI_CMD_DATA + 1] = FAN1_PWM;
+        smfi_cmd[SMFI_CMD_DATA + 1] = fan1_pwm_actual;
         return RES_OK;
 #ifdef FAN2_PWM
     case 2:
-        // Get duty of FAN2
-        smfi_cmd[SMFI_CMD_DATA + 1] = FAN2_PWM;
+        smfi_cmd[SMFI_CMD_DATA + 1] = fan2_pwm_actual;
         return RES_OK;
 #endif
     }
@@ -143,12 +143,12 @@ static enum Result cmd_fan_set(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
         // Set duty cycle of FAN1
-        FAN1_PWM = smfi_cmd[SMFI_CMD_DATA + 1];
+        fan1_pwm_target = smfi_cmd[SMFI_CMD_DATA + 1];
         return RES_OK;
 #ifdef FAN2_PWM
     case 2:
         // Set duty cycle of FAN2
-        FAN2_PWM = smfi_cmd[SMFI_CMD_DATA + 1];
+        fan2_pwm_target = smfi_cmd[SMFI_CMD_DATA + 1];
         return RES_OK;
 #endif
     }
