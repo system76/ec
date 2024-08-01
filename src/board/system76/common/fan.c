@@ -194,9 +194,8 @@ void fan_event(void) {
     int16_t sys_temp = peci_temp;
 #endif
 
-    // Fan update interval is 250ms (main.c). The event changes PWM duty
+    // Fan update interval is 100ms (main.c). The event changes PWM duty
     // by 1 every interval to give a smoothing effect.
-    // TODO: Determine if update interval should be shorter, such as 100ms
 
     // Enabling fan max toggle and exiting S0 will cause duty to immediately
     // change instead of ramping to provide the desired effects.
