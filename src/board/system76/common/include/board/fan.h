@@ -16,10 +16,6 @@ struct FanPoint {
 struct Fan {
     const struct FanPoint *points;
     uint8_t points_size;
-    uint8_t *heatup;
-    uint8_t heatup_size;
-    uint8_t *cooldown;
-    uint8_t cooldown_size;
     uint8_t pwm_min;
 };
 
