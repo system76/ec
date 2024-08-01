@@ -87,8 +87,6 @@
 #define HAVE_XLP_OUT 1
 #endif
 
-extern uint8_t main_cycle;
-
 // VccRTC stable (55%) to RTCRST# high
 #define tPCH01 delay_ms(9)
 // VccDSW stable (95%) to RSMRST# high
@@ -200,7 +198,7 @@ void power_on(void) {
     // Configure WLAN GPIOs before powering on
     wireless_power(true);
 
-    DEBUG("%02X: power_on\n", main_cycle);
+    DEBUG("power_on\n");
 
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // TODO - signal timing graph
@@ -277,7 +275,7 @@ void power_on(void) {
 }
 
 void power_off(void) {
-    DEBUG("%02X: power_off\n", main_cycle);
+    DEBUG("power_off\n");
 
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
@@ -387,9 +385,6 @@ void power_event(void) {
         }
         battery_debug();
 
-        // Reset main loop cycle to force reading PECI and battery
-        main_cycle = 0;
-
         // Send SCI to update AC and battery information
         ac_send_sci = true;
     }
@@ -418,7 +413,7 @@ void power_event(void) {
         for (uint8_t i = 100; i != 0; i--) {
             delay_ms(1);
             if (gpio_get(&PWR_SW_N) != ps_new) {
-                DEBUG("%02X: Spurious press\n", main_cycle);
+                DEBUG("Spurious press\n");
                 ps_new = ps_last;
                 break;
             } else if (power_button_disabled()) {
@@ -429,7 +424,7 @@ void power_event(void) {
         }
 
         if (ps_new != ps_last) {
-            DEBUG("%02X: Power switch press\n", main_cycle);
+            DEBUG("Power switch press\n");
 
             // Enable S5 power if necessary, before sending PWR_BTN
             update_power_state();
@@ -445,7 +440,7 @@ void power_event(void) {
     }
 #if LEVEL >= LEVEL_DEBUG
     else if (ps_new && !ps_last) {
-        DEBUG("%02X: Power switch release\n", main_cycle);
+        DEBUG("Power switch release\n");
     }
 #endif
     ps_last = ps_new;
@@ -460,7 +455,7 @@ void power_event(void) {
     static bool pg_last = false;
     bool pg_new = gpio_get(&ALL_SYS_PWRGD);
     if (pg_new && !pg_last) {
-        DEBUG("%02X: ALL_SYS_PWRGD asserted\n", main_cycle);
+        DEBUG("ALL_SYS_PWRGD asserted\n");
 
         //TODO: tPLT04;
 
@@ -477,7 +472,7 @@ void power_event(void) {
         GPIO_SET_DEBUG(PCH_PWROK_EC, true);
 #endif // HAVE_PCH_PWROK_EC
     } else if (!pg_new && pg_last) {
-        DEBUG("%02X: ALL_SYS_PWRGD de-asserted\n", main_cycle);
+        DEBUG("ALL_SYS_PWRGD de-asserted\n");
 
 #if HAVE_PCH_PWROK_EC
         // De-assert SYS_PWROK
@@ -495,11 +490,11 @@ void power_event(void) {
     bool rst_new = gpio_get(&BUF_PLT_RST_N);
 #if LEVEL >= LEVEL_DEBUG
     if (!rst_new && rst_last) {
-        DEBUG("%02X: PLT_RST# asserted\n", main_cycle);
+        DEBUG("PLT_RST# asserted\n");
     } else
 #endif
     if (rst_new && !rst_last) {
-        DEBUG("%02X: PLT_RST# de-asserted\n", main_cycle);
+        DEBUG("PLT_RST# de-asserted\n");
 #if CONFIG_BUS_ESPI
         espi_reset();
 #else // CONFIG_BUS_ESPI
@@ -513,9 +508,9 @@ void power_event(void) {
     static bool sus_last = true;
     bool sus_new = gpio_get(&SLP_SUS_N);
     if (!sus_new && sus_last) {
-        DEBUG("%02X: SLP_SUS# asserted\n", main_cycle);
+        DEBUG("SLP_SUS# asserted\n");
     } else if (sus_new && !sus_last) {
-        DEBUG("%02X: SLP_SUS# de-asserted\n", main_cycle);
+        DEBUG("SLP_SUS# de-asserted\n");
     }
     sus_last = sus_new;
 #endif
@@ -531,9 +526,9 @@ void power_event(void) {
     bool ack_new = gpio_get(&SUSWARN_N);
 #if LEVEL >= LEVEL_DEBUG
     if (ack_new && !ack_last) {
-        DEBUG("%02X: SUSPWRDNACK asserted\n", main_cycle);
+        DEBUG("SUSPWRDNACK asserted\n");
     } else if (!ack_new && ack_last) {
-        DEBUG("%02X: SUSPWRDNACK de-asserted\n", main_cycle);
+        DEBUG("SUSPWRDNACK de-asserted\n");
     }
 #endif
     ack_last = ack_new;
@@ -559,14 +554,14 @@ void power_event(void) {
     bool wake_new = gpio_get(&LAN_WAKEUP_N);
     if (!wake_new && wake_last) {
         update_power_state();
-        DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
+        DEBUG("LAN_WAKEUP# asserted\n");
         if (power_state == POWER_STATE_OFF) {
             power_on();
         }
     }
 #if LEVEL >= LEVEL_DEBUG
     else if (wake_new && !wake_last) {
-        DEBUG("%02X: LAN_WAKEUP# de-asserted\n", main_cycle);
+        DEBUG("LAN_WAKEUP# de-asserted\n");
     }
 #endif
     wake_last = wake_new;
