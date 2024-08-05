@@ -95,14 +95,18 @@ void fan_event(void) {
         fan1_pwm_target = 0;
         fan1_pwm_actual = 0;
     } else if (fan1_pwm_actual < fan1_pwm_target) {
-        // TODO :Check against board-defined maximum
         if (fan1_pwm_actual < CTR0) {
             fan1_pwm_actual++;
+            if (fan1_pwm_actual < FAN1.pwm_min) {
+                fan1_pwm_actual = FAN1.pwm_min;
+            }
         }
     } else if (fan1_pwm_actual > fan1_pwm_target) {
-        // TODO: Check against board-defined minimum
         if (fan1_pwm_actual > 0) {
             fan1_pwm_actual--;
+            if (fan1_pwm_actual < FAN1.pwm_min) {
+                fan1_pwm_actual = 0;
+            }
         }
     }
     TRACE("FAN1 duty=%d\n", fan1_pwm_actual);
@@ -119,14 +123,18 @@ void fan_event(void) {
         fan2_pwm_target = 0;
         fan2_pwm_actual = 0;
     } else if (fan2_pwm_actual < fan2_pwm_target) {
-        // TODO :Check against board-defined maximum
         if (fan2_pwm_actual < CTR0) {
             fan2_pwm_actual++;
+            if (fan2_pwm_actual < FAN2.pwm_min) {
+                fan2_pwm_actual = FAN2.pwm_min;
+            }
         }
     } else if (fan2_pwm_actual > fan2_pwm_target) {
-        // TODO: Check against board-defined minimum
         if (fan2_pwm_actual > 0) {
             fan2_pwm_actual--;
+            if (fan2_pwm_actual < FAN2.pwm_min) {
+                fan2_pwm_actual = 0;
+            }
         }
     }
     TRACE("FAN2 duty=%d\n", fan2_pwm_actual);

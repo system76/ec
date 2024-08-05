@@ -18,6 +18,7 @@ struct FanPoint {
 struct Fan {
     const struct FanPoint *const points;
     const uint8_t points_size;
+    const uint8_t pwm_min;
 };
 
 extern const struct Fan __code FAN1;

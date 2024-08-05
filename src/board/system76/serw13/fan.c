@@ -15,6 +15,7 @@ static const struct FanPoint __code FAN1_POINTS[] = {
 const struct Fan __code FAN1 = {
     .points = FAN1_POINTS,
     .points_size = ARRAY_SIZE(FAN1_POINTS),
+    .pwm_min = PWM_DUTY(28),
 };
 
 static const struct FanPoint __code FAN2_POINTS[] = {
@@ -29,4 +30,5 @@ static const struct FanPoint __code FAN2_POINTS[] = {
 const struct Fan __code FAN2 = {
     .points = FAN2_POINTS,
     .points_size = ARRAY_SIZE(FAN2_POINTS),
+    .pwm_min = PWM_DUTY(28),
 };
