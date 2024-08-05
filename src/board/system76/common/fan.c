@@ -13,13 +13,19 @@
 
 bool fan_max = false;
 
-uint8_t fan1_pwm_actual = 0;
-uint8_t fan1_pwm_target = 0;
-uint16_t fan1_rpm = 0;
+struct FanInfo fan1_info = {
+    .pwm_actual = 0,
+    .pwm_target = 0,
+    .rpm = 0,
+};
 
-uint8_t fan2_pwm_actual = 0;
-uint8_t fan2_pwm_target = 0;
-uint16_t fan2_rpm = 0;
+#ifdef FAN2_PWM
+struct FanInfo fan2_info = {
+    .pwm_actual = 0,
+    .pwm_target = 0,
+    .rpm = 0,
+};
+#endif
 
 #define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
 
@@ -94,62 +100,62 @@ void fan_event(void) {
     // change instead of stepping to provide the desired effects.
 
     // Set FAN1 duty
-    fan1_pwm_target = fan_duty(&FAN1, sys_temp);
+    fan1_info.pwm_target = fan_duty(&FAN1, sys_temp);
     if (fan_max) {
-        fan1_pwm_target = CTR0;
-        fan1_pwm_actual = CTR0;
+        fan1_info.pwm_target = CTR0;
+        fan1_info.pwm_actual = CTR0;
     } else if (power_state != POWER_STATE_S0) {
-        fan1_pwm_target = 0;
-        fan1_pwm_actual = 0;
+        fan1_info.pwm_target = 0;
+        fan1_info.pwm_actual = 0;
     } else {
-        if (fan1_pwm_actual < fan1_pwm_target) {
-            if (fan1_pwm_actual < CTR0) {
-                fan1_pwm_actual++;
-                if (fan1_pwm_actual < FAN1.pwm_min) {
-                    fan1_pwm_actual = FAN1.pwm_min;
+        if (fan1_info.pwm_actual < fan1_info.pwm_target) {
+            if (fan1_info.pwm_actual < CTR0) {
+                fan1_info.pwm_actual++;
+                if (fan1_info.pwm_actual < FAN1.pwm_min) {
+                    fan1_info.pwm_actual = FAN1.pwm_min;
                 }
             }
-        } else if (fan1_pwm_actual > fan1_pwm_target) {
-            if (fan1_pwm_actual > 0) {
-                fan1_pwm_actual--;
-                if (fan1_pwm_actual < FAN1.pwm_min) {
-                    fan1_pwm_actual = 0;
+        } else if (fan1_info.pwm_actual > fan1_info.pwm_target) {
+            if (fan1_info.pwm_actual > 0) {
+                fan1_info.pwm_actual--;
+                if (fan1_info.pwm_actual < FAN1.pwm_min) {
+                    fan1_info.pwm_actual = 0;
                 }
             }
         }
     }
-    TRACE("FAN1 duty=%d\n", fan1_pwm_actual);
-    FAN1_PWM = fan1_pwm_actual;
-    fan1_rpm = fan_get_tach0_rpm();
+    TRACE("FAN1 duty=%d\n", fan1_info.pwm_actual);
+    FAN1_PWM = fan1_info.pwm_actual;
+    fan1_info.rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
     // set FAN2 duty
-    fan2_pwm_target = fan_duty(&FAN2, sys_temp);
+    fan2_info.pwm_target = fan_duty(&FAN2, sys_temp);
     if (fan_max) {
-        fan2_pwm_target = CTR0;
-        fan2_pwm_actual = CTR0;
+        fan2_info.pwm_target = CTR0;
+        fan2_info.pwm_actual = CTR0;
     } else if (power_state != POWER_STATE_S0) {
-        fan2_pwm_target = 0;
-        fan2_pwm_actual = 0;
+        fan2_info.pwm_target = 0;
+        fan2_info.pwm_actual = 0;
     } else {
-        if (fan2_pwm_actual < fan2_pwm_target) {
-            if (fan2_pwm_actual < CTR0) {
-                fan2_pwm_actual++;
-                if (fan2_pwm_actual < FAN2.pwm_min) {
-                    fan2_pwm_actual = FAN2.pwm_min;
+        if (fan2_info.pwm_actual < fan2_info.pwm_target) {
+            if (fan2_info.pwm_actual < CTR0) {
+                fan2_info.pwm_actual++;
+                if (fan2_info.pwm_actual < FAN2.pwm_min) {
+                    fan2_info.pwm_actual = FAN2.pwm_min;
                 }
             }
-        } else if (fan2_pwm_actual > fan2_pwm_target) {
-            if (fan2_pwm_actual > 0) {
-                fan2_pwm_actual--;
-                if (fan2_pwm_actual < FAN2.pwm_min) {
-                    fan2_pwm_actual = 0;
+        } else if (fan2_info.pwm_actual > fan2_info.pwm_target) {
+            if (fan2_info.pwm_actual > 0) {
+                fan2_info.pwm_actual--;
+                if (fan2_info.pwm_actual < FAN2.pwm_min) {
+                    fan2_info.pwm_actual = 0;
                 }
             }
         }
     }
-    TRACE("FAN2 duty=%d\n", fan2_pwm_actual);
-    FAN2_PWM = fan2_pwm_actual;
-    fan2_rpm = fan_get_tach1_rpm();
+    TRACE("FAN2 duty=%d\n", fan2_info.pwm_actual);
+    FAN2_PWM = fan2_info.pwm_actual;
+    fan2_info.rpm = fan_get_tach1_rpm();
 #endif
 }
