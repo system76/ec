@@ -27,40 +27,6 @@ uint16_t fan2_rpm = 0;
 // - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
-#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
-
-// Fan curve with temperature in degrees C, duty cycle in percent
-static const struct FanPoint __code FAN1_POINTS[] = {
-#ifndef BOARD_FAN1_POINTS
-#error Board must declare fan points
-#else
-    BOARD_FAN1_POINTS
-#endif
-};
-
-static const struct Fan __code FAN1 = {
-    .points = FAN1_POINTS,
-    .points_size = ARRAY_SIZE(FAN1_POINTS),
-};
-
-#ifdef FAN2_PWM
-
-// Fan curve with temperature in degrees C, duty cycle in percent
-static const struct FanPoint __code FAN2_POINTS[] = {
-#ifndef BOARD_FAN2_POINTS
-#error Board must declare fan points
-#else
-    BOARD_FAN2_POINTS
-#endif
-};
-
-static const struct Fan __code FAN2 = {
-    .points = FAN2_POINTS,
-    .points_size = ARRAY_SIZE(FAN2_POINTS),
-};
-
-#endif // FAN2_PWM
-
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
     fan_max = false;
