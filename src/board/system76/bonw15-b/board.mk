@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 board-y += ../bonw15/board.c
+board-y += ../bonw15/fan.c
 board-y += ../bonw15/gpio.c
 
 # FIXME: Handle this better
@@ -56,22 +57,7 @@ CFLAGS += -DI2C_DGPU=I2C_1
 
 # Fan configs
 CFLAGS += -DFAN1_PWM=DCR2
-CFLAGS += -DBOARD_FAN1_POINTS="\
-	FAN_POINT(60, 40), \
-	FAN_POINT(65, 60), \
-	FAN_POINT(70, 75), \
-	FAN_POINT(75, 90), \
-	FAN_POINT(80, 100), \
-"
-
 CFLAGS += -DFAN2_PWM=DCR4
-CFLAGS += -DBOARD_FAN2_POINTS="\
-	FAN_POINT(60, 40), \
-	FAN_POINT(65, 60), \
-	FAN_POINT(70, 75), \
-	FAN_POINT(75, 90), \
-	FAN_POINT(80, 100), \
-"
 
 # Add system76 common code
 include src/board/system76/common/common.mk

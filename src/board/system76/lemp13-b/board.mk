@@ -2,6 +2,7 @@
 
 board-y += board.c
 board-y += gpio.c
+board-y += ../lemp13/fan.c
 
 EC=ite
 CONFIG_EC_ITE_IT5570E=y
@@ -44,13 +45,6 @@ CFLAGS+=\
 
 # Fan configs
 CFLAGS += -DFAN1_PWM=DCR2
-CFLAGS += -DBOARD_FAN1_POINTS="\
-	FAN_POINT(70, 40), \
-	FAN_POINT(75, 50), \
-	FAN_POINT(80, 60), \
-	FAN_POINT(85, 65), \
-	FAN_POINT(90, 65), \
-"
 
 # Add system76 common code
 include src/board/system76/common/common.mk
