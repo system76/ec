@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 board-y += board.c
+board-y += fan.c
 board-y += gpio.c
 
 EC=ite
@@ -46,36 +47,13 @@ CFLAGS+=\
 	-DPOWER_LIMIT_AC=280 \
 	-DPOWER_LIMIT_DC=55
 
-CFLAGS+=-DSMOOTH_FANS_MIN=28
-
 # Enable dGPU support
 CONFIG_HAVE_DGPU = y
 CFLAGS += -DI2C_DGPU=I2C_1
 
 # Fan configs
 CFLAGS += -DFAN1_PWM=DCR2
-CFLAGS += -DBOARD_FAN1_HEATUP=5
-CFLAGS += -DBOARD_FAN1_COOLDOWN=20
-CFLAGS += -DBOARD_FAN1_POINTS="\
-	FAN_POINT(50, 28), \
-	FAN_POINT(55, 28), \
-	FAN_POINT(60, 40), \
-	FAN_POINT(68, 40), \
-	FAN_POINT(73, 50), \
-	FAN_POINT(87, 100), \
-"
-
 CFLAGS += -DFAN2_PWM=DCR4
-CFLAGS += -DBOARD_FAN2_HEATUP=5
-CFLAGS += -DBOARD_FAN2_COOLDOWN=20
-CFLAGS += -DBOARD_FAN2_POINTS="\
-	FAN_POINT(50, 28), \
-	FAN_POINT(55, 28), \
-	FAN_POINT(60, 40), \
-	FAN_POINT(68, 40), \
-	FAN_POINT(73, 50), \
-	FAN_POINT(87, 100), \
-"
 
 # Add system76 common code
 include src/board/system76/common/common.mk
