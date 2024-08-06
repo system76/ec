@@ -8,16 +8,15 @@
 
 #define PWM_DUTY(X) ((uint8_t)(((((uint16_t)(X)) * 255) + 99) / 100))
 
-struct FanPoint {
-    const int16_t temp;
+struct FanLevel {
+    const int16_t temp_up;
+    const int16_t temp_down;
     const uint8_t duty;
 };
 
-#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
-
 struct Fan {
-    const struct FanPoint *const points;
-    const uint8_t points_size;
+    const struct FanLevel *const levels;
+    const uint8_t levels_size;
     const uint8_t pwm_min;
 };
 
