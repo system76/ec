@@ -3,15 +3,16 @@
 #include <board/fan.h>
 #include <common/macro.h>
 
-static const struct FanPoint __code FAN1_POINTS[] = {
-    FAN_POINT(70, 40),
-    FAN_POINT(75, 50),
-    FAN_POINT(80, 60),
-    FAN_POINT(85, 65),
-    FAN_POINT(90, 65),
+static const struct FanLevel __code fan1_table[] = {
+    { 70, 0, PWM_DUTY(0) },
+    { 70, 65, PWM_DUTY(40) },
+    { 75, 70, PWM_DUTY(50) },
+    { 80, 75, PWM_DUTY(60) },
+    { 85, 80, PWM_DUTY(65) },
+    { 90, 85, PWM_DUTY(65) },
 };
 
 const struct Fan __code FAN1 = {
-    .points = FAN1_POINTS,
-    .points_size = ARRAY_SIZE(FAN1_POINTS),
+    .levels = fan1_table,
+    .levels_size = ARRAY_SIZE(fan1_table),
 };
