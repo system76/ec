@@ -13,6 +13,11 @@
 
 bool fan_max = false;
 
+static uint8_t fan1_level = 0;
+#ifdef FAN2_PWM
+static uint8_t fan2_level = 0;
+#endif
+
 struct FanInfo fan1_info = {
     .pwm_actual = 0,
     .pwm_target = 0,
@@ -39,28 +44,6 @@ struct FanInfo fan2_info = {
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
     fan_max = false;
-}
-
-static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
-    for (uint8_t i = 0; i < fan->points_size; i++) {
-        const struct FanPoint *cur = &fan->points[i];
-
-        // If exactly the current temp, return the current duty
-        if (temp == cur->temp) {
-            return cur->duty;
-        } else if (temp < cur->temp) {
-            // If lower than first temp, return 0%
-            if (i == 0) {
-                return 0;
-            } else {
-                const struct FanPoint *prev = &fan->points[i - 1];
-                return prev->duty;
-            }
-        }
-    }
-
-    // If no point is found, return 100%
-    return CTR0;
 }
 
 static uint16_t fan_get_tach0_rpm(void) {
@@ -99,8 +82,21 @@ void fan_event(void) {
     // Enabling fan max toggle and exiting S0 will cause duty to immediately
     // change instead of stepping to provide the desired effects.
 
+    // Get FAN1 target duty
+    if (fan1_level < FAN1.levels_size) {
+        if (sys_temp >= FAN1.levels[fan1_level].temp_up) {
+            fan1_level++;
+        }
+    }
+    if (fan1_level > 0) {
+        if (sys_temp <= FAN1.levels[fan1_level].temp_down) {
+            fan1_level--;
+        }
+    }
+
+    fan1_info.pwm_target = FAN1.levels[fan1_level].duty;
+
     // Set FAN1 duty
-    fan1_info.pwm_target = fan_duty(&FAN1, sys_temp);
     if (fan_max) {
         fan1_info.pwm_target = CTR0;
         fan1_info.pwm_actual = CTR0;
@@ -115,7 +111,8 @@ void fan_event(void) {
                     fan1_info.pwm_actual = FAN1.pwm_min;
                 }
             }
-        } else if (fan1_info.pwm_actual > fan1_info.pwm_target) {
+        }
+        if (fan1_info.pwm_actual > fan1_info.pwm_target) {
             if (fan1_info.pwm_actual > 0) {
                 fan1_info.pwm_actual--;
                 if (fan1_info.pwm_actual < FAN1.pwm_min) {
@@ -129,8 +126,21 @@ void fan_event(void) {
     fan1_info.rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
+    // Get FAN2 target duty
+    if (fan2_level < FAN2.levels_size) {
+        if (sys_temp >= FAN2.levels[fan2_level].temp_up) {
+            fan2_level++;
+        }
+    }
+    if (fan2_level > 0) {
+        if (sys_temp <= FAN2.levels[fan2_level].temp_down) {
+            fan2_level--;
+        }
+    }
+
+    fan2_info.pwm_target = FAN2.levels[fan2_level].duty;
+
     // set FAN2 duty
-    fan2_info.pwm_target = fan_duty(&FAN2, sys_temp);
     if (fan_max) {
         fan2_info.pwm_target = CTR0;
         fan2_info.pwm_actual = CTR0;
@@ -145,7 +155,8 @@ void fan_event(void) {
                     fan2_info.pwm_actual = FAN2.pwm_min;
                 }
             }
-        } else if (fan2_info.pwm_actual > fan2_info.pwm_target) {
+        }
+        if (fan2_info.pwm_actual > fan2_info.pwm_target) {
             if (fan2_info.pwm_actual > 0) {
                 fan2_info.pwm_actual--;
                 if (fan2_info.pwm_actual < FAN2.pwm_min) {

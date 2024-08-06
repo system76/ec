@@ -3,32 +3,32 @@
 #include <board/fan.h>
 #include <common/macro.h>
 
-static const struct FanPoint __code FAN1_POINTS[] = {
-    FAN_POINT(50, 28),
-    FAN_POINT(55, 28),
-    FAN_POINT(60, 40),
-    FAN_POINT(68, 40),
-    FAN_POINT(73, 50),
-    FAN_POINT(87, 100),
+static const struct FanLevel __code fan1_table[] = {
+    { 50, 0, PWM_DUTY(0) },
+    { 55, 48, PWM_DUTY(28) },
+    { 60, 56, PWM_DUTY(40) },
+    { 68, 65, PWM_DUTY(40) },
+    { 73, 70, PWM_DUTY(50) },
+    { 87, 85, PWM_DUTY(100) },
 };
 
 const struct Fan __code FAN1 = {
-    .points = FAN1_POINTS,
-    .points_size = ARRAY_SIZE(FAN1_POINTS),
+    .levels = fan1_table,
+    .levels_size = ARRAY_SIZE(fan1_table),
     .pwm_min = PWM_DUTY(28),
 };
 
-static const struct FanPoint __code FAN2_POINTS[] = {
-    FAN_POINT(50, 28),
-    FAN_POINT(55, 28),
-    FAN_POINT(60, 40),
-    FAN_POINT(68, 40),
-    FAN_POINT(73, 50),
-    FAN_POINT(87, 100),
+static const struct FanLevel __code fan2_table[] = {
+    { 50, 0, PWM_DUTY(0) },
+    { 55, 48, PWM_DUTY(28) },
+    { 60, 56, PWM_DUTY(40) },
+    { 68, 65, PWM_DUTY(40) },
+    { 73, 70, PWM_DUTY(50) },
+    { 87, 85, PWM_DUTY(100) },
 };
 
 const struct Fan __code FAN2 = {
-    .points = FAN2_POINTS,
-    .points_size = ARRAY_SIZE(FAN2_POINTS),
+    .levels = fan2_table,
+    .levels_size = ARRAY_SIZE(fan2_table),
     .pwm_min = PWM_DUTY(28),
 };
