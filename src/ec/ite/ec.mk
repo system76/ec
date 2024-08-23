@@ -45,3 +45,5 @@ CONFIG_EC_FLASH_SIZE = 262144
 else
 $(error flash size not specified)
 endif
+
+CFLAGS += -DCONFIG_EC_FLASH_SIZE=$(CONFIG_EC_FLASH_SIZE)
