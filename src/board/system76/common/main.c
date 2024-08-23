@@ -85,6 +85,7 @@ void init(void) {
     // Must happen last
     power_init();
     board_init();
+    battery_load_thresholds();
 }
 
 void main(void) {
