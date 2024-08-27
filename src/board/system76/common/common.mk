@@ -17,7 +17,6 @@ board-common-y += parallel.c
 board-common-y += peci.c
 board-common-y += pmc.c
 board-common-y += pnp.c
-board-common-y += power.c
 board-common-y += ps2.c
 board-common-y += pwm.c
 board-common-y += scratch.c
@@ -41,6 +40,13 @@ CFLAGS+=-DLEVEL=4
 
 # Uncomment to enable I2C debug on 0x76
 #CFLAGS+=-DI2C_DEBUGGER=0x76
+
+ifeq ($(CONFIG_PLATFORM_INTEL),y)
+board-common-y += power/intel.c
+CFLAGS += -DCONFIG_PLATFORM_INTEL=1
+else
+$(error PLATFORM not specified)
+endif
 
 ifeq ($(CONFIG_SECURITY),y)
 CFLAGS+=-DCONFIG_SECURITY=1

@@ -7,7 +7,8 @@ EC=ite
 CONFIG_EC_ITE_IT5570E=y
 CONFIG_EC_FLASH_SIZE_128K = y
 
-# Enable eSPI
+# Intel-based host
+CONFIG_PLATFORM_INTEL = y
 CONFIG_BUS_ESPI=y
 
 # Enable firmware security
