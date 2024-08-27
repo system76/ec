@@ -5,6 +5,7 @@
 #include <board/pnp.h>
 #include <common/macro.h>
 #include <common/debug.h>
+#include <ec/bram.h>
 #include <ec/espi.h>
 
 volatile uint8_t __xdata __at(0x1200) IHIOA;
@@ -80,4 +81,14 @@ void pnp_enable(void) {
     // Enable SWUC
     pnp_write(0x07, 0x04);
     pnp_write(0x30, 0x01);
+
+#ifdef POST_CODE_RING_BUFFER
+    // Set up ring-buffer for POST codes
+    for (uint8_t i = 0x80; i <= 0xBF; i++) {
+        BRAM[i] = 0;
+    }
+    pnp_write(0x07, 0x10);
+    pnp_write(0xF3, 0x00);
+    pnp_write(0xF4, 0x3F);
+#endif // POST_CODE_RING_BUFFER
 }
