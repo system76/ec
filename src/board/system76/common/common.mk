@@ -14,7 +14,6 @@ board-common-y += keymap.c
 board-common-y += lid.c
 board-common-y += main.c
 board-common-y += parallel.c
-board-common-y += peci.c
 board-common-y += pmc.c
 board-common-y += pnp.c
 board-common-y += ps2.c
@@ -42,8 +41,12 @@ CFLAGS+=-DLEVEL=4
 #CFLAGS+=-DI2C_DEBUGGER=0x76
 
 ifeq ($(CONFIG_PLATFORM_INTEL),y)
+board-common-y += peci.c
 board-common-y += power/intel.c
 CFLAGS += -DCONFIG_PLATFORM_INTEL=1
+else ifeq ($(CONFIG_PLATFORM_AMD),y)
+board-common-y += power/amd.c
+CFLAGS += -DCONFIG_PLATFORM_AMD=1
 else
 $(error PLATFORM not specified)
 endif

@@ -7,10 +7,13 @@
 #include <board/gpio.h>
 #include <board/kbled.h>
 #include <board/lid.h>
-#include <board/peci.h>
 #include <board/pwm.h>
 #include <common/debug.h>
 #include <common/macro.h>
+
+#if CONFIG_PLATFORM_INTEL
+#include <board/peci.h>
+#endif
 
 #ifndef HAVE_LED_AIRPLANE_N
 #define HAVE_LED_AIRPLANE_N 1
@@ -113,7 +116,9 @@ uint8_t acpi_read(uint8_t addr) {
             }
             break;
 
+#if CONFIG_PLATFORM_INTEL
         ACPI_8(0x07, peci_temp);
+#endif
 
         // Handle AC adapter and battery present
         case 0x10:

@@ -2,11 +2,14 @@
 
 #include <board/fan.h>
 #include <board/dgpu.h>
-#include <board/peci.h>
 #include <board/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <ec/pwm.h>
+
+#if CONFIG_PLATFORM_INTEL
+#include <board/peci.h>
+#endif
 
 bool fan_max = false;
 
@@ -195,10 +198,15 @@ static uint16_t fan_get_tach1_rpm(void) {
 }
 
 void fan_event(void) {
+#if CONFIG_PLATFORM_INTEL
 #if CONFIG_HAVE_DGPU
     int16_t sys_temp = MAX(peci_temp, dgpu_temp);
 #else
     int16_t sys_temp = peci_temp;
+#endif
+#elif CONFIG_PLATFORM_AMD
+    // TODO: AMD SB-TSI temp
+    int16_t sys_temp = 50;
 #endif
 
     // Fan update interval is 100ms (main.c). The event changes PWM duty
