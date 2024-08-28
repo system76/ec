@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include <board/power.h>
+
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/acpi.h>
@@ -12,7 +14,6 @@
 #include <board/kbled.h>
 #include <board/lid.h>
 #include <board/peci.h>
-#include <board/power.h>
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <board/wireless.h>

@@ -18,7 +18,6 @@
 #include <board/kbscan.h>
 #include <board/keymap.h>
 #include <board/lid.h>
-#include <board/peci.h>
 #include <board/pmc.h>
 #include <board/power.h>
 #include <board/ps2.h>
@@ -30,6 +29,10 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/ec.h>
+
+#if CONFIG_PLATFORM_INTEL
+#include <board/peci.h>
+#endif
 
 #ifdef PARALLEL_DEBUG
 #include <board/parallel.h>
@@ -73,7 +76,9 @@ void init(void) {
         kbscan_init();
     }
     keymap_init();
+#if CONFIG_PLATFORM_INTEL
     peci_init();
+#endif
     pmc_init();
     pwm_init();
     smbus_init();
@@ -140,7 +145,9 @@ void main(void) {
             if ((time - last_time_250ms) >= INTERVAL_250MS) {
                 last_time_250ms = time;
 
+#if CONFIG_PLATFORM_INTEL
                 peci_read_temp();
+#endif
                 dgpu_read_temp();
             }
 
