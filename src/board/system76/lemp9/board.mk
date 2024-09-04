@@ -36,12 +36,13 @@ CFLAGS+=\
 
 # Fan configs
 CFLAGS += -DFAN1_PWM=DCR2
-CFLAGS += -DBOARD_FAN1_POINTS="\
-	FAN_POINT(70, 40), \
-	FAN_POINT(75, 50), \
-	FAN_POINT(80, 60), \
-	FAN_POINT(85, 65), \
-	FAN_POINT(90, 65), \
+CFLAGS += -DFAN1_TABLE="\
+	FAN_LEVEL(60, 0, 0), \
+	FAN_LEVEL(60, 55, 40), \
+	FAN_LEVEL(65, 60, 50), \
+	FAN_LEVEL(70, 65, 60), \
+	FAN_LEVEL(75, 70, 65), \
+	FAN_LEVEL(80, 75, 65), \
 "
 
 # Add system76 common code

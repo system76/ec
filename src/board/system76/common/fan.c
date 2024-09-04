@@ -18,6 +18,16 @@ uint8_t fan2_pwm_actual = 0;
 uint8_t fan2_pwm_target = 0;
 uint16_t fan2_rpm = 0;
 
+static uint8_t fan1_level = 0;
+static uint8_t fan2_level = 0;
+
+#define FAN_LEVEL(up, down, target) \
+    { \
+        .temp_up = (up), \
+        .temp_down = (down), \
+        .duty = PWM_DUTY(target), \
+    }
+
 #define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
 
 // Fan Speed (RPM) = 60 / (1/fs sec * {FnTMRR, FnRLRR} * P)
@@ -27,42 +37,22 @@ uint16_t fan2_rpm = 0;
 // - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
-#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
-
 #ifndef FAN1_PWM_MIN
 #define FAN1_PWM_MIN 0
 #endif
 
-// Fan speed is the lowest requested over HEATUP seconds
-#ifndef BOARD_FAN1_HEATUP
-#define BOARD_FAN1_HEATUP 4
-#endif
-
-static uint8_t FAN1_HEATUP[BOARD_FAN1_HEATUP] = { 0 };
-
-// Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifndef BOARD_FAN1_COOLDOWN
-#define BOARD_FAN1_COOLDOWN 10
-#endif
-
-static uint8_t FAN1_COOLDOWN[BOARD_FAN1_COOLDOWN] = { 0 };
-
 // Fan curve with temperature in degrees C, duty cycle in percent
-static const struct FanPoint __code FAN1_POINTS[] = {
-#ifndef BOARD_FAN1_POINTS
-#error Board must declare fan points
+static const struct FanLevel __code FAN1_LEVELS[] = {
+#ifndef FAN1_TABLE
+#error Board must declare fan table
 #else
-    BOARD_FAN1_POINTS
+    FAN1_TABLE
 #endif
 };
 
 static const struct Fan __code FAN1 = {
-    .points = FAN1_POINTS,
-    .points_size = ARRAY_SIZE(FAN1_POINTS),
-    .heatup = FAN1_HEATUP,
-    .heatup_size = ARRAY_SIZE(FAN1_HEATUP),
-    .cooldown = FAN1_COOLDOWN,
-    .cooldown_size = ARRAY_SIZE(FAN1_COOLDOWN),
+    .levels = FAN1_LEVELS,
+    .levels_size = ARRAY_SIZE(FAN1_LEVELS),
     .pwm_min = PWM_DUTY(FAN1_PWM_MIN),
 };
 
@@ -72,36 +62,18 @@ static const struct Fan __code FAN1 = {
 #define FAN2_PWM_MIN 0
 #endif
 
-// Fan speed is the lowest requested over HEATUP seconds
-#ifndef BOARD_FAN2_HEATUP
-#define BOARD_FAN2_HEATUP 4
-#endif
-
-static uint8_t FAN2_HEATUP[BOARD_FAN2_HEATUP] = { 0 };
-
-// Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifndef BOARD_FAN2_COOLDOWN
-#define BOARD_FAN2_COOLDOWN 10
-#endif
-
-static uint8_t FAN2_COOLDOWN[BOARD_FAN2_COOLDOWN] = { 0 };
-
 // Fan curve with temperature in degrees C, duty cycle in percent
-static const struct FanPoint __code FAN2_POINTS[] = {
-#ifndef BOARD_FAN2_POINTS
-#error Board must declare fan points
+static const struct FanLevel __code FAN2_LEVELS[] = {
+#ifndef FAN2_TABLE
+#error Board must declare fan table
 #else
-    BOARD_FAN2_POINTS
+    FAN2_TABLE
 #endif
 };
 
 static const struct Fan __code FAN2 = {
-    .points = FAN2_POINTS,
-    .points_size = ARRAY_SIZE(FAN2_POINTS),
-    .heatup = FAN2_HEATUP,
-    .heatup_size = ARRAY_SIZE(FAN2_HEATUP),
-    .cooldown = FAN2_COOLDOWN,
-    .cooldown_size = ARRAY_SIZE(FAN2_COOLDOWN),
+    .levels = FAN2_LEVELS,
+    .levels_size = ARRAY_SIZE(FAN2_LEVELS),
     .pwm_min = PWM_DUTY(FAN2_PWM_MIN),
 };
 
@@ -110,70 +82,6 @@ static const struct Fan __code FAN2 = {
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
     fan_max = false;
-}
-
-static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
-    for (uint8_t i = 0; i < fan->points_size; i++) {
-        const struct FanPoint *cur = &fan->points[i];
-
-        // If exactly the current temp, return the current duty
-        if (temp == cur->temp) {
-            return cur->duty;
-        } else if (temp < cur->temp) {
-            // If lower than first temp, return 0%
-            if (i == 0) {
-                return 0;
-            } else {
-                const struct FanPoint *prev = &fan->points[i - 1];
-                return prev->duty;
-            }
-        }
-    }
-
-    // If no point is found, return 100%
-    return CTR0;
-}
-
-static uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) {
-    uint8_t lowest = duty;
-
-    uint8_t i;
-    for (i = 0; (i + 1) < fan->heatup_size; i++) {
-        uint8_t value = fan->heatup[i + 1];
-        if (value < lowest) {
-            lowest = value;
-        }
-        fan->heatup[i] = value;
-    }
-    fan->heatup[i] = duty;
-
-    return lowest;
-}
-
-static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) {
-    uint8_t highest = duty;
-
-    uint8_t i;
-    for (i = 0; (i + 1) < fan->cooldown_size; i++) {
-        uint8_t value = fan->cooldown[i + 1];
-        if (value > highest) {
-            highest = value;
-        }
-        fan->cooldown[i] = value;
-    }
-    fan->cooldown[i] = duty;
-
-    return highest;
-}
-
-static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
-    uint8_t duty;
-
-    duty = fan_duty(fan, temp);
-    duty = fan_heatup(fan, duty);
-    duty = fan_cooldown(fan, duty);
-
-    return duty;
 }
 
 static uint16_t fan_get_tach0_rpm(void) {
@@ -207,8 +115,20 @@ void fan_event(void) {
     // Enabling fan max toggle and exiting S0 will cause duty to immediately
     // change instead of stepping to provide the desired effects.
 
+    // Get FAN1 target duty
+    if (sys_temp >= FAN1.levels[fan1_level].temp_up) {
+        if (fan1_level < FAN1.levels_size) {
+            fan1_level++;
+        }
+    }
+    if (sys_temp <= FAN1.levels[fan1_level].temp_down) {
+        if (fan1_level > 0) {
+            fan1_level--;
+        }
+    }
+    fan1_pwm_target = FAN1.levels[fan1_level].duty;
+
     // Set FAN1 duty
-    fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
     if (fan_max) {
         fan1_pwm_target = CTR0;
         fan1_pwm_actual = CTR0;
@@ -237,8 +157,20 @@ void fan_event(void) {
     fan1_rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
-    // set FAN2 duty
-    fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
+    // Get FAN2 target duty
+    if (sys_temp >= FAN2.levels[fan2_level].temp_up) {
+        if (fan2_level < FAN2.levels_size) {
+            fan2_level++;
+        }
+    }
+    if (sys_temp <= FAN2.levels[fan2_level].temp_down) {
+        if (fan2_level > 0) {
+            fan2_level--;
+        }
+    }
+    fan2_pwm_target = FAN2.levels[fan2_level].duty;
+
+    // Set FAN2 duty
     if (fan_max) {
         fan2_pwm_target = CTR0;
         fan2_pwm_actual = CTR0;
