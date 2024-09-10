@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef _EC_ECWD_H
-#define _EC_ECWD_H
+// External Timer and External Watchdog (ETWD)
+
+#ifndef _EC_ETWD_H
+#define _EC_ETWD_H
 
 #include <stdint.h>
 
@@ -27,4 +29,22 @@ volatile uint8_t __xdata __at(0x1F13) ET3CNTLH2R;
 volatile uint8_t __xdata __at(0x1F16) ET4CNTLLR;
 #endif
 
-#endif // _EC_ECWD_H
+// When the key match function of EWD is enabled (EWTCFG[5]), writing this
+// value to EWDKEY will restart the WDT.
+#define WDT_KEY 0x5C
+
+void wdt_init(void);
+
+// Restart WDT
+// NOTE: Must be inlined for compiling in Scratch ROM
+static inline void wdt_kick(void) {
+    EWDKEYR = WDT_KEY;
+}
+
+// Trigger EC reset by WDT key mismatch
+// NOTE: Must be inlined for compiling in Scratch ROM
+static inline void wdt_trigger(void) {
+    EWDKEYR = 0;
+}
+
+#endif // _EC_ETWD_H

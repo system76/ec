@@ -22,6 +22,7 @@
 #include <drivers/dgpu/dgpu.h>
 #include <drivers/usbpd/usbpd.h>
 #include <ec/ec.h>
+#include <ec/etwd.h>
 #include <ec/pwm.h>
 
 #if CONFIG_PLATFORM_INTEL
@@ -101,6 +102,8 @@ void main(void) {
 #ifdef GPIO_DEBUG
     gpio_debug();
 #endif
+
+    wdt_init();
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
@@ -184,6 +187,8 @@ void main(void) {
             }
 #endif
         }
+
+        wdt_kick();
 
         // Idle until next timer interrupt
         //PCON |= BIT(0);
