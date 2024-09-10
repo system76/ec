@@ -29,6 +29,7 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/ec.h>
+#include <ec/etwd.h>
 
 #if CONFIG_PLATFORM_INTEL
 #include <board/peci.h>
@@ -101,6 +102,8 @@ void main(void) {
     gpio_debug();
 #endif
 
+    wdt_init();
+
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
     systick_t last_time_100ms = 0;
@@ -167,6 +170,9 @@ void main(void) {
         pmc_event(&PMC_1);
         // AP/EC communication over SMFI
         smfi_event();
+
+        wdt_kick();
+
         // Idle until next timer interrupt
         //Disabled until interrupts used: PCON |= 1;
     }

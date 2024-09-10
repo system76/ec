@@ -2,6 +2,7 @@
 
 ec-y += ec.c
 ec-$(CONFIG_BUS_ESPI) += espi.c
+ec-y += etwd.c
 ec-y += gpio.c
 ec-y += i2c.c
 ec-y += intc.c
