@@ -29,6 +29,7 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <ec/ec.h>
+#include <ec/etwd.h>
 
 #if CONFIG_PLATFORM_INTEL
 #include <board/peci.h>
@@ -105,6 +106,8 @@ void main(void) {
     gpio_debug();
 #endif
 
+    wdt_init();
+
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
     systick_t last_time_1ms = 0;
@@ -175,6 +178,8 @@ void main(void) {
             battery_event();
             fan_update_target();
         }
+
+        wdt_kick();
 
         // Idle until next timer interrupt
         //PCON |= BIT(0);
