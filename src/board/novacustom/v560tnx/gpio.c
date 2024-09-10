@@ -160,7 +160,7 @@ void gpio_init(void) {
     // EC_RSMRST#
     GPCRE5 = GPIO_OUT;
     // ME_WE
-    GPCRE6 = GPIO_IN;
+    GPCRE6 = GPIO_OUT;
     // SMD_BAT
     GPCRE7 = GPIO_ALT | GPIO_UP;
 
