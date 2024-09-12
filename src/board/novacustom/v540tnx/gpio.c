@@ -84,7 +84,7 @@ void gpio_init(void) {
     // EC_PWM_LEDKB_P
     GPCRA0 = GPIO_ALT;
     // KBC_BEEP
-    GPCRA1 = GPIO_IN;
+    GPCRA1 = GPIO_ALT;
     // CPU_FAN
     GPCRA2 = GPIO_ALT;
     // VGA_FAN
