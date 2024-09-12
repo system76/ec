@@ -221,6 +221,7 @@ void acpi_write(uint8_t addr, uint8_t data) {
 
     case 0xBD:
         battery_set_end_threshold(data);
+        (void)battery_save_thresholds();
         break;
 
 #if HAVE_LED_AIRPLANE_N
