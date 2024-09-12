@@ -27,17 +27,45 @@ uint8_t board_id(void) {
     if (cached)
         return board_id;
 
-    // TODO
-
     int16_t id = adc_read_channel(7);
     if (id < 0) {
-        ERROR("Board ID error %ld, defaulting to V560TU\n", id);
+        ERROR("Board ID error %ld, defaulting to V54 GN20P\n", id);
         board_id = 0;
         goto exit;
     }
 
-    INFO("Board ID: V540TU\n");
-    board_id = 1;
+    if (id < 250) {
+        INFO("Board ID: V54 GN20P\n");
+        board_id = 0;
+        goto exit;
+    }
+
+    if (id < 800) {
+        INFO("Board ID: V56 GN20P\n");
+        board_id = 1;
+        goto exit;
+    }
+
+    if (id < 1800) {
+        INFO("Board ID: V54 GN21-X4/X2\n");
+        board_id = 2;
+        goto exit;
+    }
+
+    if (id < 2400) {
+        INFO("Board ID: V54 GN21-X6\n");
+        board_id = 3;
+        goto exit;
+    }
+
+    if (id < 2800) {
+        INFO("Board ID: V56 GN21-X4/X2\n");
+        board_id = 4;
+        goto exit;
+    }
+
+    INFO("Board ID: V56 GN21-X6\n");
+    board_id = 5;
 
 exit:
     cached = true;
