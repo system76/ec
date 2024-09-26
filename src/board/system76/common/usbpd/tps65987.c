@@ -17,8 +17,16 @@
 #define REG_MODE 0x03
 #define REG_CMD1 0x08
 #define REG_DATA1 0x09
+#define REG_INT_EVENT_1 0x14
+#define REG_INT_EVENT_2 0x15
+#define REG_INT_CLEAR_1 0x18
+#define REG_INT_CLEAR_2 0x19
 #define REG_GLOBAL_CONFIG 0x27
 #define REG_ACTIVE_CONTRACT_PDO 0x34
+
+#ifndef HAVE_PD_IRQ
+#define HAVE_PD_IRQ 0
+#endif
 
 enum {
     // PDO is empty
@@ -197,6 +205,31 @@ static void usbpd_set_multiport_policy(void) {
     DEBUG("USBPD multiport policy set RES = %ld\n", res);
 }
 
+static void usbpd_clear_event() {
+    int16_t res;
+    uint8_t reg[12] = { 0 };
+
+    DEBUG("USBPD IRQ\n");
+
+    res = i2c_get(&I2C_USBPD, PORT_A_ADDRESS, REG_INT_EVENT_1, reg, sizeof(reg));
+    if (res < 0)
+        return;
+
+    res = i2c_set(&I2C_USBPD, PORT_A_ADDRESS, REG_INT_CLEAR_1, reg, sizeof(reg));
+    if (res < 0)
+        return;
+
+#ifdef USBPD_DUAL_PORT
+    res = i2c_get(&I2C_USBPD, PORT_B_ADDRESS, REG_INT_EVENT_1, reg, sizeof(reg));
+    if (res < 0)
+        return;
+
+    res = i2c_set(&I2C_USBPD, PORT_B_ADDRESS, REG_INT_CLEAR_1, reg, sizeof(reg));
+    if (res < 0)
+        return;
+#endif
+}
+
 void usbpd_event(void) {
     bool update = false;
     int16_t res;
@@ -290,6 +323,12 @@ void usbpd_event(void) {
             power_peci_limit(true);
         }
     }
+
+#if HAVE_PD_IRQ
+    /* For now, all we do is clear all events */
+    if (!gpio_get(&PD_IRQ))
+        usbpd_clear_event();
+#endif
 }
 
 void usbpd_init(void) {
