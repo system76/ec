@@ -25,6 +25,7 @@ struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code PCH_PWROK_EC =   GPIO(F, 3);
 struct Gpio __code PD_EN =          GPIO(D, 4);
+struct Gpio __code PD_IRQ =         GPIO(E, 2);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code RGBKB_DET_N =    GPIO(I, 2);
@@ -38,26 +39,30 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init(void) {
     // Set global configuration
-    // Enable LPC reset on GPD2
-    GCR = 0b10 << 1;
-    // Disable UARTs
+    GCR = 4;
+    GCR1 = 0;
+    GCR2 = 0;
+    GCR3 = 64;
+    GCR4 = 0;
+    GCR5 = 0;
     GCR6 = 0;
-    // PWRSW WDT 2 Enable 1
-    GCR8 = BIT(4);
-    // PWRSW WDT 2 Enable 2
-    GCR9 = BIT(5);
-    // Enable SMBus channel 4
-    GCR15 = BIT(4);
-    // Set GPB5 and GPD2 to 1.8V
-    GCR19 = BIT(7) | BIT(0);
-    // Set GPD3 to 1.8V, GPF2 and GPF3 to 3.3V
-    GCR20 = BIT(7);
-    // Set GPF6, GPF7, GPH0, and GPH1 to 1.8V
-    GCR21 = BIT(6), BIT(5) | BIT(2) | BIT(1);
-    // Set VCC power domain to 1.8V
-    GCR22 = BIT(7);
-    // Set GPM6 power domain to VCC
-    GCR23 = BIT(0);
+    GCR7 = 0;
+    GCR8 = 16;
+    GCR9 = 32;
+    GCR10 = 2;
+    GCR11 = 0;
+    GCR12 = 0;
+    GCR13 = 0;
+    GCR14 = 0;
+    GCR15 = 16;
+    GCR16 = 0;
+    GCR17 = 0;
+    GCR18 = 0;
+    GCR19 = 129;
+    GCR20 = 0;
+    GCR21 = 0;
+    GCR22 = 16;
+    GCR23 = 32;
 
     // Set GPIO data
     GPDRA = 0;
@@ -112,6 +117,8 @@ void gpio_init(void) {
     GPCRB5 = GPIO_IN;
     // SUSBC_EC
     GPCRB6 = GPIO_OUT;
+    // Unknown
+    GPCRB7 = GPIO_IN;
 
     // ALL_SYS_PWRGD
     GPCRC0 = GPIO_IN;
@@ -243,7 +250,7 @@ void gpio_init(void) {
     // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
-    GPCRJ5 = GPIO_OUT;
+    GPCRJ5 = GPIO_IN; // should probably be output, but Clevo FW set it as input
     // EC_GPIO
     GPCRJ6 = GPIO_OUT | GPIO_UP;
     // KB-DET
