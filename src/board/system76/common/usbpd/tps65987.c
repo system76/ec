@@ -326,7 +326,7 @@ void usbpd_event(void) {
 
 #if HAVE_PD_IRQ
     /* For now, all we do is clear all events */
-    if (!gpio_get(&PD_IRQ))
+    if (power_state != POWER_STATE_OFF && !gpio_get(&PD_IRQ))
         usbpd_clear_event();
 #endif
 }
