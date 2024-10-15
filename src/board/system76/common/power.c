@@ -352,8 +352,8 @@ void power_peci_limit(bool ac) {
         supply_watts = (uint32_t)battery_charger_input_current *
             (uint32_t)battery_charger_input_voltage / 1000;
         DEBUG("%llu W supply detected\n", supply_watts);
-        // 15% safety margin
-        supply_watts = supply_watts * 85 / 100;
+        // 7% safety margin
+        supply_watts = supply_watts * 93 / 100;
     }
 
     if (!ac || !supply_watts || options_get(OPT_ALLOW_BAT_BOOST)) {
