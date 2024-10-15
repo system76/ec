@@ -248,7 +248,7 @@ void gpio_init(void) {
     // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
-    GPCRJ5 = GPIO_OUT;
+    GPCRJ5 = GPIO_IN;
     // EC_GPIO
     GPCRJ6 = GPIO_OUT | GPIO_UP;
     // KB-DET
