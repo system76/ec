@@ -39,30 +39,30 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init(void) {
     // Set global configuration
-    GCR = 4;
-    GCR1 = 0;
-    GCR2 = 0;
-    GCR3 = 64;
-    GCR4 = 0;
-    GCR5 = 0;
-    GCR6 = 0;
-    GCR7 = 0;
-    GCR8 = 16;
-    GCR9 = 32;
-    GCR10 = 2;
-    GCR11 = 0;
-    GCR12 = 0;
-    GCR13 = 0;
-    GCR14 = 0;
-    GCR15 = 16;
-    GCR16 = 0;
-    GCR17 = 0;
-    GCR18 = 0;
-    GCR19 = 129;
-    GCR20 = 0;
-    GCR21 = 0;
-    GCR22 = 16;
-    GCR23 = 32;
+    GCR = 0x04;
+    GCR1 = 0x00;
+    GCR2 = 0x00;
+    GCR3 = 0x40;
+    GCR4 = 0x00;
+    GCR5 = 0x00;
+    GCR6 = 0x00;
+    GCR7 = 0x00;
+    GCR8 = 0x10;
+    GCR9 = 0x20;
+    GCR10 = 0x02;
+    GCR11 = 0x00;
+    GCR12 = 0x00;
+    GCR13 = 0x00;
+    GCR14 = 0x00;
+    GCR15 = 0x10;
+    GCR16 = 0x00;
+    GCR17 = 0x00;
+    GCR18 = 0x00;
+    GCR19 = 0x81;
+    GCR20 = 0x80;
+    GCR21 = 0x66;
+    GCR22 = 0x80;
+    GCR23 = 0x01;
 
     // Set GPIO data
     GPDRA = 0;
@@ -250,7 +250,7 @@ void gpio_init(void) {
     // VA_EC_EN
     GPCRJ4 = GPIO_OUT;
     // VBATT_BOOST#
-    GPCRJ5 = GPIO_IN; // should probably be output, but Clevo FW set it as input
+    GPCRJ5 = GPIO_IN;
     // EC_GPIO
     GPCRJ6 = GPIO_OUT | GPIO_UP;
     // KB-DET

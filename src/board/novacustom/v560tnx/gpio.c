@@ -39,16 +39,16 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 
 void gpio_init(void) {
     // Set global configuration
-    GCR   = 0x04;
-    GCR1  = 0x00;
-    GCR2  = 0x00;
-    GCR3  = 0x40;
-    GCR4  = 0x00;
-    GCR5  = 0x00;
-    GCR6  = 0x00;
-    GCR7  = 0x00;
-    GCR8  = 0x10;
-    GCR9  = 0x20;
+    GCR = 0x04;
+    GCR1 = 0x00;
+    GCR2 = 0x00;
+    GCR3 = 0x40;
+    GCR4 = 0x00;
+    GCR5 = 0x00;
+    GCR6 = 0x00;
+    GCR7 = 0x00;
+    GCR8 = 0x10;
+    GCR9 = 0x20;
     GCR10 = 0x02;
     GCR11 = 0x00;
     GCR12 = 0x00;
