@@ -18,8 +18,12 @@
 
 #define BATTERY_INITIALIZED BIT(7)
 
-#define BATTERY_CHARGER_VOLTAGE_AC 19
-#define BATTERY_CHARGER_VOLTAGE_PD 20 // XXX: Only valid for HPB models
+#ifndef AC_ADAPTER_VOLTAGE
+#define AC_ADAPTER_VOLTAGE 19
+#endif
+
+#define BATTERY_CHARGER_VOLTAGE_AC AC_ADAPTER_VOLTAGE
+#define BATTERY_CHARGER_VOLTAGE_PD 20
 
 struct battery_info {
     uint16_t temp;
