@@ -133,13 +133,13 @@ static enum Result cmd_fan_get(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 0:
         // Get duty of fan 0
-        smfi_cmd[SMFI_CMD_DATA + 1] = DCR2;
+        smfi_cmd[SMFI_CMD_DATA + 1] = PWM_REG(CPU_FAN1);
         // TODO handle dual CPU fans
         return RES_OK;
     case 1:
         // Get duty of fan 1
         //TODO: only allow on platforms like addw2
-        smfi_cmd[SMFI_CMD_DATA + 1] = DCR4;
+        smfi_cmd[SMFI_CMD_DATA + 1] = PWM_REG(GPU_FAN1);
         return RES_OK;
     }
 
@@ -151,16 +151,16 @@ static enum Result cmd_fan_set(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 0:
         // Set duty cycle of fan 0
-        DCR2 = smfi_cmd[SMFI_CMD_DATA + 1];
+        PWM_REG(CPU_FAN1) = smfi_cmd[SMFI_CMD_DATA + 1];
 #if HAVE_CPU_FAN2
         // TODO handle CPU fan 2 separately
-        DCR3 = smfi_cmd[SMFI_CMD_DATA + 1];
+        PWM_REG(CPU_FAN2) = smfi_cmd[SMFI_CMD_DATA + 1];
 #endif
         return RES_OK;
     case 1:
         // Set duty cycle of fan 1
         //TODO: only allow on platforms like addw2
-        DCR4 = smfi_cmd[SMFI_CMD_DATA + 1];
+        PWM_REG(GPU_FAN1) = smfi_cmd[SMFI_CMD_DATA + 1];
         return RES_OK;
     }
 

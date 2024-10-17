@@ -5,6 +5,8 @@
 
 #include <stdint.h>
 
+#define PWM_REG(x) concat(DCR, x)
+
 // Channel 0 clock prescaler register
 volatile uint8_t __xdata __at(0x1800) C0CPRS;
 // Channel 6 clock prescaler register (low byte)

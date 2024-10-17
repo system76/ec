@@ -17,15 +17,6 @@
 
 #define PWM_REG(x) concat(DCR, x)
 
-#ifndef CPU_FAN1
-#define CPU_FAN1 2
-#endif
-
-// Only V5x0TNx is different
-#ifndef GPU_FAN1
-#define GPU_FAN1 4
-#endif
-
 bool fan_max = false;
 uint8_t last_duty_dgpu = 0;
 uint8_t last_duty_peci = 0;
@@ -81,7 +72,7 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
 #endif
 
     // set PECI fan duty
-    if (peci_fan_duty != DCR2) {
+    if (peci_fan_duty != PWM_REG(CPU_FAN1)) {
         TRACE("PECI fan_duty_raw=%d\n", peci_fan_duty);
         last_duty_peci = peci_fan_duty = fan_smooth(last_duty_peci, peci_fan_duty);
         PWM_REG(CPU_FAN1) = fan_max ? MAX_FAN_SPEED : peci_fan_duty;
@@ -92,7 +83,7 @@ void fan_duty_set(uint8_t peci_fan_duty, uint8_t dgpu_fan_duty) __reentrant {
     }
 
     // set dGPU fan duty
-    if (dgpu_fan_duty != DCR4) {
+    if (dgpu_fan_duty != PWM_REG(GPU_FAN1)) {
         TRACE("DGPU fan_duty_raw=%d\n", dgpu_fan_duty);
         last_duty_dgpu = dgpu_fan_duty = fan_smooth(last_duty_dgpu, dgpu_fan_duty);
         PWM_REG(GPU_FAN1) = fan_max ? MAX_FAN_SPEED : dgpu_fan_duty;

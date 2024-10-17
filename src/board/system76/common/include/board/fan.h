@@ -31,6 +31,15 @@
 #define SMOOTH_FANS_MIN 0 // default to smoothing all fan speed changes
 #endif
 
+#ifndef CPU_FAN1
+#define CPU_FAN1 2
+#endif
+
+// Only V5x0TNx is different
+#ifndef GPU_FAN1
+#define GPU_FAN1 4
+#endif
+
 struct FanPoint {
     int16_t temp;
     uint8_t duty;
