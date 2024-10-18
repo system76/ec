@@ -314,15 +314,15 @@ void usbpd_event(void) {
             }
         }
 
-        if (next_input_current != battery_charger_input_current) {
-            battery_charger_input_current = next_input_current;
-            battery_charger_input_voltage = next_input_voltage;
-            DEBUG("CHARGER LIMIT %d mA\n", battery_charger_input_current);
+        if (next_input_current != battery_charger_input_current_ma) {
+            battery_charger_input_current_ma = next_input_current;
+            battery_charger_input_voltage_v = next_input_voltage;
+            DEBUG("CHARGER LIMIT %d mA\n", battery_charger_input_current_ma);
 
             // Disable smart charger so it is reconfigured with the new limit
             battery_charger_disable();
             // In case power was renegotiated without power loss
-            power_peci_limit(true);
+            power_apply_limit(true);
         }
     }
 

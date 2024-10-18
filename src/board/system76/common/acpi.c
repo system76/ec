@@ -126,6 +126,10 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_8(0xCF, DCR4);
         ACPI_8(0xD2, F2TLRR);
         ACPI_8(0xD3, F2TMRR);
+
+        case 0xD4:
+            data = dgpu_get_d_notify_level(!gpio_get(&ACIN_N));
+            break;
 #endif // HAVE_DGPU
 
 #if HAVE_LED_AIRPLANE_N

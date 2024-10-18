@@ -39,8 +39,8 @@ struct battery_info {
 };
 extern struct battery_info battery_info;
 
-extern uint16_t battery_charger_input_current;
-extern uint16_t battery_charger_input_voltage;
+extern uint16_t battery_charger_input_current_ma;
+extern uint16_t battery_charger_input_voltage_v;
 
 uint8_t battery_get_start_threshold(void);
 bool battery_set_start_threshold(uint8_t value);

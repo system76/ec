@@ -338,46 +338,50 @@ void power_off(void) {
     update_power_state();
 }
 
-void power_peci_limit(bool ac) {
+void power_apply_limit(bool ac) {
     uint32_t supply_watts = 0;
     uint32_t watts = 0;
     uint16_t res;
 
     if (!peci_available()) {
-        DEBUG("PECI not yet available, skip programming PL\n");
-        return;
+        DEBUG("PECI not yet available, skip PL\n");
+    } else {
+        if (ac) {
+            supply_watts = (uint32_t)battery_charger_input_current_ma *
+                (uint32_t)battery_charger_input_voltage_v / 1000;
+            DEBUG("%llu W supply detected\n", supply_watts);
+        }
+
+        if (!ac || !supply_watts || options_get(OPT_ALLOW_BAT_BOOST)) {
+            supply_watts += POWER_LIMIT_DC;
+        }
+
+        DEBUG(
+            "PECI PL: %llu watts available from %s\n",
+            supply_watts,
+            ac ? options_get(OPT_ALLOW_BAT_BOOST) ? "AC + DC" : "AC" : "DC"
+        );
+
+        // Set PsysL2 to 2W below supply wattage (Intel says PL3 = PL2 + 2W)
+        watts = supply_watts - 2;
+        res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PSYS_PL2, 0, PECI_PSYS_PL2(watts));
+        DEBUG(" SET PsysPL2 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
+
+        // Set PsysPL3 (peak short term power) to supply wattage
+        watts = supply_watts;
+        res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL3, 0, PECI_PL3(watts, 6, 4));
+        DEBUG(" SET PL3 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
+
+        // Cap PL4 to supply wattage if needed
+        watts = (supply_watts > POWER_LIMIT_AC) ? POWER_LIMIT_AC : supply_watts;
+        res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL4, 0, PECI_PL4(watts));
+        DEBUG(" SET PL4 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
     }
 
-    if (ac) {
-        supply_watts = (uint32_t)battery_charger_input_current *
-            (uint32_t)battery_charger_input_voltage / 1000;
-        DEBUG("%llu W supply detected\n", supply_watts);
-    }
-
-    if (!ac || !supply_watts || options_get(OPT_ALLOW_BAT_BOOST)) {
-        supply_watts += POWER_LIMIT_DC;
-    }
-
-    DEBUG(
-        "PECI PL: %llu watts available from %s\n",
-        supply_watts,
-        ac ? options_get(OPT_ALLOW_BAT_BOOST) ? "AC + DC" : "AC" : "DC"
-    );
-
-    // Set PsysL2 to 2W below supply wattage (Intel says PL3 = PL2 + 2W)
-    watts = supply_watts - 2;
-    res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PSYS_PL2, 0, PECI_PSYS_PL2(watts));
-    DEBUG(" SET PsysPL2 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
-
-    // Set PsysPL3 (peak short term power) to supply wattage
-    watts = supply_watts;
-    res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL3, 0, PECI_PL3(watts, 6, 4));
-    DEBUG(" SET PL3 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
-
-    // Cap PL4 to supply wattage if needed
-    watts = (supply_watts > POWER_LIMIT_AC) ? POWER_LIMIT_AC : supply_watts;
-    res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL4, 0, PECI_PL4(watts));
-    DEBUG(" SET PL4 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
+#if HAVE_D_NOTIFY
+    // Send D-notification for GPU to re-evaluate power limit
+    pmc_sci(&PMC_1, 0xA0);
+#endif
 
     return;
 }
@@ -393,7 +397,7 @@ void power_cpu_reset(void) {
     // Reset KBC and touchpad states
     kbled_reset();
     // Set power limits
-    power_peci_limit(!gpio_get(&ACIN_N));
+    power_apply_limit(!gpio_get(&ACIN_N));
     kbc_clear_lock();
     ps2_reset(&PS2_1);
     ps2_reset(&PS2_TOUCHPAD);
@@ -437,7 +441,7 @@ void power_event(void) {
                 }
             }
         }
-        power_peci_limit(!ac_new);
+        power_apply_limit(!ac_new);
         battery_debug();
 
         // Reset main loop cycle to force reading PECI and battery

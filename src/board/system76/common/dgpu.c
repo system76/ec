@@ -5,6 +5,7 @@
 
 #if HAVE_DGPU
 
+#include <board/battery.h>
 #include <board/gpio.h>
 #include <board/peci.h>
 #include <board/power.h>
@@ -55,6 +56,39 @@ static struct Fan FAN = {
     .cooldown_size = ARRAY_SIZE(FAN_COOLDOWN),
     .interpolate = SMOOTH_FANS != 0,
 };
+
+uint8_t dgpu_get_d_notify_level(bool ac) {
+#if HAVE_D_NOTIFY
+    uint16_t supply_watts = 0;
+
+    if (ac) {
+        supply_watts = (uint32_t)battery_charger_input_current_ma *
+            (uint32_t)battery_charger_input_voltage_v / 1000;
+
+        if (supply_watts >= D_NOTIFY_D1_MIN_W)
+            return 0;
+
+        if (supply_watts >= D_NOTIFY_D2_MIN_W)
+            return 1;
+
+        if (supply_watts >= D_NOTIFY_D3_MIN_W)
+            return 2;
+
+        if (supply_watts >= D_NOTIFY_D4_MIN_W)
+            return 3;
+
+        if (supply_watts >= D_NOTIFY_D5_MIN_W)
+            return 4;
+
+        // If we have less than required for D5, we're in trouble. Do the best
+        // we can and set level to D4 anyway.
+        // TODO: Throttle the GPU further
+        return 4;
+    }
+
+#endif
+    return 0;
+}
 
 int16_t dgpu_set_fan_curve(uint8_t count, struct FanPoint *points) {
     if (count != FAN.points_size) {

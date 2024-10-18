@@ -7,8 +7,8 @@
 
 struct battery_info battery_info = { 0 };
 
-uint16_t battery_charger_input_current = CHARGER_INPUT_CURRENT;
-uint16_t battery_charger_input_voltage = BATTERY_CHARGER_VOLTAGE_AC;
+uint16_t battery_charger_input_current_ma = CHARGER_INPUT_CURRENT;
+uint16_t battery_charger_input_voltage_v = BATTERY_CHARGER_VOLTAGE_AC;
 
 // Default values to disable battery charging thresholds
 #define BATTERY_START_DEFAULT 0
