@@ -153,7 +153,7 @@ int16_t battery_charger_enable(void) {
     res = smbus_write(
         CHARGER_ADDRESS,
         REG_INPUT_CURRENT,
-        INPUT_CURRENT(battery_charger_input_current * 9 / 10)
+        INPUT_CURRENT(battery_charger_input_current)
     );
     if (res < 0)
         return res;
