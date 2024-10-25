@@ -132,6 +132,9 @@ uint8_t acpi_read(uint8_t addr) {
             break;
 #endif // HAVE_DGPU
 
+        ACPI_32(0xD5, (uint32_t)battery_charger_input_current_ma *
+                      (uint32_t)battery_charger_input_voltage_v);
+
 #if HAVE_LED_AIRPLANE_N
         // Airplane mode LED
         case 0xD9:
