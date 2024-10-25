@@ -40,6 +40,10 @@
 #define USE_S0IX 0
 #endif
 
+#ifndef POWER_LIMIT_PSYS_ENABLE
+#define POWER_LIMIT_PSYS_ENABLE 1
+#endif
+
 #ifndef HAVE_EC_EN
 #define HAVE_EC_EN 1
 #endif
@@ -362,6 +366,7 @@ void power_apply_limit(bool ac) {
             ac ? options_get(OPT_ALLOW_BAT_BOOST) ? "AC + DC" : "AC" : "DC"
         );
 
+#if POWER_LIMIT_PSYS_ENABLE
         // Set PsysL2 to 2W below supply wattage (Intel says PL3 = PL2 + 2W)
         watts = supply_watts - 2;
         res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PSYS_PL2, 0, PECI_PSYS_PL2(watts));
@@ -371,6 +376,7 @@ void power_apply_limit(bool ac) {
         watts = supply_watts;
         res = peci_wr_pkg_config(PECI_REG_PKG_CFG_PL3, 0, PECI_PL3(watts, 6, 4));
         DEBUG(" SET PL3 = %llu %s\n", watts, (res == 0x40) ? "OK" : "ERR");
+#endif
 
         // Cap PL4 to supply wattage if needed
         watts = (supply_watts > POWER_LIMIT_AC) ? POWER_LIMIT_AC : supply_watts;
