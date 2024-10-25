@@ -40,10 +40,11 @@ CFLAGS += \
 	-DCHARGER_CHARGE_VOLTAGE=17600 \
 	-DCHARGER_INPUT_CURRENT=9000
 
-# Set CPU power limits in watts
+# Set CPU power limits in watts and disable setting PSYS
 # AC: power rating of the included AC adapter
-# DC: battery discharge rate (assume 1C rating??)
+# DC: battery discharge rate (1c discharge rate)
 CFLAGS += \
+	-DPOWER_LIMIT_PSYS_ENABLE=0 \
 	-DPOWER_LIMIT_AC=180 \
 	-DPOWER_LIMIT_DC=80
 
