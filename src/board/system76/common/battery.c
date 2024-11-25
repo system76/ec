@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <board/battery.h>
+#include <board/flash.h>
 #include <board/gpio.h>
 #include <board/smbus.h>
 #include <common/debug.h>
@@ -12,6 +13,18 @@ uint16_t battery_charger_input_current = CHARGER_INPUT_CURRENT;
 // Default values to disable battery charging thresholds
 #define BATTERY_START_DEFAULT 0
 #define BATTERY_END_DEFAULT 100
+
+// Flash address to save charging thresholds to
+static const uint32_t BAT_CFG_ADDR = CONFIG_EC_FLASH_SIZE - (2 * 1024);
+static const uint16_t BAT_CFG_MAGIC = 0x4254;
+
+struct battery_config {
+    uint16_t magic;
+    uint8_t start_threshold;
+    uint8_t end_threshold;
+};
+
+static struct battery_config __xdata bat_cfg = { { 0 } };
 
 // Represents a battery percentage level, below which charging will begin.
 // Valid values are [0, 100]
@@ -111,4 +124,39 @@ void battery_event(void) {
 void battery_reset(void) {
     battery_start_threshold = BATTERY_START_THRESHOLD;
     battery_end_threshold = BATTERY_END_THRESHOLD;
+}
+
+// Read the charge thresholds from flash. Falls back to defaults if not found.
+bool battery_load_thresholds(void) {
+    bool loaded = true;
+
+    flash_read(BAT_CFG_ADDR, (uint8_t *)&bat_cfg, sizeof(bat_cfg));
+
+    if (bat_cfg.magic != BAT_CFG_MAGIC) {
+        bat_cfg.magic = BAT_CFG_MAGIC;
+        bat_cfg.start_threshold = BATTERY_START_THRESHOLD;
+        bat_cfg.end_threshold = BATTERY_END_THRESHOLD;
+        loaded = false;
+    }
+
+    (void)battery_set_start_threshold(bat_cfg.start_threshold);
+    (void)battery_set_end_threshold(bat_cfg.end_threshold);
+
+    return loaded;
+}
+
+// Write the charge thresholds to flash.
+bool battery_save_thresholds(void) {
+    if ((bat_cfg.start_threshold == battery_start_threshold) &&
+        (bat_cfg.end_threshold == battery_end_threshold)) {
+        return true;
+    }
+
+    bat_cfg.start_threshold = battery_start_threshold;
+    bat_cfg.end_threshold = battery_end_threshold;
+
+    flash_erase(BAT_CFG_ADDR);
+    flash_write(BAT_CFG_ADDR, (uint8_t *)&bat_cfg, sizeof(bat_cfg));
+
+    return flash_read_u16(BAT_CFG_ADDR) == BAT_CFG_MAGIC;
 }
