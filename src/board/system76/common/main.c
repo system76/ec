@@ -90,6 +90,7 @@ void init(void) {
     // Must happen last
     power_init();
     board_init();
+    (void)battery_load_thresholds();
 }
 
 void main(void) {
