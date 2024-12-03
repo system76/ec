@@ -87,6 +87,9 @@ uint8_t dgpu_get_d_notify_level(bool ac) {
     }
 
 #endif
+    /* Fix unused variable */
+    ac = ac;
+
     return 0;
 }
 
