@@ -126,11 +126,11 @@ static enum Result cmd_print(void) {
 static enum Result cmd_fan_get(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
-        smfi_cmd[SMFI_CMD_DATA + 1] = fan1_pwm_actual;
+        smfi_cmd[SMFI_CMD_DATA + 1] = fan1_info.pwm_actual;
         return RES_OK;
 #ifdef FAN2_PWM
     case 2:
-        smfi_cmd[SMFI_CMD_DATA + 1] = fan2_pwm_actual;
+        smfi_cmd[SMFI_CMD_DATA + 1] = fan2_info.pwm_actual;
         return RES_OK;
 #endif
     }
@@ -143,12 +143,12 @@ static enum Result cmd_fan_set(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
         // Set duty cycle of FAN1
-        fan1_pwm_target = smfi_cmd[SMFI_CMD_DATA + 1];
+        fan1_info.pwm_target = smfi_cmd[SMFI_CMD_DATA + 1];
         return RES_OK;
 #ifdef FAN2_PWM
     case 2:
         // Set duty cycle of FAN2
-        fan2_pwm_target = smfi_cmd[SMFI_CMD_DATA + 1];
+        fan2_info.pwm_target = smfi_cmd[SMFI_CMD_DATA + 1];
         return RES_OK;
 #endif
     }
