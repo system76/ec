@@ -1,0 +1,114 @@
+# SPDX-License-Identifier: CC0-1.0
+# SPDX-FileCopyrightText: NONE
+
+# A container for 8051 development using Small Device C Compiler.
+# SDCC: https://sdcc.sourceforge.net/
+
+# NOTE: The repository is specified in the image name to make it explicit
+# which source is being trusted to provide the image.
+ARG CONTAINER_IMAGE="docker.io/library/debian:trixie-20241202-slim"
+
+ARG SDCC_REPO="https://svn.code.sf.net/p/sdcc/code"
+ARG SDCC_REV="14648"
+ARG SDCC_VERSION="4.4.0"
+
+ARG RUST_TOOLCHAIN="nightly-2024-05-11"
+
+# Build SDCC toolchain
+FROM ${CONTAINER_IMAGE} as sdcc-build
+ARG SDCC_REPO
+ARG SDCC_REV
+ARG SDCC_VERSION
+WORKDIR /tmp
+
+RUN apt-get --quiet update \
+    && apt-get --quiet install --no-install-recommends --assume-yes \
+        autoconf \
+        automake \
+        bison \
+        ca-certificates \
+        flex \
+        g++ \
+        gcc \
+        libboost-dev \
+        make \
+        subversion \
+        zlib1g-dev \
+    && apt-get clean
+
+RUN svn checkout \
+    --depth infinity \
+    --revision ${SDCC_REV} \
+    ${SDCC_REPO}/tags/sdcc-${SDCC_VERSION}/sdcc \
+    sdcc
+
+# Only the MCS-51 port is needed.
+RUN cd sdcc \
+    && sh ./configure \
+        --disable-z80-port \
+        --disable-z180-port \
+        --disable-r2k-port \
+        --disable-r2ka-port \
+        --disable-r3ka-port \
+        --disable-sm83-port \
+        --disable-tlcs90-port \
+        --disable-ez80_z80-port \
+        --disable-z80n-port \
+        --disable-ds390-port \
+        --disable-ds400-port \
+        --disable-pic14-port \
+        --disable-pic16-port \
+        --disable-hc08-port \
+        --disable-s08-port \
+        --disable-stm8-port \
+        --disable-pdk13-port \
+        --disable-pdk14-port \
+        --disable-pdk15-port \
+        --disable-mos6502-port \
+        --disable-ucsim \
+        --disable-sdcdb \
+        --disable-non-free \
+        --prefix= \
+    && make -j $(nproc) \
+    && make install DESTDIR=/opt/sdcc
+
+# EC development environment
+FROM ${CONTAINER_IMAGE}
+ARG SDCC_REV
+ARG SDCC_VERSION
+ARG RUST_TOOLCHAIN
+COPY --from=sdcc-build /opt/sdcc /opt/sdcc
+ENV SDCC_REV "${SDCC_REV}"
+ENV SDCC_VERSION "${SDCC_VERSION}"
+ENV SDCC_PATH "/opt/sdcc"
+ENV PATH "${SDCC_PATH}/bin:$PATH"
+
+RUN apt-get --quiet update \
+    && apt-get --quiet install --no-install-recommends --assume-yes \
+        bash \
+        binutils \
+        ca-certificates \
+        gcc \
+        git \
+        libc6-dev \
+        libhidapi-dev \
+        make \
+        pkgconf \
+        rustup \
+        shellcheck \
+        uncrustify \
+        xxd \
+    && apt-get clean
+
+# XXX: rustup 1.27 does not recognize toolchain if preceding option specifies
+# a comma seprates list as an argument with a space.
+# Ref: https://github.com/rust-lang/rustup/issues/4073
+RUN rustup toolchain install \
+        --no-self-update \
+        --target x86_64-unknown-linux-gnu,x86_64-unknown-uefi \
+        --profile minimal \
+        --component=clippy,rustfmt \
+        ${RUST_TOOLCHAIN}
+
+WORKDIR /workspace
+CMD ["bash"]
