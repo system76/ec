@@ -20,11 +20,10 @@ toolset.
 
 A complete list of dependencies can be seen in `scripts/deps.sh`.
 
-### Cargo
+### Cargo (Rust)
 
 rustup manages the [Rust] toolchain, which includes cargo. Cargo is required
-for building the tools. It is the only part of the development toolset that is
-not installed through distro packages.
+for building the tools.
 
 ### GNU Make
 
