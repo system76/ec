@@ -64,8 +64,8 @@ Public License, version 3. See [LICENSE](./LICENSE) for details.
 - ectool: MIT
 
 Datasheets for the ITE embedded controllers used in System76 laptops cannot be
-shared outside of company. (However, the IT81202E datasheet is [publicly
-available][it81202e]. While it uses a different core, a significant portion of
-the register information is the same as IT85878E/IT5570E.)
+shared outside of company. (However, the IT81202 datasheet is [publicly
+available][it81202]. While it uses a different core, a significant portion of
+the register information is the same as IT8587/IT5570.)
 
-[it81202e]: https://www.ite.com.tw/en/product/view?mid=149
+[it81202]: https://www.ite.com.tw/en/product/cate2/IT81202
