@@ -14,6 +14,11 @@
 #define GPIO_UP     BIT(2)
 #define GPIO_DOWN   BIT(1)
 
+struct GpioInit {
+    volatile uint8_t __xdata *const reg;
+    uint8_t data;
+};
+
 struct Gpio {
     volatile uint8_t __xdata *data;
     volatile uint8_t __xdata *mirror;
