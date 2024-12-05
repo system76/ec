@@ -30,233 +30,135 @@ struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // uncrustify:on
 
+static const struct GpioInit __code gpio_cfg_init[] = {
+    // General control
+    { &GCR, 0b10 << 1 }, // Enable LPC reset on GPD2
+    { &GCR2, 0 }, // Disable PECI
+    { &GCR6, 0 }, // Disable UARTs
+    { &GCR8, BIT(4) }, // PWRSW WDT 2 Enable 1
+    { &GCR9, BIT(5) }, // PWRSW WDT 2 Enable 2
+    { &GCR10, BIT(1) }, // PWRSW counter 12 seconds
+    { &GCR15, BIT(4) }, // Enable SMBus channel 4
+    { &GCR19, BIT(7) | BIT(0) }, // Set GPB5 and GPD2 to 1.8V
+    { &GCR20, BIT(7) }, // Set GPD3 to 1.8V, GPF2 and GPF3 to 3.3V
+    { &GCR21, BIT(5) | BIT(2) | BIT(1) }, // Set GPF7, GPH0, and GPH1 to 1.8V
+    { &GCR22, BIT(7) },
+    { &GCR23, BIT(0) }, // Set GPM6 power domain to VCC
+
+    // Port data
+    { &GPDRA, 0 },
+    { &GPDRB, BIT(4) }, // XLP_OUT
+    { &GPDRC, 0 },
+    { &GPDRD, BIT(5) }, // PWR_BTN#
+    { &GPDRE, BIT(3) }, // USB_PWR_EN
+    { &GPDRF, BIT(6) }, // H_PECI
+    { &GPDRG, BIT(6) }, // H_PROCHOT_EC
+    { &GPDRH, 0 },
+    { &GPDRI, 0 },
+    { &GPDRJ, BIT(1) }, // KBC_MUTE#
+    { &GPDRM, 0 },
+
+    // Port control
+    { &GPCRA0, GPIO_OUT }, // EC_PWM_LEDKB_P
+    { &GPCRA1, GPIO_IN }, // KBC_BEEP
+    { &GPCRA2, GPIO_ALT }, // CPU_FAN
+    { &GPCRA3, GPIO_OUT }, // WLAN_PWR_EN
+    { &GPCRA4, GPIO_OUT }, // AC_PRESENT_EC
+    { &GPCRA5, GPIO_ALT }, // EC_PWM_LEDKB_R
+    { &GPCRA6, GPIO_ALT }, // EC_PWM_LEDKB_G
+    { &GPCRA7, GPIO_IN }, // TBTA_VBUS_2_EN#
+
+    { &GPCRB0, GPIO_IN | GPIO_UP }, // AC_IN#
+    { &GPCRB1, GPIO_IN | GPIO_UP }, // LID_SW#
+    { &GPCRB2, GPIO_IN }, // PCIE_WAKE#
+    { &GPCRB3, GPIO_IN }, // PWR_SW#
+    { &GPCRB4, GPIO_OUT }, // XLP_OUT
+    { &GPCRB5, GPIO_IN }, // SLP_S0#
+    { &GPCRB6, GPIO_OUT }, // SUSBC_EC#
+
+    { &GPCRC0, GPIO_IN }, // ALL_SYS_PWRGD
+    { &GPCRC1, GPIO_ALT | GPIO_UP }, // SMB_CLK_EC
+    { &GPCRC2, GPIO_ALT | GPIO_UP }, // SMB_DATA_EC
+    { &GPCRC3, GPIO_ALT | GPIO_UP }, // KB-SO16
+    { &GPCRC4, GPIO_IN | GPIO_UP }, // CNVI_DET#
+    { &GPCRC5, GPIO_ALT | GPIO_UP }, // KB-SO17
+    { &GPCRC6, GPIO_IN }, // TMRI1-TEST
+    { &GPCRC7, GPIO_OUT }, // BKL_EN
+
+    { &GPCRD0, GPIO_OUT }, // PD_POWER_EN
+    { &GPCRD1, GPIO_OUT }, // CCD_EN
+    { &GPCRD2, GPIO_ALT }, // ESPI_RESET#
+    { &GPCRD3, GPIO_IN }, // SLP_A#
+    { &GPCRD4, GPIO_OUT }, // LED_PWR
+    { &GPCRD5, GPIO_OUT }, // EC_PWR_BTN#
+    { &GPCRD6, GPIO_ALT | GPIO_DOWN }, // CPU_FANSEN
+    { &GPCRD7, GPIO_OUT }, // EC_ME_WE
+
+    { &GPCRE0, GPIO_ALT | GPIO_UP }, // SMC_BAT
+    { &GPCRE1, GPIO_IN }, // GPE1_TEST
+    { &GPCRE2, GPIO_IN }, // ACE_I2C_IRQ2Z
+    { &GPCRE3, GPIO_OUT }, // USB_PWR_EN
+    { &GPCRE4, GPIO_OUT }, // DD_ON
+    { &GPCRE5, GPIO_OUT }, // EC_RSMRST#
+    { &GPCRE6, GPIO_IN }, // JACK_IN#_EC
+    { &GPCRE7, GPIO_ALT | GPIO_UP }, // SMD_BAT
+
+    { &GPCRF0, GPIO_OUT }, // 80CLK
+    { &GPCRF1, GPIO_OUT }, // USB_CHARGE_EN
+    { &GPCRF2, GPIO_OUT }, // 3IN1
+    { &GPCRF3, GPIO_OUT }, // PCH_PWROK_EC
+    { &GPCRF4, GPIO_ALT | GPIO_UP }, // TP_CLK
+    { &GPCRF5, GPIO_ALT | GPIO_UP }, // TP_DATA
+    { &GPCRF6, GPIO_ALT }, // H_PECI
+    { &GPCRF7, GPIO_IN }, // CPU_C10_GATE#
+
+    { &GPCRG0, GPIO_IN }, // 10k pull-down
+    { &GPCRG1, GPIO_IN }, // WLAN_EN
+    { &GPCRG2, GPIO_IN }, // Pull up to VDD3
+    { &GPCRG3, GPIO_ALT }, // ALSPI_CE#
+    { &GPCRG4, GPIO_ALT }, // ALSPI_MSI
+    { &GPCRG5, GPIO_ALT }, // ALSPI_MSO
+    { &GPCRG6, GPIO_OUT }, // H_PROCHOT_EC
+    { &GPCRG7, GPIO_ALT }, // ALSPI_SCLK
+
+    { &GPCRH0, GPIO_IN }, // SUSB#_PCH
+    { &GPCRH1, GPIO_IN }, // SUSC#_PCH
+    { &GPCRH2, GPIO_OUT }, // LED_ACIN
+    { &GPCRH3, GPIO_OUT }, // 3G_EN
+    { &GPCRH4, GPIO_OUT }, // 3G_PWR_EN
+    { &GPCRH5, GPIO_IN }, // TBTA_VBUS_1_EN#
+    { &GPCRH6, GPIO_IN }, // Not connected
+    { &GPCRH7, GPIO_IN }, // Not connected
+
+    { &GPCRI0, GPIO_ALT }, // BAT_DET
+    { &GPCRI1, GPIO_ALT }, // BAT_VOLT
+    { &GPCRI2, GPIO_IN | GPIO_UP }, // RGBKB-DET#
+    { &GPCRI3, GPIO_ALT }, // THERM_VOLT_CPU_1
+    { &GPCRI4, GPIO_ALT }, // TOTAL_CUR
+    { &GPCRI5, GPIO_IN }, // Not connected
+    { &GPCRI6, GPIO_ALT }, // THERM_VOLT_CPU_2
+    { &GPCRI7, GPIO_IN }, // MODEL_ID
+
+    { &GPCRJ0, GPIO_IN }, // SINK_CTRL_EC_1
+    { &GPCRJ1, GPIO_OUT }, // KBC_MUTE#
+    { &GPCRJ2, GPIO_ALT }, // KBLIGHT_ADJ
+    { &GPCRJ3, GPIO_IN }, // SINK_CTRL_EC_2
+    { &GPCRJ4, GPIO_OUT }, // VA_EC_EN
+    { &GPCRJ5, GPIO_IN }, // VBATT_BOOST#
+    { &GPCRJ6, GPIO_OUT }, // EC_GPIO
+    { &GPCRJ7, GPIO_IN | GPIO_UP }, // LEDKB_DET#
+
+    { &GPCRM0, GPIO_ALT | GPIO_UP | GPIO_DOWN }, // ESPI_IO0_EC
+    { &GPCRM1, GPIO_ALT | GPIO_UP | GPIO_DOWN }, // ESPI_IO1_EC
+    { &GPCRM2, GPIO_ALT | GPIO_UP | GPIO_DOWN }, // ESPI_IO2_EC
+    { &GPCRM3, GPIO_ALT | GPIO_UP | GPIO_DOWN }, // ESPI_IO3_EC
+    { &GPCRM4, GPIO_ALT | GPIO_UP | GPIO_DOWN }, // ESPI_CLK_EC
+    { &GPCRM5, GPIO_ALT }, // ESPI_CS_EC#
+    { &GPCRM6, GPIO_IN | GPIO_UP | GPIO_DOWN }, // ESPI_ALRT0#
+};
+
 void gpio_init(void) {
-    // Enable LPC reset on GPD2
-    GCR = 0b10 << 1;
-    // Disable PECI
-    GCR2 = 0;
-    // Disable UARTs
-    GCR6 = 0;
-    // PWRSW WDT 2 Enable 1
-    GCR8 = BIT(4);
-    // PWRSW WDT 2 Enable 2
-    GCR9 = BIT(5);
-    // PWRSW counter 12 seconds
-    GCR10 = BIT(1);
-    // Enable SMBus channel 4
-    GCR15 = BIT(4);
-    // Set GPB5 and GPD2 to 1.8V
-    GCR19 = BIT(7) | BIT(0);
-    // Set GPD3 to 1.8V, GPF2 and GPF3 to 3.3V
-    GCR20 = BIT(7);
-    // Set GPF7, GPH0, and GPH1 to 1.8V
-    GCR21 = BIT(5) | BIT(2) | BIT(1);
-    // Not documented
-    GCR22 = BIT(7);
-    // Set GPM6 power domain to VCC
-    GCR23 = BIT(0);
-
-    // Set GPIO data
-    GPDRA = 0;
-    // XLP_OUT
-    GPDRB = BIT(4);
-    GPDRC = 0;
-    // PWR_BTN#
-    GPDRD = BIT(5);
-    // USB_PWR_EN
-    GPDRE = BIT(3);
-    // H_PECI
-    GPDRF = BIT(6);
-    // H_PROCHOT_EC
-    GPDRG = BIT(6);
-    GPDRH = 0;
-    GPDRI = 0;
-    // KBC_MUTE#
-    GPDRJ = BIT(1);
-    GPDRM = 0;
-
-    // Set GPIO control
-
-    // EC_PWM_LEDKB_P
-    GPCRA0 = GPIO_OUT;
-    // KBC_BEEP
-    GPCRA1 = GPIO_IN;
-    // CPU_FAN
-    GPCRA2 = GPIO_ALT;
-    // WLAN_PWR_EN
-    GPCRA3 = GPIO_OUT;
-    // AC_PRESENT_EC
-    GPCRA4 = GPIO_OUT;
-    // EC_PWM_LEDKB_R
-    GPCRA5 = GPIO_ALT;
-    // EC_PWM_LEDKB_G
-    GPCRA6 = GPIO_ALT;
-    // TBTA_VBUS_2_EN#
-    GPCRA7 = GPIO_IN;
-
-    // AC_IN#
-    GPCRB0 = GPIO_IN | GPIO_UP;
-    // LID_SW#
-    GPCRB1 = GPIO_IN | GPIO_UP;
-    // PCIE_WAKE#
-    GPCRB2 = GPIO_IN;
-    // PWR_SW#
-    GPCRB3 = GPIO_IN;
-    // XLP_OUT
-    GPCRB4 = GPIO_OUT;
-    // SLP_S0#
-    GPCRB5 = GPIO_IN;
-    // SUSBC_EC#
-    GPCRB6 = GPIO_OUT;
-
-    // ALL_SYS_PWRGD
-    GPCRC0 = GPIO_IN;
-    // SMB_CLK_EC
-    GPCRC1 = GPIO_ALT | GPIO_UP;
-    // SMB_DATA_EC
-    GPCRC2 = GPIO_ALT | GPIO_UP;
-    // KB-SO16
-    GPCRC3 = GPIO_ALT | GPIO_UP;
-    // CNVI_DET#
-    GPCRC4 = GPIO_IN | GPIO_UP;
-    // KB-SO17
-    GPCRC5 = GPIO_ALT | GPIO_UP;
-    // TMRI1-TEST
-    GPCRC6 = GPIO_IN;
-    // BKL_EN
-    GPCRC7 = GPIO_OUT;
-
-    // PD_POWER_EN
-    GPCRD0 = GPIO_OUT;
-    // CCD_EN
-    GPCRD1 = GPIO_OUT;
-    // ESPI_RESET#
-    GPCRD2 = GPIO_ALT;
-    // SLP_A#
-    GPCRD3 = GPIO_IN;
-    // LED_PWR
-    GPCRD4 = GPIO_OUT;
-    // EC_PWR_BTN#
-    GPCRD5 = GPIO_OUT;
-    // CPU_FANSEN
-    GPCRD6 = GPIO_ALT | GPIO_DOWN;
-    // EC_ME_WE
-    GPCRD7 = GPIO_OUT;
-
-    // SMC_BAT
-    GPCRE0 = GPIO_ALT | GPIO_UP;
-    // GPE1_TEST
-    GPCRE1 = GPIO_IN;
-    // ACE_I2C_IRQ2Z
-    GPCRE2 = GPIO_IN;
-    // USB_PWR_EN
-    GPCRE3 = GPIO_OUT;
-    // DD_ON
-    GPCRE4 = GPIO_OUT;
-    // EC_RSMRST#
-    GPCRE5 = GPIO_OUT;
-    // JACK_IN#_EC
-    GPCRE6 = GPIO_IN;
-    // SMD_BAT
-    GPCRE7 = GPIO_ALT | GPIO_UP;
-
-    // 80CLK
-    GPCRF0 = GPIO_OUT;
-    // USB_CHARGE_EN
-    GPCRF1 = GPIO_OUT;
-    // 3IN1
-    GPCRF2 = GPIO_OUT;
-    // PCH_PWROK_EC
-    GPCRF3 = GPIO_OUT;
-    // TP_CLK
-    GPCRF4 = GPIO_ALT | GPIO_UP;
-    // TP_DATA
-    GPCRF5 = GPIO_ALT | GPIO_UP;
-    // H_PECI
-    GPCRF6 = GPIO_ALT;
-    // CPU_C10_GATE#
-    GPCRF7 = GPIO_IN;
-
-    // 10k pull-down
-    GPCRG0 = GPIO_IN;
-    // WLAN_EN
-    GPCRG1 = GPIO_IN;
-    // Pull up to VDD3
-    GPCRG2 = GPIO_IN;
-    // ALSPI_CE#
-    GPCRG3 = GPIO_ALT;
-    // ALSPI_MSI
-    GPCRG4 = GPIO_ALT;
-    // ALSPI_MSO
-    GPCRG5 = GPIO_ALT;
-    // H_PROCHOT_EC
-    GPCRG6 = GPIO_OUT;
-    // ALSPI_SCLK
-    GPCRG7 = GPIO_ALT;
-
-    // SUSB#_PCH
-    GPCRH0 = GPIO_IN;
-    // SUSC#_PCH
-    GPCRH1 = GPIO_IN;
-    // LED_ACIN
-    GPCRH2 = GPIO_OUT;
-    // 3G_EN
-    GPCRH3 = GPIO_OUT;
-    // 3G_PWR_EN
-    GPCRH4 = GPIO_OUT;
-    // TBTA_VBUS_1_EN#
-    GPCRH5 = GPIO_IN;
-    // Not connected
-    GPCRH6 = GPIO_IN;
-    // Not connected
-    GPCRH7 = GPIO_IN;
-
-    // BAT_DET
-    GPCRI0 = GPIO_ALT;
-    // BAT_VOLT
-    GPCRI1 = GPIO_ALT;
-    // RGBKB-DET#
-    GPCRI2 = GPIO_IN | GPIO_UP;
-    // THERM_VOLT_CPU_1
-    GPCRI3 = GPIO_ALT;
-    // TOTAL_CUR
-    GPCRI4 = GPIO_ALT;
-    // Not connected
-    GPCRI5 = GPIO_IN;
-    // THERM_VOLT_CPU_2
-    GPCRI6 = GPIO_ALT;
-    // MODEL_ID
-    GPCRI7 = GPIO_IN;
-
-    // SINK_CTRL_EC_1
-    GPCRJ0 = GPIO_IN;
-    // KBC_MUTE#
-    GPCRJ1 = GPIO_OUT;
-    // KBLIGHT_ADJ
-    GPCRJ2 = GPIO_ALT;
-    // SINK_CTRL_EC_2
-    GPCRJ3 = GPIO_IN;
-    // VA_EC_EN
-    GPCRJ4 = GPIO_OUT;
-    // VBATT_BOOST#
-    GPCRJ5 = GPIO_IN;
-    // EC_GPIO
-    GPCRJ6 = GPIO_OUT;
-    // LEDKB_DET#
-    GPCRJ7 = GPIO_IN | GPIO_UP;
-
-    // ESPI_IO0_EC
-    GPCRM0 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
-    // ESPI_IO1_EC
-    GPCRM1 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
-    // ESPI_IO2_EC
-    GPCRM2 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
-    // ESPI_IO3_EC
-    GPCRM3 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
-    // ESPI_CLK_EC
-    GPCRM4 = GPIO_ALT | GPIO_UP | GPIO_DOWN;
-    // ESPI_CS_EC#
-    GPCRM5 = GPIO_ALT;
-    // ESPI_ALRT0#
-    GPCRM6 = GPIO_IN | GPIO_UP | GPIO_DOWN;
+    for (uint8_t i = 0; i < ARRAY_SIZE(gpio_cfg_init); i++) {
+        *gpio_cfg_init[i].reg = gpio_cfg_init[i].data;
+    }
 }
