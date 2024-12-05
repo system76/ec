@@ -106,7 +106,13 @@ void main(void) {
     gpio_debug();
 #endif
 
-    wdt_init();
+    // XXX: Currently, EC upgrade process will trigger a WDT reset after it
+    // finishes writing the flash.
+    if (ec_reset_source() == RESET_SOURCE_WDT) {
+        ERROR("\n<<< WDT reset occurred! >>>\n\n");
+    } else {
+        wdt_init();
+    }
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
