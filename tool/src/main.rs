@@ -311,7 +311,7 @@ fn main() {
         .subcommand(SubCommand::with_name("console"))
         .subcommand(SubCommand::with_name("fan")
             .arg(Arg::with_name("index")
-                .value_parser(clap::value_parser!(u8))
+                .allow_invalid_utf8(true)
                 .required(true)
             )
             .arg(Arg::with_name("duty")
@@ -456,7 +456,7 @@ fn main() {
             },
         },
         Some(("fan", sub_m)) => {
-            let index = sub_m.value_of("index").unwrap().parse::<u8>().unwrap();
+            let index = sub_m.value_of_os("index").unwrap().to_string_lossy().parse::<u8>().unwrap();
             let duty_opt = sub_m.value_of("duty").map(|x| x.parse::<u8>().unwrap());
             match duty_opt {
                 Some(duty) => match unsafe { fan_set(&mut ec, index, duty) } {
