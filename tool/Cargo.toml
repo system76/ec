@@ -20,8 +20,10 @@ clap = { version = "4.5", features = ["derive"], optional = true }
 libc = { version = "0.2", optional = true }
 # NOTE: Upgrading to 2.x blocked on Ubuntu shipping newer hidapi
 hidapi = { version = "1.5", default-features = false, features = ["linux-shared-hidraw"], optional = true }
-redox_hwio = { version = "0.1.6", default-features = false, optional = true }
 downcast-rs = { version = "1.2.0", default-features = false }
+
+[target.'cfg(any(target_arch = "x86", target_arch = "x86_64"))'.dependencies]
+redox_hwio = { version = "0.1.6", default-features = false, optional = true }
 
 [features]
 default = ["std", "hidapi", "clap"]

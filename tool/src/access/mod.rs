@@ -11,9 +11,15 @@ pub use self::hid::AccessHid;
 #[cfg(feature = "hidapi")]
 mod hid;
 
-#[cfg(any(feature = "redox_hwio", all(feature = "std", target_os = "linux")))]
+#[cfg(all(
+    any(target_arch = "x86", target_arch = "x86_64"),
+    any(feature = "redox_hwio", all(feature = "std", target_os = "linux"))
+))]
 pub use self::lpc::*;
-#[cfg(any(feature = "redox_hwio", all(feature = "std", target_os = "linux")))]
+#[cfg(all(
+    any(target_arch = "x86", target_arch = "x86_64"),
+    any(feature = "redox_hwio", all(feature = "std", target_os = "linux"))
+))]
 mod lpc;
 
 /// Access method for running an EC command
