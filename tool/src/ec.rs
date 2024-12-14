@@ -1,18 +1,10 @@
 // SPDX-License-Identifier: MIT
 
 #[cfg(not(feature = "std"))]
-use alloc::{
-    boxed::Box,
-    vec,
-};
+use alloc::{boxed::Box, vec};
 use core::convert::TryFrom;
 
-use crate::{
-    Access,
-    Error,
-    Spi,
-    SpiTarget,
-};
+use crate::{Access, Error, Spi, SpiTarget};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 #[repr(u8)]
@@ -83,10 +75,7 @@ impl<A: Access> Ec<A> {
     /// Probes for a compatible EC
     pub unsafe fn new(access: A) -> Result<Self, Error> {
         // Create EC struct with provided access method and timeout
-        let mut ec = Ec {
-            access,
-            version: 0,
-        };
+        let mut ec = Ec { access, version: 0 };
 
         // Read version of protocol
         ec.version = ec.probe()?;
@@ -188,117 +177,76 @@ impl<A: Access> Ec<A> {
 
     /// Read fan duty cycle by fan index
     pub unsafe fn fan_get(&mut self, index: u8) -> Result<u8, Error> {
-        let mut data = [
-            index,
-            0
-        ];
+        let mut data = [index, 0];
         self.command(Cmd::FanGet, &mut data)?;
         Ok(data[1])
     }
 
     /// Set fan duty cycle by fan index
     pub unsafe fn fan_set(&mut self, index: u8, duty: u8) -> Result<(), Error> {
-        let mut data = [
-            index,
-            duty
-        ];
+        let mut data = [index, duty];
         self.command(Cmd::FanSet, &mut data)
     }
 
     /// Read keymap data by layout, output pin, and input pin
     pub unsafe fn keymap_get(&mut self, layer: u8, output: u8, input: u8) -> Result<u16, Error> {
-        let mut data = [
-            layer,
-            output,
-            input,
-            0,
-            0
-        ];
+        let mut data = [layer, output, input, 0, 0];
         self.command(Cmd::KeymapGet, &mut data)?;
-        Ok(
-            (data[3] as u16) |
-            ((data[4] as u16) << 8)
-        )
+        Ok((data[3] as u16) | ((data[4] as u16) << 8))
     }
 
     /// Set keymap data by layout, output pin, and input pin
-    pub unsafe fn keymap_set(&mut self, layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
-        let mut data = [
-            layer,
-            output,
-            input,
-            value as u8,
-            (value >> 8) as u8
-        ];
+    pub unsafe fn keymap_set(
+        &mut self,
+        layer: u8,
+        output: u8,
+        input: u8,
+        value: u16,
+    ) -> Result<(), Error> {
+        let mut data = [layer, output, input, value as u8, (value >> 8) as u8];
         self.command(Cmd::KeymapSet, &mut data)
     }
 
     // Get LED value by index
     pub unsafe fn led_get_value(&mut self, index: u8) -> Result<(u8, u8), Error> {
-        let mut data = [
-            index,
-            0,
-            0,
-        ];
+        let mut data = [index, 0, 0];
         self.command(Cmd::LedGetValue, &mut data)?;
         Ok((data[1], data[2]))
     }
 
     // Set LED value by index
     pub unsafe fn led_set_value(&mut self, index: u8, value: u8) -> Result<(), Error> {
-        let mut data = [
-            index,
-            value,
-        ];
+        let mut data = [index, value];
         self.command(Cmd::LedSetValue, &mut data)
     }
 
     // Get LED color by index
     pub unsafe fn led_get_color(&mut self, index: u8) -> Result<(u8, u8, u8), Error> {
-        let mut data = [
-            index,
-            0,
-            0,
-            0,
-        ];
+        let mut data = [index, 0, 0, 0];
         self.command(Cmd::LedGetColor, &mut data)?;
-        Ok((
-            data[1],
-            data[2],
-            data[3],
-        ))
+        Ok((data[1], data[2], data[3]))
     }
 
     // Set LED color by index
-    pub unsafe fn led_set_color(&mut self, index: u8, red: u8, green: u8, blue: u8) -> Result<(), Error> {
-        let mut data = [
-            index,
-            red,
-            green,
-            blue,
-        ];
+    pub unsafe fn led_set_color(
+        &mut self,
+        index: u8,
+        red: u8,
+        green: u8,
+        blue: u8,
+    ) -> Result<(), Error> {
+        let mut data = [index, red, green, blue];
         self.command(Cmd::LedSetColor, &mut data)
     }
 
     pub unsafe fn led_get_mode(&mut self, layer: u8) -> Result<(u8, u8), Error> {
-        let mut data = [
-            layer,
-            0,
-            0,
-        ];
+        let mut data = [layer, 0, 0];
         self.command(Cmd::LedGetMode, &mut data)?;
-        Ok((
-            data[1],
-            data[2]
-        ))
+        Ok((data[1], data[2]))
     }
 
     pub unsafe fn led_set_mode(&mut self, layer: u8, mode: u8, speed: u8) -> Result<(), Error> {
-        let mut data = [
-            layer,
-            mode,
-            speed,
-        ];
+        let mut data = [layer, mode, speed];
         self.command(Cmd::LedSetMode, &mut data)
     }
 
@@ -316,23 +264,24 @@ impl<A: Access> Ec<A> {
 
     /// Get security state
     pub unsafe fn security_get(&mut self) -> Result<SecurityState, Error> {
-       let mut data = [0];
-       self.command(Cmd::SecurityGet, &mut data)?;
-       SecurityState::try_from(data[0])
+        let mut data = [0];
+        self.command(Cmd::SecurityGet, &mut data)?;
+        SecurityState::try_from(data[0])
     }
 
     /// Set security state
     pub unsafe fn security_set(&mut self, state: SecurityState) -> Result<(), Error> {
-       let mut data = [state as u8];
-       self.command(Cmd::SecuritySet, &mut data)
+        let mut data = [state as u8];
+        self.command(Cmd::SecuritySet, &mut data)
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>
-    where A: 'static {
+    where
+        A: 'static,
+    {
         Ec {
             access: Box::new(self.access),
             version: self.version,
-
         }
     }
 }
@@ -364,7 +313,7 @@ impl<'a, A: Access> EcSpi<'a, A> {
             SpiTarget::Main => (),
             SpiTarget::Backup => {
                 flags |= CMD_SPI_FLAG_BACKUP;
-            },
+            }
         }
 
         flags
@@ -394,7 +343,8 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
         for chunk in data.chunks_mut(self.buffer.len() - 2) {
             self.buffer[0] = flags;
             self.buffer[1] = chunk.len() as u8;
-            self.ec.command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            self.ec
+                .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
             if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
@@ -414,7 +364,8 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
             for i in 0..chunk.len() {
                 self.buffer[i + 2] = chunk[i];
             }
-            self.ec.command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            self.ec
+                .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
             if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }

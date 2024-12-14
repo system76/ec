@@ -4,27 +4,11 @@
 
 use clap::Parser;
 use ectool::{
-    Access,
-    AccessHid,
-    AccessLpcLinux,
-    AccessLpcSim,
-    Ec,
-    Error,
-    Firmware,
-    SecurityState,
-    StdTimeout,
-    Spi,
-    SpiRom,
-    SpiTarget,
+    Access, AccessHid, AccessLpcLinux, AccessLpcSim, Ec, Error, Firmware, SecurityState, Spi,
+    SpiRom, SpiTarget, StdTimeout,
 };
 use hidapi::HidApi;
-use std::{
-    fs,
-    process,
-    str,
-    time::Duration,
-    thread,
-};
+use std::{fs, process, str, thread, time::Duration};
 
 unsafe fn console(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     //TODO: driver support for reading debug region?
@@ -38,7 +22,9 @@ unsafe fn console(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
         } else {
             while head != tail {
                 head += 1;
-                if head >= 256 { head = 1; }
+                if head >= 256 {
+                    head = 1;
+                }
                 let c = access.read_debug(head as u8)?;
                 print!("{}", c as char);
             }
@@ -46,14 +32,21 @@ unsafe fn console(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     }
 }
 
-unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], sector_size: usize) -> Result<(), Error> {
+unsafe fn flash_read<S: Spi>(
+    spi: &mut SpiRom<S, StdTimeout>,
+    rom: &mut [u8],
+    sector_size: usize,
+) -> Result<(), Error> {
     let mut address = 0;
     while address < rom.len() {
         eprint!("\rSPI Read {}K", address / 1024);
         let next_address = address + sector_size;
         let count = spi.read_at(address as u32, &mut rom[address..next_address])?;
         if count != sector_size {
-            eprintln!("\ncount {} did not match sector size {}", count, sector_size);
+            eprintln!(
+                "\ncount {} did not match sector size {}",
+                count, sector_size
+            );
             return Err(Error::Verify);
         }
         address = next_address;
@@ -62,7 +55,12 @@ unsafe fn flash_read<S: Spi>(spi: &mut SpiRom<S, StdTimeout>, rom: &mut [u8], se
     Ok(())
 }
 
-unsafe fn flash_inner(ec: &mut Ec<Box<dyn Access>>, firmware: &Firmware, target: SpiTarget, scratch: bool) -> Result<(), Error> {
+unsafe fn flash_inner(
+    ec: &mut Ec<Box<dyn Access>>,
+    firmware: &Firmware,
+    target: SpiTarget,
+    scratch: bool,
+) -> Result<(), Error> {
     let new_rom = firmware.data.to_vec();
 
     // XXX: Get flash size programatically?
@@ -73,10 +71,7 @@ unsafe fn flash_inner(ec: &mut Ec<Box<dyn Access>>, firmware: &Firmware, target:
     }
 
     let mut spi_bus = ec.spi(target, scratch)?;
-    let mut spi = SpiRom::new(
-        &mut spi_bus,
-        StdTimeout::new(Duration::new(1, 0))
-    );
+    let mut spi = SpiRom::new(&mut spi_bus, StdTimeout::new(Duration::new(1, 0)));
     let sector_size = spi.sector_size();
 
     let mut rom = vec![0xFF; rom_size];
@@ -109,14 +104,17 @@ unsafe fn flash_inner(ec: &mut Ec<Box<dyn Access>>, firmware: &Firmware, target:
                 }
             }
 
-            if ! matches {
-                if ! erased {
+            if !matches {
+                if !erased {
                     spi.erase_sector(address as u32)?;
                 }
-                if ! new_erased {
+                if !new_erased {
                     let count = spi.write_at(address as u32, &new_rom[address..next_address])?;
                     if count != sector_size {
-                        eprintln!("\nWrite count {} did not match sector size {}", count, sector_size);
+                        eprintln!(
+                            "\nWrite count {} did not match sector size {}",
+                            count, sector_size
+                        );
                         return Err(Error::Verify);
                     }
                 }
@@ -130,7 +128,10 @@ unsafe fn flash_inner(ec: &mut Ec<Box<dyn Access>>, firmware: &Firmware, target:
         flash_read(&mut spi, &mut rom, sector_size)?;
         for i in 0..rom.len() {
             if rom[i] != new_rom[i] {
-                eprintln!("Failed to program: {:X} is {:X} instead of {:X}", i, rom[i], new_rom[i]);
+                eprintln!(
+                    "Failed to program: {:X} is {:X} instead of {:X}",
+                    i, rom[i], new_rom[i]
+                );
                 return Err(Error::Verify);
             }
         }
@@ -159,7 +160,10 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
         let ec_board = &data[..size];
         println!("ec board: {:?}", str::from_utf8(ec_board));
 
-        assert!(ec_board == firmware.board, "file board does not match ec board");
+        assert!(
+            ec_board == firmware.board,
+            "file board does not match ec board"
+        );
     }
 
     {
@@ -277,14 +281,25 @@ unsafe fn fan_set(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Result<(
     ec.fan_set(index, duty)
 }
 
-unsafe fn keymap_get(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input: u8) -> Result<(), Error> {
+unsafe fn keymap_get(
+    ec: &mut Ec<Box<dyn Access>>,
+    layer: u8,
+    output: u8,
+    input: u8,
+) -> Result<(), Error> {
     let value = ec.keymap_get(layer, output, input)?;
     println!("{:04X}", value);
 
     Ok(())
 }
 
-unsafe fn keymap_set(ec: &mut Ec<Box<dyn Access>>, layer: u8, output: u8, input: u8, value: u16) -> Result<(), Error> {
+unsafe fn keymap_set(
+    ec: &mut Ec<Box<dyn Access>>,
+    layer: u8,
+    output: u8,
+    input: u8,
+    value: u16,
+) -> Result<(), Error> {
     ec.keymap_set(layer, output, input, value)
 }
 
@@ -310,7 +325,6 @@ fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
         _ => Err(format!("Invalid color '{}'", s)),
     }
 }
-
 
 #[derive(Parser)]
 #[clap(rename_all = "snake_case")]
@@ -373,11 +387,7 @@ enum AccessMode {
 #[derive(Parser)]
 #[clap(name = "system76_ectool")]
 struct Args {
-    #[clap(
-        long = "access",
-        value_enum,
-        default_value = "lpc-linux",
-    )]
+    #[clap(long = "access", value_enum, default_value = "lpc-linux")]
     access: AccessMode,
     #[clap(subcommand)]
     subcommand: SubCommand,
@@ -392,11 +402,11 @@ fn main() {
                 AccessMode::LpcLinux => {
                     let access = AccessLpcLinux::new(Duration::new(1, 0))?;
                     Ok(Ec::new(access)?.into_dyn())
-                },
+                }
                 AccessMode::LpcSim => {
                     let access = AccessLpcSim::new(Duration::new(1, 0))?;
                     Ok(Ec::new(access)?.into_dyn())
-                },
+                }
                 AccessMode::Hid => {
                     let api = HidApi::new()?;
                     for info in api.device_list() {
@@ -436,33 +446,29 @@ fn main() {
             Err(err) => {
                 eprintln!("failed to read console: {:X?}", err);
                 process::exit(1);
-            },
-        },
-        SubCommand::Fan { index, duty } => {
-            match duty {
-                Some(duty) => match unsafe { fan_set(&mut ec, index, duty) } {
-                    Ok(()) => (),
-                    Err(err) => {
-                        eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
-                        process::exit(1);
-                    },
-                },
-                None => match unsafe { fan_get(&mut ec, index) } {
-                    Ok(()) => (),
-                    Err(err) => {
-                        eprintln!("failed to get fan {}: {:X?}", index, err);
-                        process::exit(1);
-                    },
-                },
             }
         },
-        SubCommand::Flash { path } => {
-            match unsafe { flash(&mut ec, &path, SpiTarget::Main) } {
+        SubCommand::Fan { index, duty } => match duty {
+            Some(duty) => match unsafe { fan_set(&mut ec, index, duty) } {
                 Ok(()) => (),
                 Err(err) => {
-                    eprintln!("failed to flash '{}': {:X?}", path, err);
+                    eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
                     process::exit(1);
-                },
+                }
+            },
+            None => match unsafe { fan_get(&mut ec, index) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to get fan {}: {:X?}", index, err);
+                    process::exit(1);
+                }
+            },
+        },
+        SubCommand::Flash { path } => match unsafe { flash(&mut ec, &path, SpiTarget::Main) } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to flash '{}': {:X?}", path, err);
+                process::exit(1);
             }
         },
         SubCommand::FlashBackup { path } => {
@@ -471,39 +477,48 @@ fn main() {
                 Err(err) => {
                     eprintln!("failed to flash '{}': {:X?}", path, err);
                     process::exit(1);
-                },
+                }
             }
-        },
+        }
         SubCommand::Info => match unsafe { info(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read info: {:X?}", err);
                 process::exit(1);
-            },
+            }
         },
-        SubCommand::Keymap { layer, output, input, value } => {
-            match value {
-                Some(value_str) => match u16::from_str_radix(value_str.trim_start_matches("0x"), 16) {
-                    Ok(value) => match unsafe { keymap_set(&mut ec, layer, output, input, value) } {
-                        Ok(()) => (),
-                        Err(err) => {
-                            eprintln!("failed to set keymap {}, {}, {} to {}: {:X?}", layer, output, input, value, err);
-                            process::exit(1);
-                        },
-                    },
+        SubCommand::Keymap {
+            layer,
+            output,
+            input,
+            value,
+        } => match value {
+            Some(value_str) => match u16::from_str_radix(value_str.trim_start_matches("0x"), 16) {
+                Ok(value) => match unsafe { keymap_set(&mut ec, layer, output, input, value) } {
+                    Ok(()) => (),
                     Err(err) => {
-                        eprintln!("failed to parse value: '{}': {}", value_str, err);
+                        eprintln!(
+                            "failed to set keymap {}, {}, {} to {}: {:X?}",
+                            layer, output, input, value, err
+                        );
                         process::exit(1);
                     }
                 },
-                None => match unsafe { keymap_get(&mut ec, layer, output, input) } {
-                    Ok(()) => (),
-                    Err(err) => {
-                        eprintln!("failed to get keymap {}, {}, {}: {:X?}", layer, output, input, err);
-                        process::exit(1);
-                    },
-                },
-            }
+                Err(err) => {
+                    eprintln!("failed to parse value: '{}': {}", value_str, err);
+                    process::exit(1);
+                }
+            },
+            None => match unsafe { keymap_get(&mut ec, layer, output, input) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!(
+                        "failed to get keymap {}, {}, {}: {:X?}",
+                        layer, output, input, err
+                    );
+                    process::exit(1);
+                }
+            },
         },
         SubCommand::LedColor { index, value } => {
             if let Some(value) = value {
@@ -513,7 +528,7 @@ fn main() {
                     Err(err) => {
                         eprintln!("failed to set color {}: {:X?}", value, err);
                         process::exit(1);
-                    },
+                    }
                 }
             } else {
                 match unsafe { ec.led_get_color(index) } {
@@ -521,10 +536,10 @@ fn main() {
                     Err(err) => {
                         eprintln!("failed to get color: {:X?}", err);
                         process::exit(1);
-                    },
+                    }
                 }
             }
-        },
+        }
         SubCommand::LedValue { index, value } => {
             if let Some(value) = value {
                 match unsafe { ec.led_set_value(index, value) } {
@@ -532,111 +547,115 @@ fn main() {
                     Err(err) => {
                         eprintln!("failed to set value {}: {:X?}", value, err);
                         process::exit(1);
-                    },
+                    }
                 }
             } else {
                 match unsafe { ec.led_get_value(index) } {
                     Ok((value, max)) => {
                         println!("value: {}", value);
                         println!("max: {}", max);
-                    },
+                    }
                     Err(err) => {
                         eprintln!("failed to get value: {:X?}", err);
                         process::exit(1);
-                    },
+                    }
                 }
             }
-        },
+        }
         SubCommand::LedMode { layer, mode, speed } => {
             if let (Some(mode), Some(speed)) = (mode, speed) {
                 match unsafe { ec.led_set_mode(layer, mode, speed) } {
                     Ok(()) => (),
                     Err(err) => {
-                        eprintln!("failed to set layer {} mode {} at speed {}: {:X?}", layer, mode, speed, err);
+                        eprintln!(
+                            "failed to set layer {} mode {} at speed {}: {:X?}",
+                            layer, mode, speed, err
+                        );
                         process::exit(1);
-                    },
+                    }
                 }
             } else {
                 match unsafe { ec.led_get_mode(layer) } {
                     Ok((mode, speed)) => {
                         println!("mode: {}", mode);
                         println!("speed: {}", speed);
-                    },
+                    }
                     Err(err) => {
                         eprintln!("failed to get mode for layer {}: {:X?}", layer, err);
                         process::exit(1);
-                    },
+                    }
                 }
             }
-        },
+        }
         SubCommand::LedSave => match unsafe { ec.led_save() } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to save LED settings: {:X?}", err);
                 process::exit(1);
-            },
+            }
         },
         SubCommand::Reset => match unsafe { ec.reset() } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to reset device: {:X?}", err);
                 process::exit(1);
-            },
+            }
         },
         SubCommand::Matrix => match unsafe { matrix(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to read matrix: {:X?}", err);
                 process::exit(1);
-            },
-        },
-        SubCommand::Print { message } => for arg in message {
-            let mut arg = arg.to_owned();
-            arg.push('\n');
-            match unsafe { print(&mut ec, arg.as_bytes()) } {
-                Ok(()) => (),
-                Err(err) => {
-                    eprintln!("failed to print '{}': {:X?}", arg, err);
-                    process::exit(1);
-                },
             }
         },
-        SubCommand::SetNoInput { value } => {
-            match unsafe { ec.set_no_input(value) } {
-                Ok(()) => (),
-                Err(err) => {
-                    eprintln!("failed to set no_input mode: {:X?}", err);
-                    process::exit(1);
-                }
-            }
-        },
-        SubCommand::Security { state } => {
-            match state {
-                Some(value) => {
-                    let state = match value.as_str() {
-                        "lock" => SecurityState::PrepareLock,
-                        "unlock" => SecurityState::PrepareUnlock,
-                        _ => {
-                            eprintln!("invalid security state '{}': must be 'lock' or 'unlock'", value);
-                            process::exit(1);
-                        }
-                    };
-                    match unsafe { security_set(&mut ec, state) } {
-                        Ok(()) => (),
-                        Err(err) => {
-                            eprintln!("failed to set security state to '{}': {:X?}", value, err);
-                            process::exit(1);
-                        },
-                    }
-                },
-                None => match unsafe { security_get(&mut ec) } {
+        SubCommand::Print { message } => {
+            for arg in message {
+                let mut arg = arg.to_owned();
+                arg.push('\n');
+                match unsafe { print(&mut ec, arg.as_bytes()) } {
                     Ok(()) => (),
                     Err(err) => {
-                        eprintln!("failed to get security state: {:X?}", err);
+                        eprintln!("failed to print '{}': {:X?}", arg, err);
                         process::exit(1);
-                    },
-                },
+                    }
+                }
             }
+        }
+        SubCommand::SetNoInput { value } => match unsafe { ec.set_no_input(value) } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to set no_input mode: {:X?}", err);
+                process::exit(1);
+            }
+        },
+        SubCommand::Security { state } => match state {
+            Some(value) => {
+                let state = match value.as_str() {
+                    "lock" => SecurityState::PrepareLock,
+                    "unlock" => SecurityState::PrepareUnlock,
+                    _ => {
+                        eprintln!(
+                            "invalid security state '{}': must be 'lock' or 'unlock'",
+                            value
+                        );
+                        process::exit(1);
+                    }
+                };
+                match unsafe { security_set(&mut ec, state) } {
+                    Ok(()) => (),
+                    Err(err) => {
+                        eprintln!("failed to set security state to '{}': {:X?}", value, err);
+                        process::exit(1);
+                    }
+                }
+            }
+            None => match unsafe { security_get(&mut ec) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to get security state: {:X?}", err);
+                    process::exit(1);
+                }
+            },
         },
     }
 }

@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use crate::{
-    Error,
-    Timeout,
-};
+use crate::{Error, Timeout};
 
 /// SPI bus transactions
 pub trait Spi {
@@ -38,10 +35,7 @@ pub struct SpiRom<'a, S: Spi, T: Timeout> {
 impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
     /// Create a SPI ROM using the specified SPI bus and timeout
     pub fn new(spi: &'a mut S, timeout: T) -> Self {
-        Self {
-            spi,
-            timeout,
-        }
+        Self { spi, timeout }
     }
 
     /// Get sector size in bytes
@@ -153,55 +147,55 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
 
         //TODO: automatically detect write command
         match self.spi.target() {
-            SpiTarget::Main => for (i, word) in data.chunks(2).enumerate() {
-                #[allow(clippy::get_first)]
-                let low = *word.get(0).unwrap_or(&0xFF);
-                let high = *word.get(1).unwrap_or(&0xFF);
+            SpiTarget::Main => {
+                for (i, word) in data.chunks(2).enumerate() {
+                    #[allow(clippy::get_first)]
+                    let low = *word.get(0).unwrap_or(&0xFF);
+                    let high = *word.get(1).unwrap_or(&0xFF);
 
-                self.spi.reset()?;
-                if i == 0 {
+                    self.spi.reset()?;
+                    if i == 0 {
+                        self.spi.write(&[
+                            0xAD,
+                            (address >> 16) as u8,
+                            (address >> 8) as u8,
+                            address as u8,
+                            low,
+                            high,
+                        ])?;
+                    } else {
+                        self.spi.write(&[0xAD, low, high])?;
+                    }
+
+                    // Poll status for busy unset
+                    self.status_wait(1, 0)?;
+                }
+            }
+            SpiTarget::Backup => {
+                for (i, page) in data.chunks(256).enumerate() {
+                    let page_address = address + i as u32 * 256;
+                    if page_address % 256 != 0 {
+                        return Err(Error::Parameter);
+                    }
+
+                    if i > 0 {
+                        // Write enable clears after each page is written
+                        self.write_enable()?;
+                    }
+
+                    self.spi.reset()?;
                     self.spi.write(&[
-                        0xAD,
-                        (address >> 16) as u8,
-                        (address >> 8) as u8,
-                        address as u8,
-                        low,
-                        high
+                        0xF2,
+                        (page_address >> 16) as u8,
+                        (page_address >> 8) as u8,
+                        page_address as u8,
                     ])?;
-                } else {
-                    self.spi.write(&[
-                        0xAD,
-                        low,
-                        high
-                    ])?;
+                    self.spi.write(page)?;
+
+                    // Poll status for busy unset
+                    self.status_wait(1, 0)?;
                 }
-
-                // Poll status for busy unset
-                self.status_wait(1, 0)?;
-            },
-            SpiTarget::Backup => for (i, page) in data.chunks(256).enumerate() {
-                let page_address = address + i as u32 * 256;
-                if page_address % 256 != 0 {
-                    return Err(Error::Parameter);
-                }
-
-                if i > 0 {
-                    // Write enable clears after each page is written
-                    self.write_enable()?;
-                }
-
-                self.spi.reset()?;
-                self.spi.write(&[
-                    0xF2,
-                    (page_address >> 16) as u8,
-                    (page_address >> 8) as u8,
-                    page_address as u8,
-                ])?;
-                self.spi.write(page)?;
-
-                // Poll status for busy unset
-                self.status_wait(1, 0)?;
-            },
+            }
         }
 
         self.write_disable()?;
