@@ -17,6 +17,10 @@
 bool peci_on = false;
 int16_t peci_temp = 0;
 
+// Update interval is 250ms, so average over 1s period.
+// NOTE: PECI GetTemp() internally uses a moving average over 256ms.
+static int16_t peci_temps[4] = { 0 };
+
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
 #define T_JUNCTION ((int16_t)100)
 
@@ -382,12 +386,19 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 #endif // CONFIG_PECI_OVER_ESPI
 
 void peci_read_temp(void) {
+    peci_temps[0] = peci_temps[1];
+    peci_temps[1] = peci_temps[2];
+    peci_temps[2] = peci_temps[3];
+
     peci_on = peci_available();
     if (peci_on) {
-        if (peci_get_temp(&peci_temp)) {
-            return;
+        if (!peci_get_temp(&peci_temps[3])) {
+            peci_temps[3] = 0;
         }
+    } else {
+        peci_temps[3] = 0;
     }
 
-    peci_temp = 0;
+    peci_temp = (peci_temps[0] + peci_temps[1] + peci_temps[2] + peci_temps[3]) /
+        ARRAY_SIZE(peci_temps);
 }

@@ -13,13 +13,24 @@
 
 bool fan_max = false;
 
-uint8_t fan1_pwm_actual = 0;
-uint8_t fan1_pwm_target = 0;
-uint16_t fan1_rpm = 0;
+static uint8_t fan1_level = 0;
+#ifdef FAN2_PWM
+static uint8_t fan2_level = 0;
+#endif
 
-uint8_t fan2_pwm_actual = 0;
-uint8_t fan2_pwm_target = 0;
-uint16_t fan2_rpm = 0;
+struct FanInfo fan1_info = {
+    .pwm_actual = 0,
+    .pwm_target = 0,
+    .rpm = 0,
+};
+
+#ifdef FAN2_PWM
+struct FanInfo fan2_info = {
+    .pwm_actual = 0,
+    .pwm_target = 0,
+    .rpm = 0,
+};
+#endif
 
 #define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
 
@@ -30,153 +41,9 @@ uint16_t fan2_rpm = 0;
 // - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
-#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
-
-#ifndef FAN1_PWM_MIN
-#define FAN1_PWM_MIN 0
-#endif
-
-// Fan speed is the lowest requested over HEATUP seconds
-#ifndef BOARD_FAN1_HEATUP
-#define BOARD_FAN1_HEATUP 4
-#endif
-
-static uint8_t FAN1_HEATUP[BOARD_FAN1_HEATUP] = { 0 };
-
-// Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifndef BOARD_FAN1_COOLDOWN
-#define BOARD_FAN1_COOLDOWN 10
-#endif
-
-static uint8_t FAN1_COOLDOWN[BOARD_FAN1_COOLDOWN] = { 0 };
-
-// Fan curve with temperature in degrees C, duty cycle in percent
-static const struct FanPoint __code FAN1_POINTS[] = {
-#ifndef BOARD_FAN1_POINTS
-#error Board must declare fan points
-#else
-    BOARD_FAN1_POINTS
-#endif
-};
-
-static const struct Fan __code FAN1 = {
-    .points = FAN1_POINTS,
-    .points_size = ARRAY_SIZE(FAN1_POINTS),
-    .heatup = FAN1_HEATUP,
-    .heatup_size = ARRAY_SIZE(FAN1_HEATUP),
-    .cooldown = FAN1_COOLDOWN,
-    .cooldown_size = ARRAY_SIZE(FAN1_COOLDOWN),
-    .pwm_min = PWM_DUTY(FAN1_PWM_MIN),
-};
-
-#ifdef FAN2_PWM
-
-#ifndef FAN2_PWM_MIN
-#define FAN2_PWM_MIN 0
-#endif
-
-// Fan speed is the lowest requested over HEATUP seconds
-#ifndef BOARD_FAN2_HEATUP
-#define BOARD_FAN2_HEATUP 4
-#endif
-
-static uint8_t FAN2_HEATUP[BOARD_FAN2_HEATUP] = { 0 };
-
-// Fan speed is the highest HEATUP speed over COOLDOWN seconds
-#ifndef BOARD_FAN2_COOLDOWN
-#define BOARD_FAN2_COOLDOWN 10
-#endif
-
-static uint8_t FAN2_COOLDOWN[BOARD_FAN2_COOLDOWN] = { 0 };
-
-// Fan curve with temperature in degrees C, duty cycle in percent
-static const struct FanPoint __code FAN2_POINTS[] = {
-#ifndef BOARD_FAN2_POINTS
-#error Board must declare fan points
-#else
-    BOARD_FAN2_POINTS
-#endif
-};
-
-static const struct Fan __code FAN2 = {
-    .points = FAN2_POINTS,
-    .points_size = ARRAY_SIZE(FAN2_POINTS),
-    .heatup = FAN2_HEATUP,
-    .heatup_size = ARRAY_SIZE(FAN2_HEATUP),
-    .cooldown = FAN2_COOLDOWN,
-    .cooldown_size = ARRAY_SIZE(FAN2_COOLDOWN),
-    .pwm_min = PWM_DUTY(FAN2_PWM_MIN),
-};
-
-#endif // FAN2_PWM
-
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
     fan_max = false;
-}
-
-static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
-    for (uint8_t i = 0; i < fan->points_size; i++) {
-        const struct FanPoint *cur = &fan->points[i];
-
-        // If exactly the current temp, return the current duty
-        if (temp == cur->temp) {
-            return cur->duty;
-        } else if (temp < cur->temp) {
-            // If lower than first temp, return 0%
-            if (i == 0) {
-                return 0;
-            } else {
-                const struct FanPoint *prev = &fan->points[i - 1];
-                return prev->duty;
-            }
-        }
-    }
-
-    // If no point is found, return 100%
-    return CTR0;
-}
-
-static uint8_t fan_heatup(const struct Fan *const fan, uint8_t duty) {
-    uint8_t lowest = duty;
-
-    uint8_t i;
-    for (i = 0; (i + 1) < fan->heatup_size; i++) {
-        uint8_t value = fan->heatup[i + 1];
-        if (value < lowest) {
-            lowest = value;
-        }
-        fan->heatup[i] = value;
-    }
-    fan->heatup[i] = duty;
-
-    return lowest;
-}
-
-static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) {
-    uint8_t highest = duty;
-
-    uint8_t i;
-    for (i = 0; (i + 1) < fan->cooldown_size; i++) {
-        uint8_t value = fan->cooldown[i + 1];
-        if (value > highest) {
-            highest = value;
-        }
-        fan->cooldown[i] = value;
-    }
-    fan->cooldown[i] = duty;
-
-    return highest;
-}
-
-static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
-    uint8_t duty;
-
-    duty = fan_duty(fan, temp);
-    duty = fan_heatup(fan, duty);
-    duty = fan_cooldown(fan, duty);
-
-    return duty;
 }
 
 static uint16_t fan_get_tach0_rpm(void) {
@@ -215,63 +82,91 @@ void fan_event(void) {
     // Enabling fan max toggle and exiting S0 will cause duty to immediately
     // change instead of stepping to provide the desired effects.
 
+    // Get FAN1 target duty
+    if (fan1_level < FAN1.levels_size) {
+        if (sys_temp >= FAN1.levels[fan1_level].temp_up) {
+            fan1_level++;
+        }
+    }
+    if (fan1_level > 0) {
+        if (sys_temp <= FAN1.levels[fan1_level].temp_down) {
+            fan1_level--;
+        }
+    }
+
+    fan1_info.pwm_target = FAN1.levels[fan1_level].duty;
+
     // Set FAN1 duty
-    fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
     if (fan_max) {
-        fan1_pwm_target = CTR0;
-        fan1_pwm_actual = CTR0;
+        fan1_info.pwm_target = CTR0;
+        fan1_info.pwm_actual = CTR0;
     } else if (power_state != POWER_STATE_S0) {
-        fan1_pwm_target = 0;
-        fan1_pwm_actual = 0;
+        fan1_info.pwm_target = 0;
+        fan1_info.pwm_actual = 0;
     } else {
-        if (fan1_pwm_actual < fan1_pwm_target) {
-            if (fan1_pwm_actual < CTR0) {
-                fan1_pwm_actual++;
-                if (fan1_pwm_actual < FAN1.pwm_min) {
-                    fan1_pwm_actual = FAN1.pwm_min;
+        if (fan1_info.pwm_actual < fan1_info.pwm_target) {
+            if (fan1_info.pwm_actual < CTR0) {
+                fan1_info.pwm_actual++;
+                if (fan1_info.pwm_actual < FAN1.pwm_min) {
+                    fan1_info.pwm_actual = FAN1.pwm_min;
                 }
             }
-        } else if (fan1_pwm_actual > fan1_pwm_target) {
-            if (fan1_pwm_actual > 0) {
-                fan1_pwm_actual--;
-                if (fan1_pwm_actual < FAN1.pwm_min) {
-                    fan1_pwm_actual = 0;
+        }
+        if (fan1_info.pwm_actual > fan1_info.pwm_target) {
+            if (fan1_info.pwm_actual > 0) {
+                fan1_info.pwm_actual--;
+                if (fan1_info.pwm_actual < FAN1.pwm_min) {
+                    fan1_info.pwm_actual = 0;
                 }
             }
         }
     }
-    TRACE("FAN1 duty=%d\n", fan1_pwm_actual);
-    FAN1_PWM = fan1_pwm_actual;
-    fan1_rpm = fan_get_tach0_rpm();
+    TRACE("FAN1 duty=%d\n", fan1_info.pwm_actual);
+    FAN1_PWM = fan1_info.pwm_actual;
+    fan1_info.rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
+    // Get FAN2 target duty
+    if (fan2_level < FAN2.levels_size) {
+        if (sys_temp >= FAN2.levels[fan2_level].temp_up) {
+            fan2_level++;
+        }
+    }
+    if (fan2_level > 0) {
+        if (sys_temp <= FAN2.levels[fan2_level].temp_down) {
+            fan2_level--;
+        }
+    }
+
+    fan2_info.pwm_target = FAN2.levels[fan2_level].duty;
+
     // set FAN2 duty
-    fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
     if (fan_max) {
-        fan2_pwm_target = CTR0;
-        fan2_pwm_actual = CTR0;
+        fan2_info.pwm_target = CTR0;
+        fan2_info.pwm_actual = CTR0;
     } else if (power_state != POWER_STATE_S0) {
-        fan2_pwm_target = 0;
-        fan2_pwm_actual = 0;
+        fan2_info.pwm_target = 0;
+        fan2_info.pwm_actual = 0;
     } else {
-        if (fan2_pwm_actual < fan2_pwm_target) {
-            if (fan2_pwm_actual < CTR0) {
-                fan2_pwm_actual++;
-                if (fan2_pwm_actual < FAN2.pwm_min) {
-                    fan2_pwm_actual = FAN2.pwm_min;
+        if (fan2_info.pwm_actual < fan2_info.pwm_target) {
+            if (fan2_info.pwm_actual < CTR0) {
+                fan2_info.pwm_actual++;
+                if (fan2_info.pwm_actual < FAN2.pwm_min) {
+                    fan2_info.pwm_actual = FAN2.pwm_min;
                 }
             }
-        } else if (fan2_pwm_actual > fan2_pwm_target) {
-            if (fan2_pwm_actual > 0) {
-                fan2_pwm_actual--;
-                if (fan2_pwm_actual < FAN2.pwm_min) {
-                    fan2_pwm_actual = 0;
+        }
+        if (fan2_info.pwm_actual > fan2_info.pwm_target) {
+            if (fan2_info.pwm_actual > 0) {
+                fan2_info.pwm_actual--;
+                if (fan2_info.pwm_actual < FAN2.pwm_min) {
+                    fan2_info.pwm_actual = 0;
                 }
             }
         }
     }
-    TRACE("FAN2 duty=%d\n", fan2_pwm_actual);
-    FAN2_PWM = fan2_pwm_actual;
-    fan2_rpm = fan_get_tach1_rpm();
+    TRACE("FAN2 duty=%d\n", fan2_info.pwm_actual);
+    FAN2_PWM = fan2_info.pwm_actual;
+    fan2_info.rpm = fan_get_tach1_rpm();
 #endif
 }

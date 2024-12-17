@@ -8,29 +8,33 @@
 
 #define PWM_DUTY(X) ((uint8_t)(((((uint16_t)(X)) * 255) + 99) / 100))
 
-struct FanPoint {
-    int16_t temp;
-    uint8_t duty;
+struct FanLevel {
+    const int16_t temp_up;
+    const int16_t temp_down;
+    const uint8_t duty;
 };
 
 struct Fan {
-    const struct FanPoint *points;
-    uint8_t points_size;
-    uint8_t *heatup;
-    uint8_t heatup_size;
-    uint8_t *cooldown;
-    uint8_t cooldown_size;
-    uint8_t pwm_min;
+    const struct FanLevel *const levels;
+    const uint8_t levels_size;
+    const uint8_t pwm_min;
 };
 
-extern bool fan_max;
+struct FanInfo {
+    uint8_t pwm_actual;
+    uint8_t pwm_target;
+    uint16_t rpm;
+};
 
-extern uint8_t fan1_pwm_actual;
-extern uint8_t fan1_pwm_target;
-extern uint16_t fan1_rpm;
-extern uint8_t fan2_pwm_actual;
-extern uint8_t fan2_pwm_target;
-extern uint16_t fan2_rpm;
+extern const struct Fan __code FAN1;
+extern struct FanInfo fan1_info;
+
+#ifdef FAN2_PWM
+extern const struct Fan __code FAN2;
+extern struct FanInfo fan2_info;
+#endif
+
+extern bool fan_max;
 
 void fan_reset(void);
 void fan_event(void);
