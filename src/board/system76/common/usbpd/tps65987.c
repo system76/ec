@@ -282,7 +282,11 @@ void usbpd_event(void) {
             usbpd_dbfg();
 #ifdef USBPD_DUAL_PORT
             // This resets the PD port so it has to be done after dbfg
-            usbpd_set_multiport_policy();
+            // TODO: Calling this causes PD reset which in turn causes a race
+            // condition in PMC, preventing boot.
+            // Instead of runtime patching, perform a full EEPROM update in
+            // coreboot.
+            //usbpd_set_multiport_policy();
 #endif
         }
         last_power_state = power_state;
