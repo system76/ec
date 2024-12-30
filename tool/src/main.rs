@@ -270,15 +270,15 @@ unsafe fn print(ec: &mut Ec<Box<dyn Access>>, message: &[u8]) -> Result<(), Erro
     Ok(())
 }
 
-unsafe fn fan_get(ec: &mut Ec<Box<dyn Access>>, index: u8) -> Result<(), Error> {
-    let duty = ec.fan_get(index)?;
+unsafe fn fan_get_pwm(ec: &mut Ec<Box<dyn Access>>, index: u8) -> Result<(), Error> {
+    let duty = ec.fan_get_pwm(index)?;
     println!("{}", duty);
 
     Ok(())
 }
 
-unsafe fn fan_set(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Result<(), Error> {
-    ec.fan_set(index, duty)
+unsafe fn fan_set_pwm(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Result<(), Error> {
+    ec.fan_set_pwm(index, duty)
 }
 
 unsafe fn keymap_get(
@@ -330,7 +330,7 @@ fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
 #[clap(rename_all = "snake_case")]
 enum SubCommand {
     Console,
-    Fan {
+    FanPwm {
         index: u8,
         duty: Option<u8>,
     },
@@ -448,15 +448,15 @@ fn main() {
                 process::exit(1);
             }
         },
-        SubCommand::Fan { index, duty } => match duty {
-            Some(duty) => match unsafe { fan_set(&mut ec, index, duty) } {
+        SubCommand::FanPwm { index, duty } => match duty {
+            Some(duty) => match unsafe { fan_set_pwm(&mut ec, index, duty) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to set fan {} to {}: {:X?}", index, duty, err);
                     process::exit(1);
                 }
             },
-            None => match unsafe { fan_get(&mut ec, index) } {
+            None => match unsafe { fan_get_pwm(&mut ec, index) } {
                 Ok(()) => (),
                 Err(err) => {
                     eprintln!("failed to get fan {}: {:X?}", index, err);

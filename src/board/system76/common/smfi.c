@@ -123,7 +123,7 @@ static enum Result cmd_print(void) {
     return RES_OK;
 }
 
-static enum Result cmd_fan_get(void) {
+static enum Result cmd_fan_get_pwm(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
         smfi_cmd[SMFI_CMD_DATA + 1] = fan1_pwm_actual;
@@ -139,7 +139,7 @@ static enum Result cmd_fan_get(void) {
     return RES_ERR;
 }
 
-static enum Result cmd_fan_set(void) {
+static enum Result cmd_fan_set_pwm(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
         // Set duty cycle of FAN1
@@ -384,11 +384,11 @@ void smfi_event(void) {
         case CMD_PRINT:
             smfi_cmd[SMFI_CMD_RES] = cmd_print();
             break;
-        case CMD_FAN_GET:
-            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get();
+        case CMD_FAN_GET_PWM:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get_pwm();
             break;
-        case CMD_FAN_SET:
-            smfi_cmd[SMFI_CMD_RES] = cmd_fan_set();
+        case CMD_FAN_SET_PWM:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_set_pwm();
             break;
         case CMD_KEYMAP_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_keymap_get();
