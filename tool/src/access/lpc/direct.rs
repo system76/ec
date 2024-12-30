@@ -2,13 +2,7 @@
 
 use hwio::{Io, Pio};
 
-use crate::{
-    Access,
-    Error,
-    SuperIo,
-    Timeout,
-    timeout,
-};
+use crate::{timeout, Access, Error, SuperIo, Timeout};
 
 use super::*;
 
@@ -24,9 +18,7 @@ impl<T: Timeout + Send> AccessLpcDirect<T> {
     pub unsafe fn new(timeout: T) -> Result<Self, Error> {
         // Make sure EC ID matches
         let mut sio = SuperIo::new(0x2E);
-        let id =
-            (sio.read(0x20) as u16) << 8 |
-            (sio.read(0x21) as u16);
+        let id = (sio.read(0x20) as u16) << 8 | (sio.read(0x21) as u16);
         match id {
             0x5570 | 0x8587 => (),
             _ => return Err(Error::SuperIoId(id)),
@@ -41,24 +33,18 @@ impl<T: Timeout + Send> AccessLpcDirect<T> {
 
     /// Read from the command space
     unsafe fn read_cmd(&mut self, addr: u8) -> u8 {
-        Pio::<u8>::new(
-            self.cmd + (addr as u16)
-        ).read()
+        Pio::<u8>::new(self.cmd + (addr as u16)).read()
     }
 
     /// Write to the command space
     unsafe fn write_cmd(&mut self, addr: u8, data: u8) {
-        Pio::<u8>::new(
-            self.cmd + (addr as u16)
-        ).write(data)
+        Pio::<u8>::new(self.cmd + (addr as u16)).write(data)
     }
 
     /// Read from the debug space
     //TODO: better public interface
     pub unsafe fn read_debug(&mut self, addr: u8) -> u8 {
-        Pio::<u8>::new(
-            self.dbg + (addr as u16)
-        ).read()
+        Pio::<u8>::new(self.dbg + (addr as u16)).read()
     }
 
     /// Returns Ok if a command can be sent

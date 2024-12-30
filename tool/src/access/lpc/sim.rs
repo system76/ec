@@ -1,18 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-use std::{
-    io,
-    net::UdpSocket,
-    time::Duration,
-};
+use std::{io, net::UdpSocket, time::Duration};
 
-use crate::{
-    Access,
-    Error,
-    StdTimeout,
-    Timeout,
-    timeout,
-};
+use crate::{timeout, Access, Error, StdTimeout, Timeout};
 
 use super::*;
 
@@ -39,7 +29,7 @@ impl AccessLpcSim {
         if self.socket.send(&request)? != request.len() {
             return Err(io::Error::new(
                 io::ErrorKind::UnexpectedEof,
-                "Socket request incorrect size"
+                "Socket request incorrect size",
             ));
         }
 
@@ -47,7 +37,7 @@ impl AccessLpcSim {
         if self.socket.recv(&mut response)? != response.len() {
             return Err(io::Error::new(
                 io::ErrorKind::UnexpectedEof,
-                "Socket response incorrect size"
+                "Socket response incorrect size",
             ));
         }
 

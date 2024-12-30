@@ -1,11 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-use crate::{
-    Error,
-    Pmc,
-    SuperIo,
-    Timeout,
-};
+use crate::{Error, Pmc, SuperIo, Timeout};
 
 /// Run some EC commands on previous proprietary firmware
 pub struct EcLegacy<T: Timeout> {
@@ -17,9 +12,7 @@ impl<T: Timeout> EcLegacy<T> {
     pub unsafe fn new(primary: bool, timeout: T) -> Result<Self, Error> {
         let mut sio = SuperIo::new(if primary { 0x2E } else { 0x4E });
 
-        let id =
-            (sio.read(0x20) as u16) << 8 |
-            (sio.read(0x21) as u16);
+        let id = (sio.read(0x20) as u16) << 8 | (sio.read(0x21) as u16);
 
         match id {
             0x5570 | 0x8587 => (),

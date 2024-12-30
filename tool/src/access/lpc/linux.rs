@@ -2,25 +2,13 @@
 
 use std::{
     fs,
-    io::{
-        self,
-        Read,
-        Write,
-        Seek,
-        SeekFrom,
-    },
+    io::{self, Read, Seek, SeekFrom, Write},
     os::unix::io::AsRawFd,
     path::Path,
     time::Duration,
 };
 
-use crate::{
-    Access,
-    Error,
-    StdTimeout,
-    Timeout,
-    timeout,
-};
+use crate::{timeout, Access, Error, StdTimeout, Timeout};
 
 use super::*;
 
@@ -35,7 +23,7 @@ impl PortLock {
         if end < start {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "PortLock::new: end < start"
+                "PortLock::new: end < start",
             ));
         }
         let len = (end - start) + 1;
@@ -57,18 +45,14 @@ impl PortLock {
             return Err(io::Error::last_os_error());
         }
 
-        Ok(Self {
-            start,
-            len,
-            file,
-        })
+        Ok(Self { start, len, file })
     }
 
     fn seek(&mut self, offset: u16) -> io::Result<()> {
         if offset >= self.len {
             return Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
-                "PortLock::seek: offset >= len"
+                "PortLock::seek: offset >= len",
             ));
         }
         let port = self.start + offset;
@@ -76,7 +60,7 @@ impl PortLock {
         if pos != port as u64 {
             return Err(io::Error::new(
                 io::ErrorKind::UnexpectedEof,
-                "PortLock::seek: failed to seek to port"
+                "PortLock::seek: failed to seek to port",
             ));
         }
         Ok(())
@@ -106,7 +90,7 @@ impl AccessLpcLinux {
     /// Locks ports and then returns access object
     pub unsafe fn new(timeout: Duration) -> Result<Self, Error> {
         // TODO: is there a better way to probe before running a command?
-        if ! Path::new("/sys/bus/acpi/devices/17761776:00").is_dir() {
+        if !Path::new("/sys/bus/acpi/devices/17761776:00").is_dir() {
             return Err(Error::Io(io::Error::new(
                 io::ErrorKind::NotFound,
                 "Failed to find System76 ACPI device",
