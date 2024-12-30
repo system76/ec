@@ -150,7 +150,7 @@ void main(void) {
         if ((time - last_time_100ms) >= INTERVAL_100MS) {
             last_time_100ms = time;
 
-            fan_event();
+            fan_update_duty();
         }
 
         if ((time - last_time_250ms) >= INTERVAL_250MS) {
@@ -173,6 +173,7 @@ void main(void) {
             last_time_1sec = time;
 
             battery_event();
+            fan_update_target();
         }
 
         // Idle until next timer interrupt

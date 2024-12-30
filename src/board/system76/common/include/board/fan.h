@@ -33,6 +33,7 @@ extern uint8_t fan2_pwm_target;
 extern uint16_t fan2_rpm;
 
 void fan_reset(void);
-void fan_event(void);
+void fan_update_duty(void);
+void fan_update_target(void);
 
 #endif // _BOARD_FAN_H

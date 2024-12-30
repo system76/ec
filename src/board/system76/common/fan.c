@@ -197,7 +197,9 @@ static uint16_t fan_get_tach1_rpm(void) {
     return rpm;
 }
 
-void fan_event(void) {
+// Update the target duty of the fans based on system temps.
+// Interval: 1sec
+void fan_update_target(void) {
 #if CONFIG_PLATFORM_INTEL
 #if CONFIG_HAVE_DGPU
     int16_t sys_temp = MAX(peci_temp, dgpu_temp);
@@ -209,19 +211,38 @@ void fan_event(void) {
     int16_t sys_temp = 50;
 #endif
 
-    // Fan update interval is 100ms (main.c). The event changes PWM duty
-    // by 1 every interval to give a smoothing effect.
-
-    // Enabling fan max toggle and exiting S0 will cause duty to immediately
-    // change instead of stepping to provide the desired effects.
-
-    // Set FAN1 duty
-    fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
+    // Set FAN1 target duty.
     if (fan_max) {
         fan1_pwm_target = CTR0;
-        fan1_pwm_actual = CTR0;
     } else if (power_state != POWER_STATE_S0) {
         fan1_pwm_target = 0;
+    } else {
+        fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
+    }
+
+#ifdef FAN2_PWM
+    // Set FAN2 target duty.
+    if (fan_max) {
+        fan2_pwm_target = CTR0;
+    } else if (power_state != POWER_STATE_S0) {
+        fan2_pwm_target = 0;
+    } else {
+        fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
+    }
+#endif
+}
+
+// Update the actual duty of the fans to move towards the target duty.
+// The duty is changed by 1 every interval to give a smoothing effect and to
+// avoid large, sudden changes.
+// Enabling fan max toggle and exiting S0 will cause duty to immediately
+// change instead of stepping to provide the desired effects.
+// Interval: 100ms
+void fan_update_duty(void) {
+    // Move FAN1 duty towards target.
+    if (fan_max) {
+        fan1_pwm_actual = CTR0;
+    } else if (power_state != POWER_STATE_S0) {
         fan1_pwm_actual = 0;
     } else {
         if (fan1_pwm_actual < fan1_pwm_target) {
@@ -242,16 +263,14 @@ void fan_event(void) {
     }
     TRACE("FAN1 duty=%d\n", fan1_pwm_actual);
     FAN1_PWM = fan1_pwm_actual;
+    // Update RPM value for reporting to ACPI.
     fan1_rpm = fan_get_tach0_rpm();
 
 #ifdef FAN2_PWM
-    // set FAN2 duty
-    fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
+    // Move FAN2 duty towards target.
     if (fan_max) {
-        fan2_pwm_target = CTR0;
         fan2_pwm_actual = CTR0;
     } else if (power_state != POWER_STATE_S0) {
-        fan2_pwm_target = 0;
         fan2_pwm_actual = 0;
     } else {
         if (fan2_pwm_actual < fan2_pwm_target) {
@@ -272,6 +291,7 @@ void fan_event(void) {
     }
     TRACE("FAN2 duty=%d\n", fan2_pwm_actual);
     FAN2_PWM = fan2_pwm_actual;
+    // Update RPM value for reporting to ACPI.
     fan2_rpm = fan_get_tach1_rpm();
 #endif
 }
