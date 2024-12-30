@@ -1,6 +1,6 @@
 # Keyboard layout customization
 
-System76 EC firmware suppports using custom keyboard layouts. For example,
+System76 EC firmware supports using custom keyboard layouts. For example,
 having the physical "Caps Lock" key function as "Escape" when pressed.
 
 This only applies to the internal keyboard. External keyboards are not
