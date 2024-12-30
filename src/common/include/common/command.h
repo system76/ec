@@ -20,10 +20,10 @@ enum Command {
     CMD_SPI = 5,
     // Reset EC
     CMD_RESET = 6,
-    // Get fan speeds
-    CMD_FAN_GET = 7,
-    // Set fan speeds
-    CMD_FAN_SET = 8,
+    // Get fan PWM duty
+    CMD_FAN_GET_PWM = 7,
+    // Set fan PWM duty
+    CMD_FAN_SET_PWM = 8,
     // Get keyboard map index
     CMD_KEYMAP_GET = 9,
     // Set keyboard map index

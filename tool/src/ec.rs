@@ -16,8 +16,8 @@ enum Cmd {
     Print = 4,
     Spi = 5,
     Reset = 6,
-    FanGet = 7,
-    FanSet = 8,
+    FanGetPwm = 7,
+    FanSetPwm = 8,
     KeymapGet = 9,
     KeymapSet = 10,
     LedGetValue = 11,
@@ -176,16 +176,16 @@ impl<A: Access> Ec<A> {
     }
 
     /// Read fan duty cycle by fan index
-    pub unsafe fn fan_get(&mut self, index: u8) -> Result<u8, Error> {
+    pub unsafe fn fan_get_pwm(&mut self, index: u8) -> Result<u8, Error> {
         let mut data = [index, 0];
-        self.command(Cmd::FanGet, &mut data)?;
+        self.command(Cmd::FanGetPwm, &mut data)?;
         Ok(data[1])
     }
 
     /// Set fan duty cycle by fan index
-    pub unsafe fn fan_set(&mut self, index: u8, duty: u8) -> Result<(), Error> {
+    pub unsafe fn fan_set_pwm(&mut self, index: u8, duty: u8) -> Result<(), Error> {
         let mut data = [index, duty];
-        self.command(Cmd::FanSet, &mut data)
+        self.command(Cmd::FanSetPwm, &mut data)
     }
 
     /// Read keymap data by layout, output pin, and input pin
