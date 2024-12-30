@@ -16,7 +16,6 @@
 
 #![allow(clippy::missing_safety_doc)]
 #![allow(clippy::needless_range_loop)]
-
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(not(feature = "std"))]
@@ -52,7 +51,7 @@ pub use self::super_io::SuperIo;
 #[cfg(feature = "redox_hwio")]
 mod super_io;
 
-pub use self::timeout::Timeout;
 #[cfg(feature = "std")]
 pub use self::timeout::StdTimeout;
+pub use self::timeout::Timeout;
 mod timeout;

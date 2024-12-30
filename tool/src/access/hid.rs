@@ -2,10 +2,7 @@
 
 use hidapi::HidDevice;
 
-use crate::{
-    Access,
-    Error,
-};
+use crate::{Access, Error};
 
 /// Use USB HID access, only for USB ECs
 pub struct AccessHid {

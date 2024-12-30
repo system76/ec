@@ -12,7 +12,7 @@ macro_rules! timeout {
                 Ok(ok) => {
                     result = Ok(ok);
                     break;
-                },
+                }
                 Err(err) => match err {
                     $crate::Error::WouldBlock => (),
                     _ => {
@@ -48,7 +48,7 @@ impl StdTimeout {
     pub fn new(duration: Duration) -> Self {
         StdTimeout {
             instant: Instant::now(),
-            duration
+            duration,
         }
     }
 }
