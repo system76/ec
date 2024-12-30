@@ -50,6 +50,8 @@ enum Command {
     CMD_SECURITY_GET = 20,
     // Set security state
     CMD_SECURITY_SET = 21,
+    // Get fan tachometer
+    CMD_FAN_TACH = 22,
     //TODO
 };
 
