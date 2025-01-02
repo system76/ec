@@ -140,6 +140,10 @@ static enum Result cmd_fan_get_pwm(void) {
 }
 
 static enum Result cmd_fan_set_pwm(void) {
+    if (fan_get_mode() != FAN_MODE_PWM) {
+        return RES_ERR;
+    }
+
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
         // Set duty cycle of FAN1
@@ -154,6 +158,24 @@ static enum Result cmd_fan_set_pwm(void) {
     }
 
     // Failed if fan not found
+    return RES_ERR;
+}
+
+static enum Result cmd_fan_get_mode(void) {
+    smfi_cmd[SMFI_CMD_DATA] = fan_get_mode();
+    return RES_OK;
+}
+
+static enum Result cmd_fan_set_mode(void) {
+    enum FanMode mode = smfi_cmd[SMFI_CMD_DATA];
+
+    switch (mode) {
+    case FAN_MODE_AUTO:
+    case FAN_MODE_PWM:
+        fan_set_mode(mode);
+        return RES_OK;
+    }
+
     return RES_ERR;
 }
 
@@ -420,6 +442,13 @@ void smfi_event(void) {
             smfi_cmd[SMFI_CMD_RES] = cmd_security_set();
             break;
 #endif // CONFIG_SECURITY
+
+        case CMD_FAN_GET_MODE:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get_mode();
+            break;
+        case CMD_FAN_SET_MODE:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_set_mode();
+            break;
 
 #endif // !defined(__SCRATCH__)
         case CMD_SPI:

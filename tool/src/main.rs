@@ -281,6 +281,17 @@ unsafe fn fan_set_pwm(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Resu
     ec.fan_set_pwm(index, duty)
 }
 
+unsafe fn fan_get_mode(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
+    let mode = ec.fan_get_mode()?;
+    println!("{}", mode);
+
+    Ok(())
+}
+
+unsafe fn fan_set_mode(ec: &mut Ec<Box<dyn Access>>, mode: ectool::FanMode) -> Result<(), Error> {
+    ec.fan_set_mode(mode)
+}
+
 unsafe fn keymap_get(
     ec: &mut Ec<Box<dyn Access>>,
     layer: u8,
@@ -333,6 +344,9 @@ enum SubCommand {
     FanPwm {
         index: u8,
         duty: Option<u8>,
+    },
+    FanMode {
+        mode: Option<ectool::FanMode>,
     },
     Flash {
         path: String,
@@ -447,6 +461,22 @@ fn main() {
                 eprintln!("failed to read console: {:X?}", err);
                 process::exit(1);
             }
+        },
+        SubCommand::FanMode { mode } => match mode {
+            Some(mode) => match unsafe { fan_set_mode(&mut ec, mode) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to set fan mode {}: {:X?}", mode, err);
+                    process::exit(1);
+                }
+            },
+            None => match unsafe { fan_get_mode(&mut ec) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to get fan mode: {:X?}", err);
+                    process::exit(1);
+                }
+            },
         },
         SubCommand::FanPwm { index, duty } => match duty {
             Some(duty) => match unsafe { fan_set_pwm(&mut ec, index, duty) } {
