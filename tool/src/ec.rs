@@ -3,6 +3,7 @@
 #[cfg(not(feature = "std"))]
 use alloc::{boxed::Box, vec};
 use core::convert::TryFrom;
+use core::fmt;
 
 use crate::{Access, Error, Spi, SpiTarget};
 
@@ -31,6 +32,8 @@ enum Cmd {
     SetNoInput = 19,
     SecurityGet = 20,
     SecuritySet = 21,
+    FanGetMode = 22,
+    FanSetMode = 23,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -60,6 +63,42 @@ impl TryFrom<u8> for SecurityState {
             1 => Ok(Self::Unlock),
             2 => Ok(Self::PrepareLock),
             3 => Ok(Self::PrepareUnlock),
+            _ => Err(Error::Verify),
+        }
+    }
+}
+
+#[derive(Clone, Copy, Default, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "std", derive(clap::ValueEnum))]
+#[repr(u8)]
+pub enum FanMode {
+    /// EC control
+    #[default]
+    Auto = 0,
+    /// Host control via target PWM
+    Pwm = 1,
+    /// Host control via target RPM
+    Rpm = 2,
+}
+
+impl fmt::Display for FanMode {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Self::Auto => write!(f, "auto"),
+            Self::Pwm => write!(f, "pwm"),
+            Self::Rpm => write!(f, "rpm"),
+        }
+    }
+}
+
+impl TryFrom<u8> for FanMode {
+    type Error = Error;
+
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::Auto),
+            1 => Ok(Self::Pwm),
+            2 => Ok(Self::Rpm),
             _ => Err(Error::Verify),
         }
     }
@@ -273,6 +312,19 @@ impl<A: Access> Ec<A> {
     pub unsafe fn security_set(&mut self, state: SecurityState) -> Result<(), Error> {
         let mut data = [state as u8];
         self.command(Cmd::SecuritySet, &mut data)
+    }
+
+    /// Get fan control mode.
+    pub unsafe fn fan_get_mode(&mut self) -> Result<FanMode, Error> {
+        let mut data = [0];
+        self.command(Cmd::FanGetMode, &mut data)?;
+        FanMode::try_from(data[0])
+    }
+
+    /// Set fan control mode.
+    pub unsafe fn fan_set_mode(&mut self, mode: FanMode) -> Result<(), Error> {
+        let mut data = [mode as u8];
+        self.command(Cmd::FanSetMode, &mut data)
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>
