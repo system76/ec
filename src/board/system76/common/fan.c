@@ -12,6 +12,7 @@
 #endif
 
 bool fan_max = false;
+static enum FanMode fan_mode = FAN_MODE_AUTO;
 
 uint8_t fan1_pwm_actual = 0;
 uint8_t fan1_pwm_target = 0;
@@ -260,4 +261,12 @@ void fan_update_duty(void) {
     // Update RPM value for reporting to ACPI.
     fan2_rpm = fan_get_tach1_rpm();
 #endif
+}
+
+enum FanMode fan_get_mode(void) {
+    return fan_mode;
+}
+
+void fan_set_mode(enum FanMode mode) {
+    fan_mode = mode;
 }

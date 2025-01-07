@@ -123,7 +123,7 @@ static enum Result cmd_print(void) {
     return RES_OK;
 }
 
-static enum Result cmd_fan_get(void) {
+static enum Result cmd_fan_get_pwm(void) {
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
         smfi_cmd[SMFI_CMD_DATA + 1] = fan1_pwm_actual;
@@ -139,7 +139,11 @@ static enum Result cmd_fan_get(void) {
     return RES_ERR;
 }
 
-static enum Result cmd_fan_set(void) {
+static enum Result cmd_fan_set_pwm(void) {
+    if (fan_get_mode() != FAN_MODE_PWM) {
+        return RES_ERR;
+    }
+
     switch (smfi_cmd[SMFI_CMD_DATA]) {
     case 1:
         // Set duty cycle of FAN1
@@ -154,6 +158,24 @@ static enum Result cmd_fan_set(void) {
     }
 
     // Failed if fan not found
+    return RES_ERR;
+}
+
+static enum Result cmd_fan_get_mode(void) {
+    smfi_cmd[SMFI_CMD_DATA] = fan_get_mode();
+    return RES_OK;
+}
+
+static enum Result cmd_fan_set_mode(void) {
+    enum FanMode mode = smfi_cmd[SMFI_CMD_DATA];
+
+    switch (mode) {
+    case FAN_MODE_AUTO:
+    case FAN_MODE_PWM:
+        fan_set_mode(mode);
+        return RES_OK;
+    }
+
     return RES_ERR;
 }
 
@@ -384,11 +406,11 @@ void smfi_event(void) {
         case CMD_PRINT:
             smfi_cmd[SMFI_CMD_RES] = cmd_print();
             break;
-        case CMD_FAN_GET:
-            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get();
+        case CMD_FAN_GET_PWM:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get_pwm();
             break;
-        case CMD_FAN_SET:
-            smfi_cmd[SMFI_CMD_RES] = cmd_fan_set();
+        case CMD_FAN_SET_PWM:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_set_pwm();
             break;
         case CMD_KEYMAP_GET:
             smfi_cmd[SMFI_CMD_RES] = cmd_keymap_get();
@@ -420,6 +442,13 @@ void smfi_event(void) {
             smfi_cmd[SMFI_CMD_RES] = cmd_security_set();
             break;
 #endif // CONFIG_SECURITY
+
+        case CMD_FAN_GET_MODE:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get_mode();
+            break;
+        case CMD_FAN_SET_MODE:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_set_mode();
+            break;
 
 #endif // !defined(__SCRATCH__)
         case CMD_SPI:

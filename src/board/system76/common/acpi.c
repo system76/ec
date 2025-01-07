@@ -177,6 +177,10 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0xD2, fan2_rpm);
 #endif // FAN2_PWM
 
+        case 0xD4:
+            data = fan_get_mode();
+            break;
+
 #if HAVE_LED_AIRPLANE_N
         // Airplane mode LED
         case 0xD9:
@@ -222,6 +226,29 @@ void acpi_write(uint8_t addr, uint8_t data) {
     case 0xBD:
         battery_set_end_threshold(data);
         (void)battery_save_thresholds();
+        break;
+
+    case 0xCE:
+        if (fan_get_mode() == FAN_MODE_PWM) {
+            fan1_pwm_target = data;
+        }
+        break;
+
+#ifdef FAN2_PWM
+    case 0xCF:
+        if (fan_get_mode() == FAN_MODE_PWM) {
+            fan2_pwm_target = data;
+        }
+        break;
+#endif
+
+    case 0xD4:
+        switch (data) {
+        case FAN_MODE_AUTO:
+        case FAN_MODE_PWM:
+            fan_set_mode(data);
+            break;
+        }
         break;
 
 #if HAVE_LED_AIRPLANE_N

@@ -173,7 +173,10 @@ void main(void) {
             last_time_1sec = time;
 
             battery_event();
-            fan_update_target();
+
+            if (fan_get_mode() == FAN_MODE_AUTO) {
+                fan_update_target();
+            }
         }
 
         // Idle until next timer interrupt
