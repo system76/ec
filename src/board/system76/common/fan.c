@@ -17,10 +17,12 @@ static enum FanMode fan_mode = FAN_MODE_AUTO;
 uint8_t fan1_pwm_actual = 0;
 uint8_t fan1_pwm_target = 0;
 uint16_t fan1_rpm = 0;
+static uint8_t fan1_level = 0;
 
 uint8_t fan2_pwm_actual = 0;
 uint8_t fan2_pwm_target = 0;
 uint16_t fan2_rpm = 0;
+static uint8_t fan2_level = 0;
 
 #define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
 
@@ -33,14 +35,12 @@ uint16_t fan2_rpm = 0;
 
 #define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
 
+// Fan cooling hysteresis in degrees Celcius
+#define FAN_TEMP_HYSTERESIS 5
+
 #ifndef FAN1_PWM_MIN
 #define FAN1_PWM_MIN 0
 #endif
-
-// Use highest duty over last COOLDOWN seconds.
-#define FAN1_COOLDOWN_SEC 5
-
-static uint8_t FAN1_COOLDOWN[FAN1_COOLDOWN_SEC] = { 0 };
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static const struct FanPoint __code FAN1_POINTS[] = {
@@ -54,8 +54,6 @@ static const struct FanPoint __code FAN1_POINTS[] = {
 static const struct Fan __code FAN1 = {
     .points = FAN1_POINTS,
     .points_size = ARRAY_SIZE(FAN1_POINTS),
-    .cooldown = FAN1_COOLDOWN,
-    .cooldown_size = ARRAY_SIZE(FAN1_COOLDOWN),
     .pwm_min = PWM_DUTY(FAN1_PWM_MIN),
 };
 
@@ -64,11 +62,6 @@ static const struct Fan __code FAN1 = {
 #ifndef FAN2_PWM_MIN
 #define FAN2_PWM_MIN 0
 #endif
-
-// Use highest duty over last COOLDOWN seconds.
-#define FAN2_COOLDOWN_SEC 5
-
-static uint8_t FAN2_COOLDOWN[FAN2_COOLDOWN_SEC] = { 0 };
 
 // Fan curve with temperature in degrees C, duty cycle in percent
 static const struct FanPoint __code FAN2_POINTS[] = {
@@ -82,8 +75,6 @@ static const struct FanPoint __code FAN2_POINTS[] = {
 static const struct Fan __code FAN2 = {
     .points = FAN2_POINTS,
     .points_size = ARRAY_SIZE(FAN2_POINTS),
-    .cooldown = FAN2_COOLDOWN,
-    .cooldown_size = ARRAY_SIZE(FAN2_COOLDOWN),
     .pwm_min = PWM_DUTY(FAN2_PWM_MIN),
 };
 
@@ -92,58 +83,6 @@ static const struct Fan __code FAN2 = {
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
     fan_max = false;
-}
-
-static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
-    for (uint8_t i = 0; i < fan->points_size; i++) {
-        const struct FanPoint *cur = &fan->points[i];
-
-        // If exactly the current temp, return the current duty
-        if (temp == cur->temp) {
-            return cur->duty;
-        } else if (temp < cur->temp) {
-            // If lower than first temp, return 0%
-            if (i == 0) {
-                return 0;
-            } else {
-                const struct FanPoint *prev = &fan->points[i - 1];
-                return prev->duty;
-            }
-        }
-    }
-
-    // If no point is found, return 100%
-    return CTR0;
-}
-
-// Apply hysteresis: Use the highest duty over the last COOLDOWN seconds.
-// Keep the fans at higher duties for a short time as the system cools to help
-// reduce temps below the target duty.
-// Useful for addressing the case where fans will constantly start/stop at the
-// point 0 temperature threshold.
-static uint8_t fan_cooldown(const struct Fan *const fan, uint8_t duty) {
-    uint8_t highest = duty;
-
-    uint8_t i;
-    for (i = 0; (i + 1) < fan->cooldown_size; i++) {
-        uint8_t value = fan->cooldown[i + 1];
-        if (value > highest) {
-            highest = value;
-        }
-        fan->cooldown[i] = value;
-    }
-    fan->cooldown[i] = duty;
-
-    return highest;
-}
-
-static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
-    uint8_t duty;
-
-    duty = fan_duty(fan, temp);
-    duty = fan_cooldown(fan, duty);
-
-    return duty;
 }
 
 static uint16_t fan_get_tach0_rpm(void) {
@@ -177,6 +116,7 @@ void fan_update_target(void) {
     // TODO: AMD SB-TSI temp
     int16_t sys_temp = 50;
 #endif
+    uint8_t i = 0;
 
     // Set FAN1 target duty.
     if (fan_max) {
@@ -184,7 +124,30 @@ void fan_update_target(void) {
     } else if (power_state != POWER_STATE_S0) {
         fan1_pwm_target = 0;
     } else {
-        fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
+        // Check highest level
+        for (i = 0; i < FAN1.points_size; i++) {
+            if (sys_temp < FAN1.points[i].temp) {
+                break;
+            }
+        }
+        if (fan1_level < i)
+            fan1_level = i;
+
+        // Check lowest level with hysteresis
+        for (i = 0; i < FAN1.points_size; i++) {
+            if (sys_temp < FAN1.points[i].temp - FAN_TEMP_HYSTERESIS) {
+                break;
+            }
+        }
+        if (fan1_level > i)
+            fan1_level = i;
+
+        if ((fan1_level == 0) && (sys_temp < (FAN1.points[0].temp - FAN_TEMP_HYSTERESIS))) {
+            // If temp is below point 0 with hysteresis, then turn off.
+            fan1_pwm_target = 0;
+        } else {
+            fan1_pwm_target = FAN1.points[fan1_level].duty;
+        }
     }
 
 #ifdef FAN2_PWM
@@ -194,7 +157,30 @@ void fan_update_target(void) {
     } else if (power_state != POWER_STATE_S0) {
         fan2_pwm_target = 0;
     } else {
-        fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
+        // Check highest level
+        for (i = 0; i < FAN2.points_size; i++) {
+            if (sys_temp < FAN2.points[i].temp) {
+                break;
+            }
+        }
+        if (fan2_level < i)
+            fan2_level = i;
+
+        // Check lowest level with hysteresis
+        for (i = 0; i < FAN2.points_size; i++) {
+            if (sys_temp < FAN2.points[i].temp - FAN_TEMP_HYSTERESIS) {
+                break;
+            }
+        }
+        if (fan2_level > i)
+            fan2_level = i;
+
+        if ((fan2_level == 0) && (sys_temp < (FAN2.points[0].temp - FAN_TEMP_HYSTERESIS))) {
+            // If temp is below point 0 with hysteresis, then turn off.
+            fan2_pwm_target = 0;
+        } else {
+            fan2_pwm_target = FAN2.points[fan2_level].duty;
+        }
     }
 #endif
 }
