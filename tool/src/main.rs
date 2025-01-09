@@ -316,6 +316,13 @@ unsafe fn security_set(ec: &mut Ec<Box<dyn Access>>, state: SecurityState) -> Re
     Ok(())
 }
 
+unsafe fn usbc_mux_info(ec: &mut Ec<Box<dyn Access>>, port: u8) -> Result<(), Error> {
+    let info = ec.usbc_mux_info(port)?;
+    println!("{:04X}", info);
+
+    Ok(())
+}
+
 fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
     let r = u8::from_str_radix(&s[0..2], 16);
     let g = u8::from_str_radix(&s[2..4], 16);
@@ -374,6 +381,9 @@ enum SubCommand {
     },
     Security {
         state: Option<String>,
+    },
+    UsbcMuxInfo {
+        port: u8,
     },
 }
 
@@ -656,6 +666,15 @@ fn main() {
                     process::exit(1);
                 }
             },
+        },
+        SubCommand::UsbcMuxInfo { port }  => {
+            match unsafe { usbc_mux_info(&mut ec, port) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to get usbc_mux_info {}: {:X?}", port, err);
+                    process::exit(1);
+                },
+            }
         },
     }
 }

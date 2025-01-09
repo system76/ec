@@ -27,7 +27,6 @@ CFLAGS+=-DI2C_SMBUS=I2C_4
 # Set touchpad PS2 bus
 CFLAGS+=-DPS2_TOUCHPAD=PS2_3
 
-
 # Set smart charger parameters
 # TODO: actually bq24800
 CFLAGS+=\
