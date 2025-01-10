@@ -14,12 +14,9 @@ source /etc/os-release
 msg "Installing system build dependencies"
 if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
     sudo apt-get update
-    sudo apt-get install \
-        --no-install-recommends \
-        --yes \
+    sudo apt-get install --no-install-recommends --yes \
         avr-libc \
         avrdude \
-        curl \
         gcc \
         gcc-avr \
         libc-dev \
@@ -27,34 +24,33 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         libudev-dev \
         make \
         pkgconf \
+        rustup \
         sdcc \
         shellcheck \
         uncrustify \
         xxd
 elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
-    sudo dnf install \
-        --assumeyes \
+    sudo dnf install --assumeyes \
         avr-gcc \
         avr-libc \
         avrdude \
-        curl \
         gcc \
         make \
+        rustup \
         sdcc \
         ShellCheck \
         systemd-devel \
         uncrustify \
         vim-common
 elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
-    sudo pacman -S \
-        --noconfirm \
+    sudo pacman -S --noconfirm \
         avr-gcc \
         avr-libc \
         avrdude \
-        curl \
         gcc \
         make \
         pkgconf \
+        rustup \
         sdcc \
         shellcheck \
         systemd-libs \
@@ -74,17 +70,21 @@ make git-config
 
 RUSTUP_NEW_INSTALL=0
 if ! command -v rustup >/dev/null 2>&1; then
-    RUSTUP_NEW_INSTALL=1
-    msg "Installing Rust"
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-      | sh -s -- -y --default-toolchain none
-
-    msg "Loading Rust environment"
-    source "${HOME}/.cargo/env"
+    # Fedora "rustup" package really just installs "rustup-init"
+    if command -v rustup-init >/dev/null 2>&1; then
+        RUSTUP_NEW_INSTALL=1
+        msg "Installing Rust"
+        rustup-init -y \
+            --default-toolchain none \
+            --profile minimal \
+            --no-update-default-toolchain
+        . "${HOME}/.cargo/env"
+    fi
 fi
 
 msg "Installing pinned Rust toolchain and components"
-rustup show
+# Ref: https://github.com/rust-lang/rustup/issues/3635
+rustup show active-toolchain || rustup toolchain install
 
 if [[ $RUSTUP_NEW_INSTALL = 1 ]]; then
     msg "rustup was just installed. Ensure cargo is on the PATH with:"
