@@ -10,8 +10,6 @@
 void options_init(void);
 // Restore defaults
 void options_reset(void);
-// Save options to flash
-bool options_save_config(void);
 // Get an option
 uint8_t options_get(uint16_t index);
 // Set an option

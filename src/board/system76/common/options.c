@@ -18,8 +18,6 @@ uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = {
 };
 // clang-format on
 
-#define SAVE_IMMEDIATELY BIT(OPT_POWER_ON_AC)
-
 // Config is in the second to last sector of flash
 const uint32_t OPTIONS_ADDR = 0x1F800;
 // Signature is the size of the config
@@ -72,7 +70,7 @@ static bool options_changed() {
     return false;
 }
 
-bool options_save_config(void) {
+static bool options_save_config(void) {
     // Bail if no settings changed to save flash write cycles
     if (!options_changed())
         return true;
@@ -105,9 +103,7 @@ bool options_set(uint16_t index, uint8_t value) {
     if (index < NUM_OPTIONS) {
         TRACE("OPTION %x WRITE %x\n", index, value);
         OPTIONS[index] = value;
-        if (SAVE_IMMEDIATELY & BIT(index))
-            return options_save_config();
-        return true;
+        return options_save_config();
     } else {
         return false;
     }

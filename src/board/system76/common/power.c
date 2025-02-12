@@ -297,9 +297,6 @@ void power_on(void) {
 void power_off(void) {
     DEBUG("%02X: power_off\n", main_cycle);
 
-    // Commit settings to flash on shutdown
-    options_save_config();
-
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
