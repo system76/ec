@@ -272,12 +272,12 @@ void usbpd_event(void) {
     }
 #endif
 
-    static enum PowerState last_power_state = POWER_STATE_OFF;
+    static enum PowerState last_power_state = POWER_STATE_G3;
     update_power_state();
     if (power_state != last_power_state) {
         update = true;
 
-        if (last_power_state == POWER_STATE_OFF) {
+        if (last_power_state == POWER_STATE_G3) {
             // VIN_3V3 now available, allow PD to use it instead of Vbus
             usbpd_dbfg();
 #ifdef USBPD_DUAL_PORT
@@ -332,7 +332,7 @@ void usbpd_event(void) {
 
 #if HAVE_PD_IRQ
     /* For now, all we do is clear all events */
-    if (power_state != POWER_STATE_OFF && !gpio_get(&PD_IRQ))
+    if (power_state != POWER_STATE_G3 && !gpio_get(&PD_IRQ))
         usbpd_clear_event();
 #endif
 }

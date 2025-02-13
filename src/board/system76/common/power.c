@@ -132,16 +132,21 @@ extern uint8_t main_cycle;
 // RSMRST# de-assertion to SUSPWRDNACK valid
 #define tPLT01 delay_ms(200)
 
-enum PowerState power_state = POWER_STATE_OFF;
+enum PowerState power_state = POWER_STATE_G3;
 
 #if USE_S0IX
 uint8_t pep_hook = PEP_DISPLAY_FLAG;
 #endif
 
 enum PowerState calculate_power_state(void) {
+    if (!gpio_get(&USB_CHARGE_EN)) {
+        // VDD5, VccPRIM not powered
+        return POWER_STATE_G3;
+    }
+
     if (!gpio_get(&EC_RSMRST_N)) {
         // S5 plane not powered
-        return POWER_STATE_OFF;
+        return POWER_STATE_G3_AOU;
     }
 
 #if CONFIG_BUS_ESPI
@@ -184,8 +189,11 @@ void update_power_state(void) {
 
 #if LEVEL >= LEVEL_DEBUG
         switch (power_state) {
-        case POWER_STATE_OFF:
-            DEBUG("POWER_STATE_OFF\n");
+        case POWER_STATE_G3:
+            DEBUG("POWER_STATE_G3\n");
+            break;
+        case POWER_STATE_G3_AOU:
+            DEBUG("POWER_STATE_G3_AOU\n");
             break;
         case POWER_STATE_S5:
             DEBUG("POWER_STATE_S5\n");
@@ -201,6 +209,13 @@ void update_power_state(void) {
     }
 }
 
+static bool is_standby_power_needed(void) {
+    if (options_get(OPT_ALWAYS_ON_USB))
+        return true;
+
+    return false;
+}
+
 void power_init(void) {
     // See Figure 12-19 in Whiskey Lake Platform Design Guide
     // | VCCRTC | RTCRST# | VccPRIM |
@@ -213,17 +228,7 @@ void power_init(void) {
     update_power_state();
 }
 
-void power_on(void) {
-    // Configure WLAN GPIOs before powering on
-    wireless_power(true);
-
-    DEBUG("%02X: power_on\n", main_cycle);
-
-    // See Figure 12-19 in Whiskey Lake Platform Design Guide
-    // TODO - signal timing graph
-    // See Figure 12-25 in Whiskey Lake Platform Design Guide
-    // TODO - rail timing graph
-
+static void power_sequence_g3_g3aou(void) {
 #if HAVE_VA_EC_EN
     // Enable VCCPRIM_* planes - must be enabled prior to USB power in order to
     // avoid leakage
@@ -233,8 +238,14 @@ void power_on(void) {
     GPIO_SET_DEBUG(PD_EN, true);
 #endif
     tPCH06;
-
     // Enable VDD5
+    GPIO_SET_DEBUG(USB_CHARGE_EN, true);
+}
+
+static void power_sequence_g3aou_s5(void) {
+    // Configure WLAN GPIOs before powering on
+    wireless_power(true);
+
     GPIO_SET_DEBUG(DD_ON, true);
 
 #if HAVE_SUS_PWR_ACK
@@ -261,7 +272,9 @@ void power_on(void) {
 
     // Wait for SUSPWRDNACK validity
     tPLT01;
+}
 
+static void power_sequence_s5_s0(void) {
     GPIO_SET_DEBUG(PWR_BTN_N, false);
     delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
     GPIO_SET_DEBUG(PWR_BTN_N, true);
@@ -294,9 +307,7 @@ void power_on(void) {
     }
 }
 
-void power_off(void) {
-    DEBUG("%02X: power_off\n", main_cycle);
-
+static void power_sequence_sx_g3aou(void) {
 #if HAVE_PCH_PWROK_EC
     // De-assert SYS_PWROK
     GPIO_SET_DEBUG(PCH_PWROK_EC, false);
@@ -315,18 +326,6 @@ void power_off(void) {
     // De-assert RSMRST#
     GPIO_SET_DEBUG(EC_RSMRST_N, false);
 
-    // Disable VDD5
-    GPIO_SET_DEBUG(DD_ON, false);
-    tPCH12;
-
-#if HAVE_PD_EN
-    GPIO_SET_DEBUG(PD_EN, false);
-#endif
-#if HAVE_VA_EC_EN
-    // Disable VCCPRIM_* planes
-    GPIO_SET_DEBUG(VA_EC_EN, false);
-#endif // HAVE_VA_EC_EN
-
 #if HAVE_PCH_DPWROK_EC
     // De-assert DSW_PWROK
     GPIO_SET_DEBUG(PCH_DPWROK_EC, false);
@@ -336,7 +335,77 @@ void power_off(void) {
     // Configure WLAN GPIOs after powering off
     wireless_power(false);
 
+    GPIO_SET_DEBUG(DD_ON, false);
+}
+
+static void power_sequence_g3aou_g3(void) {
+    // Disable VDD5
+    GPIO_SET_DEBUG(USB_CHARGE_EN, false);
+    tPCH12;
+
+#if HAVE_PD_EN
+    GPIO_SET_DEBUG(PD_EN, false);
+#endif
+#if HAVE_VA_EC_EN
+    // Disable VCCPRIM_* planes
+    GPIO_SET_DEBUG(VA_EC_EN, false);
+#endif // HAVE_VA_EC_EN
+}
+
+static void power_sequence(enum PowerState target) {
     update_power_state();
+
+    if (target == power_state) {
+        return;
+    }
+
+    DEBUG("Power state: %x -> %x\n", power_state, target);
+    if (target < power_state) {
+        if (power_state == POWER_STATE_G3)
+            power_sequence_g3_g3aou();
+
+        if (target == POWER_STATE_G3_AOU)
+            return;
+
+        if (power_state > POWER_STATE_S5)
+            power_sequence_g3aou_s5();
+
+        if (target == POWER_STATE_S5)
+            return;
+
+        if (power_state > POWER_STATE_S0)
+            power_sequence_s5_s0();
+    }
+
+    if (target > power_state) {
+        if (target < POWER_STATE_G3_AOU) {
+            WARN("Warning: S3 or S5 entry from S0 must be initiated by AP!\n");
+            return;
+        }
+
+        if (power_state < POWER_STATE_G3_AOU)
+            power_sequence_sx_g3aou();
+
+        if (target == POWER_STATE_G3_AOU)
+            return;
+
+        if (power_state < POWER_STATE_G3)
+            power_sequence_g3aou_g3();
+    }
+
+    update_power_state();
+}
+
+void power_on(void) {
+    DEBUG("%02X: power_on\n", main_cycle);
+
+    power_sequence(POWER_STATE_S0);
+}
+
+void power_off(void) {
+    DEBUG("%02X: power_off\n", main_cycle);
+
+    power_sequence(is_standby_power_needed() ? POWER_STATE_G3_AOU : POWER_STATE_G3);
 }
 
 void power_apply_limit(bool ac) {
@@ -399,11 +468,11 @@ void power_cpu_reset(void) {
     fan_reset();
     // Reset KBC and touchpad states
     kbled_reset();
-    // Set power limits
-    power_apply_limit(!gpio_get(&ACIN_N));
     kbc_clear_lock();
     ps2_reset(&PS2_1);
     ps2_reset(&PS2_TOUCHPAD);
+    // Set power limits
+    power_apply_limit(!gpio_get(&ACIN_N));
 }
 
 static bool power_button_disabled(void) {
@@ -418,6 +487,9 @@ void power_event(void) {
     static uint32_t ac_unplug_time = 0;
     bool ac_new = gpio_get(&ACIN_N);
 
+    if (power_state == POWER_STATE_G3 && is_standby_power_needed())
+        power_sequence(POWER_STATE_G3_AOU);
+
     if (ac_new != ac_last) {
         // Configure smart charger
         DEBUG("Power adapter ");
@@ -429,20 +501,8 @@ void power_event(void) {
         } else {
             DEBUG("plugged in\n");
             battery_charger_configure();
-            if (options_get(OPT_POWER_ON_AC) == 1) {
-                switch (power_state) {
-                case POWER_STATE_OFF:
-                    power_on();
-                    break;
-                case POWER_STATE_S5:
-                    GPIO_SET_DEBUG(PWR_BTN_N, false);
-                    delay_ms(32); // PWRBTN# must assert for at least 16 ms, we do twice that
-                    GPIO_SET_DEBUG(PWR_BTN_N, true);
-                    break;
-                default:
-                    break;
-                }
-            }
+            if (options_get(OPT_POWER_ON_AC) == 1)
+                power_on();
         }
         power_apply_limit(!ac_new);
         battery_debug();
@@ -495,8 +555,7 @@ void power_event(void) {
             DEBUG("%02X: Power switch press\n", main_cycle);
 
             // Enable S5 power if necessary, before sending PWR_BTN
-            update_power_state();
-            if (power_state == POWER_STATE_OFF) {
+            if (power_state >= POWER_STATE_G3_AOU) {
                 if (config_should_reset())
                     config_reset();
                 power_on();
@@ -608,7 +667,6 @@ void power_event(void) {
     {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
-            // Stay in S5 on AC
             if (gpio_get(&ACIN_N)) {
                 power_off();
             }
@@ -628,7 +686,7 @@ void power_event(void) {
     if (!wake_new && wake_last) {
         update_power_state();
         DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
-        if (power_state == POWER_STATE_OFF) {
+        if (power_state == POWER_STATE_G3) {
             power_on();
         }
     }
@@ -676,6 +734,10 @@ void power_event(void) {
         // AC plugged in, orange light
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, true);
+    } else if (power_state == POWER_STATE_G3_AOU) {
+        // G3, Always on USB, lights off
+        gpio_set(&LED_PWR, false);
+        gpio_set(&LED_ACIN, false);
     } else {
         // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);

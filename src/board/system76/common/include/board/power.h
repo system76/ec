@@ -6,10 +6,16 @@
 #include <stdbool.h>
 
 enum PowerState {
+    // Full On
     POWER_STATE_S0 = 0x0,
+    // Suspend to RAM
     POWER_STATE_S3 = 0x3,
+    // Soft off
     POWER_STATE_S5 = 0x5,
-    POWER_STATE_OFF = 0xf,
+    // Only USB is powered (Always On USB)
+    POWER_STATE_G3_AOU = 0xfe,
+    // Platform is off
+    POWER_STATE_G3 = 0xff,
 };
 
 extern enum PowerState power_state;
