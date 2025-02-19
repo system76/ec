@@ -45,13 +45,13 @@ jobs:
             model: v560tu
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build firmware
         run: EC_BOARD_VENDOR=${{ matrix.vendor }} EC_BOARD_MODEL=${{ matrix.model }} ./build.sh
 
       - name: Save artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: "dasharo-${{ matrix.vendor }}-${{ matrix.model }}"
           path: |
