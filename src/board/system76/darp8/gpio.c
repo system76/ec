@@ -36,6 +36,7 @@ struct Gpio __code SMI_N =          GPIO(D, 4);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 6);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code SWI_N =          GPIO(B, 5);
+struct Gpio __code USB_CHARGE_EN =  GPIO(F, 1);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4);
 struct Gpio __code WLAN_EN =        GPIO(F, 3);
 struct Gpio __code WLAN_PWR_EN =    GPIO(G, 1);

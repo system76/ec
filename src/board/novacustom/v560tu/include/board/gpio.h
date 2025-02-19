@@ -41,6 +41,7 @@ extern struct Gpio __code SINK_CTRL_2;
 extern struct Gpio __code SUSB_N_PCH;
 extern struct Gpio __code SUSC_N_PCH;
 #define HAVE_SUSWARN_N 0
+extern struct Gpio __code USB_CHARGE_EN;
 extern struct Gpio __code VA_EC_EN;
 #define HAVE_WLAN_EN 0
 extern struct Gpio __code WLAN_PWR_EN;

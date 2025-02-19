@@ -45,6 +45,7 @@ extern struct Gpio __code SMI_N;
 extern struct Gpio __code SUSB_N_PCH;
 extern struct Gpio __code SUSC_N_PCH;
 extern struct Gpio __code SWI_N;
+extern struct Gpio __code USB_CHARGE_EN;
 extern struct Gpio __code VA_EC_EN;
 extern struct Gpio __code WLAN_EN;
 extern struct Gpio __code WLAN_PWR_EN;
