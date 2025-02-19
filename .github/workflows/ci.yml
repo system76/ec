@@ -36,7 +36,11 @@ jobs:
           - vendor: novacustom
             model: ns5x_adl
           - vendor: novacustom
+            model: v540tnx
+          - vendor: novacustom
             model: v540tu
+          - vendor: novacustom
+            model: v560tnx
           - vendor: novacustom
             model: v560tu
 
