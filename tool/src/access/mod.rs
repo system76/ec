@@ -33,7 +33,7 @@ pub trait Access: Downcast + Send + 'static {
 
 impl Access for Box<dyn Access> {
     unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error> {
-        (**self).command(cmd, data)
+        unsafe { (**self).command(cmd, data) }
     }
 
     fn data_size(&self) -> usize {
@@ -41,7 +41,7 @@ impl Access for Box<dyn Access> {
     }
 
     unsafe fn read_debug(&mut self, addr: u8) -> Result<u8, Error> {
-        (**self).read_debug(addr)
+        unsafe { (**self).read_debug(addr) }
     }
 }
 

@@ -51,9 +51,11 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
     pub unsafe fn status(&mut self) -> Result<u8, Error> {
         let mut status = [0];
 
-        self.spi.reset()?;
-        self.spi.write(&[0x05])?;
-        self.spi.read(&mut status)?;
+        unsafe {
+            self.spi.reset()?;
+            self.spi.write(&[0x05])?;
+            self.spi.read(&mut status)?;
+        }
 
         Ok(status[0])
     }
@@ -62,7 +64,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
     pub unsafe fn status_wait(&mut self, mask: u8, value: u8) -> Result<(), Error> {
         self.timeout.reset();
         while self.timeout.running() {
-            if self.status()? & mask == value {
+            if unsafe { self.status()? } & mask == value {
                 return Ok(());
             }
         }
@@ -71,22 +73,26 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
 
     /// Disable writes
     pub unsafe fn write_disable(&mut self) -> Result<(), Error> {
-        self.spi.reset()?;
-        self.spi.write(&[0x04])?;
+        unsafe {
+            self.spi.reset()?;
+            self.spi.write(&[0x04])?;
 
-        // Poll status for busy unset and write enable unset
-        self.status_wait(3, 0)?;
+            // Poll status for busy unset and write enable unset
+            self.status_wait(3, 0)?;
+        }
 
         Ok(())
     }
 
     /// Enable writes
     pub unsafe fn write_enable(&mut self) -> Result<(), Error> {
-        self.spi.reset()?;
-        self.spi.write(&[0x06])?;
+        unsafe {
+            self.spi.reset()?;
+            self.spi.write(&[0x06])?;
 
-        // Poll status for busy unset and write enable set
-        self.status_wait(3, 2)?;
+            // Poll status for busy unset and write enable set
+            self.status_wait(3, 2)?;
+        }
 
         Ok(())
     }
@@ -102,20 +108,22 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
             SpiTarget::Backup => 0x20,
         };
 
-        self.write_enable()?;
+        unsafe {
+            self.write_enable()?;
 
-        self.spi.reset()?;
-        self.spi.write(&[
-            instruction,
-            (address >> 16) as u8,
-            (address >> 8) as u8,
-            address as u8,
-        ])?;
+            self.spi.reset()?;
+            self.spi.write(&[
+                instruction,
+                (address >> 16) as u8,
+                (address >> 8) as u8,
+                address as u8,
+            ])?;
 
-        // Poll status for busy unset
-        self.status_wait(1, 0)?;
+            // Poll status for busy unset
+            self.status_wait(1, 0)?;
 
-        self.write_disable()?;
+            self.write_disable()?;
+        }
 
         Ok(())
     }
@@ -126,15 +134,17 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
             return Err(Error::Parameter);
         }
 
-        self.spi.reset()?;
-        self.spi.write(&[
-            0x0B,
-            (address >> 16) as u8,
-            (address >> 8) as u8,
-            address as u8,
-            0,
-        ])?;
-        self.spi.read(data)
+        unsafe {
+            self.spi.reset()?;
+            self.spi.write(&[
+                0x0B,
+                (address >> 16) as u8,
+                (address >> 8) as u8,
+                address as u8,
+                0,
+            ])?;
+            self.spi.read(data)
+        }
     }
 
     /// Write at a specific address
@@ -143,7 +153,7 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
             return Err(Error::Parameter);
         }
 
-        self.write_enable()?;
+        unsafe { self.write_enable()? };
 
         //TODO: automatically detect write command
         match self.spi.target() {
@@ -153,22 +163,24 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
                     let low = *word.get(0).unwrap_or(&0xFF);
                     let high = *word.get(1).unwrap_or(&0xFF);
 
-                    self.spi.reset()?;
-                    if i == 0 {
-                        self.spi.write(&[
-                            0xAD,
-                            (address >> 16) as u8,
-                            (address >> 8) as u8,
-                            address as u8,
-                            low,
-                            high,
-                        ])?;
-                    } else {
-                        self.spi.write(&[0xAD, low, high])?;
-                    }
+                    unsafe {
+                        self.spi.reset()?;
+                        if i == 0 {
+                            self.spi.write(&[
+                                0xAD,
+                                (address >> 16) as u8,
+                                (address >> 8) as u8,
+                                address as u8,
+                                low,
+                                high,
+                            ])?;
+                        } else {
+                            self.spi.write(&[0xAD, low, high])?;
+                        }
 
-                    // Poll status for busy unset
-                    self.status_wait(1, 0)?;
+                        // Poll status for busy unset
+                        self.status_wait(1, 0)?;
+                    }
                 }
             }
             SpiTarget::Backup => {
@@ -178,33 +190,35 @@ impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
                         return Err(Error::Parameter);
                     }
 
-                    if i > 0 {
-                        // Write enable clears after each page is written
-                        self.write_enable()?;
+                    unsafe {
+                        if i > 0 {
+                            // Write enable clears after each page is written
+                            self.write_enable()?;
+                        }
+
+                        self.spi.reset()?;
+                        self.spi.write(&[
+                            0xF2,
+                            (page_address >> 16) as u8,
+                            (page_address >> 8) as u8,
+                            page_address as u8,
+                        ])?;
+                        self.spi.write(page)?;
+
+                        // Poll status for busy unset
+                        self.status_wait(1, 0)?;
                     }
-
-                    self.spi.reset()?;
-                    self.spi.write(&[
-                        0xF2,
-                        (page_address >> 16) as u8,
-                        (page_address >> 8) as u8,
-                        page_address as u8,
-                    ])?;
-                    self.spi.write(page)?;
-
-                    // Poll status for busy unset
-                    self.status_wait(1, 0)?;
                 }
             }
         }
 
-        self.write_disable()?;
+        unsafe { self.write_disable()? };
 
         Ok(data.len())
     }
 }
 
-impl<'a, S: Spi, T: Timeout> Drop for SpiRom<'a, S, T> {
+impl<S: Spi, T: Timeout> Drop for SpiRom<'_, S, T> {
     fn drop(&mut self) {
         unsafe {
             let _ = self.write_disable();

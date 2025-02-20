@@ -12,11 +12,11 @@ use std::{fs, process, str, thread, time::Duration};
 
 unsafe fn console(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     //TODO: driver support for reading debug region?
-    let access = ec.access();
+    let access = unsafe { ec.access() };
 
-    let mut head = access.read_debug(0)? as usize;
+    let mut head = unsafe { access.read_debug(0)? } as usize;
     loop {
-        let tail = access.read_debug(0)? as usize;
+        let tail = unsafe { access.read_debug(0)? } as usize;
         if tail == 0 || head == tail {
             thread::sleep(Duration::from_millis(1));
         } else {
@@ -25,7 +25,7 @@ unsafe fn console(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
                 if head >= 256 {
                     head = 1;
                 }
-                let c = access.read_debug(head as u8)?;
+                let c = unsafe { access.read_debug(head as u8)? };
                 print!("{}", c as char);
             }
         }
@@ -41,7 +41,7 @@ unsafe fn flash_read<S: Spi>(
     while address < rom.len() {
         eprint!("\rSPI Read {}K", address / 1024);
         let next_address = address + sector_size;
-        let count = spi.read_at(address as u32, &mut rom[address..next_address])?;
+        let count = unsafe { spi.read_at(address as u32, &mut rom[address..next_address])? };
         if count != sector_size {
             eprintln!(
                 "\ncount {} did not match sector size {}",
@@ -70,12 +70,12 @@ unsafe fn flash_inner(
         return Err(ectool::Error::Verify);
     }
 
-    let mut spi_bus = ec.spi(target, scratch)?;
+    let mut spi_bus = unsafe { ec.spi(target, scratch)? };
     let mut spi = SpiRom::new(&mut spi_bus, StdTimeout::new(Duration::new(1, 0)));
     let sector_size = spi.sector_size();
 
     let mut rom = vec![0xFF; rom_size];
-    flash_read(&mut spi, &mut rom, sector_size)?;
+    unsafe { flash_read(&mut spi, &mut rom, sector_size)? };
 
     eprintln!("Saving ROM to backup.rom");
     fs::write("backup.rom", &rom).map_err(|_| Error::Verify)?;
@@ -106,10 +106,11 @@ unsafe fn flash_inner(
 
             if !matches {
                 if !erased {
-                    spi.erase_sector(address as u32)?;
+                    unsafe { spi.erase_sector(address as u32)? };
                 }
                 if !new_erased {
-                    let count = spi.write_at(address as u32, &new_rom[address..next_address])?;
+                    let count =
+                        unsafe { spi.write_at(address as u32, &new_rom[address..next_address])? };
                     if count != sector_size {
                         eprintln!(
                             "\nWrite count {} did not match sector size {}",
@@ -125,7 +126,7 @@ unsafe fn flash_inner(
         eprintln!("\rSPI Write {}K", address / 1024);
 
         // Verify chip write
-        flash_read(&mut spi, &mut rom, sector_size)?;
+        unsafe { flash_read(&mut spi, &mut rom, sector_size)? };
         for i in 0..rom.len() {
             if rom[i] != new_rom[i] {
                 eprintln!(
@@ -151,11 +152,11 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
     println!("file board: {:?}", str::from_utf8(firmware.board));
     println!("file version: {:?}", str::from_utf8(firmware.version));
 
-    let data_size = ec.access().data_size();
+    let data_size = unsafe { ec.access().data_size() };
 
     {
         let mut data = vec![0; data_size];
-        let size = ec.board(&mut data)?;
+        let size = unsafe { ec.board(&mut data)? };
 
         let ec_board = &data[..size];
         println!("ec board: {:?}", str::from_utf8(ec_board));
@@ -168,13 +169,13 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
 
     {
         let mut data = vec![0; data_size];
-        let size = ec.version(&mut data)?;
+        let size = unsafe { ec.version(&mut data)? };
 
         let ec_version = &data[..size];
         println!("ec version: {:?}", str::from_utf8(ec_version));
     }
 
-    if let Ok(security) = ec.security_get() {
+    if let Ok(security) = unsafe { ec.security_get() } {
         if security != SecurityState::Unlock {
             return Err(Error::WriteLocked);
         }
@@ -189,7 +190,7 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
     eprintln!("Sync");
     let _ = process::Command::new("sync").status();
 
-    let res = flash_inner(ec, &firmware, target, scratch);
+    let res = unsafe { flash_inner(ec, &firmware, target, scratch) };
     eprintln!("Result: {:X?}", res);
 
     eprintln!("Sync");
@@ -202,19 +203,19 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
         eprintln!("Sync");
         let _ = process::Command::new("sync").status();
 
-        ec.reset()?;
+        unsafe { ec.reset()? };
     }
 
     res
 }
 
 unsafe fn info(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
-    let data_size = ec.access().data_size();
+    let data_size = unsafe { ec.access().data_size() };
 
     {
         print!("board: ");
         let mut data = vec![0; data_size];
-        let size = ec.board(&mut data)?;
+        let size = unsafe { ec.board(&mut data)? };
         for &b in data[..size].iter() {
             print!("{}", b as char);
         }
@@ -224,7 +225,7 @@ unsafe fn info(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     {
         print!("version: ");
         let mut data = vec![0; data_size];
-        let size = ec.version(&mut data)?;
+        let size = unsafe { ec.version(&mut data)? };
         for &b in data[..size].iter() {
             print!("{}", b as char);
         }
@@ -235,10 +236,10 @@ unsafe fn info(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
 }
 
 unsafe fn matrix(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
-    let data_size = ec.access().data_size();
+    let data_size = unsafe { ec.access().data_size() };
 
     let mut data = vec![0; data_size];
-    ec.matrix_get(&mut data)?;
+    unsafe { ec.matrix_get(&mut data)? };
     #[allow(clippy::get_first)]
     let rows = *data.get(0).unwrap_or(&0);
     let cols = *data.get(1).unwrap_or(&0);
@@ -265,31 +266,31 @@ unsafe fn matrix(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
 }
 
 unsafe fn print(ec: &mut Ec<Box<dyn Access>>, message: &[u8]) -> Result<(), Error> {
-    ec.print(message)?;
+    unsafe { ec.print(message)? };
 
     Ok(())
 }
 
 unsafe fn fan_get_pwm(ec: &mut Ec<Box<dyn Access>>, index: u8) -> Result<(), Error> {
-    let duty = ec.fan_get_pwm(index)?;
+    let duty = unsafe { ec.fan_get_pwm(index)? };
     println!("{}", duty);
 
     Ok(())
 }
 
 unsafe fn fan_set_pwm(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Result<(), Error> {
-    ec.fan_set_pwm(index, duty)
+    unsafe { ec.fan_set_pwm(index, duty) }
 }
 
 unsafe fn fan_get_mode(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
-    let mode = ec.fan_get_mode()?;
+    let mode = unsafe { ec.fan_get_mode()? };
     println!("{}", mode);
 
     Ok(())
 }
 
 unsafe fn fan_set_mode(ec: &mut Ec<Box<dyn Access>>, mode: ectool::FanMode) -> Result<(), Error> {
-    ec.fan_set_mode(mode)
+    unsafe { ec.fan_set_mode(mode) }
 }
 
 unsafe fn keymap_get(
@@ -298,7 +299,7 @@ unsafe fn keymap_get(
     output: u8,
     input: u8,
 ) -> Result<(), Error> {
-    let value = ec.keymap_get(layer, output, input)?;
+    let value = unsafe { ec.keymap_get(layer, output, input)? };
     println!("{:04X}", value);
 
     Ok(())
@@ -311,17 +312,17 @@ unsafe fn keymap_set(
     input: u8,
     value: u16,
 ) -> Result<(), Error> {
-    ec.keymap_set(layer, output, input, value)
+    unsafe { ec.keymap_set(layer, output, input, value) }
 }
 
 unsafe fn security_get(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
-    println!("{:?}", ec.security_get()?);
+    println!("{:?}", unsafe { ec.security_get()? });
 
     Ok(())
 }
 
 unsafe fn security_set(ec: &mut Ec<Box<dyn Access>>, state: SecurityState) -> Result<(), Error> {
-    ec.security_set(state)?;
+    unsafe { ec.security_set(state)? };
     println!("Shut down the system for the security state to take effect");
 
     Ok(())
