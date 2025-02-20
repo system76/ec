@@ -8,7 +8,7 @@ use std::{
     time::Duration,
 };
 
-use crate::{timeout, Access, Error, StdTimeout, Timeout};
+use crate::{Access, Error, StdTimeout, Timeout, timeout};
 
 use super::*;
 
@@ -118,7 +118,7 @@ impl AccessLpcLinux {
 
     /// Returns Ok if a command can be sent
     unsafe fn command_check(&mut self) -> Result<(), Error> {
-        if self.read_cmd(SMFI_CMD_CMD)? == 0 {
+        if unsafe { self.read_cmd(SMFI_CMD_CMD)? } == 0 {
             Ok(())
         } else {
             Err(Error::WouldBlock)
@@ -133,28 +133,30 @@ impl Access for AccessLpcLinux {
             return Err(Error::DataLength(data.len()));
         }
 
-        // All previous commands should be finished
-        self.command_check()?;
+        unsafe {
+            // All previous commands should be finished
+            self.command_check()?;
 
-        // Write data bytes, index should be valid due to length test above
-        for i in 0..data.len() {
-            self.write_cmd(i as u8 + SMFI_CMD_DATA, data[i])?;
+            // Write data bytes, index should be valid due to length test above
+            for i in 0..data.len() {
+                self.write_cmd(i as u8 + SMFI_CMD_DATA, data[i])?;
+            }
+
+            // Write command byte, which starts command
+            self.write_cmd(SMFI_CMD_CMD, cmd)?;
+
+            // Wait for command to finish with timeout
+            self.timeout.reset();
+            timeout!(self.timeout, self.command_check())?;
+
+            // Read data bytes, index should be valid due to length test above
+            for i in 0..data.len() {
+                data[i] = self.read_cmd(i as u8 + SMFI_CMD_DATA)?;
+            }
+
+            // Return response byte
+            self.read_cmd(SMFI_CMD_RES)
         }
-
-        // Write command byte, which starts command
-        self.write_cmd(SMFI_CMD_CMD, cmd)?;
-
-        // Wait for command to finish with timeout
-        self.timeout.reset();
-        timeout!(self.timeout, self.command_check())?;
-
-        // Read data bytes, index should be valid due to length test above
-        for i in 0..data.len() {
-            data[i] = self.read_cmd(i as u8 + SMFI_CMD_DATA)?;
-        }
-
-        // Return response byte
-        self.read_cmd(SMFI_CMD_RES)
     }
 
     fn data_size(&self) -> usize {

@@ -1,7 +1,7 @@
 [package]
 name = "system76_ectool"
 version = "0.3.8"
-edition = "2021"
+edition = "2024"
 description = "System76 EC tool"
 license = "MIT"
 authors = ["Jeremy Soller <jeremy@system76.com>"]

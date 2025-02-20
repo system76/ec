@@ -117,7 +117,7 @@ impl<A: Access> Ec<A> {
         let mut ec = Ec { access, version: 0 };
 
         // Read version of protocol
-        ec.version = ec.probe()?;
+        ec.version = unsafe { ec.probe()? };
 
         // Make sure protocol version is supported
         match ec.version {
@@ -134,7 +134,7 @@ impl<A: Access> Ec<A> {
     }
 
     unsafe fn command(&mut self, cmd: Cmd, data: &mut [u8]) -> Result<(), Error> {
-        match self.access.command(cmd as u8, data)? {
+        match unsafe { self.access.command(cmd as u8, data)? } {
             0 => Ok(()),
             err => Err(Error::Protocol(err)),
         }
@@ -143,7 +143,7 @@ impl<A: Access> Ec<A> {
     /// Probe for EC
     pub unsafe fn probe(&mut self) -> Result<u8, Error> {
         let mut data = [0; 3];
-        self.command(Cmd::Probe, &mut data)?;
+        unsafe { self.command(Cmd::Probe, &mut data)? };
         let signature = (data[0], data[1]);
         if signature == (0x76, 0xEC) {
             let version = data[2];
@@ -155,7 +155,7 @@ impl<A: Access> Ec<A> {
 
     /// Read board from EC
     pub unsafe fn board(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        self.command(Cmd::Board, data)?;
+        unsafe { self.command(Cmd::Board, data)? };
         let mut i = 0;
         while i < data.len() {
             if data[i] == 0 {
@@ -168,7 +168,7 @@ impl<A: Access> Ec<A> {
 
     /// Read version from EC
     pub unsafe fn version(&mut self, data: &mut [u8]) -> Result<usize, Error> {
-        self.command(Cmd::Version, data)?;
+        unsafe { self.command(Cmd::Version, data)? };
         let mut i = 0;
         while i < data.len() {
             if data[i] == 0 {
@@ -188,7 +188,7 @@ impl<A: Access> Ec<A> {
             data[0] = flags;
             data[1] = chunk.len() as u8;
             data[2..chunk.len()].clone_from_slice(chunk);
-            self.command(Cmd::Print, &mut data)?;
+            unsafe { self.command(Cmd::Print, &mut data)? };
             if data[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
@@ -205,32 +205,32 @@ impl<A: Access> Ec<A> {
             scratch,
             buffer: vec![0; data_size].into_boxed_slice(),
         };
-        spi.reset()?;
+        unsafe { spi.reset()? };
         Ok(spi)
     }
 
     /// Reset EC. Will also power off computer.
     pub unsafe fn reset(&mut self) -> Result<(), Error> {
-        self.command(Cmd::Reset, &mut [])
+        unsafe { self.command(Cmd::Reset, &mut []) }
     }
 
     /// Read fan duty cycle by fan index
     pub unsafe fn fan_get_pwm(&mut self, index: u8) -> Result<u8, Error> {
         let mut data = [index, 0];
-        self.command(Cmd::FanGetPwm, &mut data)?;
+        unsafe { self.command(Cmd::FanGetPwm, &mut data)? };
         Ok(data[1])
     }
 
     /// Set fan duty cycle by fan index
     pub unsafe fn fan_set_pwm(&mut self, index: u8, duty: u8) -> Result<(), Error> {
         let mut data = [index, duty];
-        self.command(Cmd::FanSetPwm, &mut data)
+        unsafe { self.command(Cmd::FanSetPwm, &mut data) }
     }
 
     /// Read keymap data by layout, output pin, and input pin
     pub unsafe fn keymap_get(&mut self, layer: u8, output: u8, input: u8) -> Result<u16, Error> {
         let mut data = [layer, output, input, 0, 0];
-        self.command(Cmd::KeymapGet, &mut data)?;
+        unsafe { self.command(Cmd::KeymapGet, &mut data)? };
         Ok((data[3] as u16) | ((data[4] as u16) << 8))
     }
 
@@ -243,26 +243,26 @@ impl<A: Access> Ec<A> {
         value: u16,
     ) -> Result<(), Error> {
         let mut data = [layer, output, input, value as u8, (value >> 8) as u8];
-        self.command(Cmd::KeymapSet, &mut data)
+        unsafe { self.command(Cmd::KeymapSet, &mut data) }
     }
 
     // Get LED value by index
     pub unsafe fn led_get_value(&mut self, index: u8) -> Result<(u8, u8), Error> {
         let mut data = [index, 0, 0];
-        self.command(Cmd::LedGetValue, &mut data)?;
+        unsafe { self.command(Cmd::LedGetValue, &mut data)? };
         Ok((data[1], data[2]))
     }
 
     // Set LED value by index
     pub unsafe fn led_set_value(&mut self, index: u8, value: u8) -> Result<(), Error> {
         let mut data = [index, value];
-        self.command(Cmd::LedSetValue, &mut data)
+        unsafe { self.command(Cmd::LedSetValue, &mut data) }
     }
 
     // Get LED color by index
     pub unsafe fn led_get_color(&mut self, index: u8) -> Result<(u8, u8, u8), Error> {
         let mut data = [index, 0, 0, 0];
-        self.command(Cmd::LedGetColor, &mut data)?;
+        unsafe { self.command(Cmd::LedGetColor, &mut data)? };
         Ok((data[1], data[2], data[3]))
     }
 
@@ -275,56 +275,56 @@ impl<A: Access> Ec<A> {
         blue: u8,
     ) -> Result<(), Error> {
         let mut data = [index, red, green, blue];
-        self.command(Cmd::LedSetColor, &mut data)
+        unsafe { self.command(Cmd::LedSetColor, &mut data) }
     }
 
     pub unsafe fn led_get_mode(&mut self, layer: u8) -> Result<(u8, u8), Error> {
         let mut data = [layer, 0, 0];
-        self.command(Cmd::LedGetMode, &mut data)?;
+        unsafe { self.command(Cmd::LedGetMode, &mut data)? };
         Ok((data[1], data[2]))
     }
 
     pub unsafe fn led_set_mode(&mut self, layer: u8, mode: u8, speed: u8) -> Result<(), Error> {
         let mut data = [layer, mode, speed];
-        self.command(Cmd::LedSetMode, &mut data)
+        unsafe { self.command(Cmd::LedSetMode, &mut data) }
     }
 
     pub unsafe fn led_save(&mut self) -> Result<(), Error> {
-        self.command(Cmd::LedSave, &mut [])
+        unsafe { self.command(Cmd::LedSave, &mut []) }
     }
 
     pub unsafe fn matrix_get(&mut self, matrix: &mut [u8]) -> Result<(), Error> {
-        self.command(Cmd::MatrixGet, matrix)
+        unsafe { self.command(Cmd::MatrixGet, matrix) }
     }
 
     pub unsafe fn set_no_input(&mut self, no_input: bool) -> Result<(), Error> {
-        self.command(Cmd::SetNoInput, &mut [no_input as u8])
+        unsafe { self.command(Cmd::SetNoInput, &mut [no_input as u8]) }
     }
 
     /// Get security state
     pub unsafe fn security_get(&mut self) -> Result<SecurityState, Error> {
         let mut data = [0];
-        self.command(Cmd::SecurityGet, &mut data)?;
+        unsafe { self.command(Cmd::SecurityGet, &mut data)? };
         SecurityState::try_from(data[0])
     }
 
     /// Set security state
     pub unsafe fn security_set(&mut self, state: SecurityState) -> Result<(), Error> {
         let mut data = [state as u8];
-        self.command(Cmd::SecuritySet, &mut data)
+        unsafe { self.command(Cmd::SecuritySet, &mut data) }
     }
 
     /// Get fan control mode.
     pub unsafe fn fan_get_mode(&mut self) -> Result<FanMode, Error> {
         let mut data = [0];
-        self.command(Cmd::FanGetMode, &mut data)?;
+        unsafe { self.command(Cmd::FanGetMode, &mut data)? };
         FanMode::try_from(data[0])
     }
 
     /// Set fan control mode.
     pub unsafe fn fan_set_mode(&mut self, mode: FanMode) -> Result<(), Error> {
         let mut data = [mode as u8];
-        self.command(Cmd::FanSetMode, &mut data)
+        unsafe { self.command(Cmd::FanSetMode, &mut data) }
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>
@@ -345,7 +345,7 @@ pub struct EcSpi<'a, A: Access> {
     buffer: Box<[u8]>,
 }
 
-impl<'a, A: Access> EcSpi<'a, A> {
+impl<A: Access> EcSpi<'_, A> {
     fn flags(&self, read: bool, disable: bool) -> u8 {
         let mut flags = 0;
 
@@ -372,7 +372,7 @@ impl<'a, A: Access> EcSpi<'a, A> {
     }
 }
 
-impl<'a, A: Access> Spi for EcSpi<'a, A> {
+impl<A: Access> Spi for EcSpi<'_, A> {
     fn target(&self) -> SpiTarget {
         self.target
     }
@@ -382,7 +382,7 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
         let flags = self.flags(false, true);
         self.buffer[0] = flags;
         self.buffer[1] = 0;
-        self.ec.command(Cmd::Spi, &mut self.buffer[..2])?;
+        unsafe { self.ec.command(Cmd::Spi, &mut self.buffer[..2])? };
         if self.buffer[1] != 0 {
             return Err(Error::Verify);
         }
@@ -395,8 +395,10 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
         for chunk in data.chunks_mut(self.buffer.len() - 2) {
             self.buffer[0] = flags;
             self.buffer[1] = chunk.len() as u8;
-            self.ec
-                .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            unsafe {
+                self.ec
+                    .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            }
             if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
@@ -416,8 +418,10 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
             for i in 0..chunk.len() {
                 self.buffer[i + 2] = chunk[i];
             }
-            self.ec
-                .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            unsafe {
+                self.ec
+                    .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+            }
             if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
             }
@@ -426,7 +430,7 @@ impl<'a, A: Access> Spi for EcSpi<'a, A> {
     }
 }
 
-impl<'a, A: Access> Drop for EcSpi<'a, A> {
+impl<A: Access> Drop for EcSpi<'_, A> {
     fn drop(&mut self) {
         unsafe {
             let _ = self.reset();

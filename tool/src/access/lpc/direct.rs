@@ -2,7 +2,7 @@
 
 use hwio::{Io, Pio};
 
-use crate::{timeout, Access, Error, SuperIo, Timeout};
+use crate::{Access, Error, SuperIo, Timeout, timeout};
 
 use super::*;
 

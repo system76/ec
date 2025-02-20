@@ -2,7 +2,7 @@
 
 use hwio::{Io, Pio};
 
-use crate::{timeout, Error, Timeout};
+use crate::{Error, Timeout, timeout};
 
 /// Standard ACPI EC interface
 pub struct Pmc<T: Timeout> {

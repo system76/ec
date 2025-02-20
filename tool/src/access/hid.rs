@@ -60,7 +60,7 @@ impl AccessHid {
 impl Access for AccessHid {
     unsafe fn command(&mut self, cmd: u8, data: &mut [u8]) -> Result<u8, Error> {
         for _ in 0..self.retries {
-            match self.command_try(cmd, data)? {
+            match unsafe { self.command_try(cmd, data)? } {
                 Some(some) => return Ok(some),
                 None => continue,
             }
