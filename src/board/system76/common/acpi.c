@@ -83,13 +83,13 @@ uint8_t acpi_read(uint8_t addr) {
         ACPI_16(0x22, battery_info.design_voltage);
 
         case 0x26:
-            // If AC adapter connected
-            if (!gpio_get(&ACIN_N)) {
-                // And battery is not fully charged
-                if (battery_info.current != 0) {
-                    // Battery is charging
-                    data |= BIT(1);
-                }
+            // If battery is not fully charged
+            if ((int16_t)battery_info.current > 0) {
+                // Battery is charging
+                data |= BIT(1);
+            } else if ((int16_t)battery_info.current < 0) {
+                // Battery isn't charging
+                data |= BIT(0);
             }
             break;
 
