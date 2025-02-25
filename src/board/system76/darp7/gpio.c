@@ -153,7 +153,7 @@ void gpio_init() {
     // RGBKB-DET#
     GPCRE2 = GPIO_IN | GPIO_UP;
     // USB_PWR_EN#
-    GPCRE3 = GPIO_OUT | GPIO_UP;
+    GPCRE3 = GPIO_OUT;
     // DD_ON
     GPCRE4 = GPIO_OUT | GPIO_DOWN;
     // EC_RSMRST#
