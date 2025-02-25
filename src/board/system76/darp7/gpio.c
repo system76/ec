@@ -71,8 +71,8 @@ void gpio_init() {
     GPDRD = BIT(5) | BIT(4);
     // USB_PWR_EN#
     GPDRE = BIT(3);
-    // H_PECI
-    GPDRF = BIT(6);
+    // H_PECI, CC_EN
+    GPDRF = BIT(6) | BIT(7);
     // H_PROCHOT_EC#
     GPDRG = BIT(6);
     GPDRH = 0;
@@ -176,8 +176,8 @@ void gpio_init() {
     GPCRF5 = GPIO_ALT;
     // H_PECI
     GPCRF6 = GPIO_ALT;
-    //TODO: CC_EN
-    GPCRF7 = GPIO_IN | GPIO_UP;
+    // CC_EN
+    GPCRF7 = GPIO_OUT;
     // VCCIN_AUX_PG
     GPCRG0 = GPIO_IN;
     // WLAN_EN

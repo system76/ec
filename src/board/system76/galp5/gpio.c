@@ -72,8 +72,8 @@ void gpio_init() {
     // PWR_BTN#, SMI#
     GPDRD = BIT(5) | BIT(4);
     GPDRE = 0;
-    // H_PECI
-    GPDRF = BIT(6);
+    // H_PECI, CC_EN
+    GPDRF = BIT(6) | BIT(7);
     // H_PROCHOT_EC
     GPDRG = BIT(6);
     GPDRH = 0;
@@ -177,8 +177,8 @@ void gpio_init() {
     GPCRF5 = GPIO_ALT | GPIO_UP;
     // H_PECI
     GPCRF6 = GPIO_ALT;
-    // CC_EN: TODO!
-    GPCRF7 = GPIO_IN | GPIO_UP;
+    // CC_EN
+    GPCRF7 = GPIO_OUT;
     // dGPU_GPIO8_OVERT
     GPCRG0 = GPIO_IN;
     // WLAN_EN

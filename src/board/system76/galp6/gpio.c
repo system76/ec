@@ -158,7 +158,7 @@ void gpio_init(void) {
     GPCRE1 = GPIO_OUT;
     // KB-DET
     GPCRE2 = GPIO_IN | GPIO_UP;
-    // USB_PWR_EN# (Actually active high)
+    // USB_PWR_EN
     GPCRE3 = GPIO_OUT;
     // DD_ON
     GPCRE4 = GPIO_OUT | GPIO_DOWN;
