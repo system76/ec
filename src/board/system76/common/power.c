@@ -667,9 +667,7 @@ void power_event(void) {
     {
         // Disable S5 power plane if not needed
         if (power_state == POWER_STATE_S5) {
-            if (gpio_get(&ACIN_N)) {
-                power_off();
-            }
+            power_off();
 
 #if CONFIG_SECURITY
             // Handle security state changes if necessary
