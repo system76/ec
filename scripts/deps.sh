@@ -1,24 +1,17 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
 
+# shellcheck disable=SC1091
+
 set -eE
 
-function msg {
-  echo -e "\x1B[1m$*\x1B[0m" >&2
-}
-
-trap 'msg "\x1B[31mFailed to install dependencies!"' ERR
-
-source /etc/os-release
-
-msg "Installing system build dependencies"
-if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
+. /etc/os-release
+if [ "${ID}" = "debian" ] || [[ "${ID_LIKE}" =~ "debian" ]]; then
     sudo apt-get update
-    sudo apt-get install \
-        --no-install-recommends \
-        --yes \
+    sudo apt-get install --no-install-recommends --yes \
         avr-libc \
         avrdude \
+        ca-certificates \
         curl \
         gcc \
         gcc-avr \
@@ -31,64 +24,50 @@ if [[ "${ID}" =~ "debian" ]] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         shellcheck \
         uncrustify \
         xxd
-elif [[ "${ID}" =~ "fedora" ]] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
-    sudo dnf install \
-        --assumeyes \
+elif [ "${ID}" = "fedora" ] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
+    sudo dnf install --assumeyes \
         avr-gcc \
         avr-libc \
         avrdude \
-        curl \
         gcc \
         make \
+        rustup \
         sdcc \
         ShellCheck \
         systemd-devel \
         uncrustify \
         vim-common
-elif [[ "${ID}" =~ "arch" ]] || [[ "${ID_LIKE}" =~ "arch" ]]; then
-    sudo pacman -S \
-        --noconfirm \
+elif [ "${ID}" = "arch" ] || [[ "${ID_LIKE}" =~ "arch" ]]; then
+    sudo pacman -S --noconfirm \
         avr-gcc \
         avr-libc \
         avrdude \
-        curl \
         gcc \
         make \
         pkgconf \
+        rustup \
         sdcc \
         shellcheck \
         systemd-libs \
         uncrustify \
         vim
 else
-    msg "Please add support for your distribution to:"
-    msg "scripts/deps.sh"
+    printf "\x1B[1m\x1B[31munsupported host:\x1B[0m %s\n" "${ID}"
     exit 1
 fi
 
-msg "Initializing submodules"
-git submodule update --init --recursive
-
-msg "Installing git hooks"
-make git-config
-
-RUSTUP_NEW_INSTALL=0
 if ! command -v rustup >/dev/null 2>&1; then
-    RUSTUP_NEW_INSTALL=1
-    msg "Installing Rust"
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
-      | sh -s -- -y --default-toolchain none
+    if command -v rustup-init >/dev/null 2>&1; then
+        rustup-init -y \
+            --default-toolchain stable \
+            --profile minimal \
+            --no-update-default-toolchain
+    else
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+            | sh -s -- -y --default-toolchain stable
+    fi
 
-    msg "Loading Rust environment"
-    source "${HOME}/.cargo/env"
+    . "${HOME}/.cargo/env"
 fi
 
-msg "Installing pinned Rust toolchain and components"
-rustup show
-
-if [[ $RUSTUP_NEW_INSTALL = 1 ]]; then
-    msg "rustup was just installed. Ensure cargo is on the PATH with:"
-    echo -e "    source ~/.cargo/env\n"
-fi
-
-msg "\x1B[32mSuccessfully installed dependencies"
+rustup show active-toolchain || rustup toolchain install
