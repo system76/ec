@@ -34,7 +34,7 @@ impl<T: Timeout> Pmc<T> {
 
     /// Write a command to the PMC. Returns None if unable to write
     pub unsafe fn command(&mut self, data: u8) -> Result<(), Error> {
-        if self.can_write() {
+        if unsafe { self.can_write() } {
             self.cmd.write(data);
             Ok(())
         } else {
@@ -44,7 +44,7 @@ impl<T: Timeout> Pmc<T> {
 
     /// Read data from the PMC. Returns None if unable to read
     pub unsafe fn read(&mut self) -> Result<u8, Error> {
-        if self.can_read() {
+        if unsafe { self.can_read() } {
             Ok(self.data.read())
         } else {
             Err(Error::WouldBlock)
@@ -53,7 +53,7 @@ impl<T: Timeout> Pmc<T> {
 
     /// Write data to the PMC. Returns false if unable to write
     pub unsafe fn write(&mut self, data: u8) -> Result<(), Error> {
-        if self.can_write() {
+        if unsafe { self.can_write() } {
             self.data.write(data);
             Ok(())
         } else {
@@ -65,8 +65,10 @@ impl<T: Timeout> Pmc<T> {
     pub unsafe fn acpi_read(&mut self, addr: u8) -> Result<u8, Error> {
         self.timeout.reset();
 
-        timeout!(self.timeout, self.command(0x80))?;
-        timeout!(self.timeout, self.write(addr))?;
-        timeout!(self.timeout, self.read())
+        unsafe {
+            timeout!(self.timeout, self.command(0x80))?;
+            timeout!(self.timeout, self.write(addr))?;
+            timeout!(self.timeout, self.read())
+        }
     }
 }
