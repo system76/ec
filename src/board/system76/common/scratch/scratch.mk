@@ -34,13 +34,13 @@ SCRATCH_CC=\
 $(BUILD)/include/scratch.h: $(SCRATCH_BUILD)/scratch.rom
 	@echo "  XXD       $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
-	xxd -include < $< > $@
+	xxd -include -s $(SCRATCH_OFFSET) < $< > $@
 
 # Convert from Intel Hex file to binary file
 $(SCRATCH_BUILD)/scratch.rom: $(SCRATCH_BUILD)/scratch.ihx
-	@echo "  OBJCOPY   $(subst $(BUILD)/,,$@)"
+	@echo "  MAKEBIN   $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
-	objcopy -I ihex -O binary $< $@
+	makebin -p $< $@
 
 # Link object files into Intel Hex file
 $(SCRATCH_BUILD)/scratch.ihx: $(SCRATCH_OBJ)

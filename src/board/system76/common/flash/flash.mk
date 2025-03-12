@@ -35,13 +35,13 @@ FLASH_CC=\
 $(BUILD)/include/flash.h: $(FLASH_BUILD)/flash.rom
 	@echo "  XXD       $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
-	xxd -include < $< > $@
+	xxd -include -s $(FLASH_OFFSET) < $< > $@
 
 # Convert from Intel Hex file to binary file
 $(FLASH_BUILD)/flash.rom: $(FLASH_BUILD)/flash.ihx
-	@echo "  OBJCOPY   $(subst $(BUILD)/,,$@)"
+	@echo "  MAKEBIN   $(subst $(BUILD)/,,$@)"
 	mkdir -p $(@D)
-	objcopy -I ihex -O binary $< $@
+	makebin -p $< $@
 
 # Link object files into Intel Hex file
 $(FLASH_BUILD)/flash.ihx: $(FLASH_OBJ)
