@@ -35,7 +35,10 @@ pub struct SpiRom<'a, S: Spi, T: Timeout> {
 impl<'a, S: Spi, T: Timeout> SpiRom<'a, S, T> {
     /// Create a SPI ROM using the specified SPI bus and timeout
     pub fn new(spi: &'a mut S, timeout: T) -> Self {
-        Self { spi, timeout }
+        Self {
+            spi,
+            timeout,
+        }
     }
 
     /// Get sector size in bytes
