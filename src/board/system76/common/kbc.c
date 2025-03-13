@@ -155,6 +155,7 @@ enum KbcState {
     KBC_STATE_IDENTIFY_0,
     KBC_STATE_IDENTIFY_1,
     KBC_STATE_SELF_TEST,
+    KBC_STATE_SCANCODE_GET,
 };
 
 // TODO: state per KBC (we only have one KBC so low priority)
@@ -362,6 +363,9 @@ static void kbc_on_input_data(struct Kbc *const kbc, uint8_t data) {
             break;
         }
 #endif
+        if (data == 0) {
+            state_next = KBC_STATE_SCANCODE_GET;
+        }
         state = KBC_STATE_KEYBOARD;
         state_data = 0xFA;
         break;
@@ -433,6 +437,11 @@ static void kbc_on_output_empty(struct Kbc *const kbc) {
     }
 
     switch (state) {
+    case KBC_STATE_SCANCODE_GET:
+        state = KBC_STATE_KEYBOARD;
+        // Always scancode 2 so far
+        state_data = kbc_translate ? 0x41 : 0x02;
+        break;
     case KBC_STATE_IDENTIFY_0:
         state = KBC_STATE_KEYBOARD;
         state_data = 0xAB;
