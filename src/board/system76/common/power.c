@@ -20,6 +20,7 @@
 #include <board/usbpd.h>
 #include <board/wireless.h>
 #include <common/debug.h>
+#include <board/dgpu.h>
 
 #if CONFIG_BUS_ESPI
 #include <ec/espi.h>
@@ -460,6 +461,10 @@ void power_apply_limit(bool ac) {
 
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {
+#if HAVE_DGPU
+    // Set GPIO MUX_CTRL_BIOS to choose between iGPU and dGPU
+    set_mux_ctrl();
+#endif //HAVE_DGPU
     // LPC was just reset, enable PNP devices
     pnp_enable();
     // Reset ACPI registers

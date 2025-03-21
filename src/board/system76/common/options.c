@@ -16,6 +16,7 @@ uint8_t DEFAULT_OPTIONS[NUM_OPTIONS] = {
     [OPT_BAT_THRESHOLD_STOP] = 98,
     [OPT_ALLOW_BAT_BOOST] = 0,
     [OPT_ALWAYS_ON_USB] = 0,
+    [OPT_GPU_MUX_CTRL] = 0,
 };
 // clang-format on
 

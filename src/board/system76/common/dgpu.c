@@ -147,6 +147,9 @@ uint8_t dgpu_get_fan_duty(void) {
     return duty;
 }
 
+// choose between dgpu and igpu for internal display
+void set_mux_ctrl(void) {}
+
 #else
 
 void dgpu_init(void) {}
