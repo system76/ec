@@ -16,6 +16,7 @@ extern struct Gpio __code BUF_PLT_RST_N;
 extern struct Gpio __code CCD_EN;
 extern struct Gpio __code DD_ON;
 extern struct Gpio __code DGPU_PWR_EN;
+#define HAVE_MUX_CTRL_BIOS 1
 extern struct Gpio __code MUX_CTRL_BIOS;
 extern struct Gpio __code EC_EN;
 extern struct Gpio __code EC_RSMRST_N;

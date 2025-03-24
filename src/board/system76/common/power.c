@@ -461,8 +461,10 @@ void power_apply_limit(bool ac) {
 
 // This function is run when the CPU is reset
 void power_cpu_reset(void) {
-#if HAVE_DGPU
+    DEBUG("Entering power_cpu_reset()\n");
+#if HAVE_DGPU && HAVE_MUX_CTRL_BIOS
     // Set GPIO MUX_CTRL_BIOS to choose between iGPU and dGPU
+    DEBUG("OPT_GPU_MUX_CTRL value: %d\n", options_get(OPT_GPU_MUX_CTRL));
     set_mux_ctrl();
 #endif //HAVE_DGPU
     // LPC was just reset, enable PNP devices

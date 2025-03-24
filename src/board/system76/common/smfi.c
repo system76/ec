@@ -270,7 +270,10 @@ static enum Result cmd_wifi_bt_enablement_set(void) {
 }
 
 static enum Result cmd_option_get(void) {
+    DEBUG("EC: cmd_option_get request for index = %d \n ", smfi_cmd[SMFI_CMD_DATA]);
+    DEBUG("EC: option_get result: %d \n ", options_get(smfi_cmd[SMFI_CMD_DATA]));
     smfi_cmd[SMFI_CMD_DATA] = options_get(smfi_cmd[SMFI_CMD_DATA]);
+    DEBUG("EC: cmd_option_get: substituted index for value = %d \n ", smfi_cmd[SMFI_CMD_DATA]);
     return RES_OK;
 }
 

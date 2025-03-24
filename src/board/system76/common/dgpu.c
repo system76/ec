@@ -7,6 +7,7 @@
 
 #include <board/battery.h>
 #include <board/gpio.h>
+#include <board/options.h>
 #include <board/peci.h>
 #include <board/power.h>
 #include <common/debug.h>
@@ -147,8 +148,18 @@ uint8_t dgpu_get_fan_duty(void) {
     return duty;
 }
 
+#if HAVE_MUX_CTRL_BIOS
 // choose between dgpu and igpu for internal display
-void set_mux_ctrl(void) {}
+void set_mux_ctrl(void) {
+    DEBUG("set_mux_ctrl() entered\n");
+    gpio_set(&MUX_CTRL_BIOS, !!options_get(OPT_GPU_MUX_CTRL));
+    DEBUG(
+        "set_mux_ctrl(): option is %d, gpio is %d\n",
+        options_get(OPT_GPU_MUX_CTRL),
+        gpio_get(&MUX_CTRL_BIOS)
+    );
+}
+#endif // HAVE_MUX_CTRL_BIOS
 
 #else
 
