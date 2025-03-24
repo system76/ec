@@ -12,6 +12,7 @@ struct Gpio __code BUF_PLT_RST_N =  GPIO(D, 2);
 struct Gpio __code CCD_EN =         GPIO(D, 1);
 struct Gpio __code DD_ON =          GPIO(E, 4);
 struct Gpio __code DGPU_PWR_EN =    GPIO(H, 4);
+struct Gpio __code MUX_CTRL_BIOS =  GPIO(G, 1);
 struct Gpio __code EC_EN =          GPIO(B, 6);
 struct Gpio __code EC_RSMRST_N =    GPIO(E, 5);
 struct Gpio __code GC6_FB_EN =      GPIO(J, 3);
