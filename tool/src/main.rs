@@ -43,10 +43,7 @@ unsafe fn flash_read<S: Spi>(
         let next_address = address + sector_size;
         let count = unsafe { spi.read_at(address as u32, &mut rom[address..next_address])? };
         if count != sector_size {
-            eprintln!(
-                "\ncount {} did not match sector size {}",
-                count, sector_size
-            );
+            eprintln!("\ncount {} did not match sector size {}", count, sector_size);
             return Err(Error::Verify);
         }
         address = next_address;
@@ -129,10 +126,7 @@ unsafe fn flash_inner(
         unsafe { flash_read(&mut spi, &mut rom, sector_size)? };
         for i in 0..rom.len() {
             if rom[i] != new_rom[i] {
-                eprintln!(
-                    "Failed to program: {:X} is {:X} instead of {:X}",
-                    i, rom[i], new_rom[i]
-                );
+                eprintln!("Failed to program: {:X} is {:X} instead of {:X}", i, rom[i], new_rom[i]);
                 return Err(Error::Verify);
             }
         }
@@ -161,10 +155,7 @@ unsafe fn flash(ec: &mut Ec<Box<dyn Access>>, path: &str, target: SpiTarget) -> 
         let ec_board = &data[..size];
         println!("ec board: {:?}", str::from_utf8(ec_board));
 
-        assert!(
-            ec_board == firmware.board,
-            "file board does not match ec board"
-        );
+        assert!(ec_board == firmware.board, "file board does not match ec board");
     }
 
     {
@@ -463,7 +454,9 @@ fn main() {
                 process::exit(1);
             }
         },
-        SubCommand::FanMode { mode } => match mode {
+        SubCommand::FanMode {
+            mode,
+        } => match mode {
             Some(mode) => match unsafe { fan_set_mode(&mut ec, mode) } {
                 Ok(()) => (),
                 Err(err) => {
@@ -479,7 +472,10 @@ fn main() {
                 }
             },
         },
-        SubCommand::FanPwm { index, duty } => match duty {
+        SubCommand::FanPwm {
+            index,
+            duty,
+        } => match duty {
             Some(duty) => match unsafe { fan_set_pwm(&mut ec, index, duty) } {
                 Ok(()) => (),
                 Err(err) => {
@@ -495,22 +491,24 @@ fn main() {
                 }
             },
         },
-        SubCommand::Flash { path } => match unsafe { flash(&mut ec, &path, SpiTarget::Main) } {
+        SubCommand::Flash {
+            path,
+        } => match unsafe { flash(&mut ec, &path, SpiTarget::Main) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to flash '{}': {:X?}", path, err);
                 process::exit(1);
             }
         },
-        SubCommand::FlashBackup { path } => {
-            match unsafe { flash(&mut ec, &path, SpiTarget::Backup) } {
-                Ok(()) => (),
-                Err(err) => {
-                    eprintln!("failed to flash '{}': {:X?}", path, err);
-                    process::exit(1);
-                }
+        SubCommand::FlashBackup {
+            path,
+        } => match unsafe { flash(&mut ec, &path, SpiTarget::Backup) } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to flash '{}': {:X?}", path, err);
+                process::exit(1);
             }
-        }
+        },
         SubCommand::Info => match unsafe { info(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
@@ -543,15 +541,15 @@ fn main() {
             None => match unsafe { keymap_get(&mut ec, layer, output, input) } {
                 Ok(()) => (),
                 Err(err) => {
-                    eprintln!(
-                        "failed to get keymap {}, {}, {}: {:X?}",
-                        layer, output, input, err
-                    );
+                    eprintln!("failed to get keymap {}, {}, {}: {:X?}", layer, output, input, err);
                     process::exit(1);
                 }
             },
         },
-        SubCommand::LedColor { index, value } => {
+        SubCommand::LedColor {
+            index,
+            value,
+        } => {
             if let Some(value) = value {
                 let (r, g, b) = parse_color(&value).unwrap();
                 match unsafe { ec.led_set_color(index, r, g, b) } {
@@ -571,7 +569,10 @@ fn main() {
                 }
             }
         }
-        SubCommand::LedValue { index, value } => {
+        SubCommand::LedValue {
+            index,
+            value,
+        } => {
             if let Some(value) = value {
                 match unsafe { ec.led_set_value(index, value) } {
                     Ok(()) => (),
@@ -593,7 +594,11 @@ fn main() {
                 }
             }
         }
-        SubCommand::LedMode { layer, mode, speed } => {
+        SubCommand::LedMode {
+            layer,
+            mode,
+            speed,
+        } => {
             if let (Some(mode), Some(speed)) = (mode, speed) {
                 match unsafe { ec.led_set_mode(layer, mode, speed) } {
                     Ok(()) => (),
@@ -639,7 +644,9 @@ fn main() {
                 process::exit(1);
             }
         },
-        SubCommand::Print { message } => {
+        SubCommand::Print {
+            message,
+        } => {
             for arg in message {
                 let mut arg = arg.to_owned();
                 arg.push('\n');
@@ -652,23 +659,24 @@ fn main() {
                 }
             }
         }
-        SubCommand::SetNoInput { value } => match unsafe { ec.set_no_input(value) } {
+        SubCommand::SetNoInput {
+            value,
+        } => match unsafe { ec.set_no_input(value) } {
             Ok(()) => (),
             Err(err) => {
                 eprintln!("failed to set no_input mode: {:X?}", err);
                 process::exit(1);
             }
         },
-        SubCommand::Security { state } => match state {
+        SubCommand::Security {
+            state,
+        } => match state {
             Some(value) => {
                 let state = match value.as_str() {
                     "lock" => SecurityState::PrepareLock,
                     "unlock" => SecurityState::PrepareUnlock,
                     _ => {
-                        eprintln!(
-                            "invalid security state '{}': must be 'lock' or 'unlock'",
-                            value
-                        );
+                        eprintln!("invalid security state '{}': must be 'lock' or 'unlock'", value);
                         process::exit(1);
                     }
                 };

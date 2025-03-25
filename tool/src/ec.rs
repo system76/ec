@@ -114,7 +114,10 @@ impl<A: Access> Ec<A> {
     /// Probes for a compatible EC
     pub unsafe fn new(access: A) -> Result<Self, Error> {
         // Create EC struct with provided access method and timeout
-        let mut ec = Ec { access, version: 0 };
+        let mut ec = Ec {
+            access,
+            version: 0,
+        };
 
         // Read version of protocol
         ec.version = unsafe { ec.probe()? };
@@ -396,8 +399,7 @@ impl<A: Access> Spi for EcSpi<'_, A> {
             self.buffer[0] = flags;
             self.buffer[1] = chunk.len() as u8;
             unsafe {
-                self.ec
-                    .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+                self.ec.command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
             }
             if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);
@@ -419,8 +421,7 @@ impl<A: Access> Spi for EcSpi<'_, A> {
                 self.buffer[i + 2] = chunk[i];
             }
             unsafe {
-                self.ec
-                    .command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
+                self.ec.command(Cmd::Spi, &mut self.buffer[..(chunk.len() + 2)])?;
             }
             if self.buffer[1] != chunk.len() as u8 {
                 return Err(Error::Verify);

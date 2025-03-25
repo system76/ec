@@ -21,17 +21,11 @@ struct PortLock {
 impl PortLock {
     pub fn new(start: u16, end: u16) -> io::Result<Self> {
         if end < start {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "PortLock::new: end < start",
-            ));
+            return Err(io::Error::new(io::ErrorKind::InvalidInput, "PortLock::new: end < start"));
         }
         let len = (end - start) + 1;
 
-        let file = fs::OpenOptions::new()
-            .read(true)
-            .write(true)
-            .open("/dev/port")?;
+        let file = fs::OpenOptions::new().read(true).write(true).open("/dev/port")?;
 
         let mut flock = libc::flock {
             l_type: libc::F_WRLCK as _,
@@ -45,7 +39,11 @@ impl PortLock {
             return Err(io::Error::last_os_error());
         }
 
-        Ok(Self { start, len, file })
+        Ok(Self {
+            start,
+            len,
+            file,
+        })
     }
 
     fn seek(&mut self, offset: u16) -> io::Result<()> {
