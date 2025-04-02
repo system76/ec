@@ -29,11 +29,9 @@ static uint8_t FAN_HEATUP[BOARD_HEATUP] = { 0 };
 
 static uint8_t FAN_COOLDOWN[BOARD_COOLDOWN] = { 0 };
 
-// Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
-#define T_JUNCTION 100
-
 bool peci_on = false;
 int16_t peci_temp = 0;
+uint8_t t_junction = 100;
 
 #define PECI_TEMP(X) ((int16_t)(X))
 
@@ -413,6 +411,71 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     return -((int16_t)cc);
 }
 
+int16_t peci_rd_pkg_config(uint8_t index, uint16_t param, uint32_t *value) {
+    int retry = 50; // TODO how many retries are appropriate?
+    uint8_t cc = HORDDR;
+    *value = 0;
+
+    // Wait for any in-progress transaction to complete
+    while (HOSTAR & BIT(0)) {}
+    do {
+        // Clear status
+        HOSTAR = HOSTAR;
+
+        // Enable PECI, clearing data fifo's, enable AW_FCS
+        HOCTLR = BIT(5) | BIT(3) | BIT(1);
+        // Set address to default
+        HOTRADDR = 0x30;
+        // Set write length
+        HOWRLR = 5;
+        // Set read length
+        HORDLR = 5;
+
+        // Set command
+        HOCMDR = 0xA1;
+        // Write host ID
+        HOWRDR = 0;
+        // Write index
+        HOWRDR = index;
+        // Write param
+        HOWRDR = (uint8_t)param;
+        HOWRDR = (uint8_t)(param >> 8);
+
+        // Start transaction
+        HOCTLR |= 1;
+
+        // Wait for command completion
+        while (!(HOSTAR & BIT(1))) {}
+
+        uint8_t status = HOSTAR;
+        if (status & 0xEC) {
+            ERROR("peci_rd_pkg_config: hardware error: 0x%02X\n", status);
+            // Clear status
+            HOSTAR = HOSTAR;
+            return -(0x1000 | status);
+        }
+
+        cc = HORDDR;
+
+        // Clear status
+        HOSTAR = HOSTAR;
+    } while (cc & 0x80 || !retry--);
+
+    if (cc != 0x40) {
+        ERROR("peci_rd_pkg_config: hardware error: 0x%02X\n", cc);
+        return -((int16_t)cc);
+    } else {
+        // Read data if finished successfully
+        for (int i = 0; i < 4; ++i) {
+            *value |= (((uint32_t)HORDDR) << (8 * i));
+        }
+
+        // Clear status
+        HOSTAR = HOSTAR;
+        return 0;
+    }
+}
+
 #endif // CONFIG_PECI_OVER_ESPI
 
 // PECI information can be found here: https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf
@@ -424,7 +487,7 @@ uint8_t peci_get_fan_duty(void) {
         int16_t peci_offset = 0;
         if (peci_get_temp(&peci_offset)) {
             // Use result if finished successfully
-            peci_temp = PECI_TEMP(T_JUNCTION) + (peci_offset >> 6);
+            peci_temp = PECI_TEMP(t_junction) + (peci_offset >> 6);
             duty = fan_duty(&FAN, peci_temp);
         } else {
             // Default to 50% if there is an error

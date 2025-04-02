@@ -478,6 +478,11 @@ void power_cpu_reset(void) {
     ps2_reset(&PS2_TOUCHPAD);
     // Set power limits
     power_apply_limit(!gpio_get(&ACIN_N));
+
+    // Read Tjunction
+    uint32_t pkg_temp_target;
+    if (!peci_rd_pkg_config(16, 0, &pkg_temp_target))
+        t_junction = (pkg_temp_target >> 16) & 0xFF;
 }
 
 static bool power_button_disabled(void) {
