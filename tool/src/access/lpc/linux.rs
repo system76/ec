@@ -108,7 +108,8 @@ impl AccessLpcLinux {
         // TODO: is there a better way to probe before running a command?
         if ! Path::new("/sys/bus/acpi/devices/17761776:00").is_dir() &&
            ! Path::new("/sys/bus/acpi/devices/DASHEC00:00").is_dir() &&
-           ! Path::new("/sys/bus/acpi/devices/DSHR4543:00").is_dir() {
+           ! Path::new("/sys/bus/acpi/devices/DSHR4543:00").is_dir() &&
+           ! Path::new("/sys/bus/acpi/devices/DSHR0001:00").is_dir() {
             return Err(Error::Io(io::Error::new(
                 io::ErrorKind::NotFound,
                 "Failed to find Dasharo ACPI device",
