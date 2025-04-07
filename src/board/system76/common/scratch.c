@@ -18,7 +18,7 @@ uint8_t __code __at(SCRATCH_OFFSET) scratch_rom[] = {
 void scratch_trampoline(void) {
     // Set fans to 100%
     PWM_REG(CPU_FAN1) = 0xFF;
-#if HAVE_CPU_FAN2
+#ifdef CPU_FAN2
     PWM_REG(CPU_FAN2) = 0xFF;
 #endif
 #if HAVE_DGPU

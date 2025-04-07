@@ -26,7 +26,7 @@ void pwm_init(void) {
 
     // Turn off CPU fan (temperature control in peci_get_fan_duty)
     PWM_REG(CPU_FAN1) = 0;
-#if HAVE_CPU_FAN2
+#ifdef CPU_FAN2
     PWM_REG(CPU_FAN2) = 0;
 #endif
 #if HAVE_DGPU

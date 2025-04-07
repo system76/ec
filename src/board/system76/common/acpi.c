@@ -115,15 +115,17 @@ uint8_t acpi_read(uint8_t addr) {
 
         ACPI_8(0xCC, sci_extra);
 
-        ACPI_8(0xCE, DCR2);
-#if HAVE_CPU_FAN2
-        ACPI_8(0xCF, DCR3);
-#endif
+        ACPI_8(0xCE, PWM_REG(CPU_FAN1));
         ACPI_8(0xD0, F1TLRR);
         ACPI_8(0xD1, F1TMRR);
+#ifdef CPU_FAN2
+        ACPI_8(0xCF, PWM_REG(CPU_FAN2));
+        ACPI_8(0xD2, F2TLRR);
+        ACPI_8(0xD3, F2TMRR);
+#endif
 #if HAVE_DGPU
         ACPI_8(0xCD, dgpu_temp);
-        ACPI_8(0xCF, DCR4);
+        ACPI_8(0xCF, PWM_REG(GPU_FAN1));
         ACPI_8(0xD2, F2TLRR);
         ACPI_8(0xD3, F2TMRR);
 

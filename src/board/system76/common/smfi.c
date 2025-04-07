@@ -152,7 +152,7 @@ static enum Result cmd_fan_set(void) {
     case 0:
         // Set duty cycle of fan 0
         PWM_REG(CPU_FAN1) = smfi_cmd[SMFI_CMD_DATA + 1];
-#if HAVE_CPU_FAN2
+#ifdef CPU_FAN2
         // TODO handle CPU fan 2 separately
         PWM_REG(CPU_FAN2) = smfi_cmd[SMFI_CMD_DATA + 1];
 #endif
