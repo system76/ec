@@ -46,7 +46,9 @@ void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
 const uint16_t battery_interval = 1000;
-const uint16_t fan_interval = 1000;
+// update fan speed more frequently for smoother fans
+// NOTE: event loop is longer than 100ms and maybe even longer than 250
+const uint16_t fan_interval = SMOOTH_FANS != 0 ? 250 : 1000;
 
 void init(void) {
     // Must happen first
