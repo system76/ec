@@ -16,6 +16,10 @@
 #define HAVE_LED_AIRPLANE_N 1
 #endif // HAVE_LED_AIRPLANE_N
 
+#if defined(CPU_FAN2) && HAVE_DGPU == 1
+#error "CPU_FAN2 and HAVE_DGPU are mutually exclusive"
+#endif
+
 extern uint8_t sci_extra;
 
 enum EcOs acpi_ecos = EC_OS_NONE;
