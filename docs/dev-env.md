@@ -42,8 +42,8 @@ the [SDCC manual] for more information.
 
 Version 4.0.0 or newer should be used.
 
-**Note**: Fedora installs SDCC binaries to a non-standard location. Ensure that
-`PATH` includes `/usr/libexec/sdcc`.
+**Note**: Fedora installs SDCC binaries with a prefix. Ensure that
+`SDCC_PREFIX=sdcc-` is set when building.
 
 
 [EditorConfig]: https://editorconfig.org/
