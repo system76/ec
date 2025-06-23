@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
-CC = sdcc -mmcs51 -MMD --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
+# XXX: On Fedora, SDCC programs have the `sdcc-` prefix.
+SDCC_PREFIX ?=
+SDCC = $(SDCC_PREFIX)sdcc
+CC = $(SDCC) -mmcs51 -MMD --model-large --code-size $(CODE_SIZE) --xram-size $(SRAM_SIZE) --Werror
 
 AS = sdas8051
 ASFLAGS = -plosgff

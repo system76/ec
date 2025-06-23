@@ -21,7 +21,7 @@ FLASH_SRC += $(foreach src, $(flash-y), $(FLASH_DIR)/$(src))
 FLASH_BUILD=$(BUILD)/flash
 FLASH_OBJ=$(sort $(patsubst src/%.c,$(FLASH_BUILD)/%.rel,$(FLASH_SRC)))
 FLASH_CC=\
-	sdcc \
+	$(SDCC) \
 	-mmcs51 \
 	-MMD \
 	--model-large \

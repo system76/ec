@@ -22,7 +22,7 @@ SCRATCH_SRC += $(foreach src, $(scratch-y), $(SCRATCH_DIR)/$(src))
 SCRATCH_BUILD=$(BUILD)/scratch
 SCRATCH_OBJ=$(sort $(patsubst src/%.c,$(SCRATCH_BUILD)/%.rel,$(SCRATCH_SRC)))
 SCRATCH_CC=\
-	sdcc \
+	$(SDCC) \
 	-mmcs51 \
 	-MMD \
 	--model-small \
