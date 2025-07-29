@@ -10,6 +10,8 @@ enum PowerState {
     POWER_STATE_S0 = 0x0,
     // Suspend to RAM
     POWER_STATE_S3 = 0x3,
+    // Suspend to Disk
+    POWER_STATE_S4 = 0x4,
     // Soft off
     POWER_STATE_S5 = 0x5,
     // Only USB is powered (Always On USB)

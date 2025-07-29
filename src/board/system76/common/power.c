@@ -153,9 +153,14 @@ enum PowerState calculate_power_state(void) {
 #if CONFIG_BUS_ESPI
     // Use eSPI virtual wires if available
 
+    if (vw_get(&VW_SLP_S5_N) != VWS_HIGH) {
+        // S5 plane not powered
+        return POWER_STATE_S5;
+    }
+
     if (vw_get(&VW_SLP_S4_N) != VWS_HIGH) {
         // S4 plane not powered
-        return POWER_STATE_S5;
+        return POWER_STATE_S4;
     }
 
     if (vw_get(&VW_SLP_S3_N) != VWS_HIGH) {
@@ -198,6 +203,9 @@ void update_power_state(void) {
             break;
         case POWER_STATE_S5:
             DEBUG("POWER_STATE_S5\n");
+            break;
+        case POWER_STATE_S4:
+            DEBUG("POWER_STATE_S4\n");
             break;
         case POWER_STATE_S3:
             DEBUG("POWER_STATE_S3\n");
@@ -742,8 +750,8 @@ void power_event(void) {
         // AC plugged in, orange light
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, true);
-    } else if (power_state == POWER_STATE_G3_AOU) {
-        // G3, Always on USB, lights off
+    } else if (power_state == POWER_STATE_G3_AOU || power_state == POWER_STATE_S4) {
+        // G3 + Always on USB or S4, lights off
         gpio_set(&LED_PWR, false);
         gpio_set(&LED_ACIN, false);
     } else {
