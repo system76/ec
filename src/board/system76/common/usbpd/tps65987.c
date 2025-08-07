@@ -50,6 +50,8 @@ enum {
     USBPD_MODE_DISC,
     // Other values indicate limited functionality
     USBPD_MODE_UNKNOWN,
+    // An error occured while reading mode
+    USBPD_MODE_I2C_ERR,
 };
 
 #define PDO_KIND(pdo) ((uint8_t)((pdo) >> 30 & 3))
@@ -125,41 +127,41 @@ static int16_t usbpd_get_mode(void) {
     int16_t mode;
     uint8_t reg[5] = { 0 };
 
-    DEBUG("USBPD controller mode: ");
+    TRACE("USBPD controller mode: ");
 
     res = i2c_get(&I2C_USBPD, PORT_A_ADDRESS, REG_MODE, reg, sizeof(reg));
     if (res < 0 || reg[0] < 4) {
-        DEBUG("UNKNOWN (I2C error %d)\n", res);
-        return USBPD_MODE_UNKNOWN;
+        TRACE("UNKNOWN (I2C error %d)\n", res);
+        return USBPD_MODE_I2C_ERR;
     }
 
     mode = FOURCC(reg[1], reg[2], reg[3], reg[4]);
 
     switch (mode) {
     case FOURCC('A', 'P', 'P', ' '):
-        DEBUG("APP\n");
+        TRACE("APP\n");
         return USBPD_MODE_APP;
     case FOURCC('B', 'I', 'S', 'T'):
-        DEBUG("BIST\n");
+        TRACE("BIST\n");
         return USBPD_MODE_BIST;
     case FOURCC('B', 'O', 'O', 'T'):
-        DEBUG("BOOT\n");
+        TRACE("BOOT\n");
         return USBPD_MODE_BOOT;
     case FOURCC('D', 'I', 'S', 'C'):
-        DEBUG("DISC\n");
+        TRACE("DISC\n");
         return USBPD_MODE_DISC;
     }
 
-    DEBUG("UNKNOWN %llx\n", mode);
+    TRACE("UNKNOWN %llx\n", mode);
     return USBPD_MODE_UNKNOWN;
 }
 
 // Return to normal operation
-// Reboots the PD controller and exits any modal tasks
+// Cold resets the PD controller and exits any modal tasks
 void usbpd_reset(void) {
     int16_t res;
 
-    uint8_t cmd[5] = { 4, 'G', 'a', 'i', 'd' };
+    uint8_t cmd[5] = { 4, 'G', 'A', 'I', 'D' };
 
     res = i2c_set(&I2C_USBPD, PORT_A_ADDRESS, REG_CMD1, cmd, sizeof(cmd));
     if (res < 0)
@@ -230,6 +232,30 @@ static void usbpd_clear_event() {
 #endif
 }
 
+// Check the operational mode of the PDC and kick it if it has been in a bad
+// mode for over 1 second.
+static void usbpd_check_mode() {
+    static uint32_t time_start = 0;
+
+    if (power_state != POWER_STATE_G3 && usbpd_get_mode() == USBPD_MODE_UNKNOWN && !time_start)
+        time_start = time_get();
+    else
+        time_start = 0;
+
+    // Kick the PDC if it's been in a bad state for over 1 second
+    if (time_start && (time_get() - time_start) > 1000) {
+        WARN("PDC timeout!\n");
+        usbpd_reset();
+        while (usbpd_get_mode() == USBPD_MODE_UNKNOWN && (time_get() - time_start) <= 2000)
+            ;
+
+        if ((time_get() - time_start) > 2000)
+            ERROR("Timed out waiting for PDC to reset!\n");
+
+        time_start = 0;
+    }
+}
+
 void usbpd_event(void) {
     bool update = false;
     int16_t res;
@@ -271,6 +297,8 @@ void usbpd_event(void) {
         DEBUG("SINK_CTRL_2 %d\n", sink_ctrl_2);
     }
 #endif
+
+    usbpd_check_mode();
 
     static enum PowerState last_power_state = POWER_STATE_G3;
     update_power_state();
