@@ -63,7 +63,7 @@ void peci_init(void) {}
 bool peci_get_temp(int16_t *const data) {
     //TODO: Wait for completion?
     // Clear upstream status
-    ESUCTRL0 = ESUCTRL0;
+    ESUCTRL0 = ESUCTRL0_CH_DISABLED | ESUCTRL0_DONE;
     // Clear OOB status
     ESOCTRL0 = ESOCTRL0;
 
@@ -114,7 +114,7 @@ bool peci_get_temp(int16_t *const data) {
             return false;
         }
     }
-    // Clear upstream done status
+    // Clear upstream done status and disable initiating upstream transactions
     ESUCTRL0 = ESUCTRL0_DONE;
 
     // Wait for response
@@ -156,7 +156,7 @@ bool peci_get_temp(int16_t *const data) {
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     //TODO: Wait for completion?
     // Clear upstream status
-    ESUCTRL0 = ESUCTRL0;
+    ESUCTRL0 = ESUCTRL0_CH_DISABLED | ESUCTRL0_DONE;
     // Clear OOB status
     ESOCTRL0 = ESOCTRL0;
 
@@ -221,7 +221,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
             return false;
         }
     }
-    // Clear upstream done status
+    // Clear upstream done status and disable initiating upstream transactions
     ESUCTRL0 = ESUCTRL0_DONE;
 
     // Wait for response
