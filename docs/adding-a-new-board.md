@@ -24,12 +24,13 @@ Its charger has:
 DC OUTPUT (输出/輸出): 19.5V⎓9.23A 180W
 ```
 
-The schematics show it uses a 0.005 ohm sense resistor for both the adapter and
-the battery.
+The schematics show it has a TI BQ24780S smart charger and uses a 0.005 ohm
+sense resistor for both the adapter and the battery.
 
 This gives:
 
 ```
+CONFIG_CHARGER = bq24780s
 CONFIG_CHARGER_ADAPTER_RSENSE = 5
 CONFIG_CHARGER_BATTERY_RSENSE = 5
 CONFIG_CHARGER_CHARGE_CURRENT = 3072
