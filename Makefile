@@ -61,6 +61,13 @@ SRC += $(foreach src, $(arch-y), $(ARCH_DIR)/$(src))
 
 include $(ARCH_DIR)/toolchain.mk
 
+# TODO: Generate config file as part of build.
+.PHONY: show-config
+show-config:
+	$(foreach v, \
+		$(sort $(filter CONFIG_%,$(.VARIABLES))), \
+		$(info $(v)=$($(v))))
+
 # The architecture defines build targets, no more is required
 endif
 
