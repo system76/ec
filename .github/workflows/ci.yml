@@ -43,7 +43,7 @@ jobs:
         run: ./scripts/deps.sh
 
       - name: Build tool
-        run: cargo build ${{ matrix.features }} --release --manifest-path tool/Cargo.toml
+        run: cargo build ${{ matrix.features }} --release --manifest-path tools/system76_ectool/Cargo.toml
 
   ec:
     runs-on: ubuntu-24.04

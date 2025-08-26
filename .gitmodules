@@ -1,11 +1,11 @@
 [submodule "ecsim"]
-	path = ecsim
+	path = tools/ecsim
 	url = https://github.com/system76/ecsim.git
 	branch = master
 [submodule "ecflash"]
-	path = ecflash
+	path = tools/ecflash
 	url = https://github.com/system76/ecflash.git
 	branch = master
 [submodule "ecspy"]
-	path = ecspy
+	path = tools/ecspy
 	url = https://github.com/system76/ecspy.git
