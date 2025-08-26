@@ -175,5 +175,5 @@ flash_internal: $(BUILD)/ec.rom
 	sudo tool/target/release/system76_ectool flash $<
 
 flash_external: $(BUILD)/ec.rom
-	cargo build --manifest-path ecflash/Cargo.toml --example isp --release
-	sudo ecflash/target/release/examples/isp $<
+	cargo build --manifest-path tools/ecflash/Cargo.toml --example isp --release
+	sudo tools/ecflash/target/release/examples/isp $<

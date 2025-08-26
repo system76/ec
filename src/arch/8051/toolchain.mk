@@ -28,7 +28,7 @@ OBJ = $(MAIN_OBJ) $(sort $(ASM_OBJ) $(C_OBJ))
 sim: $(BUILD)/ec.rom
 	cargo run \
 		--release \
-		--manifest-path ecsim/Cargo.toml \
+		--manifest-path tools/ecsim/Cargo.toml \
 		--no-default-features \
 		-- $<
 
