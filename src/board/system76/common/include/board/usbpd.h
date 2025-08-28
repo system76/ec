@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 System76, Inc.
 
 #ifndef _BOARD_USBPD_H
 #define _BOARD_USBPD_H

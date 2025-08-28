@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 System76, Inc.
 
 // 18H9-9430G-RGB-RF - X2
 

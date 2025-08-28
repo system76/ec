@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2021 System76, Inc.
 
 # shellcheck disable=SC1091
 

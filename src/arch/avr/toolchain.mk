@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2019 System76, Inc.
 
 CC = avr-gcc -mmcu=$(EC_VARIANT)
 CFLAGS += -MMD -Os -fstack-usage -Wall -Werror \
