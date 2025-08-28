@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2023 System76, Inc.
 
 # Check that all files have a SPDX license identifier
 # TODO: Validate license tags against a whitelist
@@ -10,19 +11,11 @@ LINT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 echo -n "Checking for SPDX tags..."
 
 EXCLUDES=(
-    # Ignore license files
-    ':!:LICENSE'
-    ':!:**/LICENSE'
     # Ignore cargo files
     ':!:**/Cargo.lock'
-    ':!:**/Cargo.toml'
-    ':!:rust-toolchain.toml'
     # Ignore text files
     ':!:*.md'
     ':!:*.txt'
-    # Ignore dotfiles
-    ':!:\.*'
-    ':!:**/\.*'
 )
 
 needs_tag=()

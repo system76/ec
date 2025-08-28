@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2021 System76, Inc.
 
 ec-y += ec.c
 ec-$(CONFIG_BUS_ESPI) += espi.c

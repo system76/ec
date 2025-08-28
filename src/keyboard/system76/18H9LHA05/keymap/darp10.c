@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2024 System76, Inc.
 
 // Darter Pro 10 has a custom keyboard with the alt legend on Num / removed.
 

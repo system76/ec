@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 System76, Inc.
+// SPDX-FileCopyrightText: 2020 Fabian Topfstedt
 
 #ifndef _BOARD_KEYMAP_H
 #define _BOARD_KEYMAP_H

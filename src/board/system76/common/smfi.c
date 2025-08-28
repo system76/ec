@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
-//
+// SPDX-FileCopyrightText: 2020 System76, Inc.
+
 // This defines a protocol for clients on the AP (application processor) to
 // communicate with the EC. The protocol is polled, and uses semaphores to
 // ensure correct sequencing.

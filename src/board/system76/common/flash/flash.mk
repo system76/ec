@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: 2020 Evan Lojewski
+# SPDX-FileCopyrightText: 2022 System76, Inc.
 
 flash-y += main.c
 
