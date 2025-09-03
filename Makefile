@@ -30,16 +30,16 @@ all: $(BUILD)/ec.rom
 
 # Include common source
 COMMON_DIR=src/common
-INCLUDE += $(COMMON_DIR)/common.mk
+INCLUDE += $(COMMON_DIR)/Makefile.mk
 CFLAGS=-I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
-include $(COMMON_DIR)/common.mk
+include $(COMMON_DIR)/Makefile.mk
 SRC += $(foreach src, $(common-y), $(COMMON_DIR)/$(src))
 
 # Include the board's source
 BOARD_DIR=src/board/$(BOARD)
-INCLUDE += $(BOARD_DIR)/board.mk
+INCLUDE += $(BOARD_DIR)/Makefile.mk
 CFLAGS+=-I$(BOARD_DIR)/include -D__BOARD__=$(BOARD)
-include $(BOARD_DIR)/board.mk
+include $(BOARD_DIR)/Makefile.mk
 SRC += $(foreach src, $(board-y), $(BOARD_DIR)/$(src))
 SRC += $(foreach src, $(board-common-y), $(SYSTEM76_COMMON_DIR)/$(src))
 SRC += $(foreach src, $(keyboard-y), $(KEYBOARD_DIR)/$(src))
@@ -47,17 +47,17 @@ SRC += $(foreach src, $(keyboard-y), $(KEYBOARD_DIR)/$(src))
 # The board will define the embedded controller
 # Include the embedded controller's source
 EC_DIR=src/ec/$(EC)
-INCLUDE += $(EC_DIR)/ec.mk
+INCLUDE += $(EC_DIR)/Makefile.mk
 CFLAGS+=-I$(EC_DIR)/include
-include $(EC_DIR)/ec.mk
+include $(EC_DIR)/Makefile.mk
 SRC += $(foreach src, $(ec-y), $(EC_DIR)/$(src))
 
 # The EC will define the architecture
 # Include the architecture's source
 ARCH_DIR=src/arch/$(ARCH)
-INCLUDE += $(ARCH_DIR)/arch.mk
+INCLUDE += $(ARCH_DIR)/Makefile.mk
 CFLAGS+=-I$(ARCH_DIR)/include -D__ARCH__=$(ARCH)
-include $(ARCH_DIR)/arch.mk
+include $(ARCH_DIR)/Makefile.mk
 SRC += $(foreach src, $(arch-y), $(ARCH_DIR)/$(src))
 
 include $(ARCH_DIR)/toolchain.mk
@@ -88,10 +88,13 @@ fmt:
 lint:
 	./scripts/lint/lint.sh
 
+# TODO: Move "common" out of board directory
 .PHONY: list-boards
 list-boards:
-	@cd src/board && for board in */*/board.mk; do \
-		echo "$$(dirname "$$board")"; \
+	@cd src/board && for board in */*/Makefile.mk; do \
+		if [ "$$board" != "system76/common/Makefile.mk" ]; then \
+			echo "$$(dirname "$$board")"; \
+		fi; \
 	done
 
 # This target is run during setup, and is not shown in the help text.
