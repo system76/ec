@@ -1,7 +1,7 @@
 # Firmware security
 
 The firmware security feature can be configured by setting `CONFIG_SECURITY=1`
-in the `src/board/system76/[board]/board.mk` file. This feature prevents
+in the `src/board/system76/<board>/Makefile.mk` file. This feature prevents
 programming the EC firmware at runtime, unless the EC is unlocked with the
 `system76-ectool security unlock` command. After this, on the next reboot, the
 EC will respond to the SPI and reset commands. On boards where the `ME_WE` GPIO

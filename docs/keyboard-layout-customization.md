@@ -43,7 +43,7 @@ git submodule update --recursive
 Determine the keyboard used for your model.
 
 ```sh
-grep KEYBOARD src/board/system76/<model>/board.mk
+grep KEYBOARD src/board/system76/<model>/Makefile.mk
 ```
 
 Copy the default layout file for the keyboard to a separate file in the keymap
