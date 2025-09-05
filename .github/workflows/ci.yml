@@ -28,6 +28,19 @@ jobs:
         id: board-matrix
         run: echo "boards=$(make list-boards | jq -sRc 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
 
+  mega2560:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes --no-install-recommends avr-libc make gcc-avr
+
+    - name: Build firmware
+      run: make -C tools/mega2560 VERBOSE=1
+
   tool:
     strategy:
       matrix:

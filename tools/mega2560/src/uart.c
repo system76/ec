@@ -1,10 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <stdio.h>
+#include "uart.h"
 #include <avr/io.h>
-
-#include <arch/uart.h>
-#include <board/cpu.h>
+#include <stdio.h>
 
 #define UART(N) \
     { \
