@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef _ARCH_GPIO_H
-#define _ARCH_GPIO_H
-
-#include <common/macro.h>
+#ifndef _GPIO_H
+#define _GPIO_H
 
 #include <avr/io.h>
 #include <stdbool.h>
@@ -20,7 +18,7 @@ struct Gpio {
     .pin = &PIN ## BLOCK, \
     .ddr = &DDR ## BLOCK, \
     .port = &PORT ## BLOCK, \
-    .value = BIT(NUMBER), \
+    .value = (1U << (NUMBER)), \
 }
 
 bool gpio_get(const struct Gpio *const gpio);
@@ -28,4 +26,4 @@ void gpio_set(struct Gpio *const gpio, bool value);
 bool gpio_get_dir(const struct Gpio *const gpio);
 void gpio_set_dir(struct Gpio *const gpio, bool value);
 
-#endif // _ARCH_GPIO_H
+#endif // _GPIO_H
