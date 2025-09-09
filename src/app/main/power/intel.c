@@ -13,12 +13,12 @@
 #include <app/peci.h>
 #include <app/pmc.h>
 #include <app/pnp.h>
-#include <app/usbpd.h>
 #include <app/wireless.h>
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <board/gpio.h>
 #include <common/debug.h>
+#include <drivers/usbpd/usbpd.h>
 
 #if CONFIG_BUS_ESPI
 #include <ec/espi.h>
