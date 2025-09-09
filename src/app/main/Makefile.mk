@@ -3,7 +3,6 @@
 app-y += acpi.c
 app-y += battery.c
 app-y += config.c
-app-$(CONFIG_HAVE_DGPU) += dgpu.c
 app-y += ecpm.c
 app-$(CONFIG_BUS_ESPI) += espi.c
 app-y += fan.c
@@ -67,11 +66,6 @@ CFLAGS += -DCONFIG_BUS_ESPI=1
 ifeq ($(CONFIG_PECI_OVER_ESPI),y)
 CFLAGS += -DCONFIG_PECI_OVER_ESPI=1
 endif
-endif
-
-ifeq ($(CONFIG_HAVE_DGPU),y)
-CFLAGS += -DCONFIG_HAVE_DGPU=1
-CFLAGS += -DI2C_DGPU=$(CONFIG_I2C_DGPU)
 endif
 
 # Fan configs
