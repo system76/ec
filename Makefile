@@ -27,10 +27,12 @@ VERSION?=$(DATE)_$(REV)
 all: $(BUILD)/ec.rom
 	$(info Built $(VERSION) for $(BOARD))
 
+CFLAGS = -Isrc/
+
 # Include common source
 COMMON_DIR=src/common
 INCLUDE += $(COMMON_DIR)/common.mk
-CFLAGS=-I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
+CFLAGS += -I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
 include $(COMMON_DIR)/common.mk
 SRC += $(foreach src, $(common-y), $(COMMON_DIR)/$(src))
 
@@ -50,6 +52,8 @@ INCLUDE += $(EC_DIR)/ec.mk
 CFLAGS+=-I$(EC_DIR)/include
 include $(EC_DIR)/ec.mk
 SRC += $(foreach src, $(ec-y), $(EC_DIR)/$(src))
+
+include src/drivers/Makefile.mk
 
 # The EC will define the architecture
 # Include the architecture's source
