@@ -17,8 +17,8 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <board/wireless.h>
-#include <board/usbpd.h>
 #include <common/debug.h>
+#include <drivers/usbpd/usbpd.h>
 
 #if CONFIG_BUS_ESPI
 #include <ec/espi.h>
