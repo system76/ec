@@ -28,10 +28,12 @@ all: $(BUILD)/ec.rom
 	$(info Built $(VERSION) for $(BOARD))
 	./scripts/check-home-segment.sh
 
+CFLAGS = -Isrc/
+
 # Include common source
 COMMON_DIR=src/common
 INCLUDE += $(COMMON_DIR)/Makefile.mk
-CFLAGS=-I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
+CFLAGS += -I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
 include $(COMMON_DIR)/Makefile.mk
 SRC += $(foreach src, $(common-y), $(COMMON_DIR)/$(src))
 
@@ -59,6 +61,8 @@ INCLUDE += $(ARCH_DIR)/Makefile.mk
 CFLAGS+=-I$(ARCH_DIR)/include -D__ARCH__=$(ARCH)
 include $(ARCH_DIR)/Makefile.mk
 SRC += $(foreach src, $(arch-y), $(ARCH_DIR)/$(src))
+
+include src/drivers/Makefile.mk
 
 include $(ARCH_DIR)/toolchain.mk
 
