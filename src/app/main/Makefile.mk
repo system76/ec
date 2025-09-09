@@ -106,13 +106,6 @@ CFLAGS += -DCHARGER_PSYS_GAIN=$(CONFIG_CHARGER_PSYS_GAIN)
 endif
 endif
 
-# Add USB-PD
-ifeq ($(CONFIG_HAVE_USBPD),y)
-CFLAGS += -DCONFIG_HAVE_USBPD=1
-app-$(CONFIG_USBPD_TPS65987) += usbpd/tps65987.c
-CFLAGS += -DI2C_USBPD=$(CONFIG_I2C_USBPD)
-endif
-
 # Add keyboard
 ifndef KEYBOARD
 $(error KEYBOARD is not set by the board)
