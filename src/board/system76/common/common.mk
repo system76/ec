@@ -157,8 +157,8 @@ board-common-y += flash/wrapper.c
 PROGRAMMER=$(wildcard /dev/serial/by-id/usb-Arduino*)
 
 console_internal:
-	cargo build --manifest-path tool/Cargo.toml --release
-	sudo tool/target/release/system76_ectool console
+	cargo build --manifest-path tools/system76_ectool/Cargo.toml --release
+	sudo tools/system76_ectool/target/release/system76_ectool console
 
 console_external:
 	sudo test -c "$(PROGRAMMER)"
@@ -171,8 +171,8 @@ console_external_forced:
 	sudo tio -b 1000000 -m INLCRNL -t "$(PROGRAMMER)"
 
 flash_internal: $(BUILD)/ec.rom
-	cargo build --manifest-path tool/Cargo.toml --release
-	sudo tool/target/release/system76_ectool flash $<
+	cargo build --manifest-path tools/system76_ectool/Cargo.toml --release
+	sudo tools/system76_ectool/target/release/system76_ectool flash $<
 
 flash_external: $(BUILD)/ec.rom
 	cargo build --manifest-path tools/ecflash/Cargo.toml --example isp --release
