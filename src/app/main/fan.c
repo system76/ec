@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <app/fan.h>
-#include <app/dgpu.h>
 #include <app/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
+#include <drivers/dgpu/dgpu.h>
 #include <ec/pwm.h>
 
 #if CONFIG_PLATFORM_INTEL
