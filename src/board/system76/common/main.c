@@ -23,11 +23,11 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
-#include <board/usbpd.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
 #include <drivers/dgpu/dgpu.h>
+#include <drivers/usbpd/usbpd.h>
 #include <ec/ec.h>
 
 #if CONFIG_PLATFORM_INTEL
