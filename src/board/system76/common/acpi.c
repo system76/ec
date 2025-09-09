@@ -2,7 +2,6 @@
 
 #include <board/acpi.h>
 #include <board/battery.h>
-#include <board/dgpu.h>
 #include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbled.h>
@@ -10,6 +9,7 @@
 #include <board/pwm.h>
 #include <common/debug.h>
 #include <common/macro.h>
+#include <drivers/dgpu/dgpu.h>
 
 #if CONFIG_PLATFORM_INTEL
 #include <board/peci.h>
