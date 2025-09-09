@@ -3,7 +3,6 @@
 board-common-y += acpi.c
 board-common-y += battery.c
 board-common-y += config.c
-board-common-$(CONFIG_HAVE_DGPU) += dgpu.c
 board-common-y += ecpm.c
 board-common-$(CONFIG_BUS_ESPI) += espi.c
 board-common-y += fan.c
@@ -69,11 +68,6 @@ CFLAGS += -DCONFIG_PECI_OVER_ESPI=1
 endif
 endif
 
-ifeq ($(CONFIG_HAVE_DGPU),y)
-CFLAGS += -DCONFIG_HAVE_DGPU=1
-CFLAGS += -DI2C_DGPU=$(CONFIG_I2C_DGPU)
-endif
-
 # Include system76 common source
 SYSTEM76_COMMON_DIR=src/board/system76/common
 INCLUDE += $(SYSTEM76_COMMON_DIR)/common.mk
@@ -115,13 +109,6 @@ CFLAGS += -DCHARGER_INPUT_CURRENT=$(CONFIG_CHARGER_INPUT_CURRENT)
 ifneq ($(CONFIG_CHARGER_PSYS_GAIN),)
 CFLAGS += -DCHARGER_PSYS_GAIN=$(CONFIG_CHARGER_PSYS_GAIN)
 endif
-endif
-
-# Add USB-PD
-ifeq ($(CONFIG_HAVE_USBPD),y)
-CFLAGS += -DCONFIG_HAVE_USBPD=1
-board-common-$(CONFIG_USBPD_TPS65987) += usbpd/tps65987.c
-CFLAGS += -DI2C_USBPD=$(CONFIG_I2C_USBPD)
 endif
 
 # Add keyboard
