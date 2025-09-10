@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#ifndef _ARCH_UART_H
-#define _ARCH_UART_H
+#ifndef _UART_H
+#define _UART_H
 
 #include <stdint.h>
 
@@ -33,4 +33,4 @@ void uart_write(struct Uart *const uart, uint8_t data);
 extern struct Uart *uart_stdio;
 void uart_stdio_init(int16_t num, uint32_t baud);
 
-#endif // _ARCH_UART_H
+#endif // _UART_H

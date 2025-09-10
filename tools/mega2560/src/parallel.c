@@ -3,13 +3,11 @@
 // High resolution pinout can be found here:
 // https://osoyoo.com/wp-content/uploads/2017/08/arduino_mega_2560_pinout.png
 
+#include "gpio.h"
+#include "uart.h"
+#include <util/delay.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <board/cpu.h>
-#include <util/delay.h>
-
-#include <arch/gpio.h>
-#include <arch/uart.h>
 
 // Mapping of 24-pin ribbon cable to parallel pins. See schematic
 #define PINS \
