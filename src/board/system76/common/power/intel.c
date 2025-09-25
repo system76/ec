@@ -125,6 +125,10 @@ extern uint8_t main_cycle;
 
 enum PowerState power_state = POWER_STATE_OFF;
 
+// Event that caused the system to power on.
+// Note: Must not be Reserved (0x00) or Unknown (0x02) when reported.
+enum PowerWakeupType power_wakeup_type = POWER_WAKEUP_TYPE_UNKNOWN;
+
 enum PowerState calculate_power_state(void) {
     if (!gpio_get(&EC_RSMRST_N)) {
         // S5 plane not powered
@@ -435,6 +439,7 @@ void power_event(void) {
                 if (config_should_reset())
                     config_reset();
                 power_on();
+                power_wakeup_type = POWER_WAKEUP_TYPE_POWER_SWITCH;
 
                 // After power on ensure there is no secondary press sent to PCH
                 ps_new = ps_last;
@@ -560,6 +565,7 @@ void power_event(void) {
         DEBUG("%02X: LAN_WAKEUP# asserted\n", main_cycle);
         if (power_state == POWER_STATE_OFF) {
             power_on();
+            power_wakeup_type = POWER_WAKEUP_TYPE_LAN_REMOTE;
         }
     }
 #if LEVEL >= LEVEL_DEBUG
