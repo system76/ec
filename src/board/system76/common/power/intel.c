@@ -26,7 +26,7 @@
 #endif
 
 #if CONFIG_SECURITY
-#include <board/security.h>
+#include <drivers/security/security.h>
 #endif // CONFIG_SECURITY
 
 #define GPIO_SET_DEBUG(G, V) \
