@@ -18,7 +18,6 @@ board-common-y += pnp.c
 board-common-y += ps2.c
 board-common-y += pwm.c
 board-common-y += scratch.c
-board-common-$(CONFIG_SECURITY) += security.c
 board-common-y += smbus.c
 board-common-y += smfi.c
 board-common-y += stdio.c
@@ -39,10 +38,6 @@ CFLAGS+=-DLEVEL=4
 CFLAGS += -DI2C_SMBUS=$(CONFIG_I2C_SMBUS)
 # Uncomment to enable I2C debug on 0x76
 #CFLAGS+=-DI2C_DEBUGGER=0x76
-
-ifeq ($(CONFIG_SECURITY),y)
-CFLAGS+=-DCONFIG_SECURITY=1
-endif
 
 ifeq ($(CONFIG_PLATFORM_INTEL),y)
 board-common-y += peci.c
