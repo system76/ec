@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "security.h"
 #include <board/gpio.h>
-#include <board/security.h>
 
 static enum SecurityState security_state = SECURITY_STATE_LOCK;
 
