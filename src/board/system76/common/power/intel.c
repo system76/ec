@@ -17,8 +17,8 @@
 #include <board/pmc.h>
 #include <board/pnp.h>
 #include <board/wireless.h>
-#include <board/usbpd.h>
 #include <common/debug.h>
+#include <drivers/usbpd/usbpd.h>
 
 #if CONFIG_BUS_ESPI
 #include <ec/espi.h>
@@ -26,7 +26,7 @@
 #endif
 
 #if CONFIG_SECURITY
-#include <board/security.h>
+#include <drivers/security/security.h>
 #endif // CONFIG_SECURITY
 
 #define GPIO_SET_DEBUG(G, V) \
