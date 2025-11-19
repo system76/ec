@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#include "gpio.h"
+#include "uart.h"
 #include <stdio.h>
-
-#include <arch/gpio.h>
-#include <arch/uart.h>
 
 void init(void) {
     uart_stdio_init(0, __CONSOLE_BAUD__);
