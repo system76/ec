@@ -104,7 +104,6 @@ RUN apt-get --quiet update \
 # a comma separated list as an argument with a space.
 # Ref: https://github.com/rust-lang/rustup/issues/4073
 RUN rustup toolchain install \
-        --no-self-update \
         --target x86_64-unknown-linux-gnu,x86_64-unknown-uefi \
         --profile minimal \
         --component=clippy,rustfmt \
