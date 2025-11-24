@@ -6,7 +6,7 @@
 
 # NOTE: The repository is specified in the image name to make it explicit
 # which source is being trusted to provide the image.
-ARG CONTAINER_IMAGE="docker.io/library/debian:trixie-20250520-slim"
+ARG CONTAINER_IMAGE="docker.io/library/debian:trixie-20251020-slim"
 
 ARG SDCC_REPO="https://svn.code.sf.net/p/sdcc/code"
 ARG SDCC_REV="14648"
