@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2023 System76, Inc.
 
 board-y += ../gaze17-3060/board.c
 board-y += ../gaze17-3060/gpio.c

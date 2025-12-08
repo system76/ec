@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
-//
+// SPDX-FileCopyrightText: 2020 System76, Inc.
+
 // TI BQ24780S Smart Charger
 // https://www.ti.com/lit/ds/symlink/bq24780s.pdf
 

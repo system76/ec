@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 // Jeremy's layout - http://www.keyboard-layout-editor.com/#/gists/fe00274727fc01b78a79d79473cd547c
 
