@@ -11,7 +11,6 @@
 #include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
-#include <board/kbled.h>
 #include <board/lid.h>
 #include <board/peci.h>
 #include <board/pmc.h>
@@ -345,7 +344,6 @@ void power_cpu_reset(void) {
     fan_reset();
     //TODO: reset touchpad states
     kbc_reset();
-    kbled_reset();
     // Set PL4
     //TODO: if this returns false, retry?
     power_peci_limit(
