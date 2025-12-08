@@ -8,7 +8,6 @@
 #include <arch/time.h>
 #include <board/battery.h>
 #include <board/board.h>
-#include <board/dgpu.h>
 #include <board/ecpm.h>
 #include <board/fan.h>
 #include <board/gpio.h>
@@ -24,10 +23,11 @@
 #include <board/pwm.h>
 #include <board/smbus.h>
 #include <board/smfi.h>
-#include <board/usbpd.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <drivers/dgpu/dgpu.h>
+#include <drivers/usbpd/usbpd.h>
 #include <ec/ec.h>
 
 #if CONFIG_PLATFORM_INTEL
