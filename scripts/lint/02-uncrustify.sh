@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2024 System76, Inc.
 
 # Check if any C files or headers need to be formatted.
 

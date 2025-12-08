@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2019 System76, Inc.
 
 #ifndef _UART_H
 #define _UART_H

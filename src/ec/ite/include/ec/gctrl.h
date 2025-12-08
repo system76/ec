@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2019 System76, Inc.
 
 #ifndef _EC_GCTRL_H
 #define _EC_GCTRL_H

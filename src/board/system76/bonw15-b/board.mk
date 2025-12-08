@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2024 System76, Inc.
 
 board-y += ../bonw15/board.c
 board-y += ../bonw15/gpio.c

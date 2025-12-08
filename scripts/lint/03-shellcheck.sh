@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2023 System76, Inc.
 
 # Check if any shell scripts have issues.
+
+# shellcheck disable=SC1091
 
 LINT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 . "$LINT_DIR/util.sh"

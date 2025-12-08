@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 Andrew Rodland
 
 // PrtSc == Insert
 // Fn + PrtSc == Print Screen

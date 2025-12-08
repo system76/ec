@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: CC0-1.0
+# SPDX-FileCopyrightText: NONE
+
 name: CI
 on:
   push:
@@ -15,8 +18,9 @@ jobs:
       - name: Install dependencies
         run: ./scripts/deps.sh
 
-      - name:  Check SPDX tags
-        run: ./scripts/lint/01-spdx-tags.sh
+        # 24.04 only has reuse 2.1.0, so use the action for latest version
+      - name: Check REUSE compliance
+        uses: fsfe/reuse-action@v6
 
       - name: Check formatting
         run: ./scripts/lint/02-uncrustify.sh

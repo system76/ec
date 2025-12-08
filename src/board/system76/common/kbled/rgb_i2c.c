@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 #include <arch/delay.h>
 #include <board/gpio.h>

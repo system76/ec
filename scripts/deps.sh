@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2021 System76, Inc.
 
 # shellcheck disable=SC1091
 
@@ -20,6 +21,7 @@ if [ "${ID}" = "debian" ] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         libudev-dev \
         make \
         pkgconf \
+        reuse \
         sdcc \
         shellcheck \
         uncrustify \
@@ -31,6 +33,7 @@ elif [ "${ID}" = "fedora" ] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avrdude \
         gcc \
         make \
+        reuse \
         rustup \
         sdcc \
         ShellCheck \
@@ -45,6 +48,7 @@ elif [ "${ID}" = "arch" ] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         gcc \
         make \
         pkgconf \
+        reuse \
         rustup \
         sdcc \
         shellcheck \

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 #ifndef _EC_BRAM_H
 #define _EC_BRAM_H

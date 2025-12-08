@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 Fabian Topfstedt
 
 // Clevo L141CU US ISO layout by @fabiant7t
 // Picture: https://drive.google.com/file/d/1vTJvdfl9tf2Iwb6hkmsUwGBCVZ9lmouv/view?usp=sharing

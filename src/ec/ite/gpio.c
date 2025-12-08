@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2019 System76, Inc.
 
 #include <ec/gpio.h>
 #include <common/debug.h>

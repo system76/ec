@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2019 System76, Inc.
+// SPDX-FileCopyrightText: 2023 3mdeb
 
 // PECI information can be found here:
 // https://www.intel.com/content/dam/www/public/us/en/documents/design-guides/core-i7-lga-2011-guide.pdf

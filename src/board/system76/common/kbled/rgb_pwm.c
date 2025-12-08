@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 #include <board/gpio.h>
 #include <board/kbled.h>

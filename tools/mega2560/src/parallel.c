@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2019 System76, Inc.
 
 // High resolution pinout can be found here:
 // https://osoyoo.com/wp-content/uploads/2017/08/arduino_mega_2560_pinout.png

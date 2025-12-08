@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: CC0-1.0
+# SPDX-FileCopyrightText: NONE
+
+version = 1
+
+[[annotations]]
+path = [
+    "README.md",
+]
+precedence = "override"
+SPDX-License-Identifier = "GPL-3.0-only"
+SPDX-FileCopyrightText = "2025 System76, Inc. and contributors"

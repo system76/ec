@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 Fabian Topfstedt
 
 // # Fabian ISO layout
 // Swapped FN and LEFT_CTRL (like on Thinkpads and Macbooks)

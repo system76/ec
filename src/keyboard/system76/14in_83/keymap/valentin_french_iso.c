@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2020 Brosseau Valentin
 
 // # Valentin French ISO layout
 // Swapped FN and LEFT_CTRL (like Macbooks)

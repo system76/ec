@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2023 System76, Inc.
 
 // USB-PD driver for TPS65987 and the mostly compatible TPS65993 and TPS65994.
 // I2C register reference: https://www.ti.com/lit/ug/slvubh2b/slvubh2b.pdf
