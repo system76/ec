@@ -1,20 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <ec/ec.h>
+#include <arch/arch.h>
 #include <ec/gctrl.h>
 #include <common/debug.h>
 #include <common/macro.h>
-
-void ec_init(void) {
-#if CONFIG_EC_ITE_IT8587E
-    RSTS = (0b10U << 6) | BIT(2);
-#else
-    RSTS = (0b01U << 6) | BIT(2);
-
-    // Enable POST codes
-    SPCTRL1 |= BIT(7) | BIT(6) | BIT(3);
-#endif
-}
 
 void ec_read_post_codes(void) {
 #if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
@@ -25,5 +15,18 @@ void ec_read_post_codes(void) {
 
         DEBUG("POST %02X%02X\n", p81h, p80h);
     }
+#endif
+}
+
+void ec_init(void) {
+    arch_init();
+
+#if CONFIG_EC_ITE_IT8587E
+    RSTS = (0b10U << 6) | BIT(2);
+#else
+    RSTS = (0b01U << 6) | BIT(2);
+
+    // Enable POST codes
+    SPCTRL1 |= BIT(7) | BIT(6) | BIT(3);
 #endif
 }
