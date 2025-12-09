@@ -3,9 +3,7 @@
 app-y += acpi.c
 app-y += battery.c
 app-y += config.c
-app-y += ecpm.c
 app-$(CONFIG_BUS_ESPI) += espi.c
-app-y += gctrl.c
 app-y += kbc.c
 app-y += kbscan.c
 app-y += keymap.c
