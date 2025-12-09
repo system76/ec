@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <ec/ec.h>
+#include <arch/arch.h>
 #include <ec/gctrl.h>
 #include <common/debug.h>
 #include <common/macro.h>
 
 void ec_init(void) {
+    arch_init();
+
 #if CONFIG_EC_ITE_IT8587E
     RSTS = (0b10U << 6) | BIT(2);
 #else
