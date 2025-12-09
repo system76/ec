@@ -6,6 +6,13 @@
 #include <common/debug.h>
 #include <common/macro.h>
 
+static void gctrl_init(void) {
+    // Set I2EC as R/W
+    SPCTRL1 |= 0x03;
+    // Set PNPCFG base address
+    BADRSEL = 0;
+}
+
 void ec_init(void) {
     arch_init();
 
@@ -17,6 +24,8 @@ void ec_init(void) {
     // Enable POST codes
     SPCTRL1 |= BIT(7) | BIT(6) | BIT(3);
 #endif
+
+    gctrl_init();
 }
 
 void ec_read_post_codes(void) {
