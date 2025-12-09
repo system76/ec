@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <8051.h>
 #include <stdio.h>
 
-#include <arch/arch.h>
-#include <arch/delay.h>
 #include <arch/time.h>
 #include <board/battery.h>
 #include <board/board.h>
@@ -57,7 +54,6 @@ uint8_t main_cycle = 0;
 
 void init(void) {
     // Must happen first
-    arch_init();
     ec_init();
     gctrl_init();
     gpio_init();
