@@ -9,7 +9,6 @@
 #include <board/ecpm.h>
 #include <board/fan.h>
 #include <board/gpio.h>
-#include <board/gctrl.h>
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
@@ -55,7 +54,6 @@ uint8_t main_cycle = 0;
 void init(void) {
     // Must happen first
     ec_init();
-    gctrl_init();
     gpio_init();
 
     // Can happen in any order

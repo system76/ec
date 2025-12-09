@@ -7,7 +7,6 @@ board-common-$(CONFIG_HAVE_DGPU) += dgpu.c
 board-common-y += ecpm.c
 board-common-$(CONFIG_BUS_ESPI) += espi.c
 board-common-y += fan.c
-board-common-y += gctrl.c
 board-common-y += kbc.c
 board-common-y += kbscan.c
 board-common-y += keymap.c
