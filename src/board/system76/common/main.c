@@ -34,13 +34,17 @@
 #include <board/parallel.h>
 #endif // PARALLEL_DEBUG
 
-void external_0(void) __interrupt(0) {}
-// timer_0 is in time.c
+// NOTE: SDCC requires ISR protoypes are included in the file that contains
+// main(), otherwise the IVT will not contain entries for them.
+// XXX: This is specific to ITE SoCs, which may use the 8052 defined interrupts
+// and defines no additional interrupts in the IVT (everything from WUC/SWUC
+// goes through External 1).
+static void external_0(void) __interrupt(0) {}
 void timer_0(void) __interrupt(1);
-void external_1(void) __interrupt(2) {}
-void timer_1(void) __interrupt(3) {}
-void serial(void) __interrupt(4) {}
-void timer_2(void) __interrupt(5) {}
+static void external_1(void) __interrupt(2) {}
+static void timer_1(void) __interrupt(3) {}
+static void serial(void) __interrupt(4) {}
+static void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
 
