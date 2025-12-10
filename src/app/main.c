@@ -6,7 +6,6 @@
 #include <app/dgpu.h>
 #include <app/ecpm.h>
 #include <app/fan.h>
-#include <app/gctrl.h>
 #include <app/kbc.h>
 #include <app/kbled.h>
 #include <app/kbscan.h>
@@ -56,7 +55,6 @@ uint8_t main_cycle = 0;
 void init(void) {
     // Must happen first
     soc_init();
-    gctrl_init();
     gpio_init();
 
     // Can happen in any order

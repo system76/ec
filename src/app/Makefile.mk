@@ -8,7 +8,6 @@ app-$(CONFIG_HAVE_DGPU) += dgpu.c
 app-y += ecpm.c
 app-$(CONFIG_BUS_ESPI) += espi.c
 app-y += fan.c
-app-y += gctrl.c
 app-y += kbc.c
 app-y += kbscan.c
 app-y += keymap.c
