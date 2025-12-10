@@ -1,10 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <8051.h>
 #include <stdio.h>
 
-#include <arch/arch.h>
-#include <arch/delay.h>
 #include <arch/time.h>
 #include <board/battery.h>
 #include <board/board.h>
@@ -12,7 +9,6 @@
 #include <board/ecpm.h>
 #include <board/fan.h>
 #include <board/gpio.h>
-#include <board/gctrl.h>
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
@@ -38,13 +34,17 @@
 #include <board/parallel.h>
 #endif // PARALLEL_DEBUG
 
-void external_0(void) __interrupt(0) {}
-// timer_0 is in time.c
+// NOTE: SDCC requires ISR protoypes are included in the file that contains
+// main(), otherwise the IVT will not contain entries for them.
+// XXX: This is specific to ITE SoCs, which may use the 8052 defined interrupts
+// and defines no additional interrupts in the IVT (everything from WUC/SWUC
+// goes through External 1).
+static void external_0(void) __interrupt(0) {}
 void timer_0(void) __interrupt(1);
-void external_1(void) __interrupt(2) {}
-void timer_1(void) __interrupt(3) {}
-void serial(void) __interrupt(4) {}
-void timer_2(void) __interrupt(5) {}
+static void external_1(void) __interrupt(2) {}
+static void timer_1(void) __interrupt(3) {}
+static void serial(void) __interrupt(4) {}
+static void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
 
@@ -57,9 +57,7 @@ uint8_t main_cycle = 0;
 
 void init(void) {
     // Must happen first
-    arch_init();
     ec_init();
-    gctrl_init();
     gpio_init();
 
     // Can happen in any order
