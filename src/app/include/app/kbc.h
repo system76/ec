@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2019 System76, Inc.
+
+#ifndef _APP_KBC_H
+#define _APP_KBC_H
+
+#include <stdbool.h>
+
+#include <ec/kbc.h>
+
+extern uint8_t kbc_leds;
+
+void kbc_init(void);
+void kbc_reset(void);
+bool kbc_scancode(uint16_t key, bool pressed);
+void kbc_event(struct Kbc *const kbc);
+
+#endif // _APP_KBC_H

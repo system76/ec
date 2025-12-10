@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#include <board/board.h>
-#include <board/gctrl.h>
+#include <app/board.h>
+#include <app/kbc.h>
 #include <board/gpio.h>
-#include <board/kbc.h>
-#include <common/debug.h>
 #include <ec/ec.h>
 
 void board_init(void) {

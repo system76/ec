@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2019 System76, Inc.
 
-#include <board/board.h>
+#include <app/board.h>
 #include <board/gpio.h>
 
 void board_init(void) {
