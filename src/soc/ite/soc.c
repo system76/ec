@@ -2,11 +2,14 @@
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
 #include <soc/soc.h>
+#include <arch/arch.h>
 #include <soc/gctrl.h>
 #include <common/debug.h>
 #include <common/macro.h>
 
 void soc_init(void) {
+    arch_init();
+
 #if CONFIG_EC_ITE_IT8587E
     RSTS = (0b10U << 6) | BIT(2);
 #else

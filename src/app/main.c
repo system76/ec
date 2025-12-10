@@ -18,8 +18,6 @@
 #include <app/smbus.h>
 #include <app/smfi.h>
 #include <app/usbpd.h>
-#include <arch/arch.h>
-#include <arch/delay.h>
 #include <arch/time.h>
 #include <board/gpio.h>
 #include <board/keymap.h>
@@ -57,7 +55,6 @@ uint8_t main_cycle = 0;
 
 void init(void) {
     // Must happen first
-    arch_init();
     soc_init();
     gctrl_init();
     gpio_init();
