@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2019 System76, Inc.
 
 #include <app/pwm.h>
-#include <ec/pwm.h>
+#include <soc/pwm.h>
 #include <common/macro.h>
 
 void pwm_init(void) {

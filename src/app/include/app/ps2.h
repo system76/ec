@@ -4,7 +4,7 @@
 #ifndef _APP_PS2_H
 #define _APP_PS2_H
 
-#include <ec/ps2.h>
+#include <soc/ps2.h>
 
 void ps2_init(void);
 

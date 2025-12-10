@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #include <board/keymap.h>
-#include <ec/kbscan.h>
+#include <soc/kbscan.h>
 
 // EC config reset key combo: Fn+Esc
 extern bool kbscan_fn_held;

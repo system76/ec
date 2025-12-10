@@ -50,19 +50,17 @@ CFLAGS += -I$(APP_DIR)/include
 include $(APP_DIR)/Makefile.mk
 SRC += $(foreach src, $(app-y), $(APP_DIR)/$(src))
 
-# The board will define the embedded controller
-# Include the embedded controller's source
-EC_DIR=src/ec/$(EC)
-INCLUDE += $(EC_DIR)/Makefile.mk
-CFLAGS+=-I$(EC_DIR)/include
-include $(EC_DIR)/Makefile.mk
-SRC += $(foreach src, $(ec-y), $(EC_DIR)/$(src))
+# The board will declare the SoC
+SOC_DIR = src/soc/$(EC)
+INCLUDE += $(SOC_DIR)/Makefile.mk
+CFLAGS += -I$(SOC_DIR)/include
+include $(SOC_DIR)/Makefile.mk
+SRC += $(foreach src, $(soc-y), $(SOC_DIR)/$(src))
 
-# The EC will define the architecture
-# Include the architecture's source
-ARCH_DIR=src/arch/$(ARCH)
+# The SoC will declare the architecture
+ARCH_DIR = src/arch/$(ARCH)
 INCLUDE += $(ARCH_DIR)/Makefile.mk
-CFLAGS+=-I$(ARCH_DIR)/include -D__ARCH__=$(ARCH)
+CFLAGS += -I$(ARCH_DIR)/include -D__ARCH__=$(ARCH)
 include $(ARCH_DIR)/Makefile.mk
 SRC += $(foreach src, $(arch-y), $(ARCH_DIR)/$(src))
 

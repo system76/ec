@@ -5,7 +5,7 @@
 #include <app/battery.h>
 #include <app/espi.h>
 #include <board/gpio.h>
-#include <ec/ec.h>
+#include <soc/soc.h>
 
 void board_init(void) {
     espi_init();
@@ -28,7 +28,7 @@ void board_init(void) {
 void board_event(void) {
     espi_event();
 
-    ec_read_post_codes();
+    soc_read_post_codes();
 
     // Hack to drain LDO_3V3 capacitors
     if (!gpio_get(&XLP_OUT)) {

@@ -5,7 +5,7 @@
 #include <arch/delay.h>
 #include <arch/time.h>
 #include <common/macro.h>
-#include <ec/kbscan.h>
+#include <soc/kbscan.h>
 
 #include <stdbool.h>
 

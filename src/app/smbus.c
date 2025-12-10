@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2019 System76, Inc.
 
 #include <app/smbus.h>
-#include <ec/i2c.h>
+#include <soc/i2c.h>
 
 void smbus_init(void) {
     // 9.2 MHz * 4.7 us = 43.24

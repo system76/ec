@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 
-#include <ec/kbc.h>
+#include <soc/kbc.h>
 
 extern uint8_t kbc_leds;
 

@@ -4,7 +4,7 @@
 #ifndef _APP_PECI_H
 #define _APP_PECI_H
 
-#include <ec/peci.h>
+#include <soc/peci.h>
 #include <stdbool.h>
 
 extern bool peci_on;

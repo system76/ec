@@ -6,8 +6,8 @@
 #include <board/keymap.h>
 #include <common/debug.h>
 #include <common/macro.h>
-#include <ec/espi.h>
-#include <ec/ps2.h>
+#include <soc/espi.h>
+#include <soc/ps2.h>
 
 void kbc_init(void) {
     // Disable interrupts

@@ -23,7 +23,7 @@
 
 #if CONFIG_BUS_ESPI
 #include <app/espi.h>
-#include <ec/espi.h>
+#include <soc/espi.h>
 #endif
 
 #if CONFIG_SECURITY

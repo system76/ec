@@ -3,7 +3,7 @@
 
 #include <app/flash.h>
 #include "include/flash/entry.h"
-#include <ec/scratch.h>
+#include <soc/scratch.h>
 #include <stdint.h>
 #include <stddef.h>
 

@@ -10,7 +10,7 @@
 #endif
 
 #ifdef I2C_DEBUGGER
-#include <ec/i2c.h>
+#include <soc/i2c.h>
 #endif
 
 #ifdef PARALLEL_DEBUG

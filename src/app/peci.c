@@ -13,8 +13,8 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 #include <common/macro.h>
-#include <ec/gpio.h>
-#include <ec/pwm.h>
+#include <soc/gpio.h>
+#include <soc/pwm.h>
 
 bool peci_on = false;
 int16_t peci_temp = 0;

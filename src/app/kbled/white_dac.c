@@ -3,7 +3,7 @@
 
 #include <app/kbled.h>
 #include <common/macro.h>
-#include <ec/dac.h>
+#include <soc/dac.h>
 
 #if !defined(KBLED_DAC)
 #error "KBLED_DAC must be defined"

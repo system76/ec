@@ -4,7 +4,7 @@
 #ifndef _BOARD_GPIO_H
 #define _BOARD_GPIO_H
 
-#include <ec/gpio.h>
+#include <soc/gpio.h>
 
 void gpio_init(void);
 

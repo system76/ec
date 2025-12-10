@@ -5,7 +5,7 @@
 #include <arch/delay.h>
 #include <board/gpio.h>
 #include <common/macro.h>
-#include <ec/i2c.h>
+#include <soc/i2c.h>
 
 #define kbled_i2c_get(A, D, L) i2c_get(&KBLED_I2C, 0x68, A, D, L)
 #define kbled_i2c_set(A, D, L) i2c_set(&KBLED_I2C, 0x68, A, D, L)

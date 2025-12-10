@@ -4,7 +4,7 @@
 #ifndef _APP_GCTRL_H
 #define _APP_GCTRL_H
 
-#include <ec/gctrl.h>
+#include <soc/gctrl.h>
 
 void gctrl_init(void);
 

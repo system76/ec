@@ -3,7 +3,7 @@
 
 #include <app/kbled.h>
 #include <board/gpio.h>
-#include <ec/pwm.h>
+#include <soc/pwm.h>
 
 void kbled_init(void) {
     if (!gpio_get(&RGBKB_DET_N)) {

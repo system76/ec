@@ -4,7 +4,7 @@
 #ifndef _APP_SMBUS_H
 #define _APP_SMBUS_H
 
-#include <ec/smbus.h>
+#include <soc/smbus.h>
 
 void smbus_init(void);
 int16_t smbus_read(uint8_t address, uint8_t command, uint16_t *const data);
