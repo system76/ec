@@ -3,7 +3,6 @@
 
 #include <app/acpi.h>
 #include <app/battery.h>
-#include <app/dgpu.h>
 #include <app/fan.h>
 #include <app/kbled.h>
 #include <app/lid.h>
@@ -11,6 +10,7 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 #include <common/macro.h>
+#include <drivers/dgpu/dgpu.h>
 
 #if CONFIG_PLATFORM_INTEL
 #include <app/peci.h>

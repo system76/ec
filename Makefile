@@ -28,10 +28,12 @@ VERSION?=$(DATE)_$(REV)
 all: $(BUILD)/ec.rom
 	$(info Built $(VERSION) for $(BOARD))
 
+CFLAGS = -Isrc/
+
 # Include common source
-COMMON_DIR=src/common
+COMMON_DIR = src/common
 INCLUDE += $(COMMON_DIR)/Makefile.mk
-CFLAGS=-I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
+CFLAGS += -I$(COMMON_DIR)/include -D__FIRMWARE_VERSION__=$(VERSION)
 include $(COMMON_DIR)/Makefile.mk
 SRC += $(foreach src, $(common-y), $(COMMON_DIR)/$(src))
 
@@ -42,6 +44,8 @@ CFLAGS+=-I$(BOARD_DIR)/include -D__BOARD__=$(BOARD)
 include $(BOARD_DIR)/Makefile.mk
 SRC += $(foreach src, $(board-y), $(BOARD_DIR)/$(src))
 SRC += $(foreach src, $(keyboard-y), $(KEYBOARD_DIR)/$(src))
+
+include src/drivers/Makefile.mk
 
 # Add System76 EC app
 APP_DIR = src/app

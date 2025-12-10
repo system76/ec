@@ -3,7 +3,6 @@
 
 #include <app/battery.h>
 #include <app/board.h>
-#include <app/dgpu.h>
 #include <app/ecpm.h>
 #include <app/fan.h>
 #include <app/kbc.h>
@@ -22,6 +21,7 @@
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <drivers/dgpu/dgpu.h>
 #include <soc/soc.h>
 
 #if CONFIG_PLATFORM_INTEL

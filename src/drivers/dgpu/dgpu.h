@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#ifndef _APP_DGPU_H
-#define _APP_DGPU_H
+#ifndef _DRIVERS_DGPU_DGPU_H
+#define _DRIVERS_DGPU_DGPU_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -28,4 +28,4 @@ static inline void dgpu_read_temp(void) {}
 
 #endif // CONFIG_HAVE_DGPU
 
-#endif // _APP_DGPU_H
+#endif // _DRIVERS_DGPU_DGPU_H

@@ -2,10 +2,10 @@
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
 #include <app/fan.h>
-#include <app/dgpu.h>
 #include <app/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
+#include <drivers/dgpu/dgpu.h>
 #include <soc/pwm.h>
 
 #if CONFIG_PLATFORM_INTEL

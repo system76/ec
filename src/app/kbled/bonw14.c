@@ -10,7 +10,7 @@
 void kbled_init(void) {
     kbled_kind = KBLED_RGB;
 
-    i2c_reset(&I2C_DGPU, true);
+    i2c_reset(&DGPU_I2C, true);
 
     // Force SMBUS B design to 100kHZ
     SCLKTSB = 0b10;
@@ -18,11 +18,11 @@ void kbled_init(void) {
 
 void kbled_reset(void) {
     uint8_t value = 0xE4;
-    int16_t res = i2c_set(&I2C_DGPU, 0x2D, 0xA0, &value, 1);
+    int16_t res = i2c_set(&DGPU_I2C, 0x2D, 0xA0, &value, 1);
     DEBUG("kbled_reset 0x2D: %d\n", res);
 
     //value = 0xC4;
-    //res = i2c_set(&I2C_DGPU, 0x66, 0xA0, &value, 1);
+    //res = i2c_set(&DGPU_I2C, 0x66, 0xA0, &value, 1);
     //DEBUG("kbled_reset 0x66: %d\n", res);
 
     // Set brightness and color
