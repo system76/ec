@@ -12,7 +12,6 @@
 #include <app/lid.h>
 #include <app/pmc.h>
 #include <app/power.h>
-#include <app/ps2.h>
 #include <app/pwm.h>
 #include <app/smbus.h>
 #include <app/smfi.h>
