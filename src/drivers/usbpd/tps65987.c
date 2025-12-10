@@ -4,7 +4,7 @@
 // USB-PD driver for TPS65987 and the mostly compatible TPS65993 and TPS65994.
 // I2C register reference: https://www.ti.com/lit/ug/slvubh2b/slvubh2b.pdf
 
-#include <app/usbpd.h>
+#include "usbpd.h"
 #include <app/battery.h>
 #include <app/power.h>
 #include <board/gpio.h>
@@ -16,12 +16,12 @@
 #define REG_ACTIVE_CONTRACT_PDO 0x34
 
 void usbpd_init(void) {
-    i2c_reset(&I2C_USBPD, true);
+    i2c_reset(&USBPD_I2C, true);
 }
 
 static int16_t usbpd_current_limit(void) {
     uint8_t value[7] = { 0 };
-    int16_t res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, REG_ACTIVE_CONTRACT_PDO, value, sizeof(value));
+    int16_t res = i2c_get(&USBPD_I2C, USBPD_ADDRESS, REG_ACTIVE_CONTRACT_PDO, value, sizeof(value));
     if (res == 7) {
         if (value[0] == 6) {
             uint32_t pdo = ((uint32_t)value[1]) | (((uint32_t)value[2]) << 8) |
@@ -73,7 +73,7 @@ static void usbpd_dump(void) {
     // Dump all registers for debugging
     for (uint8_t reg = 0x00; reg < 0x40; reg += 1) {
         uint8_t value[65] = { 0 };
-        int16_t res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, reg, value, sizeof(value));
+        int16_t res = i2c_get(&USBPD_I2C, USBPD_ADDRESS, reg, value, sizeof(value));
         if (res < 0) {
             DEBUG("USBPD %02X ERROR %04X\n", reg, res);
         } else {
@@ -169,7 +169,7 @@ static int16_t usbpd_aneg(void) {
     int16_t res;
 
     uint8_t cmd[5] = { 4, 'A', 'N', 'e', 'g' };
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x08, cmd, sizeof(cmd));
+    res = i2c_set(&USBPD_I2C, USBPD_ADDRESS, 0x08, cmd, sizeof(cmd));
     if (res < 0) {
         return res;
     }
@@ -186,7 +186,7 @@ void usbpd_disable_charging(void) {
 
     // Read current value
     uint8_t value[2] = { 0 };
-    res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
+    res = i2c_get(&USBPD_I2C, USBPD_ADDRESS, 0x33, value, sizeof(value));
     if (res < 0) {
         DEBUG("ERR %04X\n", -res);
         return;
@@ -201,7 +201,7 @@ void usbpd_disable_charging(void) {
     // Enable only the first TX sink PDO (5V)
     value[0] = 1;
     value[1] = 1;
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
+    res = i2c_set(&USBPD_I2C, USBPD_ADDRESS, 0x33, value, sizeof(value));
     if (res < 0) {
         DEBUG("ERR %04X\n", -res);
         return;
@@ -224,7 +224,7 @@ void usbpd_enable_charging(void) {
 
     // Read current value
     uint8_t value[2] = { 0 };
-    res = i2c_get(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
+    res = i2c_get(&USBPD_I2C, USBPD_ADDRESS, 0x33, value, sizeof(value));
     if (res < 0) {
         DEBUG("ERR %04X\n", -res);
         return;
@@ -239,7 +239,7 @@ void usbpd_enable_charging(void) {
     // Enable the first two TX sink PDO (5V and 20V)
     value[0] = 1;
     value[1] = 2;
-    res = i2c_set(&I2C_USBPD, USBPD_ADDRESS, 0x33, value, sizeof(value));
+    res = i2c_set(&USBPD_I2C, USBPD_ADDRESS, 0x33, value, sizeof(value));
     if (res < 0) {
         DEBUG("ERR %04X\n", -res);
         return;

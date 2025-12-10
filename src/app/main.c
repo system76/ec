@@ -14,7 +14,6 @@
 #include <app/pwm.h>
 #include <app/smbus.h>
 #include <app/smfi.h>
-#include <app/usbpd.h>
 #include <arch/time.h>
 #include <board/gpio.h>
 #include <board/keymap.h>
@@ -22,6 +21,7 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <drivers/dgpu/dgpu.h>
+#include <drivers/usbpd/usbpd.h>
 #include <soc/soc.h>
 
 #if CONFIG_PLATFORM_INTEL
