@@ -6,7 +6,6 @@
 #include <app/ecpm.h>
 #include <app/fan.h>
 #include <app/kbc.h>
-#include <app/kbled.h>
 #include <app/kbscan.h>
 #include <app/lid.h>
 #include <app/pmc.h>
@@ -21,6 +20,7 @@
 #include <common/macro.h>
 #include <common/version.h>
 #include <drivers/dgpu/dgpu.h>
+#include <drivers/kbled/kbled.h>
 #include <drivers/usbpd/usbpd.h>
 #include <soc/soc.h>
 

@@ -18,8 +18,8 @@ CONFIG_SECURITY = y
 # Set keyboard configs
 KEYBOARD = 18H9LHA04
 
-CONFIG_HAVE_KBLED = y
-CONFIG_KBLED = rgb_pwm
+# Set keyboard LED mechanism
+CONFIG_DRIVERS_KBLED_PWM = y
 
 # Set touchpad PS2 bus
 CONFIG_PS2_TOUCHPAD = PS2_3

@@ -18,9 +18,10 @@ CONFIG_SECURITY = y
 # Keyboard configuration
 KEYBOARD = 14in_83
 KEYMAP = darp10-b
-CONFIG_HAVE_KBLED = y
-CONFIG_KBLED = white_dac
-CONFIG_KBLED_DAC = 2
+
+# Set keyboard LED mechanism
+CONFIG_DRIVERS_KBLED_DAC = y
+CONFIG_KBLED_DAC_CH = 2
 
 # Set battery I2C bus
 CONFIG_I2C_SMBUS = I2C_4

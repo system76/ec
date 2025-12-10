@@ -5,7 +5,6 @@
 #include <app/acpi.h>
 #include <app/fan.h>
 #include <app/kbc.h>
-#include <app/kbled.h>
 #include <app/lid.h>
 #include <app/pmc.h>
 #include <app/power.h>
@@ -15,6 +14,7 @@
 #include <board/keymap.h>
 #include <common/debug.h>
 #include <common/macro.h>
+#include <drivers/kbled/kbled.h>
 
 // Default to not n-key rollover
 #ifndef KM_NKEY

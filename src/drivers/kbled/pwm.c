@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#include <app/kbled.h>
+// PWM interface for KBLED.
+
+#include "kbled.h"
 #include <board/gpio.h>
 #include <soc/pwm.h>
+
+#define BRIGHTNESS_PWM DCR0
+#define RED_PWM DCR5
+#define GREEN_PWM DCR6
+#define BLUE_PWM DCR7
 
 void kbled_init(void) {
     if (!gpio_get(&RGBKB_DET_N)) {
@@ -24,16 +31,16 @@ void kbled_reset(void) {
 
 uint8_t kbled_get(void) {
     // Get PWM for power
-    return DCR0;
+    return BRIGHTNESS_PWM;
 }
 
 uint8_t kbled_max(void) {
-    return 255;
+    return CTR0;
 }
 
 void kbled_set(uint8_t level) {
     // Set PWM for power
-    DCR0 = level;
+    BRIGHTNESS_PWM = level;
 }
 
 uint32_t kbled_get_color(void) {
@@ -41,13 +48,13 @@ uint32_t kbled_get_color(void) {
         return 0xFFFFFF;
 
     // Get PWM of blue component
-    uint32_t color = (uint32_t)DCR7;
+    uint32_t color = (uint32_t)BLUE_PWM;
 
     // Get PWM of green component
-    color |= ((uint32_t)DCR6) << 8;
+    color |= ((uint32_t)GREEN_PWM) << 8;
 
     // Get PWM of red component
-    color |= ((uint32_t)DCR5) << 16;
+    color |= ((uint32_t)RED_PWM) << 16;
 
     return color;
 }
@@ -57,11 +64,11 @@ void kbled_set_color(uint32_t color) {
         color = 0xFFFFFF;
 
     // Set PWM for blue component
-    DCR7 = (uint8_t)(color);
+    BLUE_PWM = (uint8_t)(color);
 
     // Set PWM for green component
-    DCR6 = (uint8_t)(color >> 8);
+    GREEN_PWM = (uint8_t)(color >> 8);
 
     // Set PWM for red component
-    DCR5 = (uint8_t)(color >> 16);
+    RED_PWM = (uint8_t)(color >> 16);
 }

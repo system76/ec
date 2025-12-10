@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#include <app/kbled.h>
+// USB HID interface for KBLED.
+
+#include "kbled.h"
 #include <common/debug.h>
 #include <soc/i2c.h>
-#include <soc/pwm.h>
 #include <soc/smbus.h>
 
 void kbled_init(void) {
     kbled_kind = KBLED_RGB;
 
-    i2c_reset(&DGPU_I2C, true);
+    i2c_reset(&KBLED_I2C, true);
 
     // Force SMBUS B design to 100kHZ
     SCLKTSB = 0b10;
@@ -18,11 +19,11 @@ void kbled_init(void) {
 
 void kbled_reset(void) {
     uint8_t value = 0xE4;
-    int16_t res = i2c_set(&DGPU_I2C, 0x2D, 0xA0, &value, 1);
+    int16_t res = i2c_set(&KBLED_I2C, 0x2D, 0xA0, &value, 1);
     DEBUG("kbled_reset 0x2D: %d\n", res);
 
     //value = 0xC4;
-    //res = i2c_set(&DGPU_I2C, 0x66, 0xA0, &value, 1);
+    //res = i2c_set(&KBLED_I2C, 0x66, 0xA0, &value, 1);
     //DEBUG("kbled_reset 0x66: %d\n", res);
 
     // Set brightness and color

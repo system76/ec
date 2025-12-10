@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#include <app/kbled.h>
+// DAC interface for KBLED.
+
+#include "kbled.h"
 #include <common/macro.h>
 #include <soc/dac.h>
 

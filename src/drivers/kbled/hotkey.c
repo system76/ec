@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#include <app/kbled.h>
+// KBLED hotkey support.
+
+#include "kbled.h"
 #include <common/macro.h>
 
 enum KbledKind kbled_kind = KBLED_NONE;

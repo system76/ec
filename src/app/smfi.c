@@ -18,9 +18,9 @@
 
 #if !defined(__SCRATCH__)
 #include <app/fan.h>
-#include <app/kbled.h>
 #include <app/kbscan.h>
 #include <app/scratch.h>
+#include <drivers/kbled/kbled.h>
 
 #if CONFIG_SECURITY
 #include <drivers/security/security.h>

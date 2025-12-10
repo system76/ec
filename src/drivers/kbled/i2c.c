@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#include <app/kbled.h>
+// I2C interface for KBLED.
+
+#include "kbled.h"
 #include <arch/delay.h>
 #include <board/gpio.h>
 #include <common/macro.h>

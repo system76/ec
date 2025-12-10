@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2020 System76, Inc.
 
-#ifndef _APP_KBLED_H
-#define _APP_KBLED_H
+#ifndef _DRIVERS_KBLED_KBLED_H
+#define _DRIVERS_KBLED_KBLED_H
 
 #include <stdint.h>
 
@@ -64,4 +64,4 @@ static inline void kbled_hotkey_step(void) {}
 
 #endif // CONFIG_HAVE_KBLED
 
-#endif // _APP_KBLED_H
+#endif // _DRIVERS_KBLED_KBLED_H

@@ -19,8 +19,7 @@ CONFIG_SECURITY = y
 KEYBOARD = 18H9LHA05
 
 # Set keyboard LED mechanism
-CONFIG_HAVE_KBLED = y
-CONFIG_KBLED = rgb_pwm
+CONFIG_DRIVERS_KBLED_PWM = y
 
 # Set battery I2C bus
 CONFIG_I2C_SMBUS = I2C_4

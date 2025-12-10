@@ -9,7 +9,6 @@
 #include <app/config.h>
 #include <app/fan.h>
 #include <app/kbc.h>
-#include <app/kbled.h>
 #include <app/lid.h>
 #include <app/peci.h>
 #include <app/pmc.h>
@@ -19,6 +18,7 @@
 #include <arch/time.h>
 #include <board/gpio.h>
 #include <common/debug.h>
+#include <drivers/kbled/kbled.h>
 #include <drivers/usbpd/usbpd.h>
 
 #if CONFIG_BUS_ESPI
