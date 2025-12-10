@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // SPDX-FileCopyrightText: 2023 System76, Inc.
 
-#include <app/security.h>
+#include "security.h"
 #include <board/gpio.h>
 
 static enum SecurityState security_state = SECURITY_STATE_LOCK;

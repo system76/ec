@@ -23,7 +23,7 @@
 #include <app/scratch.h>
 
 #if CONFIG_SECURITY
-#include <app/security.h>
+#include <drivers/security/security.h>
 #endif // CONFIG_SECURITY
 #endif // !defined(__SCRATCH__)
 

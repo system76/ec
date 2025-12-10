@@ -17,7 +17,6 @@ app-y += pmc.c
 app-y += pnp.c
 app-y += pwm.c
 app-y += scratch.c
-app-$(CONFIG_SECURITY) += security.c
 app-y += smbus.c
 app-y += smfi.c
 app-y += stdio.c
@@ -38,10 +37,6 @@ CFLAGS+=-DLEVEL=4
 CFLAGS += -DI2C_SMBUS=$(CONFIG_I2C_SMBUS)
 # Uncomment to enable I2C debug on 0x76
 #CFLAGS+=-DI2C_DEBUGGER=0x76
-
-ifeq ($(CONFIG_SECURITY),y)
-CFLAGS+=-DCONFIG_SECURITY=1
-endif
 
 ifeq ($(CONFIG_PLATFORM_INTEL),y)
 app-y += peci.c
