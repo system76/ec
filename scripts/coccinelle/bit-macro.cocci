@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2021 System76, Inc.
 // Replace shifts with BIT macro
 
 @@ expression val; @@

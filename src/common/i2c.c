@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
+// SPDX-FileCopyrightText: 2019 System76, Inc.
+// SPDX-FileCopyrightText: 2020 Evan Lojewski
 
 #include <common/i2c.h>
 

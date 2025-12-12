@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 const SMFI_CMD_BASE: u16 = 0xE00;
 const SMFI_CMD_SIZE: usize = 0x100;

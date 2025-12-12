@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2023 System76, Inc.
 
 board-y += ../galp3-c/board.c
 board-y += ../galp3-c/gpio.c

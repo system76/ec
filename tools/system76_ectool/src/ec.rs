@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 #[cfg(not(feature = "std"))]
 use alloc::{boxed::Box, vec};

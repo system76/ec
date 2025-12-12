@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
+# SPDX-FileCopyrightText: 2021 System76, Inc.
+# SPDX-FileCopyrightText: 2021 Winston Hoy
 
 board-y += board.c
 board-y += gpio.c
