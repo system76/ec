@@ -4,7 +4,6 @@ board-common-y += acpi.c
 board-common-y += battery.c
 board-common-y += config.c
 board-common-$(CONFIG_HAVE_DGPU) += dgpu.c
-board-common-y += ecpm.c
 board-common-$(CONFIG_BUS_ESPI) += espi.c
 board-common-y += fan.c
 board-common-y += kbc.c

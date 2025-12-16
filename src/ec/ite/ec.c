@@ -2,6 +2,7 @@
 
 #include <ec/ec.h>
 #include <arch/arch.h>
+#include <ec/ecpm.h>
 #include <ec/gctrl.h>
 #include <common/debug.h>
 #include <common/macro.h>
@@ -25,6 +26,15 @@ static void gctrl_init(void) {
     BADRSEL = 0;
 }
 
+static void ecpm_init(void) {
+    // Clock gate EGPC, CIR, and SWUC
+    CGCTRL2 |= BIT(6) | BIT(5) | BIT(4);
+    // Clock gate UART, SSPI, and DBGR
+    CGCTRL3 |= BIT(2) | BIT(1) | BIT(0);
+    // Clock gate CEC
+    CGCTRL4 |= BIT(0);
+}
+
 void ec_init(void) {
     arch_init();
 
@@ -38,4 +48,5 @@ void ec_init(void) {
 #endif
 
     gctrl_init();
+    ecpm_init();
 }

@@ -6,7 +6,6 @@
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/dgpu.h>
-#include <board/ecpm.h>
 #include <board/fan.h>
 #include <board/gpio.h>
 #include <board/kbc.h>
@@ -60,7 +59,6 @@ void init(void) {
 #if CONFIG_HAVE_DGPU
     dgpu_init();
 #endif
-    ecpm_init();
     kbc_init();
     kbled_init();
 #ifdef PARALLEL_DEBUG
