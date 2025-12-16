@@ -1,18 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <8051.h>
 #include <stdio.h>
 
-#include <arch/arch.h>
-#include <arch/delay.h>
 #include <arch/time.h>
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/dgpu.h>
-#include <board/ecpm.h>
 #include <board/fan.h>
 #include <board/gpio.h>
-#include <board/gctrl.h>
 #include <board/kbc.h>
 #include <board/kbled.h>
 #include <board/kbscan.h>
@@ -57,16 +52,13 @@ uint8_t main_cycle = 0;
 
 void init(void) {
     // Must happen first
-    arch_init();
     ec_init();
-    gctrl_init();
     gpio_init();
 
     // Can happen in any order
 #if CONFIG_HAVE_DGPU
     dgpu_init();
 #endif
-    ecpm_init();
     kbc_init();
     kbled_init();
 #ifdef PARALLEL_DEBUG

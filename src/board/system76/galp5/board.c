@@ -3,7 +3,6 @@
 #include <board/battery.h>
 #include <board/board.h>
 #include <board/espi.h>
-#include <board/gctrl.h>
 #include <board/gpio.h>
 #include <common/debug.h>
 #include <ec/ec.h>
