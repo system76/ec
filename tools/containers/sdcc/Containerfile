@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: CC0-1.0
+# SPDX-FileCopyrightText: NONE
+
+# A container for the Small Device C Compiler.
+# SDCC: https://sdcc.sourceforge.net/
+
+ARG CONTAINER_IMAGE="docker.io/library/debian:trixie-20251208-slim"
+
+# Build the SDCC toolchain.
+FROM ${CONTAINER_IMAGE} as sdcc-build
+ARG SDCC_REPO
+ARG SDCC_REV
+ARG SDCC_VERSION
+WORKDIR /tmp
+
+# Install compile-time dependencies.
+# NOTE: SDCC 4.4.0 does not build with the default GCC (gcc-14).
+RUN apt-get update \
+    && apt-get install --no-install-recommends --assume-yes \
+        automake \
+        bison \
+        ca-certificates \
+        flex \
+        g++-13 \
+        gcc-13 \
+        gputils \
+        libboost-dev \
+        make \
+        subversion \
+        zlib1g-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 50 \
+    && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-13 50
+
+RUN svn checkout \
+        --depth infinity \
+        --revision ${SDCC_REV} \
+        ${SDCC_REPO}/tags/sdcc-${SDCC_VERSION}/sdcc \
+        sdcc
+
+RUN cd sdcc \
+    && sh ./configure \
+        --disable-non-free \
+        --prefix= \
+    && make --jobs=4 \
+    && make install DESTDIR=/opt/sdcc
+
+FROM ${CONTAINER_IMAGE}
+ARG SDCC_REV
+ARG SDCC_VERSION
+COPY --from=sdcc-build /opt/sdcc /opt/sdcc
+ENV SDCC_REV "${SDCC_REV}"
+ENV SDCC_VERSION "${SDCC_VERSION}"
+ENV SDCC_PATH "/opt/sdcc"
+ENV PATH "${SDCC_PATH}/bin:$PATH"
+
+# Install run-time dependencies.
+RUN apt-get update \
+    && apt-get install --no-install-recommends --assume-yes \
+        libc6 \
+        libstdc++6 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
