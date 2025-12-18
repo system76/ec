@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 #![allow(clippy::uninlined_format_args)]
 

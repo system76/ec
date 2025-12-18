@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright (C) 2020 Evan Lojewski
 
 #ifndef _FLASH_ENTRY_H
 #define _FLASH_ENTRY_H
