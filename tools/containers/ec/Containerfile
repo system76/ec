@@ -94,6 +94,7 @@ RUN apt-get --quiet update \
         libhidapi-dev \
         make \
         pkgconf \
+        reuse \
         rustup \
         shellcheck \
         uncrustify \
