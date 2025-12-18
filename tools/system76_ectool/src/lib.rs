@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 //! Library for accessing System76 ECs
 //! First, construct an access method, using an object implementing the `Access` trait. Next, an Ec

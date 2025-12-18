@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// SPDX-FileCopyrightText: 2020 System76, Inc.
 
 /// Parses firmware information from a firmware ROM
 pub struct Firmware<'a> {

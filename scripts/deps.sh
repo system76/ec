@@ -20,6 +20,7 @@ if [ "${ID}" = "debian" ] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         libudev-dev \
         make \
         pkgconf \
+        reuse \
         sdcc \
         shellcheck \
         uncrustify \
@@ -31,6 +32,7 @@ elif [ "${ID}" = "fedora" ] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avrdude \
         gcc \
         make \
+        reuse \
         rustup \
         sdcc \
         ShellCheck \
@@ -45,6 +47,7 @@ elif [ "${ID}" = "arch" ] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         gcc \
         make \
         pkgconf \
+        reuse \
         rustup \
         sdcc \
         shellcheck \
