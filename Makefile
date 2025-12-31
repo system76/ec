@@ -26,6 +26,7 @@ VERSION?=$(DATE)_$(REV)
 # Default target - build the board's EC firmware
 all: $(BUILD)/ec.rom
 	$(info Built $(VERSION) for $(BOARD))
+	./scripts/check-home-segment.sh
 
 # Include common source
 COMMON_DIR=src/common
