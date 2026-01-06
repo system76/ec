@@ -11,6 +11,7 @@
 #define TIMER_RELOAD (0xFFFF - (TICK_INTERVAL_MS * (CONFIG_CLOCK_FREQ_KHZ / OSC_DIVISOR)))
 
 static volatile systick_t time_overflows = 0;
+volatile __bit evt_systick;
 
 void timer_0(void) __interrupt(1) {
     // Hardware automatically clears the the interrupt
@@ -19,6 +20,7 @@ void timer_0(void) __interrupt(1) {
     TR0 = 0;
 
     time_overflows++;
+    evt_systick = 1;
 
     // Reload the values
     TH0 = TIMER_RELOAD >> 8;
@@ -37,6 +39,7 @@ void time_init(void) __critical {
     TF0 = 0;
 
     time_overflows = 0;
+    evt_systick = 0;
 
     // Enable the interrupt
     ET0 = 1;
