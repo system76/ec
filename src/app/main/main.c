@@ -118,11 +118,44 @@ void main(void) {
     systick_t last_time_500ms = 0;
     systick_t last_time_1sec = 0;
 
+    __bit evt_1ms = 0;
+    __bit evt_5ms = 0;
+    __bit evt_100ms = 0;
+    __bit evt_250ms = 0;
+    __bit evt_500ms = 0;
+    __bit evt_1sec = 0;
+
     for (main_cycle = 0;; main_cycle++) {
         systick_t time = time_get();
 
+        // FIXME: These only need to run on systick event instead of every loop.
         if ((time - last_time_1ms) >= INTERVAL_1MS) {
             last_time_1ms = time;
+            evt_1ms = 1;
+        }
+        if ((time - last_time_5ms) >= INTERVAL_5MS) {
+            last_time_5ms = time;
+            evt_5ms = 1;
+        }
+        if ((time - last_time_100ms) >= INTERVAL_100MS) {
+            last_time_100ms = time;
+            evt_100ms = 1;
+        }
+        if ((time - last_time_250ms) >= INTERVAL_250MS) {
+            last_time_250ms = time;
+            evt_250ms = 1;
+        }
+        if ((time - last_time_500ms) >= INTERVAL_500MS) {
+            last_time_500ms = time;
+            evt_500ms = 1;
+        }
+        if ((time - last_time_1sec) >= INTERVAL_1SEC) {
+            last_time_1sec = time;
+            evt_1sec = 1;
+        }
+
+        if (evt_1ms) {
+            evt_1ms = 0;
 
             // Handle USB-C events immediately before power states
             usbpd_event();
@@ -142,8 +175,8 @@ void main(void) {
             smfi_event();
         }
 
-        if ((time - last_time_5ms) >= INTERVAL_5MS) {
-            last_time_5ms = time;
+        if (evt_5ms) {
+            evt_5ms = 0;
 
 #if PARALLEL_DEBUG
             if (!parallel_debug)
@@ -154,8 +187,8 @@ void main(void) {
             }
         }
 
-        if ((time - last_time_100ms) >= INTERVAL_100MS) {
-            last_time_100ms = time;
+        if (evt_100ms) {
+            evt_100ms = 0;
 
 #if CONFIG_FAN_CTRL_STEP
             fan_update_duty();
@@ -164,8 +197,8 @@ void main(void) {
 #endif
         }
 
-        if ((time - last_time_250ms) >= INTERVAL_250MS) {
-            last_time_250ms = time;
+        if (evt_250ms) {
+            evt_250ms = 0;
 
 #if CONFIG_PLATFORM_INTEL
             peci_read_temp();
@@ -173,15 +206,15 @@ void main(void) {
             dgpu_read_temp();
         }
 
-        if ((time - last_time_500ms) >= INTERVAL_500MS) {
-            last_time_500ms = time;
+        if (evt_500ms) {
+            evt_500ms = 0;
 
             // Handle lid close/open
             lid_event();
         }
 
-        if ((time - last_time_1sec) >= INTERVAL_1SEC) {
-            last_time_1sec = time;
+        if (evt_1sec) {
+            evt_1sec = 0;
 
             battery_event();
 
