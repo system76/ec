@@ -359,26 +359,17 @@ static enum Result cmd_reset(void) {
 
 #endif // !defined(__SCRATCH__)
 
-    // Attempt to trigger watchdog reset
-    ETWCFG |= BIT(5);
-    EWDKEYR = 0;
+    wdt_trigger();
 
     // Failed if it got this far
     return RES_ERR;
-}
-
-// Set a watchdog timer of 10 seconds
-void smfi_watchdog(void) {
-    ET1CNTLLR = 0xFF;
-    EWDCNTLLR = 0xFF;
-    EWDCNTLHR = 0x04;
 }
 
 void smfi_event(void) {
     if (smfi_cmd[SMFI_CMD_CMD]) {
 #if defined(__SCRATCH__)
         // If in scratch ROM, restart watchdog timer when command received
-        smfi_watchdog();
+        wdt_kick();
 #endif
 
         switch (smfi_cmd[SMFI_CMD_CMD]) {
