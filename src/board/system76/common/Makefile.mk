@@ -3,7 +3,6 @@
 board-common-y += acpi.c
 board-common-y += battery.c
 board-common-y += config.c
-board-common-$(CONFIG_HAVE_DGPU) += dgpu.c
 board-common-y += ecpm.c
 board-common-$(CONFIG_BUS_ESPI) += espi.c
 board-common-y += fan.c
@@ -19,7 +18,6 @@ board-common-y += pnp.c
 board-common-y += ps2.c
 board-common-y += pwm.c
 board-common-y += scratch.c
-board-common-$(CONFIG_SECURITY) += security.c
 board-common-y += smbus.c
 board-common-y += smfi.c
 board-common-y += stdio.c
@@ -40,10 +38,6 @@ CFLAGS+=-DLEVEL=4
 CFLAGS += -DI2C_SMBUS=$(CONFIG_I2C_SMBUS)
 # Uncomment to enable I2C debug on 0x76
 #CFLAGS+=-DI2C_DEBUGGER=0x76
-
-ifeq ($(CONFIG_SECURITY),y)
-CFLAGS+=-DCONFIG_SECURITY=1
-endif
 
 ifeq ($(CONFIG_PLATFORM_INTEL),y)
 board-common-y += peci.c
@@ -67,11 +61,6 @@ CFLAGS += -DCONFIG_BUS_ESPI=1
 ifeq ($(CONFIG_PECI_OVER_ESPI),y)
 CFLAGS += -DCONFIG_PECI_OVER_ESPI=1
 endif
-endif
-
-ifeq ($(CONFIG_HAVE_DGPU),y)
-CFLAGS += -DCONFIG_HAVE_DGPU=1
-CFLAGS += -DI2C_DGPU=$(CONFIG_I2C_DGPU)
 endif
 
 # Include system76 common source
@@ -115,13 +104,6 @@ CFLAGS += -DCHARGER_INPUT_CURRENT=$(CONFIG_CHARGER_INPUT_CURRENT)
 ifneq ($(CONFIG_CHARGER_PSYS_GAIN),)
 CFLAGS += -DCHARGER_PSYS_GAIN=$(CONFIG_CHARGER_PSYS_GAIN)
 endif
-endif
-
-# Add USB-PD
-ifeq ($(CONFIG_HAVE_USBPD),y)
-CFLAGS += -DCONFIG_HAVE_USBPD=1
-board-common-$(CONFIG_USBPD_TPS65987) += usbpd/tps65987.c
-CFLAGS += -DI2C_USBPD=$(CONFIG_I2C_USBPD)
 endif
 
 # Add keyboard
