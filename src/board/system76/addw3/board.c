@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <board/battery.h>
-#include <board/board.h>
-#include <board/espi.h>
-#include <board/gctrl.h>
+#include <app/battery.h>
+#include <app/board.h>
+#include <app/espi.h>
 #include <board/gpio.h>
-#include <common/debug.h>
 #include <ec/ec.h>
 
 void board_init(void) {
