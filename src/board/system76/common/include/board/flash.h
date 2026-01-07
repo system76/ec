@@ -1,8 +1,5 @@
-/*
- * Copyright (C) 2020 Evan Lojewski
- *
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
+// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-FileCopyrightText: Copyright (C) 2020 Evan Lojewski
 
 #ifndef _BOARD_FLASH_H
 #define _BOARD_FLASH_H
