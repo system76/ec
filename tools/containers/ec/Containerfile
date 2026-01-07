@@ -27,6 +27,7 @@ RUN apt-get --quiet update \
         automake \
         bison \
         ca-certificates \
+        cmake \
         flex \
         g++ \
         gcc \

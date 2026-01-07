@@ -12,6 +12,7 @@ if [ "${ID}" = "debian" ] || [[ "${ID_LIKE}" =~ "debian" ]]; then
         avr-libc \
         avrdude \
         ca-certificates \
+        cmake \
         curl \
         gcc \
         gcc-avr \
@@ -30,6 +31,7 @@ elif [ "${ID}" = "fedora" ] || [[ "${ID_LIKE}" =~ "fedora" ]]; then
         avr-gcc \
         avr-libc \
         avrdude \
+        cmake \
         gcc \
         make \
         reuse \
@@ -44,6 +46,7 @@ elif [ "${ID}" = "arch" ] || [[ "${ID_LIKE}" =~ "arch" ]]; then
         avr-gcc \
         avr-libc \
         avrdude \
+        cmake \
         gcc \
         make \
         pkgconf \
