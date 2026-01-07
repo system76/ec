@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <board/board.h>
+#include <app/board.h>
 #include <board/gpio.h>
 
 void board_init(void) {

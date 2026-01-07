@@ -64,6 +64,3 @@ CONFIG_FAN2_POINTS = " \
 	FAN_POINT(85, 90), \
 	FAN_POINT(90, 100), \
 "
-
-# Add system76 common code
-include src/board/system76/common/Makefile.mk

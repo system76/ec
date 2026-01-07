@@ -41,7 +41,6 @@ INCLUDE += $(BOARD_DIR)/Makefile.mk
 CFLAGS+=-I$(BOARD_DIR)/include -D__BOARD__=$(BOARD)
 include $(BOARD_DIR)/Makefile.mk
 SRC += $(foreach src, $(board-y), $(BOARD_DIR)/$(src))
-SRC += $(foreach src, $(board-common-y), $(SYSTEM76_COMMON_DIR)/$(src))
 SRC += $(foreach src, $(keyboard-y), $(KEYBOARD_DIR)/$(src))
 
 # The board will define the embedded controller
@@ -59,6 +58,13 @@ INCLUDE += $(ARCH_DIR)/Makefile.mk
 CFLAGS+=-I$(ARCH_DIR)/include -D__ARCH__=$(ARCH)
 include $(ARCH_DIR)/Makefile.mk
 SRC += $(foreach src, $(arch-y), $(ARCH_DIR)/$(src))
+
+# Add System76 EC app
+APP_DIR = src/app/main
+INCLUDE += $(APP_DIR)/Makefile.mk
+CFLAGS += -I$(APP_DIR)/include
+include $(APP_DIR)/Makefile.mk
+SRC += $(foreach src,$(app-y),$(APP_DIR)/$(src))
 
 include $(ARCH_DIR)/toolchain.mk
 
