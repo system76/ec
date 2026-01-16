@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2020 Evan Lojewski
 
 #include <app/flash.h>
-#include <ec/scratch.h>
+#include <soc/scratch.h>
 #include "include/flash/entry.h"
 #include <stdint.h>
 #include <stddef.h>
