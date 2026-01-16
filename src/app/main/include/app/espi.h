@@ -5,7 +5,7 @@
 
 #include <stdbool.h>
 
-#include <ec/espi.h>
+#include <soc/espi.h>
 
 extern bool espi_host_reset;
 

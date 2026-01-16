@@ -21,8 +21,8 @@
 #include <drivers/usbpd/usbpd.h>
 
 #if CONFIG_BUS_ESPI
-#include <ec/espi.h>
 #include <app/espi.h>
+#include <soc/espi.h>
 #endif
 
 #if CONFIG_SECURITY

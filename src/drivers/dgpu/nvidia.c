@@ -5,7 +5,7 @@
 #include <board/gpio.h>
 #include <common/debug.h>
 #include <common/macro.h>
-#include <ec/i2c.h>
+#include <soc/i2c.h>
 
 int16_t dgpu_temp = 0;
 

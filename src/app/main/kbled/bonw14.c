@@ -2,9 +2,9 @@
 
 #include <app/kbled.h>
 #include <common/debug.h>
-#include <ec/i2c.h>
-#include <ec/pwm.h>
-#include <ec/smbus.h>
+#include <soc/i2c.h>
+#include <soc/pwm.h>
+#include <soc/smbus.h>
 
 void kbled_init(void) {
     kbled_kind = KBLED_RGB;
