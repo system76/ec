@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <app/pwm.h>
-#include <ec/pwm.h>
 #include <common/macro.h>
+#include <soc/pwm.h>
 
 void pwm_init(void) {
     // Set T0CHSEL to TACH0A and T1CHSEL to TACH1A
@@ -30,7 +30,7 @@ void pwm_init(void) {
     FAN2_PWM = 0;
 #endif
 
-#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+#if CONFIG_SOC_ITE_IT5570E || CONFIG_SOC_ITE_IT5571E
     // Reload counters when they reach 0 instead of immediately
     PWMLCCR = 0xFF;
 #endif

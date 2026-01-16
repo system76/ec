@@ -29,8 +29,8 @@
 #include <common/command.h>
 #include <common/macro.h>
 #include <common/version.h>
-#include <ec/etwd.h>
-#include <ec/pwm.h>
+#include <soc/etwd.h>
+#include <soc/pwm.h>
 
 #include <stdint.h>
 #include <stdio.h>
