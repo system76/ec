@@ -3,7 +3,7 @@
 #include <app/board.h>
 #include <app/battery.h>
 #include <board/gpio.h>
-#include <ec/ec.h>
+#include <soc/soc.h>
 
 void board_init(void) {
     // Make sure charger is in off state, also enables PSYS
@@ -22,7 +22,7 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    ec_read_post_codes();
+    soc_read_post_codes();
 
     // Hack to drain LDO_3V3 capacitors
     if (!gpio_get(&XLP_OUT)) {

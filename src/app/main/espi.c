@@ -6,8 +6,8 @@
 #include <arch/delay.h>
 #include <common/debug.h>
 #include <common/macro.h>
-#include <ec/ecpm.h>
-#include <ec/gpio.h>
+#include <soc/ecpm.h>
+#include <soc/gpio.h>
 
 #include <8051.h>
 #include <stdint.h>

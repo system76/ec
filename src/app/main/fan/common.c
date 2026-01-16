@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <app/fan.h>
-#include <ec/pwm.h>
+#include <soc/pwm.h>
 
 bool fan_max = false;
 static enum FanMode fan_mode = FAN_MODE_AUTO;
