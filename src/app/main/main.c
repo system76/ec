@@ -25,7 +25,7 @@
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
-#include <ec/ec.h>
+#include <soc/soc.h>
 
 #if CONFIG_PLATFORM_INTEL
 #include <app/peci.h>
@@ -58,7 +58,7 @@ uint8_t main_cycle = 0;
 void init(void) {
     // Must happen first
     arch_init();
-    ec_init();
+    soc_init();
     gctrl_init();
     gpio_init();
 
