@@ -5,7 +5,6 @@ app-y += battery.c
 app-y += config.c
 app-$(CONFIG_HAVE_DGPU) += dgpu.c
 app-y += ecpm.c
-app-$(CONFIG_BUS_ESPI) += espi.c
 app-y += fan.c
 app-y += gctrl.c
 app-y += kbc.c
@@ -19,7 +18,6 @@ app-y += pnp.c
 app-y += ps2.c
 app-y += pwm.c
 app-y += scratch.c
-app-$(CONFIG_SECURITY) += security.c
 app-y += smbus.c
 app-y += smfi.c
 app-y += stdio.c
@@ -42,6 +40,7 @@ CFLAGS += -DI2C_SMBUS=$(CONFIG_I2C_SMBUS)
 #CFLAGS+=-DI2C_DEBUGGER=0x76
 
 ifeq ($(CONFIG_SECURITY),y)
+app-y += security.c
 CFLAGS+=-DCONFIG_SECURITY=1
 endif
 
@@ -55,6 +54,8 @@ CFLAGS += -DCONFIG_PLATFORM_AMD=1
 else
 $(error PLATFORM not specified)
 endif
+
+app-$(CONFIG_BUS_ESPI) += espi.c
 
 # Set CPU power limits
 CFLAGS += -DPOWER_LIMIT_AC=$(CONFIG_POWER_LIMIT_AC)

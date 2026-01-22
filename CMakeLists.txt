@@ -33,16 +33,17 @@ set(BOARD system76/darp10)
 target_compile_definitions(ec PUBLIC __FIRMWARE_VERSION__=${VERSION})
 target_compile_definitions(ec PUBLIC __BOARD__=${BOARD})
 
-add_subdirectory(src/board/${BOARD})
-add_subdirectory(src/soc/${EC})
-add_subdirectory(src/arch/${ARCH})
 add_subdirectory(src/common)
-add_subdirectory(src/app/main)
+add_subdirectory(src/board/${BOARD})
 
 if(NOT DEFINED KEYBOARD)
     message(FATAL_ERROR "KEYBOARD is not set by the board")
 endif()
 add_subdirectory(src/keyboard/system76/${KEYBOARD})
+
+add_subdirectory(src/soc/${EC})
+add_subdirectory(src/arch/${ARCH})
+add_subdirectory(src/app/main)
 
 add_custom_command(
     TARGET ec

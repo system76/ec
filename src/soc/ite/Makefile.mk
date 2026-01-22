@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 soc-y += soc.c
-soc-$(CONFIG_BUS_ESPI) += espi.c
 soc-y += gpio.c
 soc-y += i2c.c
 soc-y += intc.c
@@ -10,6 +9,7 @@ soc-y += pmc.c
 soc-y += ps2.c
 soc-y += signature.c
 soc-y += wuc.c
+soc-$(CONFIG_BUS_ESPI) += espi.c
 
 # Chip clock frequency: 9.2 MHz
 CFLAGS += -DCONFIG_CLOCK_FREQ_KHZ=9200

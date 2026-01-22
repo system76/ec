@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
 target_sources(ec PRIVATE
+    soc.c
     gpio.c
     i2c.c
     intc.c
@@ -8,7 +9,6 @@ target_sources(ec PRIVATE
     pmc.c
     ps2.c
     signature.c
-    soc.c
     wuc.c
 )
 
