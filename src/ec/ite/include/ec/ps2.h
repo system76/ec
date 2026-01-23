@@ -3,7 +3,19 @@
 #ifndef _EC_PS2_H
 #define _EC_PS2_H
 
+#include <common/macro.h>
 #include <stdint.h>
+
+// Debounce circuit enable
+#define PSCTL_DCEN BIT(4)
+// Transmit/receive mode selection
+#define PSCTL_TRMS BIT(3)
+// PS/2 hardware enable
+#define PSCTL_PSHE BIT(2)
+// Control CLK line
+#define PSCTL_CCLK BIT(1)
+// Control DATA line
+#define PSCTL_CDAT BIT(0)
 
 #define PSSTS_TIMEOUT_ERR BIT(6)
 #define PSSTS_FRAME_ERR BIT(5)

@@ -15,7 +15,7 @@ struct Ps2 __code PS2_3 = PS2(3);
 
 void ps2_reset(struct Ps2 *const ps2) {
     // Reset interface to defaults
-    *(ps2->control) = 1;
+    *(ps2->control) = PSCTL_CDAT;
     // Clear status
     *(ps2->status) = *(ps2->status);
 }
