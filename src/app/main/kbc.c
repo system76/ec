@@ -506,6 +506,7 @@ void kbc_event(struct Kbc *const kbc) {
             *(PS2_TOUCHPAD.status) = sts;
             // If transaction is done, stop waiting
             if (sts & PSSTS_DONE) {
+                ps2_reset(&PS2_TOUCHPAD);
                 kbc_second_wait = 0;
             }
             // If an error happened, clear status, print error, and stop waiting
