@@ -136,6 +136,34 @@ bool kbc_scancode(uint16_t key, bool pressed) {
     return kbc_buffer_push(scancodes, scancodes_len);
 }
 
+static uint8_t kbc_second_buffer[16] = { 0 };
+static uint8_t kbc_second_buffer_head = 0;
+static uint8_t kbc_second_buffer_tail = 0;
+
+static bool kbc_second_buffer_pop(uint8_t *const scancode) {
+    if (kbc_second_buffer_head == kbc_second_buffer_tail) {
+        return false;
+    }
+    *scancode = kbc_second_buffer[kbc_second_buffer_head];
+    kbc_second_buffer_head = (kbc_second_buffer_head + 1U) % ARRAY_SIZE(kbc_second_buffer);
+    return true;
+}
+
+static bool kbc_second_buffer_push(uint8_t data) {
+    uint8_t next = (kbc_second_buffer_tail + 1U) % ARRAY_SIZE(kbc_second_buffer);
+    if (next == kbc_second_buffer_head) {
+        return false;
+    }
+    kbc_second_buffer[kbc_second_buffer_tail] = data;
+    kbc_second_buffer_tail = next;
+    return true;
+}
+
+static void kbc_second_buffer_clear(void) {
+    kbc_second_buffer_head = 0;
+    kbc_second_buffer_tail = 0;
+}
+
 enum KbcState {
     // Input buffer states
     KBC_STATE_NORMAL,
@@ -149,7 +177,6 @@ enum KbcState {
     KBC_STATE_SECOND_PORT_INPUT,
     // Output buffer states
     KBC_STATE_KEYBOARD,
-    KBC_STATE_TOUCHPAD,
     KBC_STATE_MOUSE,
     // After output buffer states
     KBC_STATE_IDENTIFY_0,
@@ -256,10 +283,6 @@ static void kbc_on_input_command(struct Kbc *const kbc, uint8_t data) {
 static void kbc_on_input_data(struct Kbc *const kbc, uint8_t data) {
     TRACE("kbc data: %02X\n", data);
     switch (state) {
-    case KBC_STATE_TOUCHPAD:
-        // Interrupt touchpad command
-        state = KBC_STATE_NORMAL;
-    // Fall through
     case KBC_STATE_NORMAL:
         TRACE("  keyboard command\n");
         // Keyboard commands clear output buffer
@@ -411,11 +434,26 @@ static void kbc_on_input_data(struct Kbc *const kbc, uint8_t data) {
         *(PS2_TOUCHPAD.control) = PSCTL_DCEN | PSCTL_TRMS | PSCTL_PSHE | PSCTL_CCLK;
         // Set wait timeout of 100 cycles
         kbc_second_wait = 100;
+        
+        // Reset command should clear buffer
+        if (data == 0xFF) {
+            kbc_second_buffer_clear();
+        }
+
         break;
     }
 }
 
 static void kbc_on_output_empty(struct Kbc *const kbc) {
+    // Read from scancode or mouse buffer when possible
+    if (state == KBC_STATE_NORMAL) {
+        if (kbc_buffer_pop(&state_data)) {
+            state = KBC_STATE_KEYBOARD;
+        } else if (kbc_second_buffer_pop(&state_data)) {
+            state = KBC_STATE_MOUSE;
+        }
+    }
+
     switch (state) {
     case KBC_STATE_KEYBOARD:
         TRACE("kbc keyboard: %02X\n", state_data);
@@ -424,9 +462,6 @@ static void kbc_on_output_empty(struct Kbc *const kbc) {
             state_next = KBC_STATE_NORMAL;
         }
         break;
-    case KBC_STATE_TOUCHPAD:
-        state_data = *(PS2_TOUCHPAD.data);
-    // Fall through
     case KBC_STATE_MOUSE:
         TRACE("kbc mouse: %02X\n", state_data);
         if (kbc_mouse(kbc, state_data, KBC_TIMEOUT)) {
@@ -460,19 +495,14 @@ static void kbc_on_output_empty(struct Kbc *const kbc) {
 }
 
 void kbc_event(struct Kbc *const kbc) {
-    uint8_t sts;
-
-    // Read from scancode buffer when possible
-    if (state == KBC_STATE_NORMAL && kbc_buffer_pop(&state_data)) {
-        state = KBC_STATE_KEYBOARD;
-    }
+    uint8_t sts, data;
 
     // Read from touchpad when possible
     if (kbc_second) {
         if (kbc_second_wait > 0) {
             // Wait for touchpad write transaction to finish
             kbc_second_wait -= 1;
-            uint8_t sts = *(PS2_TOUCHPAD.status);
+            sts = *(PS2_TOUCHPAD.status);
             *(PS2_TOUCHPAD.status) = sts;
             // If transaction is done, stop waiting
             if (sts & PSSTS_DONE) {
@@ -495,12 +525,11 @@ void kbc_event(struct Kbc *const kbc) {
         if (kbc_second_wait == 0) {
             // Attempt to read from touchpad
             *(PS2_TOUCHPAD.control) = PSCTL_DCEN | PSCTL_PSHE | PSCTL_CCLK | PSCTL_CDAT;
-            if (state == KBC_STATE_NORMAL) {
-                uint8_t sts = *(PS2_TOUCHPAD.status);
-                *(PS2_TOUCHPAD.status) = sts;
-                if (sts & PSSTS_DONE) {
-                    state = KBC_STATE_TOUCHPAD;
-                }
+            sts = *(PS2_TOUCHPAD.status);
+            *(PS2_TOUCHPAD.status) = sts;
+            if (sts & PSSTS_DONE) {
+                data = *(PS2_TOUCHPAD.data);
+                kbc_second_buffer_push(data);
             }
         }
     } else {
@@ -510,7 +539,7 @@ void kbc_event(struct Kbc *const kbc) {
     // Read command/data while available
     sts = kbc_status(kbc);
     if (sts & KBC_STS_IBF) {
-        uint8_t data = kbc_read(kbc);
+        data = kbc_read(kbc);
         if (sts & KBC_STS_CMD) {
             kbc_on_input_command(kbc, data);
         } else {
