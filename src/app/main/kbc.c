@@ -521,9 +521,7 @@ void kbc_event(struct Kbc *const kbc) {
                 TRACE("  write second port input TIMEOUT\n");
                 kbc_second_wait = 0;
             }
-        }
-
-        if (kbc_second_wait == 0) {
+        } else if (kbc_second_wait == 0) {
             // Attempt to read from touchpad
             *(PS2_TOUCHPAD.control) = PSCTL_DCEN | PSCTL_PSHE | PSCTL_CCLK | PSCTL_CDAT;
             sts = *(PS2_TOUCHPAD.status);
