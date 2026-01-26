@@ -77,15 +77,4 @@ enum CommandSpiFlag {
 
 #define CMD_LED_INDEX_ALL 0xFF
 
-enum SecurityState {
-    // Default value, flashing is prevented, cannot be set with CMD_SECURITY_SET
-    SECURITY_STATE_LOCK = 0,
-    // Flashing is allowed, cannot be set with CMD_SECURITY_SET
-    SECURITY_STATE_UNLOCK = 1,
-    // Flashing will be prevented on the next reboot
-    SECURITY_STATE_PREPARE_LOCK = 2,
-    // Flashing will be allowed on the next reboot
-    SECURITY_STATE_PREPARE_UNLOCK = 3,
-};
-
 #endif // _COMMON_COMMAND_H

@@ -2,7 +2,6 @@
 
 #include <app/battery.h>
 #include <app/board.h>
-#include <app/dgpu.h>
 #include <app/ecpm.h>
 #include <app/fan.h>
 #include <app/gctrl.h>
@@ -16,7 +15,6 @@
 #include <app/pwm.h>
 #include <app/smbus.h>
 #include <app/smfi.h>
-#include <app/usbpd.h>
 #include <arch/arch.h>
 #include <arch/delay.h>
 #include <arch/time.h>
@@ -25,6 +23,8 @@
 #include <common/debug.h>
 #include <common/macro.h>
 #include <common/version.h>
+#include <drivers/dgpu/dgpu.h>
+#include <drivers/usbpd/usbpd.h>
 #include <ec/ec.h>
 
 #if CONFIG_PLATFORM_INTEL

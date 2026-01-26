@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <app/dgpu.h>
 #include <app/fan.h>
 #include <app/smfi.h>
 #include <common/macro.h>
+#include <drivers/dgpu/dgpu.h>
 #include <ec/pwm.h>
 #include <ec/scratch.h>
 
