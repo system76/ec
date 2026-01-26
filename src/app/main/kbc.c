@@ -434,7 +434,7 @@ static void kbc_on_input_data(struct Kbc *const kbc, uint8_t data) {
         *(PS2_TOUCHPAD.control) = PSCTL_DCEN | PSCTL_TRMS | PSCTL_PSHE | PSCTL_CCLK;
         // Set wait timeout of 100 cycles
         kbc_second_wait = 100;
-        
+
         // Reset command should clear buffer
         if (data == 0xFF) {
             kbc_second_buffer_clear();
