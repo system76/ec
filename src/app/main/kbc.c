@@ -3,10 +3,13 @@
 #include <app/kbc.h>
 #include <app/kbscan.h>
 #include <board/keymap.h>
+#include <common/circ_buf.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <ec/espi.h>
 #include <ec/ps2.h>
+
+#define KBC_BUFFER_SIZE 16
 
 void kbc_init(void) {
     // Disable interrupts
@@ -77,30 +80,28 @@ static const uint16_t kbc_typematic_period[32] = {
     500,    //  2.0 cps = 500ms
 };
 
-static uint8_t kbc_buffer[16] = { 0 };
-static uint8_t kbc_buffer_head = 0;
-static uint8_t kbc_buffer_tail = 0;
+DECL_CIRC_BUF(kbc_buffer, KBC_BUFFER_SIZE);
 
 static bool kbc_buffer_pop(uint8_t *const scancode) {
-    if (kbc_buffer_head == kbc_buffer_tail) {
+    if (kbc_buffer.head == kbc_buffer.tail) {
         return false;
     }
-    *scancode = kbc_buffer[kbc_buffer_head];
-    kbc_buffer_head = (kbc_buffer_head + 1U) % ARRAY_SIZE(kbc_buffer);
+    *scancode = kbc_buffer.buf[kbc_buffer.head];
+    kbc_buffer.head = (kbc_buffer.head + 1U) % KBC_BUFFER_SIZE;
     return true;
 }
 
 static bool kbc_buffer_push(const uint8_t *const scancodes, uint8_t len) {
     //TODO: make this test more efficient
     for (uint8_t i = 0; i < len; i++) {
-        if ((kbc_buffer_tail + i + 1U) % ARRAY_SIZE(kbc_buffer) == kbc_buffer_head) {
+        if ((kbc_buffer.tail + i + 1U) % KBC_BUFFER_SIZE == kbc_buffer.head) {
             return false;
         }
     }
 
     for (uint8_t i = 0; i < len; i++) {
-        kbc_buffer[kbc_buffer_tail] = scancodes[i];
-        kbc_buffer_tail = (kbc_buffer_tail + 1U) % ARRAY_SIZE(kbc_buffer);
+        kbc_buffer.buf[kbc_buffer.tail] = scancodes[i];
+        kbc_buffer.tail = (kbc_buffer.tail + 1U) % KBC_BUFFER_SIZE;
     }
     return true;
 }
@@ -136,32 +137,30 @@ bool kbc_scancode(uint16_t key, bool pressed) {
     return kbc_buffer_push(scancodes, scancodes_len);
 }
 
-static uint8_t kbc_second_buffer[16] = { 0 };
-static uint8_t kbc_second_buffer_head = 0;
-static uint8_t kbc_second_buffer_tail = 0;
+DECL_CIRC_BUF(kbc_second_buffer, KBC_BUFFER_SIZE);
 
 static bool kbc_second_buffer_pop(uint8_t *const scancode) {
-    if (kbc_second_buffer_head == kbc_second_buffer_tail) {
+    if (kbc_second_buffer.head == kbc_second_buffer.tail) {
         return false;
     }
-    *scancode = kbc_second_buffer[kbc_second_buffer_head];
-    kbc_second_buffer_head = (kbc_second_buffer_head + 1U) % ARRAY_SIZE(kbc_second_buffer);
+    *scancode = kbc_second_buffer.buf[kbc_second_buffer.head];
+    kbc_second_buffer.head = (kbc_second_buffer.head + 1U) % KBC_BUFFER_SIZE;
     return true;
 }
 
 static bool kbc_second_buffer_push(uint8_t data) {
-    uint8_t next = (kbc_second_buffer_tail + 1U) % ARRAY_SIZE(kbc_second_buffer);
-    if (next == kbc_second_buffer_head) {
+    uint8_t next = (kbc_second_buffer.tail + 1U) % KBC_BUFFER_SIZE;
+    if (next == kbc_second_buffer.head) {
         return false;
     }
-    kbc_second_buffer[kbc_second_buffer_tail] = data;
-    kbc_second_buffer_tail = next;
+    kbc_second_buffer.buf[kbc_second_buffer.tail] = data;
+    kbc_second_buffer.tail = next;
     return true;
 }
 
 static void kbc_second_buffer_clear(void) {
-    kbc_second_buffer_head = 0;
-    kbc_second_buffer_tail = 0;
+    kbc_second_buffer.head = 0;
+    kbc_second_buffer.tail = 0;
 }
 
 enum KbcState {
