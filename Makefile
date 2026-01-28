@@ -43,15 +43,10 @@ include $(BOARD_DIR)/Makefile.mk
 SRC += $(foreach src, $(board-y), $(BOARD_DIR)/$(src))
 SRC += $(foreach src, $(keyboard-y), $(KEYBOARD_DIR)/$(src))
 
-# The board will define the embedded controller
-# Include the embedded controller's source
-EC_DIR=src/ec/$(EC)
-INCLUDE += $(EC_DIR)/Makefile.mk
-CFLAGS+=-I$(EC_DIR)/include
-include $(EC_DIR)/Makefile.mk
-SRC += $(foreach src, $(ec-y), $(EC_DIR)/$(src))
+# The board will define the SoC
+include src/soc/Makefile.mk
 
-# The EC will define the architecture
+# The SoC will define the architecture
 # Include the architecture's source
 ARCH_DIR=src/arch/$(ARCH)
 INCLUDE += $(ARCH_DIR)/Makefile.mk
