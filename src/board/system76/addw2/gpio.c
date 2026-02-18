@@ -26,6 +26,7 @@ struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LED_SCROLL_N =   GPIO(J, 3);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code ME_WE =          GPIO(I, 2);
+struct Gpio __code MUX_CTRL_BIOS =  GPIO(F, 3);
 struct Gpio __code PM_CLKRUN_N =    GPIO(H, 0); // renamed to ECCLKRUN#
 struct Gpio __code PM_PWROK =       GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
@@ -110,7 +111,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPCRF0, GPIO_IN }, // 80CLK
     { &GPCRF1, GPIO_OUT | GPIO_UP }, // USB_CHARGE_EN
     { &GPCRF2, GPIO_IN | GPIO_UP }, // 3IN1
-    { &GPCRF3, GPIO_OUT | GPIO_UP }, // MUX_CTRL_BIOS
+    { &GPCRF3, GPIO_OUT }, // MUX_CTRL_BIOS
     { &GPCRF4, GPIO_ALT }, // TP_CLK
     { &GPCRF5, GPIO_ALT }, // TP_DATA
     { &GPCRF6, GPIO_ALT }, // EC_PECI

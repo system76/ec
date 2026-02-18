@@ -23,6 +23,7 @@ struct Gpio __code LED_BAT_FULL =   GPIO(J, 0);
 struct Gpio __code LED_PWR =        GPIO(D, 0);
 struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code ME_WE =          GPIO(H, 0);
+struct Gpio __code MUX_CTRL_BIOS =  GPIO(H, 3);
 struct Gpio __code PCH_DPWROK_EC =  GPIO(F, 3);
 struct Gpio __code PCH_PWROK_EC =   GPIO(C, 6);
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
@@ -126,7 +127,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPCRH0, GPIO_OUT }, // ME_WE
     { &GPCRH1, GPIO_IN }, // SUSC#_PCH
     { &GPCRH2, GPIO_OUT | GPIO_UP }, // LED_ACIN
-    { &GPCRH3, GPIO_IN | GPIO_DOWN }, // MUX_CTRL_BIOS
+    { &GPCRH3, GPIO_OUT }, // MUX_CTRL_BIOS
     { &GPCRH4, GPIO_IN }, // DGPU_PWR_EN
     { &GPCRH5, GPIO_OUT | GPIO_UP }, // LED_BAT_CHG
     { &GPCRH6, GPIO_IN }, // SUSB#_PCH
