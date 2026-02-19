@@ -3,7 +3,7 @@
 #include <app/pnp.h>
 #include <common/macro.h>
 #include <common/debug.h>
-#include <ec/espi.h>
+#include <soc/espi.h>
 #include <stdint.h>
 
 volatile uint8_t __xdata __at(0x1200) IHIOA;

@@ -5,7 +5,7 @@
 #include <common/debug.h>
 #include <common/macro.h>
 #include <drivers/dgpu/dgpu.h>
-#include <ec/pwm.h>
+#include <soc/pwm.h>
 
 #if CONFIG_PLATFORM_INTEL
 #include <app/peci.h>
