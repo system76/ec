@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-3.0-only
+
+ifneq ($(CONFIG_FAN1_PWM),)
+CFLAGS += -DFAN1_PWM=$(CONFIG_FAN1_PWM)
+ifneq ($(CONFIG_FAN1_PWM_MIN),)
+CFLAGS += -DFAN1_PWM_MIN=$(CONFIG_FAN1_PWM_MIN)
+endif
+CFLAGS += -DBOARD_FAN1_POINTS=$(CONFIG_FAN1_POINTS)
+endif
+
+ifneq ($(CONFIG_FAN2_PWM),)
+CFLAGS += -DFAN2_PWM=$(CONFIG_FAN2_PWM)
+ifneq ($(CONFIG_FAN2_PWM_MIN),)
+CFLAGS += -DFAN2_PWM_MIN=$(CONFIG_FAN2_PWM_MIN)
+endif
+CFLAGS += -DBOARD_FAN2_POINTS=$(CONFIG_FAN2_POINTS)
+endif
+
+#app-y += fan/step.c
+app-y += fan/interp.c

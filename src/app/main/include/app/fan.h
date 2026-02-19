@@ -6,16 +6,19 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define PWM_DUTY(X) ((uint8_t)(((((uint16_t)(X)) * 255) + 99) / 100))
-
 struct FanPoint {
     int16_t temp;
     uint8_t duty;
 };
 
+#define PWM_DUTY(X) ((uint8_t)(((((uint16_t)(X)) * 255) + 99) / 100))
+#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
+
 struct Fan {
     const struct FanPoint *points;
     uint8_t points_size;
+    uint8_t *heatup;
+    uint8_t heatup_size;
     uint8_t *cooldown;
     uint8_t cooldown_size;
     uint8_t pwm_min;

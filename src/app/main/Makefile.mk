@@ -5,7 +5,6 @@ app-y += battery.c
 app-y += config.c
 app-y += ecpm.c
 app-$(CONFIG_BUS_ESPI) += espi.c
-app-y += fan.c
 app-y += gctrl.c
 app-y += kbc.c
 app-y += kbscan.c
@@ -64,21 +63,7 @@ endif
 endif
 
 # Fan configs
-ifneq ($(CONFIG_FAN1_PWM),)
-CFLAGS += -DFAN1_PWM=$(CONFIG_FAN1_PWM)
-ifneq ($(CONFIG_FAN1_PWM_MIN),)
-CFLAGS += -DFAN1_PWM_MIN=$(CONFIG_FAN1_PWM_MIN)
-endif
-CFLAGS += -DBOARD_FAN1_POINTS=$(CONFIG_FAN1_POINTS)
-endif
-
-ifneq ($(CONFIG_FAN2_PWM),)
-CFLAGS += -DFAN2_PWM=$(CONFIG_FAN2_PWM)
-ifneq ($(CONFIG_FAN2_PWM_MIN),)
-CFLAGS += -DFAN2_PWM_MIN=$(CONFIG_FAN2_PWM_MIN)
-endif
-CFLAGS += -DBOARD_FAN2_POINTS=$(CONFIG_FAN2_POINTS)
-endif
+include $(APP_DIR)/fan/Makefile.mk
 
 # Set battery charging thresholds
 BATTERY_START_THRESHOLD?=90

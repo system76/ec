@@ -31,7 +31,6 @@ uint16_t fan2_rpm = 0;
 // - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
-#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
 
 #ifndef FAN1_PWM_MIN
 #define FAN1_PWM_MIN 0
@@ -179,20 +178,20 @@ void fan_update_target(void) {
 #endif
 
     // Set FAN1 target duty.
-    if (fan_max) {
-        fan1_pwm_target = CTR0;
-    } else if (power_state != POWER_STATE_S0) {
+    if (power_state != POWER_STATE_S0) {
         fan1_pwm_target = 0;
+    } else if (fan_max) {
+        fan1_pwm_target = CTR0;
     } else {
         fan1_pwm_target = fan_get_duty(&FAN1, sys_temp);
     }
 
 #ifdef FAN2_PWM
     // Set FAN2 target duty.
-    if (fan_max) {
-        fan2_pwm_target = CTR0;
-    } else if (power_state != POWER_STATE_S0) {
+    if (power_state != POWER_STATE_S0) {
         fan2_pwm_target = 0;
+    } else if (fan_max) {
+        fan2_pwm_target = CTR0;
     } else {
         fan2_pwm_target = fan_get_duty(&FAN2, sys_temp);
     }
