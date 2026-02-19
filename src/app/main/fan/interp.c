@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <board/fan.h>
-#include <board/dgpu.h>
-#include <board/peci.h>
-#include <board/power.h>
+#include <app/fan.h>
+#include <app/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
 #include <ec/pwm.h>
+#include <drivers/dgpu/dgpu.h>
+
+#if CONFIG_PLATFORM_INTEL
+#include <app/peci.h>
+#endif
 
 bool fan_max = false;
+static enum FanMode fan_mode = FAN_MODE_AUTO;
 
 static uint8_t last_fan1_duty = 0;
 static uint8_t last_fan2_duty = 0;
@@ -25,15 +29,22 @@ uint16_t fan2_rpm = 0;
 // - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
-#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
+#define MAX_FAN_SPEED CTR0
+#define MIN_FAN_SPEED 0
 
-#if SMOOTH_FANS != 0
+#ifndef SMOOTH_FANS_UP
+#define SMOOTH_FANS_UP 45 // default to ~11 seconds for full ramp-up
+#endif
+#ifndef SMOOTH_FANS_DOWN
+#define SMOOTH_FANS_DOWN 100 // default to ~25 seconds for full ramp-down
+#endif
+
+#ifndef SMOOTH_FANS_MIN
+#define SMOOTH_FANS_MIN 0 // default to smoothing all fan speed changes
+#endif
+
 #define MAX_JUMP_UP ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_UP)
 #define MAX_JUMP_DOWN ((MAX_FAN_SPEED - MIN_FAN_SPEED) / (uint8_t)SMOOTH_FANS_DOWN)
-#else
-#define MAX_JUMP_UP (MAX_FAN_SPEED - MIN_FAN_SPEED)
-#define MAX_JUMP_DOWN (MAX_FAN_SPEED - MIN_FAN_SPEED)
-#endif
 
 #define MIN_SPEED_TO_SMOOTH PWM_DUTY(SMOOTH_FANS_MIN)
 
@@ -67,7 +78,6 @@ static const struct Fan __code FAN1 = {
     .heatup_size = ARRAY_SIZE(FAN1_HEATUP),
     .cooldown = FAN1_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN1_COOLDOWN),
-    .interpolate = SMOOTH_FANS != 0,
 };
 
 #ifdef FAN2_PWM
@@ -102,7 +112,6 @@ static const struct Fan __code FAN2 = {
     .heatup_size = ARRAY_SIZE(FAN2_HEATUP),
     .cooldown = FAN2_COOLDOWN,
     .cooldown_size = ARRAY_SIZE(FAN2_COOLDOWN),
-    .interpolate = SMOOTH_FANS != 0,
 };
 
 #endif // FAN2_PWM
@@ -128,18 +137,14 @@ static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
             } else {
                 const struct FanPoint *prev = &fan->points[i - 1];
 
-                if (fan->interpolate) {
-                    // If in between current temp and previous temp, interpolate
-                    if (temp > prev->temp) {
-                        int16_t dtemp = (cur->temp - prev->temp);
-                        int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
-                        return (uint8_t)(
-                            ((int16_t)prev->duty) +
-                            ((temp - prev->temp) * dduty) / dtemp
-                        );
-                    }
-                } else {
-                    return prev->duty;
+                // If in between current temp and previous temp, interpolate
+                if (temp > prev->temp) {
+                    int16_t dtemp = (cur->temp - prev->temp);
+                    int16_t dduty = ((int16_t)cur->duty) - ((int16_t)prev->duty);
+                    return (uint8_t)(
+                        ((int16_t)prev->duty) +
+                        ((temp - prev->temp) * dduty) / dtemp
+                    );
                 }
             }
         }
@@ -277,4 +282,12 @@ void fan_event(void) {
     }
     fan2_rpm = fan_get_tach1_rpm();
 #endif
+}
+
+enum FanMode fan_get_mode(void) {
+    return fan_mode;
+}
+
+void fan_set_mode(enum FanMode mode) {
+    fan_mode = mode;
 }

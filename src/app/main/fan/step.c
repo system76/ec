@@ -31,7 +31,6 @@ uint16_t fan2_rpm = 0;
 // - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
-
 #ifndef FAN1_PWM_MIN
 #define FAN1_PWM_MIN 0
 #endif
