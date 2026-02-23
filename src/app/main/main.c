@@ -150,7 +150,11 @@ void main(void) {
         if ((time - last_time_100ms) >= INTERVAL_100MS) {
             last_time_100ms = time;
 
+#if CONFIG_FAN_CTRL_STEP
             fan_update_duty();
+#elif CONFIG_FAN_CTRL_INTERP
+            fan_event();
+#endif
         }
 
         if ((time - last_time_250ms) >= INTERVAL_250MS) {
@@ -174,9 +178,11 @@ void main(void) {
 
             battery_event();
 
+#if CONFIG_FAN_CTRL_STEP
             if (fan_get_mode() == FAN_MODE_AUTO) {
                 fan_update_target();
             }
+#endif
         }
 
         // Idle until next timer interrupt
