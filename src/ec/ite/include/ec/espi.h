@@ -114,6 +114,7 @@ volatile uint8_t __xdata __at(0x31A3) ESGCTRL3;
 volatile uint8_t __xdata __at(0x31B0) ESUCTRL0;
 #define ESUCTRL0_ENABLE BIT(7)
 #define ESUCTRL0_GO BIT(6)
+#define ESUCTRL0_CH_DISABLED BIT(2)
 #define ESUCTRL0_DONE BIT(1)
 #define ESUCTRL0_BUSY BIT(0)
 

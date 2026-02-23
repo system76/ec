@@ -63,7 +63,7 @@ void peci_init(void) {}
 bool peci_get_temp(int16_t *const data) {
     //TODO: Wait for completion?
     // Clear upstream status
-    ESUCTRL0 = ESUCTRL0;
+    ESUCTRL0 = ESUCTRL0_CH_DISABLED | ESUCTRL0_DONE;
     // Clear OOB status
     ESOCTRL0 = ESOCTRL0;
 
@@ -93,18 +93,28 @@ bool peci_get_temp(int16_t *const data) {
 
     // Set upstream enable
     ESUCTRL0 |= ESUCTRL0_ENABLE;
+
+    // Wait for upstream to be available
+    systick_t start = time_get();
+    while (ESUCTRL0 & ESUCTRL0_BUSY) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("peci_get_temp: upstream busy\n");
+            return false;
+        }
+    }
+
     // Set upstream go
     ESUCTRL0 |= ESUCTRL0_GO;
 
     // Wait until upstream done
-    systick_t start = time_get();
+    start = time_get();
     while (!(ESUCTRL0 & ESUCTRL0_DONE)) {
         if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
             DEBUG("peci_get_temp: upstream timeout\n");
             return false;
         }
     }
-    // Clear upstream done status
+    // Clear upstream done status and disable initiating upstream transactions
     ESUCTRL0 = ESUCTRL0_DONE;
 
     // Wait for response
@@ -146,7 +156,7 @@ bool peci_get_temp(int16_t *const data) {
 int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     //TODO: Wait for completion?
     // Clear upstream status
-    ESUCTRL0 = ESUCTRL0;
+    ESUCTRL0 = ESUCTRL0_CH_DISABLED | ESUCTRL0_DONE;
     // Clear OOB status
     ESOCTRL0 = ESOCTRL0;
 
@@ -189,11 +199,21 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 
     // Set upstream enable
     ESUCTRL0 |= ESUCTRL0_ENABLE;
+
+    // Wait for upstream to be available
+    systick_t start = time_get();
+    while (ESUCTRL0 & ESUCTRL0_BUSY) {
+        if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
+            DEBUG("peci_wr_pkg_config: upstream busy\n");
+            return false;
+        }
+    }
+
     // Set upstream go
     ESUCTRL0 |= ESUCTRL0_GO;
 
     // Wait until upstream done
-    systick_t start = time_get();
+    start = time_get();
     while (!(ESUCTRL0 & ESUCTRL0_DONE)) {
         DEBUG("peci_wr_pkg_config: wait upstream\n");
         if ((time_get() - start) >= PECI_ESPI_TIMEOUT) {
@@ -201,7 +221,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
             return false;
         }
     }
-    // Clear upstream done status
+    // Clear upstream done status and disable initiating upstream transactions
     ESUCTRL0 = ESUCTRL0_DONE;
 
     // Wait for response
