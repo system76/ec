@@ -12,7 +12,6 @@
 #include <app/pmc.h>
 #include <app/power.h>
 #include <app/ps2.h>
-#include <app/pwm.h>
 #include <app/smbus.h>
 #include <app/smfi.h>
 #include <arch/arch.h>
@@ -26,6 +25,7 @@
 #include <drivers/dgpu/dgpu.h>
 #include <drivers/usbpd/usbpd.h>
 #include <ec/ec.h>
+#include <ec/pwm.h>
 
 #if CONFIG_PLATFORM_INTEL
 #include <app/peci.h>

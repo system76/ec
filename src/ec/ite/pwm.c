@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
-#include <app/pwm.h>
 #include <ec/pwm.h>
 #include <common/macro.h>
 

@@ -5,7 +5,6 @@
 #include <app/fan.h>
 #include <app/kbled.h>
 #include <app/lid.h>
-#include <app/pwm.h>
 #include <board/gpio.h>
 #include <common/debug.h>
 #include <common/macro.h>
