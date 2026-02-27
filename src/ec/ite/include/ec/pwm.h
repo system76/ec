@@ -67,4 +67,6 @@ volatile uint8_t __xdata __at(0x1848) TSWCTLR;
 volatile uint8_t __xdata __at(0x185A) PWMLCCR;
 #endif
 
+void pwm_init(void);
+
 #endif // _EC_PWM_H

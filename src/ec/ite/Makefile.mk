@@ -8,6 +8,7 @@ ec-y += intc.c
 ec-y += kbc.c
 ec-y += pmc.c
 ec-y += ps2.c
+ec-y += pwm.c
 ec-y += signature.c
 ec-y += wuc.c
 

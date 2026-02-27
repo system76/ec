@@ -16,7 +16,6 @@ app-y += parallel.c
 app-y += pmc.c
 app-y += pnp.c
 app-y += ps2.c
-app-y += pwm.c
 app-y += scratch.c
 app-y += smbus.c
 app-y += smfi.c
