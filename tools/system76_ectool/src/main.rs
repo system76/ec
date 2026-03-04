@@ -274,6 +274,13 @@ unsafe fn fan_set_pwm(ec: &mut Ec<Box<dyn Access>>, index: u8, duty: u8) -> Resu
     unsafe { ec.fan_set_pwm(index, duty) }
 }
 
+unsafe fn fan_get_rpm(ec: &mut Ec<Box<dyn Access>>, index: u8) -> Result<(), Error> {
+    let rpm = unsafe { ec.fan_get_rpm(index)? };
+    println!("{}", rpm);
+
+    Ok(())
+}
+
 unsafe fn fan_get_mode(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
     let mode = unsafe { ec.fan_get_mode()? };
     println!("{}", mode);
@@ -283,6 +290,17 @@ unsafe fn fan_get_mode(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
 
 unsafe fn fan_set_mode(ec: &mut Ec<Box<dyn Access>>, mode: ectool::FanMode) -> Result<(), Error> {
     unsafe { ec.fan_set_mode(mode) }
+}
+
+unsafe fn case_rev_get(ec: &mut Ec<Box<dyn Access>>) -> Result<(), Error> {
+    let rev = unsafe { ec.case_rev_get()? };
+    println!("{}", rev);
+
+    Ok(())
+}
+
+unsafe fn case_rev_set(ec: &mut Ec<Box<dyn Access>>, rev: u32) -> Result<(), Error> {
+    unsafe { ec.case_rev_set(rev) }
 }
 
 unsafe fn keymap_get(
@@ -333,13 +351,19 @@ fn parse_color(s: &str) -> Result<(u8, u8, u8), String> {
 #[derive(Parser)]
 #[clap(rename_all = "snake_case")]
 enum SubCommand {
+    CaseRev {
+        rev: Option<u32>,
+    },
     Console,
+    FanMode {
+        mode: Option<ectool::FanMode>,
+    },
     FanPwm {
         index: u8,
         duty: Option<u8>,
     },
-    FanMode {
-        mode: Option<ectool::FanMode>,
+    FanRpm {
+        index: u8,
     },
     Flash {
         path: String,
@@ -426,7 +450,13 @@ fn main() {
                             // System76 launch_2
                             (0x3384, 0x0006, 1) |
                             // System76 launch_heavy_1
-                            (0x3384, 0x0007, 1) => {
+                            (0x3384, 0x0007, 1) |
+                            // System76 launch_3
+                            (0x3384, 0x0009, 1) |
+                            // System76 launch_heavy_3
+                            (0x3384, 0x000A, 1) |
+                            // System76 thelio_io_2
+                            (0x3384, 0x000B, 1) => {
                                 let device = info.open_device(&api)?;
                                 let access = AccessHid::new(device, 10, 100)?;
                                 return Ok(Ec::new(access)?.into_dyn());
@@ -448,6 +478,24 @@ fn main() {
     };
 
     match args.subcommand {
+        SubCommand::CaseRev {
+            rev,
+        } => match rev {
+            Some(rev) => match unsafe { case_rev_set(&mut ec, rev) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to set case revision {}: {:X?}", rev, err);
+                    process::exit(1);
+                }
+            },
+            None => match unsafe { case_rev_get(&mut ec) } {
+                Ok(()) => (),
+                Err(err) => {
+                    eprintln!("failed to get case revision: {:X?}", err);
+                    process::exit(1);
+                }
+            },
+        },
         SubCommand::Console => match unsafe { console(&mut ec) } {
             Ok(()) => (),
             Err(err) => {
@@ -491,6 +539,15 @@ fn main() {
                     process::exit(1);
                 }
             },
+        },
+        SubCommand::FanRpm {
+            index,
+        } => match unsafe { fan_get_rpm(&mut ec, index) } {
+            Ok(()) => (),
+            Err(err) => {
+                eprintln!("failed to get fan rpm {}: {:X?}", index, err);
+                process::exit(1);
+            }
         },
         SubCommand::Flash {
             path,

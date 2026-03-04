@@ -33,8 +33,11 @@ enum Cmd {
     SetNoInput = 19,
     SecurityGet = 20,
     SecuritySet = 21,
-    FanGetMode = 22,
-    FanSetMode = 23,
+    FanGetRpm = 22,
+    FanGetMode = 23,
+    FanSetMode = 24,
+    CaseRevGet = 25,
+    CaseRevSet = 26,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -318,6 +321,14 @@ impl<A: Access> Ec<A> {
         unsafe { self.command(Cmd::SecuritySet, &mut data) }
     }
 
+    /// Get fan tachometer.
+    pub unsafe fn fan_get_rpm(&mut self, index: u8) -> Result<u16, Error> {
+        let mut data = [index, 0, 0];
+        data[0] = index;
+        unsafe { self.command(Cmd::FanGetRpm, &mut data)? };
+        Ok((data[1] as u16) | ((data[2] as u16) << 8))
+    }
+
     /// Get fan control mode.
     pub unsafe fn fan_get_mode(&mut self) -> Result<FanMode, Error> {
         let mut data = [0];
@@ -329,6 +340,19 @@ impl<A: Access> Ec<A> {
     pub unsafe fn fan_set_mode(&mut self, mode: FanMode) -> Result<(), Error> {
         let mut data = [mode as u8];
         unsafe { self.command(Cmd::FanSetMode, &mut data) }
+    }
+
+    /// Get case revision
+    pub unsafe fn case_rev_get(&mut self) -> Result<u32, Error> {
+        let mut data = [0; 4];
+        unsafe { self.command(Cmd::CaseRevGet, &mut data)? };
+        Ok(u32::from_le_bytes(data))
+    }
+
+    /// Set case revision
+    pub unsafe fn case_rev_set(&mut self, rev: u32) -> Result<(), Error> {
+        let mut data = rev.to_le_bytes();
+        unsafe { self.command(Cmd::CaseRevSet, &mut data) }
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>
