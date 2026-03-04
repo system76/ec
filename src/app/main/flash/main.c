@@ -46,7 +46,7 @@ void flash_write_enable(void);
 void flash_entry(uint32_t addr, uint8_t *data, uint32_t length,
                  uint8_t command) __reentrant __critical {
     // Only allow access from 64 KiB to the end of flash.
-    if ((addr < 0x10000) || (length > 0x10000) || ((addr + length) > CONFIG_EC_FLASH_SIZE))
+    if ((addr < 0x10000) || (length > 0x10000) || ((addr + length) > CONFIG_SOC_FLASH_SIZE))
         return;
 
     if (command == FLASH_COMMAND_READ) {
