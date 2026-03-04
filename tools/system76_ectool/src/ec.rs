@@ -33,8 +33,9 @@ enum Cmd {
     SetNoInput = 19,
     SecurityGet = 20,
     SecuritySet = 21,
-    FanGetMode = 22,
-    FanSetMode = 23,
+    FanGetTach = 22,
+    FanGetMode = 23,
+    FanSetMode = 24,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
