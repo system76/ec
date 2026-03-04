@@ -50,10 +50,16 @@ enum Command {
     CMD_SECURITY_GET = 20,
     // Set security state
     CMD_SECURITY_SET = 21,
+    // Get fan RPM
+    CMD_FAN_GET_RPM = 22,
     // Get fan control mode
-    CMD_FAN_GET_MODE = 22,
+    CMD_FAN_GET_MODE = 23,
     // Set fan control mode
-    CMD_FAN_SET_MODE = 23,
+    CMD_FAN_SET_MODE = 24,
+    // Get case revision
+    CMD_CASE_REV_GET = 25,
+    // Set case revision
+    CMD_CASE_REV_SET = 26,
 };
 
 enum Result {

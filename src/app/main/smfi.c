@@ -161,6 +161,24 @@ static enum Result cmd_fan_set_pwm(void) {
     return RES_ERR;
 }
 
+static enum Result cmd_fan_get_rpm(void) {
+    switch (smfi_cmd[SMFI_CMD_DATA]) {
+    case 1:
+        smfi_cmd[SMFI_CMD_DATA + 1] = (uint8_t)fan1_rpm;
+        smfi_cmd[SMFI_CMD_DATA + 2] = (uint8_t)(fan1_rpm >> 8);
+        return RES_OK;
+    #ifdef FAN2_PWM
+    case 2:
+        smfi_cmd[SMFI_CMD_DATA + 1] = (uint8_t)fan2_rpm;
+        smfi_cmd[SMFI_CMD_DATA + 2] = (uint8_t)(fan2_rpm >> 8);
+        return RES_OK;
+#endif
+    }
+
+    // Failed if fan not found
+    return RES_ERR;
+}
+
 static enum Result cmd_fan_get_mode(void) {
     smfi_cmd[SMFI_CMD_DATA] = fan_get_mode();
     return RES_OK;
@@ -443,6 +461,9 @@ void smfi_event(void) {
             break;
 #endif // CONFIG_SECURITY
 
+        case CMD_FAN_GET_RPM:
+            smfi_cmd[SMFI_CMD_RES] = cmd_fan_get_rpm();
+            break;
         case CMD_FAN_GET_MODE:
             smfi_cmd[SMFI_CMD_RES] = cmd_fan_get_mode();
             break;
