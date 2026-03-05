@@ -30,8 +30,6 @@ struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // uncrustify:on
 
-//TODO: copied from lemp13-b, everything above is verified, everything below is not
-
 static const struct GpioInit __code gpio_cfg_init[] = {
     // General control
     { &GCR, 0b10 << 1 }, // Enable LPC reset on GPD2
@@ -43,9 +41,11 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GCR15, BIT(4) }, // Enable SMBus channel 4
     { &GCR19, BIT(7) | BIT(0) }, // Set GPB5 and GPD2 to 1.8V
     { &GCR20, BIT(7) }, // Set GPD3 to 1.8V, GPF2 and GPF3 to 3.3V
-    { &GCR21, BIT(5) | BIT(2) | BIT(1) }, // Set GPF7, GPH0, and GPH1 to 1.8V
+    { &GCR21, BIT(6) | BIT(5) | BIT(2) | BIT(1) }, // Set GPF6, GPF7, GPH0, and GPH1 to 1.8V
     { &GCR22, BIT(7) },
     { &GCR23, BIT(0) }, // Set GPM6 power domain to VCC
+
+    //TODO: copied from lemp13-b, everything above is verified, everything below is not
 
     // Port data
     { &GPDRA, 0 },
@@ -53,7 +53,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPDRC, 0 },
     { &GPDRD, BIT(5) }, // PWR_BTN#
     { &GPDRE, BIT(3) }, // USB_PWR_EN
-    { &GPDRF, BIT(6) }, // H_PECI
+    { &GPDRF, 0 },
     { &GPDRG, BIT(6) }, // H_PROCHOT_EC
     { &GPDRH, 0 },
     { &GPDRI, 0 },
@@ -111,7 +111,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPCRF3, GPIO_OUT }, // PCH_PWROK_EC
     { &GPCRF4, GPIO_ALT | GPIO_UP }, // TP_CLK
     { &GPCRF5, GPIO_ALT | GPIO_UP }, // TP_DATA
-    { &GPCRF6, GPIO_ALT }, // H_PECI
+    { &GPCRF6, GPIO_IN }, // SLP_A#
     { &GPCRF7, GPIO_IN }, // CPU_C10_GATE#
 
     { &GPCRG0, GPIO_IN }, // 10k pull-down
@@ -137,7 +137,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPCRI2, GPIO_IN | GPIO_UP }, // RGBKB-DET#
     { &GPCRI3, GPIO_ALT }, // THERM_VOLT_CPU_1
     { &GPCRI4, GPIO_ALT }, // TOTAL_CUR
-    { &GPCRI5, GPIO_IN }, // Not connected
+    { &GPCRI5, GPIO_OUT }, //TODO: LED_PWR_BTN
     { &GPCRI6, GPIO_ALT }, // THERM_VOLT_CPU_2
     { &GPCRI7, GPIO_IN }, // MODEL_ID
 
