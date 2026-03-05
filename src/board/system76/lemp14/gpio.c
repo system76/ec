@@ -20,12 +20,15 @@ struct Gpio __code LID_SW_N =       GPIO(B, 1);
 struct Gpio __code ME_WE =          GPIO(D, 7);
 struct Gpio __code PCH_PWROK_EC =   GPIO(F, 3);
 struct Gpio __code PD_EN =          GPIO(D, 0); // renamed to PD_POWER_EN
+struct Gpio __code PM_PWROK =       GPIO(H, 7); // renamed to EC_PWROK
 struct Gpio __code PWR_BTN_N =      GPIO(D, 5);
 struct Gpio __code PWR_SW_N =       GPIO(B, 3);
 struct Gpio __code SLP_S0_N =       GPIO(B, 5);
 struct Gpio __code SUSB_N_PCH =     GPIO(H, 0);
 struct Gpio __code SUSC_N_PCH =     GPIO(H, 1);
 struct Gpio __code VA_EC_EN =       GPIO(J, 4);
+struct Gpio __code VCCST_EN =       GPIO(D, 3);
+struct Gpio __code VCCST_EN_PG =    GPIO(H, 6);
 struct Gpio __code WLAN_PWR_EN =    GPIO(A, 3);
 struct Gpio __code XLP_OUT =        GPIO(B, 4);
 // uncrustify:on
@@ -90,7 +93,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPCRD0, GPIO_OUT }, // PD_POWER_EN
     { &GPCRD1, GPIO_OUT }, // CCD_EN
     { &GPCRD2, GPIO_ALT }, // ESPI_RESET#
-    { &GPCRD3, GPIO_IN }, // SLP_A#
+    { &GPCRD3, GPIO_IN }, // VCCST_EN
     { &GPCRD4, GPIO_OUT }, // LED_PWR
     { &GPCRD5, GPIO_OUT }, // EC_PWR_BTN#
     { &GPCRD6, GPIO_ALT | GPIO_DOWN }, // CPU_FANSEN
@@ -129,8 +132,8 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPCRH3, GPIO_OUT }, // 3G_EN
     { &GPCRH4, GPIO_OUT }, // 3G_PWR_EN
     { &GPCRH5, GPIO_IN }, // TBTA_VBUS_1_EN#
-    { &GPCRH6, GPIO_IN }, // Not connected
-    { &GPCRH7, GPIO_IN }, // Not connected
+    { &GPCRH6, GPIO_OUT }, // VCCST_EN_PG
+    { &GPCRH7, GPIO_OUT }, // EC_PWROK
 
     { &GPCRI0, GPIO_ALT }, // BAT_DET
     { &GPCRI1, GPIO_ALT }, // BAT_VOLT
