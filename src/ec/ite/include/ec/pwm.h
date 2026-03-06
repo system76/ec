@@ -79,6 +79,20 @@ volatile uint8_t __xdata __at(0x184F) TSWCTLR2;
 volatile uint8_t __xdata __at(0x185A) PWMLCCR;
 #endif
 
+enum TachCh {
+    // T0A/T1A are always available and enabled by default.
+    TACH_CH_0A = 0,
+    TACH_CH_1A,
+    // `B` and `2` channels must be configured and enabled.
+    TACH_CH_0B,
+    TACH_CH_1B,
+    TACH_CH_2A,
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+    TACH_CH_2B,
+#endif
+    NR_TACH_CHS,
+};
+
 void pwm_init(void);
 
 #endif // _EC_PWM_H
