@@ -164,6 +164,15 @@ static uint16_t fan_get_tach1_rpm(void) {
     return rpm;
 }
 
+static uint16_t fan_get_tach2_rpm(void) {
+    uint16_t rpm = (F3TMRR << 8) | F3TLRR;
+
+    if (rpm)
+        rpm = TACH_TO_RPM(rpm);
+
+    return rpm;
+}
+
 // Update the target duty of the fans based on system temps.
 // Interval: 1sec
 void fan_update_target(void) {
