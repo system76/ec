@@ -15,25 +15,39 @@ static enum FanMode fan_mode = FAN_MODE_AUTO;
 // - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
 #define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
 
-uint16_t fan_get_tach0_rpm(void) {
-    uint16_t rpm = (F1TMRR << 8) | F1TLRR;
+int16_t fan_get_tach0_rpm(void) {
+    if (TSWCTLR & T0DVS) {
+        uint16_t rpm = (F1TMRR << 8) | F1TLRR;
 
-    if (rpm)
-        rpm = TACH_TO_RPM(rpm);
+        if (rpm)
+            rpm = TACH_TO_RPM(rpm);
 
-    return rpm;
+        TSWCTLR |= T0DVS;
+
+        return rpm;
+    }
+
+    return -1;
 }
 
-uint16_t fan_get_tach1_rpm(void) {
-    uint16_t rpm = (F2TMRR << 8) | F2TLRR;
+int16_t fan_get_tach1_rpm(void) {
+    if (TSWCTLR & T1DVS) {
+        uint16_t rpm = (F2TMRR << 8) | F2TLRR;
 
-    if (rpm)
-        rpm = TACH_TO_RPM(rpm);
+        if (rpm)
+            rpm = TACH_TO_RPM(rpm);
 
-    return rpm;
+        TSWCTLR |= T1DVS;
+
+        return rpm;
+    }
+
+    return -1;
 }
 
-uint16_t fan_get_tach2_rpm(void) {
+#if CONFIG_EC_ITE_IT8587E
+// IT8587 does not have TACH2 control
+int16_t fan_get_tach2_rpm(void) {
     uint16_t rpm = (F3TMRR << 8) | F3TLRR;
 
     if (rpm)
@@ -41,6 +55,22 @@ uint16_t fan_get_tach2_rpm(void) {
 
     return rpm;
 }
+#else
+int16_t fan_get_tach2_rpm(void) {
+    if (TSWCTLR2 & T2DVS) {
+        uint16_t rpm = (F3TMRR << 8) | F3TLRR;
+
+        if (rpm)
+            rpm = TACH_TO_RPM(rpm);
+
+        TSWCTLR2 |= T2DVS;
+
+        return rpm;
+    }
+
+    return -1;
+}
+#endif
 
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
