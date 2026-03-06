@@ -33,6 +33,15 @@ uint16_t fan_get_tach1_rpm(void) {
     return rpm;
 }
 
+uint16_t fan_get_tach2_rpm(void) {
+    uint16_t rpm = (F3TMRR << 8) | F3TLRR;
+
+    if (rpm)
+        rpm = TACH_TO_RPM(rpm);
+
+    return rpm;
+}
+
 void fan_reset(void) {
     // Do not manually set fans to maximum speed
     fan_max = false;

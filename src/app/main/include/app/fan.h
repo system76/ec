@@ -44,6 +44,7 @@ extern uint16_t fan2_rpm;
 
 uint16_t fan_get_tach0_rpm(void);
 uint16_t fan_get_tach1_rpm(void);
+uint16_t fan_get_tach2_rpm(void);
 
 void fan_reset(void);
 #if CONFIG_FAN_CTRL_STEP
