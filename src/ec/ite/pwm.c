@@ -2,10 +2,63 @@
 
 #include <ec/pwm.h>
 #include <common/macro.h>
+#include <ec/gpio.h>
+
+// TODO: Define per-board
+// All boards use T0A/T1A, so just declare it here for now based on FAN2_PWM
+#ifdef FAN2_PWM
+#define NR_TACHS 2
+#else
+#define NR_TACHS 1
+#endif
+
+const enum TachCh board_tachs[NR_TACHS] = {
+    TACH_CH_0A,
+#ifdef FAN2_PWM
+    TACH_CH_1A,
+#endif
+};
+
+void pwm_tach_init(void) {
+    for (uint8_t i = 0; i < NR_TACHS; i++) {
+        // XXX: Should init be responsible for setting GPIO to ALT for TACH function?
+        switch (board_tachs[i]) {
+        case TACH_CH_0B:
+            // GPJ2
+            GCR5 |= TACH0BEN;
+            TSWCTLR |= T0CHSEL;
+            break;
+
+        case TACH_CH_1B:
+            // GPJ3
+            GCR5 |= TACH1BEN;
+            TSWCTLR |= T1CHSEL;
+            break;
+
+        case TACH_CH_2A:
+            // GPJ0
+            GCR2 |= TACH2AEN;
+            // XXX: `A` channel is default; Explicitly clear CHSEL bit?
+            break;
+
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+        case TACH_CH_2B:
+            // GPJ1
+            GCR15 |= TACH2BEN;
+            TSWCTLR2 |= T2CHSEL;
+            break;
+#endif
+
+        default:
+            // T0A/T1A always available
+            // XXX: `A` channel is default; Explicitly clear CHSEL bit?
+            break;
+        }
+    }
+}
 
 void pwm_init(void) {
-    // Set T0CHSEL to TACH0A and T1CHSEL to TACH1A
-    TSWCTLR = 0;
+    pwm_tach_init();
 
     // Disable PWM
     ZTIER = 0;

@@ -61,11 +61,37 @@ volatile uint8_t __xdata __at(0x180F) PCSGR;
 volatile uint8_t __xdata __at(0x1823) ZTIER;
 // Tachometer switch control register
 volatile uint8_t __xdata __at(0x1848) TSWCTLR;
+#define T1CHSEL     BIT(0)
+#define T1DVS       BIT(1)
+#define T0CHSEL     BIT(2)
+#define T0DVS       BIT(3)
 
 #if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+volatile uint8_t __xdata __at(0x1845) F3TLRR;
+volatile uint8_t __xdata __at(0x1845) F3TMRR;
+
+// Tachometer switch control register 2
+volatile uint8_t __xdata __at(0x184F) TSWCTLR2;
+#define T2CHSEL     BIT(0)
+#define T2DVS       BIT(1)
+
 // PWM Load Counter Control Register
 volatile uint8_t __xdata __at(0x185A) PWMLCCR;
 #endif
+
+enum TachCh {
+    // T0A/T1A are always available and enabled by default.
+    TACH_CH_0A = 0,
+    TACH_CH_1A,
+    // `B` and `2` channels must be configured and enabled.
+    TACH_CH_0B,
+    TACH_CH_1B,
+    TACH_CH_2A,
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+    TACH_CH_2B,
+#endif
+    NR_TACH_CHS,
+};
 
 void pwm_init(void);
 
