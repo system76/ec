@@ -79,6 +79,17 @@ volatile uint8_t __xdata __at(0x184F) TSWCTLR2;
 volatile uint8_t __xdata __at(0x185A) PWMLCCR;
 #endif
 
+enum TachCh {
+    TACH_CH_0A = 0, // GPD6
+    TACH_CH_1A, // GPD7
+    TACH_CH_0B, // GPJ2
+    TACH_CH_1B, // GPJ3
+    TACH_CH_2A, // GPJ0
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+    TACH_CH_2B, // GPJ1
+#endif
+};
+
 void pwm_init(void);
 
 #endif // _EC_PWM_H
