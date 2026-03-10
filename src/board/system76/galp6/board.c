@@ -2,13 +2,10 @@
 
 #include <app/board.h>
 #include <app/battery.h>
-#include <app/espi.h>
 #include <board/gpio.h>
 #include <ec/ec.h>
 
 void board_init(void) {
-    espi_init();
-
     // Allow backlight to be turned on
     gpio_set(&BKL_EN, true);
     // Enable camera
@@ -22,7 +19,5 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    espi_event();
-
     ec_read_post_codes();
 }
