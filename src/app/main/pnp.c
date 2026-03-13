@@ -16,13 +16,13 @@ uint8_t ec2i_read(uint8_t port) {
 
     while (IBCTL & (BIT(2) | BIT(1))) {}
     IHIOA = port;
-    IBMAE = BIT(0);
-    IBCTL = BIT(1);
+    IBMAE |= BIT(0);
+    IBCTL |= BIT(1);
     IBCTL |= BIT(0);
     while (IBCTL & BIT(1)) {}
     ihd = IHD;
-    IBMAE = 0;
-    IBCTL = 0;
+    IBMAE &= ~BIT(0);
+    IBCTL &= ~BIT(0);
     return ihd;
 }
 
@@ -30,11 +30,11 @@ void ec2i_write(uint8_t port, uint8_t data) {
     while (IBCTL & (BIT(2) | BIT(1))) {}
     IHIOA = port;
     IHD = data;
-    IBMAE = BIT(0);
-    IBCTL = BIT(0);
+    IBMAE |= BIT(0);
+    IBCTL |= BIT(0);
     while (IBCTL & BIT(2)) {}
-    IBMAE = 0;
-    IBCTL = 0;
+    IBMAE &= ~BIT(0);
+    IBCTL &= ~BIT(0);
 }
 
 uint8_t pnp_read(uint8_t reg) {
