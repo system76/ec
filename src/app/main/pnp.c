@@ -11,6 +11,12 @@ volatile uint8_t __xdata __at(0x1201) IHD;
 volatile uint8_t __xdata __at(0x1204) IBMAE;
 volatile uint8_t __xdata __at(0x1205) IBCTL;
 
+// BADRSEL set to 0x2E/0x2F
+enum PortOffset {
+    ADDR_OFFSET = 0,
+    DATA_OFFSET = 1,
+};
+
 // PNP host index register map
 enum HostIdx {
     // Logical Device Number
@@ -82,11 +88,11 @@ enum LogicalDeviceNumber {
     LDN_PMC5 = 0x19,
 };
 
-uint8_t ec2i_read(uint8_t port) {
+static uint8_t ec2i_read(enum PortOffset offset) {
     uint8_t ihd;
 
     while (IBCTL & (BIT(2) | BIT(1))) {}
-    IHIOA = port;
+    IHIOA = offset;
     IBMAE |= BIT(0);
     IBCTL |= BIT(1);
     IBCTL |= BIT(0);
@@ -97,9 +103,9 @@ uint8_t ec2i_read(uint8_t port) {
     return ihd;
 }
 
-void ec2i_write(uint8_t port, uint8_t data) {
+static void ec2i_write(enum PortOffset offset, uint8_t data) {
     while (IBCTL & (BIT(2) | BIT(1))) {}
-    IHIOA = port;
+    IHIOA = offset;
     IHD = data;
     IBMAE |= BIT(0);
     IBCTL |= BIT(0);
@@ -109,13 +115,13 @@ void ec2i_write(uint8_t port, uint8_t data) {
 }
 
 uint8_t pnp_read(uint8_t reg) {
-    ec2i_write(0x2E, reg);
-    return ec2i_read(0x2F);
+    ec2i_write(ADDR_OFFSET, reg);
+    return ec2i_read(DATA_OFFSET);
 }
 
 void pnp_write(uint8_t reg, uint8_t data) {
-    ec2i_write(0x2E, reg);
-    ec2i_write(0x2F, data);
+    ec2i_write(ADDR_OFFSET, reg);
+    ec2i_write(DATA_OFFSET, data);
 }
 
 void pnp_enable(void) {
