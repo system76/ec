@@ -4,8 +4,8 @@
 #include <app/smfi.h>
 #include <common/macro.h>
 #include <drivers/dgpu/dgpu.h>
-#include <ec/pwm.h>
-#include <ec/scratch.h>
+#include <soc/pwm.h>
+#include <soc/scratch.h>
 
 #include <8051.h>
 #include <stdint.h>
