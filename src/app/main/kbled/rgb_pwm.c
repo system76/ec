@@ -4,6 +4,11 @@
 #include <board/gpio.h>
 #include <ec/pwm.h>
 
+#define KBLED_BRI DCR0
+#define KBLED_RED DCR5
+#define KBLED_GREEN DCR6
+#define KBLED_BLUE DCR7
+
 void kbled_init(void) {
     if (!gpio_get(&RGBKB_DET_N)) {
         kbled_kind = KBLED_RGB;
@@ -22,8 +27,7 @@ void kbled_reset(void) {
 }
 
 uint8_t kbled_get(void) {
-    // Get PWM for power
-    return DCR0;
+    return KBLED_BRI;
 }
 
 uint8_t kbled_max(void) {
@@ -31,22 +35,16 @@ uint8_t kbled_max(void) {
 }
 
 void kbled_set(uint8_t level) {
-    // Set PWM for power
-    DCR0 = level;
+    KBLED_BRI = level;
 }
 
 uint32_t kbled_get_color(void) {
     if (kbled_kind == KBLED_WHITE)
         return 0xFFFFFF;
 
-    // Get PWM of blue component
-    uint32_t color = (uint32_t)DCR7;
-
-    // Get PWM of green component
-    color |= ((uint32_t)DCR6) << 8;
-
-    // Get PWM of red component
-    color |= ((uint32_t)DCR5) << 16;
+    uint32_t color = (uint32_t)KBLED_BLUE;
+    color |= ((uint32_t)KBLED_GREEN) << 8;
+    color |= ((uint32_t)KBLED_RED) << 16;
 
     return color;
 }
@@ -55,12 +53,7 @@ void kbled_set_color(uint32_t color) {
     if (kbled_kind == KBLED_WHITE)
         color = 0xFFFFFF;
 
-    // Set PWM for blue component
-    DCR7 = (uint8_t)(color);
-
-    // Set PWM for green component
-    DCR6 = (uint8_t)(color >> 8);
-
-    // Set PWM for red component
-    DCR5 = (uint8_t)(color >> 16);
+    KBLED_BLUE = (uint8_t)(color);
+    KBLED_GREEN = (uint8_t)(color >> 8);
+    KBLED_RED = (uint8_t)(color >> 16);
 }
