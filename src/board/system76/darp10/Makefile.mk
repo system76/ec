@@ -1,5 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Variant with:
+# - Meteor Lake (MTL-H) chipset
+# - 16" display
+# - 18x8 keyboard matrix
+# - KBLED using PWM interface
+
 board-y += board.c
 board-y += gpio.c
 

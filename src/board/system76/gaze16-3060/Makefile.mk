@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Variant with:
+# - NVIDIA RTX 3060 dGPU
+# - Realtek Ethernet controller
+
 board-y += board.c
 board-y += gpio.c
 
