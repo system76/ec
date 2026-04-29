@@ -51,6 +51,10 @@
 #define HAVE_LED_BAT_FULL 1
 #endif
 
+#ifndef HAVE_LED_PWR_BTN
+#define HAVE_LED_PWR_BTN 0
+#endif
+
 #ifndef HAVE_PCH_DPWROK_EC
 #define HAVE_PCH_DPWROK_EC 1
 #endif
@@ -82,6 +86,11 @@
 // Only galp6 has this, so disable by default.
 #ifndef HAVE_PD_EN
 #define HAVE_PD_EN 0
+#endif
+
+// Introduced with Panther Lake, disabled by default
+#ifndef HAVE_VCCST_EN
+#define HAVE_VCCST_EN 0
 #endif
 
 #ifndef HAVE_XLP_OUT
@@ -138,12 +147,12 @@ enum PowerState calculate_power_state(void) {
 #if CONFIG_BUS_ESPI
     // Use eSPI virtual wires if available
 
-    if (vw_get(&VW_SLP_S4_N) != VWS_HIGH) {
+    if (vw_get_ignore_invalid(&VW_SLP_S4_N) != VWS_HIGH) {
         // S4 plane not powered
         return POWER_STATE_S5;
     }
 
-    if (vw_get(&VW_SLP_S3_N) != VWS_HIGH) {
+    if (vw_get_ignore_invalid(&VW_SLP_S3_N) != VWS_HIGH) {
         // S3 plane not powered
         return POWER_STATE_S3;
     }
@@ -200,6 +209,27 @@ void power_init(void) {
 
     update_power_state();
 }
+
+#if HAVE_VCCST_EN
+static void power_vccst_update(void) {
+    //TODO: verify against panther lake design guide
+    static bool last_vccst_en = false;
+    bool vccst_en = gpio_get(&VCCST_EN);
+    if (vccst_en != last_vccst_en) {
+        if (vccst_en) {
+            DEBUG("%02X: VCCST_EN asserted\n", main_cycle);
+
+            // Delay for power good
+            //TODO: determine ideal delay
+            delay_ms(200);
+        } else {
+            DEBUG("%02X: VCCST_EN de-asserted\n", main_cycle);
+        }
+        GPIO_SET_DEBUG(VCCST_EN_PG, vccst_en);
+        last_vccst_en = vccst_en;
+    }
+}
+#endif
 
 void power_on(void) {
     // Configure WLAN GPIOs before powering on
@@ -265,6 +295,10 @@ void power_on(void) {
             DEBUG("reached S0 in %d ms\n", i);
             break;
         }
+
+#if HAVE_VCCST_EN
+        power_vccst_update();
+#endif
 
 #if CONFIG_BUS_ESPI
         // Check for VW changes
@@ -524,6 +558,10 @@ void power_event(void) {
 #endif
 #endif // HAVE_SLP_SUS_N
 
+#if HAVE_VCCST_EN
+    power_vccst_update();
+#endif
+
 #if CONFIG_BUS_ESPI
     // ESPI systems must keep S5 planes powered unless VW_SUS_PWRDN_ACK is high
     if (vw_get(&VW_SUS_PWRDN_ACK) == VWS_HIGH)
@@ -585,6 +623,9 @@ void power_event(void) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+#if HAVE_LED_PWR_BTN
+                gpio_set(&LED_PWR_BTN, !gpio_get(&LED_PWR_BTN));
+#endif
                 last_time = time;
             }
             gpio_set(&LED_ACIN, false);
@@ -593,22 +634,34 @@ void power_event(void) {
         {
             // CPU on, green light
             gpio_set(&LED_PWR, true);
+#if HAVE_LED_PWR_BTN
+            gpio_set(&LED_PWR_BTN, true);
+#endif
             gpio_set(&LED_ACIN, false);
         }
     } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
         if ((time - last_time) >= 1000) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+#if HAVE_LED_PWR_BTN
+            gpio_set(&LED_PWR_BTN, !gpio_get(&LED_PWR_BTN));
+#endif
             last_time = time;
         }
         gpio_set(&LED_ACIN, false);
     } else if (!ac_new) {
         // AC plugged in, orange light
         gpio_set(&LED_PWR, false);
+#if HAVE_LED_PWR_BTN
+        gpio_set(&LED_PWR_BTN, false);
+#endif
         gpio_set(&LED_ACIN, true);
     } else {
         // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
+#if HAVE_LED_PWR_BTN
+        gpio_set(&LED_PWR_BTN, false);
+#endif
         if ((time - last_time) >= 1000) {
             gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
             last_time = time;
