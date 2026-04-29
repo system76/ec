@@ -51,6 +51,10 @@
 #define HAVE_LED_BAT_FULL 1
 #endif
 
+#ifndef HAVE_LED_PWR_BTN
+#define HAVE_LED_PWR_BTN 0
+#endif
+
 #ifndef HAVE_PCH_DPWROK_EC
 #define HAVE_PCH_DPWROK_EC 1
 #endif
@@ -619,6 +623,9 @@ void power_event(void) {
             // Modern suspend, flashing green light
             if ((time - last_time) >= 1000) {
                 gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+#if HAVE_LED_PWR_BTN
+                gpio_set(&LED_PWR_BTN, !gpio_get(&LED_PWR_BTN));
+#endif
                 last_time = time;
             }
             gpio_set(&LED_ACIN, false);
@@ -627,22 +634,34 @@ void power_event(void) {
         {
             // CPU on, green light
             gpio_set(&LED_PWR, true);
+#if HAVE_LED_PWR_BTN
+            gpio_set(&LED_PWR_BTN, true);
+#endif
             gpio_set(&LED_ACIN, false);
         }
     } else if (power_state == POWER_STATE_S3) {
         // Suspended, flashing green light
         if ((time - last_time) >= 1000) {
             gpio_set(&LED_PWR, !gpio_get(&LED_PWR));
+#if HAVE_LED_PWR_BTN
+            gpio_set(&LED_PWR_BTN, !gpio_get(&LED_PWR_BTN));
+#endif
             last_time = time;
         }
         gpio_set(&LED_ACIN, false);
     } else if (!ac_new) {
         // AC plugged in, orange light
         gpio_set(&LED_PWR, false);
+#if HAVE_LED_PWR_BTN
+        gpio_set(&LED_PWR_BTN, false);
+#endif
         gpio_set(&LED_ACIN, true);
     } else {
         // CPU off and AC adapter unplugged, flashing orange light
         gpio_set(&LED_PWR, false);
+#if HAVE_LED_PWR_BTN
+        gpio_set(&LED_PWR_BTN, false);
+#endif
         if ((time - last_time) >= 1000) {
             gpio_set(&LED_ACIN, !gpio_get(&LED_ACIN));
             last_time = time;
