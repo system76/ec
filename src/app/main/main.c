@@ -3,6 +3,7 @@
 #include <app/battery.h>
 #include <app/board.h>
 #include <app/ecpm.h>
+#include <app/espi.h>
 #include <app/fan.h>
 #include <app/gctrl.h>
 #include <app/kbc.h>
@@ -92,6 +93,9 @@ void init(void) {
 
     // Must happen last
     power_init();
+#if CONFIG_BUS_ESPI
+    espi_init();
+#endif
     board_init();
     (void)battery_load_thresholds();
 }
@@ -124,7 +128,10 @@ void main(void) {
             usbpd_event();
             // Handle power states
             power_event();
-
+#if CONFIG_BUS_ESPI
+            // eSPI events
+            espi_event();
+#endif
             // Board-specific events
             board_event();
             // Checks for keyboard/mouse packets from host

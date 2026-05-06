@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 #include <app/board.h>
-#include <app/espi.h>
 #include <board/gpio.h>
 #include <ec/ec.h>
 
 void board_init(void) {
-    espi_init();
-
     // Allow CPU to boot
     gpio_set(&SB_KBCRST_N, true);
     // Allow backlight to be turned on
@@ -23,7 +20,5 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    espi_event();
-
     ec_read_post_codes();
 }
