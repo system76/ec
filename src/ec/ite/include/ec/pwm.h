@@ -61,11 +61,34 @@ volatile uint8_t __xdata __at(0x180F) PCSGR;
 volatile uint8_t __xdata __at(0x1823) ZTIER;
 // Tachometer switch control register
 volatile uint8_t __xdata __at(0x1848) TSWCTLR;
+#define T1CHSEL     BIT(0)
+#define T1DVS       BIT(1)
+#define T0CHSEL     BIT(2)
+#define T0DVS       BIT(3)
+
+volatile uint8_t __xdata __at(0x1845) F3TLRR; // CFLRR on IT8587
+volatile uint8_t __xdata __at(0x1846) F3TMRR; // CFMRR on IT8587
 
 #if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+// Tachometer switch control register 2
+volatile uint8_t __xdata __at(0x184F) TSWCTLR2;
+#define T2CHSEL     BIT(0)
+#define T2DVS       BIT(1)
+
 // PWM Load Counter Control Register
 volatile uint8_t __xdata __at(0x185A) PWMLCCR;
 #endif
+
+enum TachCh {
+    TACH_CH_0A = 0, // GPD6
+    TACH_CH_1A, // GPD7
+    TACH_CH_0B, // GPJ2
+    TACH_CH_1B, // GPJ3
+    TACH_CH_2A, // GPJ0
+#if CONFIG_EC_ITE_IT5570E || CONFIG_EC_ITE_IT5571E
+    TACH_CH_2B, // GPJ1
+#endif
+};
 
 void pwm_init(void);
 
