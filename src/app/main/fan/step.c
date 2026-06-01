@@ -11,9 +11,6 @@
 #include <app/peci.h>
 #endif
 
-bool fan_max = false;
-static enum FanMode fan_mode = FAN_MODE_AUTO;
-
 uint8_t fan1_pwm_actual = 0;
 uint8_t fan1_pwm_target = 0;
 uint16_t fan1_rpm = 0;
@@ -21,17 +18,6 @@ uint16_t fan1_rpm = 0;
 uint8_t fan2_pwm_actual = 0;
 uint8_t fan2_pwm_target = 0;
 uint16_t fan2_rpm = 0;
-
-#define TACH_FREQ (CONFIG_CLOCK_FREQ_KHZ * 1000UL)
-
-// Fan Speed (RPM) = 60 / (1/fs sec * {FnTMRR, FnRLRR} * P)
-// - n: 1 or 2
-// - P: the numbers of square pulses per revolution
-// - fs: sample rate (FreqEC / 128)
-// - {FnTMRR, FnTLRR} = 0000h: Fan Speed is zero
-#define TACH_TO_RPM(x) (60UL * TACH_FREQ / 128UL / 2UL / (x))
-
-#define FAN_POINT(T, D) { .temp = (int16_t)(T), .duty = PWM_DUTY(D) }
 
 #ifndef FAN1_PWM_MIN
 #define FAN1_PWM_MIN 0
@@ -89,11 +75,6 @@ static const struct Fan __code FAN2 = {
 
 #endif // FAN2_PWM
 
-void fan_reset(void) {
-    // Do not manually set fans to maximum speed
-    fan_max = false;
-}
-
 static uint8_t fan_duty(const struct Fan *const fan, int16_t temp) {
     for (uint8_t i = 0; i < fan->points_size; i++) {
         const struct FanPoint *cur = &fan->points[i];
@@ -144,24 +125,6 @@ static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
     duty = fan_cooldown(fan, duty);
 
     return duty;
-}
-
-static uint16_t fan_get_tach0_rpm(void) {
-    uint16_t rpm = (F1TMRR << 8) | F1TLRR;
-
-    if (rpm)
-        rpm = TACH_TO_RPM(rpm);
-
-    return rpm;
-}
-
-static uint16_t fan_get_tach1_rpm(void) {
-    uint16_t rpm = (F2TMRR << 8) | F2TLRR;
-
-    if (rpm)
-        rpm = TACH_TO_RPM(rpm);
-
-    return rpm;
 }
 
 // Update the target duty of the fans based on system temps.
@@ -261,12 +224,4 @@ void fan_update_duty(void) {
     // Update RPM value for reporting to ACPI.
     fan2_rpm = fan_get_tach1_rpm();
 #endif
-}
-
-enum FanMode fan_get_mode(void) {
-    return fan_mode;
-}
-
-void fan_set_mode(enum FanMode mode) {
-    fan_mode = mode;
 }
