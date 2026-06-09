@@ -211,6 +211,9 @@ void power_init(void) {
 }
 
 #if HAVE_VCCST_EN
+// VCCST_EN assertion to VCCST stable
+#define tCPU26 delay_ms(1)
+
 static void power_vccst_update(void) {
     //TODO: verify against panther lake design guide
     static bool last_vccst_en = false;
@@ -218,10 +221,7 @@ static void power_vccst_update(void) {
     if (vccst_en != last_vccst_en) {
         if (vccst_en) {
             DEBUG("%02X: VCCST_EN asserted\n", main_cycle);
-
-            // Delay for power good
-            //TODO: determine ideal delay
-            delay_ms(200);
+            tCPU26;
         } else {
             DEBUG("%02X: VCCST_EN de-asserted\n", main_cycle);
         }
