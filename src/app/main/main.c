@@ -48,7 +48,6 @@ void timer_2(void) __interrupt(5) {}
 
 uint8_t main_cycle = 0;
 
-#define INTERVAL_1MS    1U
 #define INTERVAL_5MS    5U
 #define INTERVAL_100MS  100U
 #define INTERVAL_250MS  250U
@@ -107,18 +106,52 @@ void main(void) {
 
     INFO("System76 EC board '%s', version '%s'\n", board(), version());
 
-    systick_t last_time_1ms = 0;
     systick_t last_time_5ms = 0;
     systick_t last_time_100ms = 0;
     systick_t last_time_250ms = 0;
     systick_t last_time_500ms = 0;
     systick_t last_time_1sec = 0;
 
-    for (main_cycle = 0;; main_cycle++) {
-        systick_t time = time_get();
+    __bit evt_1ms = 0;
+    __bit evt_5ms = 0;
+    __bit evt_100ms = 0;
+    __bit evt_250ms = 0;
+    __bit evt_500ms = 0;
+    __bit evt_1sec = 0;
 
-        if ((time - last_time_1ms) >= INTERVAL_1MS) {
-            last_time_1ms = time;
+    for (main_cycle = 0;; main_cycle++) {
+        // Calculate which intervals need to run at systick update.
+        if (evt_systick) {
+            evt_systick = 0;
+
+            systick_t time = time_get();
+
+            evt_1ms = 1;
+
+            if ((time - last_time_5ms) >= INTERVAL_5MS) {
+                last_time_5ms = time;
+                evt_5ms = 1;
+            }
+            if ((time - last_time_100ms) >= INTERVAL_100MS) {
+                last_time_100ms = time;
+                evt_100ms = 1;
+            }
+            if ((time - last_time_250ms) >= INTERVAL_250MS) {
+                last_time_250ms = time;
+                evt_250ms = 1;
+            }
+            if ((time - last_time_500ms) >= INTERVAL_500MS) {
+                last_time_500ms = time;
+                evt_500ms = 1;
+            }
+            if ((time - last_time_1sec) >= INTERVAL_1SEC) {
+                last_time_1sec = time;
+                evt_1sec = 1;
+            }
+        }
+
+        if (evt_1ms) {
+            evt_1ms = 0;
 
             // Handle USB-C events immediately before power states
             usbpd_event();
@@ -135,8 +168,8 @@ void main(void) {
             smfi_event();
         }
 
-        if ((time - last_time_5ms) >= INTERVAL_5MS) {
-            last_time_5ms = time;
+        if (evt_5ms) {
+            evt_5ms = 0;
 
 #if PARALLEL_DEBUG
             if (!parallel_debug)
@@ -147,14 +180,14 @@ void main(void) {
             }
         }
 
-        if ((time - last_time_100ms) >= INTERVAL_100MS) {
-            last_time_100ms = time;
+        if (evt_100ms) {
+            evt_100ms = 0;
 
             fan_update_duty();
         }
 
-        if ((time - last_time_250ms) >= INTERVAL_250MS) {
-            last_time_250ms = time;
+        if (evt_250ms) {
+            evt_250ms = 0;
 
 #if CONFIG_PLATFORM_INTEL
             peci_read_temp();
@@ -162,15 +195,15 @@ void main(void) {
             dgpu_read_temp();
         }
 
-        if ((time - last_time_500ms) >= INTERVAL_500MS) {
-            last_time_500ms = time;
+        if (evt_500ms) {
+            evt_500ms = 0;
 
             // Handle lid close/open
             lid_event();
         }
 
-        if ((time - last_time_1sec) >= INTERVAL_1SEC) {
-            last_time_1sec = time;
+        if (evt_1sec) {
+            evt_1sec = 0;
 
             battery_event();
 
