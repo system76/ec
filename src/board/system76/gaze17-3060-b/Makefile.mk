@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Variant with:
+# - NVIDIA RTX 3060 dGPU
+# - Onboard Intel I219-V Ethernet controller
+
 board-y += ../gaze17-3060/board.c
 board-y += ../gaze17-3060/gpio.c
 
