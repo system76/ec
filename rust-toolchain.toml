@@ -2,6 +2,6 @@
 # SPDX-FileCopyrightText: NONE
 
 [toolchain]
-channel = "1.85.0"
+channel = "1.95.0"
 components = ["clippy", "rustfmt"]
 profile = "minimal"
