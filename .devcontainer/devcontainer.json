@@ -1,0 +1,15 @@
+{
+  "name": "System76 EC",
+  "build": {
+    "dockerfile": "../tools/containers/ec/Containerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {},
+      "extensions": [
+        "EditorConfig.EditorConfig",
+        "rust-lang.rust-analyzer"
+      ]
+    }
+  }
+}
