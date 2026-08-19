@@ -146,23 +146,62 @@ static uint8_t fan_get_duty(const struct Fan *const fan, int16_t temp) {
     return duty;
 }
 
-static uint16_t fan_get_tach0_rpm(void) {
-    uint16_t rpm = (F1TMRR << 8) | F1TLRR;
+static int16_t fan_get_tach0_rpm(void) {
+    if (TSWCTLR & T0DVS) {
+        uint16_t rpm = (F1TMRR << 8) | F1TLRR;
+
+        if (rpm)
+            rpm = TACH_TO_RPM(rpm);
+
+        TSWCTLR |= T0DVS;
+
+        return rpm;
+    }
+
+    return -1;
+}
+
+static int16_t fan_get_tach1_rpm(void) {
+    if (TSWCTLR & T1DVS) {
+        uint16_t rpm = (F2TMRR << 8) | F2TLRR;
+
+        if (rpm)
+            rpm = TACH_TO_RPM(rpm);
+
+        TSWCTLR |= T1DVS;
+
+        return rpm;
+    }
+
+    return -1;
+}
+
+#if CONFIG_EC_ITE_IT8587E
+// IT8587 does not have TACH2 control
+static int16_t fan_get_tach2_rpm(void) {
+    uint16_t rpm = (F3TMRR << 8) | F3TLRR;
 
     if (rpm)
         rpm = TACH_TO_RPM(rpm);
 
     return rpm;
 }
+#else
+static int16_t fan_get_tach2_rpm(void) {
+    if (TSWCTLR2 & T2DVS) {
+        uint16_t rpm = (F3TMRR << 8) | F3TLRR;
 
-static uint16_t fan_get_tach1_rpm(void) {
-    uint16_t rpm = (F2TMRR << 8) | F2TLRR;
+        if (rpm)
+            rpm = TACH_TO_RPM(rpm);
 
-    if (rpm)
-        rpm = TACH_TO_RPM(rpm);
+        TSWCTLR2 |= T2DVS;
 
-    return rpm;
+        return rpm;
+    }
+
+    return -1;
 }
+#endif
 
 // Update the target duty of the fans based on system temps.
 // Interval: 1sec

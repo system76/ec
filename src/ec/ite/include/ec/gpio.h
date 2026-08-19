@@ -43,9 +43,14 @@ void gpio_debug(void);
 volatile uint8_t __xdata __at(0x1600) GCR;
 volatile uint8_t __xdata __at(0x16F0) GCR1;
 volatile uint8_t __xdata __at(0x16F1) GCR2;
+#define TACH2AEN BIT(0)
+
 volatile uint8_t __xdata __at(0x16F2) GCR3;
 volatile uint8_t __xdata __at(0x16F3) GCR4;
 volatile uint8_t __xdata __at(0x16F4) GCR5;
+#define TACH0BEN BIT(0)
+#define TACH1BEN BIT(1)
+
 volatile uint8_t __xdata __at(0x16F5) GCR6;
 volatile uint8_t __xdata __at(0x16F6) GCR7;
 volatile uint8_t __xdata __at(0x16F7) GCR8;
@@ -56,6 +61,8 @@ volatile uint8_t __xdata __at(0x16FB) GCR12;
 volatile uint8_t __xdata __at(0x16FC) GCR13;
 volatile uint8_t __xdata __at(0x16FD) GCR14;
 volatile uint8_t __xdata __at(0x16FE) GCR15;
+#define TACH2BEN BIT(3)
+
 volatile uint8_t __xdata __at(0x16E0) GCR16;
 volatile uint8_t __xdata __at(0x16E1) GCR17;
 volatile uint8_t __xdata __at(0x16E2) GCR18;
