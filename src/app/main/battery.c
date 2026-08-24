@@ -15,7 +15,7 @@ uint16_t battery_charger_input_current = CHARGER_INPUT_CURRENT;
 #define BATTERY_END_DEFAULT 100
 
 // Flash address to save charging thresholds to
-static const uint32_t BAT_CFG_ADDR = CONFIG_EC_FLASH_SIZE - (2 * 1024);
+static const uint32_t BAT_CFG_ADDR = CONFIG_SOC_FLASH_SIZE - (2 * 1024);
 static const uint16_t BAT_CFG_MAGIC = 0x4254;
 
 struct battery_config {
