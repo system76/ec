@@ -9,11 +9,12 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
     outputs:
       boards: ${{ steps.board-matrix.outputs.boards }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: ./scripts/deps.sh
@@ -33,9 +34,10 @@ jobs:
         run: echo "boards=$(make list-boards | jq -sRc 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
 
   mega2560:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
 
     - name: Install dependencies
       run: |
@@ -52,9 +54,10 @@ jobs:
           - features:
           - features: --no-default-features --features="redox_hwio"
 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: ./scripts/deps.sh
@@ -63,7 +66,8 @@ jobs:
         run: cargo build ${{ matrix.features }} --release --manifest-path tools/system76_ectool/Cargo.toml
 
   ec:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
     needs: lint
     strategy:
       matrix:
@@ -71,7 +75,7 @@ jobs:
         # TODO: Conditionally build based on files changed?
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Install dependencies
         run: ./scripts/deps.sh
