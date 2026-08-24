@@ -7,7 +7,6 @@
 #include <common/debug.h>
 #include <common/macro.h>
 #include <ec/ecpm.h>
-#include <ec/gctrl.h>
 #include <ec/gpio.h>
 
 #include <8051.h>

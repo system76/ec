@@ -2,9 +2,7 @@
 
 #include <app/battery.h>
 #include <app/board.h>
-#include <app/ecpm.h>
 #include <app/fan.h>
-#include <app/gctrl.h>
 #include <app/kbc.h>
 #include <app/kbled.h>
 #include <app/kbscan.h>
@@ -14,8 +12,6 @@
 #include <app/ps2.h>
 #include <app/smbus.h>
 #include <app/smfi.h>
-#include <arch/arch.h>
-#include <arch/delay.h>
 #include <arch/time.h>
 #include <board/gpio.h>
 #include <board/keymap.h>
@@ -57,16 +53,13 @@ uint8_t main_cycle = 0;
 
 void init(void) {
     // Must happen first
-    arch_init();
     ec_init();
-    gctrl_init();
     gpio_init();
 
     // Can happen in any order
 #if CONFIG_HAVE_DGPU
     dgpu_init();
 #endif
-    ecpm_init();
     kbc_init();
     kbled_init();
 #ifdef PARALLEL_DEBUG
