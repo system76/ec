@@ -1,5 +1,11 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Variant with:
+# - 14" display
+# - 16x8 keyboard matrix
+# - KBLED uses DAC interface
+# - Sane keyboard layout
+
 board-y += board.c
 board-y += gpio.c
 

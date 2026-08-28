@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Variant with:
+# - 256K EC e-flash
+# - TBT5 JHL9540 (Barlow Ridge) controller
+
 board-y += ../bonw15/board.c
 board-y += ../bonw15/gpio.c
 
