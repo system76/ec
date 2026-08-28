@@ -50,6 +50,16 @@ enum VirtualWireState vw_get(struct VirtualWire *const vw) __critical {
     }
 }
 
+// Panther Lake sets validity only when signals change
+enum VirtualWireState vw_get_ignore_invalid(struct VirtualWire *const vw) __critical {
+    uint8_t index = *vw->index;
+    if (index & vw->data_mask) {
+        return VWS_HIGH;
+    } else {
+        return VWS_LOW;
+    }
+}
+
 void vw_set(struct VirtualWire *const vw, enum VirtualWireState state) __critical {
     uint8_t index = *vw->index;
     switch (state) {
