@@ -6,7 +6,6 @@
 #include <stdint.h>
 
 void smfi_init(void);
-void smfi_watchdog(void);
 void smfi_event(void);
 void smfi_debug(uint8_t byte);
 
