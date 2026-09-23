@@ -8,7 +8,7 @@ bool keymap_fnlock = false;
 uint16_t __xdata DYNAMIC_KEYMAP[KM_LAY][KM_OUT][KM_IN];
 
 // Config is in the last sector of flash
-const uint32_t CONFIG_ADDR = CONFIG_EC_FLASH_SIZE - 1024;
+const uint32_t CONFIG_ADDR = CONFIG_SOC_FLASH_SIZE - 1024;
 // Signature is the size of the keymap
 const uint16_t CONFIG_SIGNATURE = sizeof(DYNAMIC_KEYMAP);
 

@@ -6,9 +6,8 @@ board-y += ../galp6/gpio.c
 # FIXME: Handle this better
 CFLAGS += -I$(BOARD_DIR)/../galp6/include
 
-EC = ite
-CONFIG_EC_ITE_IT5570E = y
-CONFIG_EC_FLASH_SIZE_128K = y
+CONFIG_SOC_ITE_IT5570E = y
+CONFIG_SOC_FLASH_SIZE_128K = y
 
 # Intel-based host
 CONFIG_PLATFORM_INTEL = y

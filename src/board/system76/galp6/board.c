@@ -3,7 +3,7 @@
 #include <app/board.h>
 #include <app/battery.h>
 #include <board/gpio.h>
-#include <ec/ec.h>
+#include <soc/soc.h>
 
 void board_init(void) {
     // Allow backlight to be turned on
@@ -19,5 +19,5 @@ void board_init(void) {
 }
 
 void board_event(void) {
-    ec_read_post_codes();
+    soc_read_post_codes();
 }

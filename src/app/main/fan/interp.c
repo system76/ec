@@ -4,7 +4,7 @@
 #include <app/power.h>
 #include <common/debug.h>
 #include <common/macro.h>
-#include <ec/pwm.h>
+#include <soc/pwm.h>
 #include <drivers/dgpu/dgpu.h>
 
 #if CONFIG_PLATFORM_INTEL

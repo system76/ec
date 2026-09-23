@@ -8,7 +8,7 @@
 #include <app/power.h>
 #include <board/gpio.h>
 #include <common/debug.h>
-#include <ec/i2c.h>
+#include <soc/i2c.h>
 
 #define USBPD_ADDRESS 0x20
 

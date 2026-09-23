@@ -2,7 +2,7 @@
 
 #include <app/kbled.h>
 #include <board/gpio.h>
-#include <ec/pwm.h>
+#include <soc/pwm.h>
 
 #define KBLED_BRI DCR0
 #define KBLED_RED DCR5
