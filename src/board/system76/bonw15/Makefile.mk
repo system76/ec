@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Variant with:
+# - 128K EC e-flash
+# - TBT4 JHL8540 (Maple Ridge) controller
+
 board-y += board.c
 board-y += gpio.c
 

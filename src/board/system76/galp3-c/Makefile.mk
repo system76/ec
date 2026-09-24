@@ -1,5 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-only
 
+# Variant with:
+# - Whiskey Lake (WHL-U) chipset
+
 board-y += board.c
 board-y += gpio.c
 
