@@ -28,6 +28,7 @@ extern struct Gpio __code LED_BAT_FULL;
 extern struct Gpio __code LED_PWR;
 extern struct Gpio __code LID_SW_N;
 extern struct Gpio __code ME_WE;
+extern struct Gpio __code MUX_CTRL_BIOS;
 extern struct Gpio __code PCH_DPWROK_EC;
 #define HAVE_PCH_PWROK_EC 0
 extern struct Gpio __code PM_PWROK;
