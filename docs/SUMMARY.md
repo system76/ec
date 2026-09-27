@@ -6,5 +6,4 @@
 - [Supported controllers](./controllers.md)
 - [Debugging](./debugging.md)
 - [Flashing](./flashing.md)
-- [Custom keyboard layouts](./keyboard-layout-customization.md)
 - [Mega2560](./mega2560.md)
