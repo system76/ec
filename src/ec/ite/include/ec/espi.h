@@ -26,6 +26,7 @@ enum VirtualWireState {
 };
 
 enum VirtualWireState vw_get(struct VirtualWire *const vw) __critical;
+enum VirtualWireState vw_get_ignore_invalid(struct VirtualWire *const vw) __critical;
 
 void vw_set(struct VirtualWire *const vw, enum VirtualWireState state) __critical;
 
