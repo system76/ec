@@ -142,4 +142,4 @@ flash_internal: $(BUILD)/ec.rom
 
 flash_external: $(BUILD)/ec.rom
 	cargo build --manifest-path tools/ecflash/Cargo.toml --example isp --release
-	sudo tools/ecflash/target/release/examples/isp $<
+	sudo tools/ecflash/target/release/examples/isp $< $(PROGRAMMER)

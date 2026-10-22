@@ -34,7 +34,7 @@ else ifneq ($(findstring 13.,$(_gcc_version)),)
 CFLAGS += --param=min-pagesize=0
 endif
 
-PORT = $(wildcard /dev/ttyACM*)
+PORT = $(wildcard /dev/serial/by-id/usb-Arduino*)
 CONSOLE_BAUD = 1000000
 CFLAGS += -D__CONSOLE_BAUD__=$(CONSOLE_BAUD)
 
