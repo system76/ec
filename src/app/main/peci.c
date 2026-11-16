@@ -21,6 +21,42 @@ int16_t peci_temp = 0;
 // NOTE: PECI GetTemp() internally uses a moving average over 256ms.
 static int16_t peci_temps[4] = { 0 };
 
+#define PECI_CPU_ADDR   0x30
+
+// PECI completion codes
+#define PECI_CC_RSP_SUCCESS             0x40
+#define PECI_CC_RSP_TIMEOUT             0x80
+#define PECI_CC_RSP_OUT_OF_RESOURCES    0x81
+#define PECI_CC_RSP_LOW_POWER_STATE     0x82
+#define PECI_CC_RSP_INVALID_REQUEST     0x90
+#define PECI_CC_RSP_LOGIC_ERROR         0x91
+
+// Ping
+#define PECI_PING_WR_LEN        0
+#define PECI_PING_RD_LEN        0
+// GetDIB
+#define PECI_GET_DIB_WR_LEN     1
+#define PECI_GET_DIB_RD_LEN     8
+// GetTemp
+#define PECI_GET_TEMP_WR_LEN    1
+#define PECI_GET_TEMP_RD_LEN    2
+// WrPkgConfig
+#define PECI_WR_PKG_WR_LEN_1    7
+#define PECI_WR_PKG_WR_LEN_2    8
+#define PECI_WR_PKG_WR_LEN_4    10
+#define PECI_WR_PKG_RD_LEN      1
+// RdPkgConfig
+#define PECI_RD_PKG_WR_LEN      5
+#define PECI_RD_PKG_RD_LEN_1    2
+#define PECI_RD_PKG_RD_LEN_2    3
+#define PECI_RD_PKG_RD_LEN_4    5
+// RdIAMSR
+#define PECI_RD_IAMSR_WR_LEN    5
+#define PECI_RD_IAMSR_RD_LEN_1  2
+#define PECI_RD_IAMSR_RD_LEN_2  3
+#define PECI_RD_IAMSR_RD_LEN_4  5
+#define PECI_RD_IAMSR_RD_LEN_8  9
+
 // Tjunction = 100C for i7-8565U (and probably the same for all WHL-U)
 #define T_JUNCTION ((int16_t)100)
 
@@ -57,6 +93,18 @@ bool peci_available(void) {
 
 #if CONFIG_PECI_OVER_ESPI
 
+// Cycle type + Tag + Length bytes
+#define OOB_PACKET_HDR_LEN 3
+
+// Command code
+#define OOB_CMD_PECI    0x01
+// Source/Dest slave addresses
+#define OOB_EC_ADDR     0x0F
+#define OOB_PCH_ADDR    0x10
+
+#define OOB_DEST(addr)  (((addr) << 1) | 0)
+#define OOB_SRC(addr)   (((addr) << 1) | 1)
+
 void peci_init(void) {}
 
 // Returns true on success, false on error
@@ -67,27 +115,27 @@ bool peci_get_temp(int16_t *const data) {
     // Clear OOB status
     ESOCTRL0 = ESOCTRL0;
 
-    // Set upstream cycle type
+    // eSPI cycle type
     ESUCTRL1 = ESUCTRL1_OOB;
-    // Set upstream tag / length[11:8]
+    // Tag [3:0] / Length [11:8]
     ESUCTRL2 = 0;
-    // Set upstream length [7:0] (size of PECI data plus 3)
-    ESUCTRL3 = 8;
+    // Length [7:0]
+    ESUCTRL3 = 5 + OOB_PACKET_HDR_LEN;
 
-    // Destination address (0x10 is PCH, left shifted by one)
-    UDB[0] = 0x10 << 1;
-    // Command code (0x01 is PECI)
-    UDB[1] = 0x01;
-    // Set byte count
+    // OOB destination address
+    UDB[0] = OOB_DEST(OOB_PCH_ADDR);
+    // OOB command code
+    UDB[1] = OOB_CMD_PECI;
+    // Byte count
     UDB[2] = 5;
-    // Set source address (0x0F is EC, left shifted by one, or with 1)
-    UDB[3] = (0x0F << 1) | 1;
-    // PECI target address (0x30 is default)
-    UDB[4] = 0x30;
+    // OOB source address
+    UDB[3] = OOB_SRC(OOB_EC_ADDR);
+    // PECI target address
+    UDB[4] = PECI_CPU_ADDR;
     // PECI write length
-    UDB[5] = 1;
+    UDB[5] = PECI_GET_TEMP_WR_LEN;
     // PECI read length
-    UDB[6] = 2;
+    UDB[6] = PECI_GET_TEMP_RD_LEN;
     // PECI command
     UDB[7] = PECI_CMD_GET_TEMP;
 
@@ -150,38 +198,37 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Clear OOB status
     ESOCTRL0 = ESOCTRL0;
 
-    // Set upstream cycle type
+    // eSPI cycle type
     ESUCTRL1 = ESUCTRL1_OOB;
-    // Set upstream tag / length[11:8]
+    // Tag [3:0] / Length [11:8]
     ESUCTRL2 = 0;
-    // Set upstream length [7:0] (size of PECI data plus 3)
-    ESUCTRL3 = 16;
+    // Length [7:0]
+    ESUCTRL3 = 13 + OOB_PACKET_HDR_LEN;
 
-    // Destination address (0x10 is PCH, left shifted by one)
-    UDB[0] = 0x10 << 1;
-    // Command code (0x01 is PECI)
-    UDB[1] = 0x01;
-    // Set byte count
+    // OOB destination address
+    UDB[0] = OOB_DEST(OOB_PCH_ADDR);
+    // OOB command code
+    UDB[1] = OOB_CMD_PECI;
+    // Byte count
     UDB[2] = 13;
-    // Set source address (0x0F is EC, left shifted by one, or with 1)
-    UDB[3] = (0x0F << 1) | 1;
-    // PECI target address (0x30 is default)
-    UDB[4] = 0x30;
+    // OOB source address
+    UDB[3] = OOB_SRC(OOB_EC_ADDR);
+    // PECI target address
+    UDB[4] = PECI_CPU_ADDR;
     // PECI write length
-    UDB[5] = 10;
+    UDB[5] = PECI_WR_PKG_WR_LEN_4;
     // PECI read length
-    UDB[6] = 1;
+    UDB[6] = PECI_WR_PKG_RD_LEN;
     // PECI command
     UDB[7] = PECI_CMD_WR_PKG_CONFIG;
-
-    // Write host ID
+    // Host ID [7:1] & Retry [0]
     UDB[8] = 0;
-    // Write index
+    // Index
     UDB[9] = index;
-    // Write param
+    // Param
     UDB[10] = (uint8_t)param;
     UDB[11] = (uint8_t)(param >> 8);
-    // Write data
+    // Data
     UDB[12] = (uint8_t)data;
     UDB[13] = (uint8_t)(data >> 8);
     UDB[14] = (uint8_t)(data >> 16);
@@ -226,7 +273,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
         // Clear PUT_OOB status
         ESOCTRL0 = ESOCTRL0_STATUS;
 
-        if (cc & 0x80) {
+        if (cc & BIT(7)) {
             return -cc;
         } else {
             return cc;
@@ -271,12 +318,12 @@ bool peci_get_temp(int16_t *const data) {
 
     // Enable PECI, clearing data fifo's
     HOCTLR = BIT(5) | BIT(3);
-    // Set address to default
-    HOTRADDR = 0x30;
+    // Set address
+    HOTRADDR = PECI_CPU_ADDR;
     // Set write length
-    HOWRLR = 1;
+    HOWRLR = PECI_GET_TEMP_WR_LEN;
     // Set read length
-    HORDLR = 2;
+    HORDLR = PECI_GET_TEMP_RD_LEN;
     // Set command
     HOCMDR = PECI_CMD_GET_TEMP;
     // Start transaction
@@ -327,12 +374,12 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
 
     // Enable PECI, clearing data fifo's, enable AW_FCS
     HOCTLR = BIT(5) | BIT(3) | BIT(1);
-    // Set address to default
-    HOTRADDR = 0x30;
+    // Set address
+    HOTRADDR = PECI_CPU_ADDR;
     // Set write length
-    HOWRLR = 10;
+    HOWRLR = PECI_WR_PKG_WR_LEN_4;
     // Set read length
-    HORDLR = 1;
+    HORDLR = PECI_WR_PKG_RD_LEN;
     // Set command
     HOCMDR = PECI_CMD_WR_PKG_CONFIG;
 
@@ -374,7 +421,7 @@ int16_t peci_wr_pkg_config(uint8_t index, uint16_t param, uint32_t data) {
     // Clear status
     HOSTAR = HOSTAR;
 
-    if (cc == 0x40) {
+    if (cc == PECI_CC_RSP_SUCCESS) {
         TRACE("peci_wr_pkg_config: command successful\n");
         return cc;
     }
