@@ -12,6 +12,14 @@ ec-y += pwm.c
 ec-y += signature.c
 ec-y += wuc.c
 
+ifeq ($(CONFIG_PLATFORM_INTEL),y)
+ifeq ($(CONFIG_PECI_OVER_ESPI),y)
+ec-y += peci_espi.c
+else
+ec-y += peci_legacy.c
+endif
+endif # CONFIG_PLATFORM_INTEL
+
 # Chip clock frequency: 9.2 MHz
 CFLAGS += -DCONFIG_CLOCK_FREQ_KHZ=9200
 
@@ -33,10 +41,10 @@ else
 $(error Unsupported EC)
 endif
 
-ARCH=8051
+ARCH = 8051
 
 # 64 KB is the max without banking
-CODE_SIZE=65536
+CODE_SIZE = 65536
 
 # Chip flash size
 ifeq ($(CONFIG_EC_FLASH_SIZE_128K),y)
