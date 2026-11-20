@@ -38,6 +38,7 @@ enum Cmd {
     FanSetMode = 24,
     CaseRevGet = 25,
     CaseRevSet = 26,
+    UsbcMuxInfo = 27,
 }
 
 const CMD_SPI_FLAG_READ: u8 = 1 << 0;
@@ -353,6 +354,16 @@ impl<A: Access> Ec<A> {
     pub unsafe fn case_rev_set(&mut self, rev: u32) -> Result<(), Error> {
         let mut data = rev.to_le_bytes();
         unsafe { self.command(Cmd::CaseRevSet, &mut data) }
+    }
+
+    /// Get USB-C mux info
+    pub unsafe fn usbc_mux_info(&mut self, port: u8) -> Result<u16, Error> {
+       let mut data = [port, 0, 0];
+       self.command(Cmd::UsbcMuxInfo, &mut data)?;
+        Ok(
+            (data[1] as u16) |
+            ((data[2] as u16) << 8)
+        )
     }
 
     pub fn into_dyn(self) -> Ec<Box<dyn Access>>
