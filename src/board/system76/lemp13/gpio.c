@@ -33,7 +33,6 @@ struct Gpio __code XLP_OUT =        GPIO(B, 4);
 static const struct GpioInit __code gpio_cfg_init[] = {
     // General control
     { &GCR, 0b10 << 1 }, // Enable LPC reset on GPD2
-    { &GCR2, 0 }, // Disable PECI
     { &GCR6, 0 }, // Disable UARTs
     { &GCR8, BIT(4) }, // PWRSW WDT 2 Enable 1
     { &GCR9, BIT(5) }, // PWRSW WDT 2 Enable 2
@@ -51,7 +50,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPDRC, 0 },
     { &GPDRD, BIT(5) }, // PWR_BTN#
     { &GPDRE, BIT(3) }, // USB_PWR_EN
-    { &GPDRF, BIT(6) }, // H_PECI
+    { &GPDRF, 0 },
     { &GPDRG, BIT(6) }, // H_PROCHOT_EC
     { &GPDRH, 0 },
     { &GPDRI, 0 },
@@ -109,7 +108,7 @@ static const struct GpioInit __code gpio_cfg_init[] = {
     { &GPCRF3, GPIO_OUT }, // PCH_PWROK_EC
     { &GPCRF4, GPIO_ALT | GPIO_UP }, // TP_CLK
     { &GPCRF5, GPIO_ALT | GPIO_UP }, // TP_DATA
-    { &GPCRF6, GPIO_ALT }, // H_PECI
+    { &GPCRF6, GPIO_IN | GPIO_DOWN }, // Not connected
     { &GPCRF7, GPIO_IN }, // CPU_C10_GATE#
 
     { &GPCRG0, GPIO_IN }, // 10k pull-down
