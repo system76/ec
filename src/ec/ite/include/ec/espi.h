@@ -3,9 +3,8 @@
 #ifndef _EC_ESPI_H
 #define _EC_ESPI_H
 
-#include <stdint.h>
-
 #include <common/macro.h>
+#include <stdint.h>
 
 struct VirtualWire {
     volatile uint8_t __xdata *index;
@@ -82,6 +81,8 @@ volatile uint8_t __xdata __at(0x310C) ESC1CAC3;
 
 // Channel 2 capabilities and configurations
 volatile uint8_t __xdata __at(0x3113) ESC2CAC0;
+#define CH_OOB_ENABLED      BIT(0)
+#define CH_OOB_READY        BIT(1)
 volatile uint8_t __xdata __at(0x3112) ESC2CAC1;
 volatile uint8_t __xdata __at(0x3111) ESC2CAC2;
 volatile uint8_t __xdata __at(0x3110) ESC2CAC3;
