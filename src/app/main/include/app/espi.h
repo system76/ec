@@ -3,9 +3,8 @@
 #ifndef _APP_ESPI_H
 #define _APP_ESPI_H
 
-#include <stdbool.h>
-
 #include <ec/espi.h>
+#include <stdbool.h>
 
 extern bool espi_host_reset;
 

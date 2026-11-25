@@ -43,7 +43,11 @@ void gpio_debug(void);
 volatile uint8_t __xdata __at(0x1600) GCR;
 volatile uint8_t __xdata __at(0x16F0) GCR1;
 volatile uint8_t __xdata __at(0x16F1) GCR2;
+#define PECIE           BIT(4)  // PECI Enable
+
 volatile uint8_t __xdata __at(0x16F2) GCR3;
+#define PECIPDG         BIT(6)  // PECI VCC Power-down Gating
+
 volatile uint8_t __xdata __at(0x16F3) GCR4;
 volatile uint8_t __xdata __at(0x16F4) GCR5;
 volatile uint8_t __xdata __at(0x16F5) GCR6;
